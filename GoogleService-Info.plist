@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>450276546603-nbqqhqaa8jjb1b5hlvp0bprsripoupke.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.450276546603-nbqqhqaa8jjb1b5hlvp0bprsripoupke</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDyfw4CfEhSNm2skKcAzUJid7fQfXzLqSk</string>
+	<key>GCM_SENDER_ID</key>
+	<string>450276546603</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.gatewaymobile.app</string>
+	<key>PROJECT_ID</key>
+	<string>gateway-308a9</string>
+	<key>STORAGE_BUCKET</key>
+	<string>gateway-308a9.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:450276546603:ios:7d67d1b7b251acfc18326e</string>
+</dict>
+</plist>

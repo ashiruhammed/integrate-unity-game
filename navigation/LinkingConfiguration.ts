@@ -13,19 +13,28 @@ const linking: LinkingOptions<RootStackParamList> = {
   prefixes: [Linking.createURL('/')],
   config: {
     screens: {
-      Root: {
+      Dashboard: {
         screens: {
-          TabOne: {
-            screens: {
-              TabOneScreen: 'one',
-            },
+          Home:{
+
           },
-          TabTwo: {
-            screens: {
-              TabTwoScreen: 'two',
-            },
+          Adventures:{
+
           },
+          Community:{
+
+          },
+          MarketPlace:{
+
+          },
+          Profile:{
+
+          }
         },
+      },
+      Wallet: {},
+      auth:{
+
       },
       Modal: 'modal',
       NotFound: '*',

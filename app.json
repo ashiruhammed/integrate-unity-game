@@ -1,11 +1,13 @@
 {
   "expo": {
-    "name": "gateway-app",
-    "slug": "gateway-app",
-    "version": "1.0.0",
+    "name": "Gateway",
+    "slug": "gateway-mobile-app",
+    "version": "1.8.0",
+    "owner": "gateway-app",
     "orientation": "portrait",
+    "jsEngine": "hermes",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "gateway",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",
@@ -13,22 +15,59 @@
       "backgroundColor": "#ffffff"
     },
     "updates": {
-      "fallbackToCacheTimeout": 0
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/fba1f675-6e30-4413-a03c-cf0b4bd62268"
     },
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "icon": "./assets/images/app-icon.png",
+      "userInterfaceStyle": "light",
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "bundleIdentifier": "com.gatewaymobile.app",
+      "buildNumber": "9",
+      "usesIcloudStorage": true,
+      "infoPlist": {
+        "remote-notification": "Allow user to receive remote notification",
+        "NSLocationWhenInUseUsageDescription": "Allow user to receive remote notification",
+        "UIViewControllerBasedStatusBarAppearance": "No",
+        "NSCameraUsageDescription": "This app uses the camera to let user put a photo in his profile page.",
+        "NSPhotoLibraryUsageDescription": "This app needs to access the camera library so they can upload their profile image.",
+        "NSMicrophoneUsageDescription": "Allow Brace to access your microphone"
+      }
     },
     "android": {
+      "versionCode": 9,
+      "useNextNotificationsApi": true,
+      "userInterfaceStyle": "light",
+      "package": "com.gatewaymobile.app",
+      "googleServicesFile": "./google-services.json",
+      "permissions": [
+        "RECEIVE_BOOT_COMPLETED",
+        "CAMERA",
+        "INTERNET",
+        "ACCESS_MEDIA_LOCATION",
+        "WRITE_EXTERNAL_STORAGE",
+        "READ_EXTERNAL_STORAGE",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ],
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/gateway-adaptive.png",
         "backgroundColor": "#ffffff"
       }
     },
     "web": {
       "favicon": "./assets/images/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "aea0bd55-ea74-4e72-b6a3-ffea717a6428"
+      }
     }
   }
 }

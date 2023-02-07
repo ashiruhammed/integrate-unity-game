@@ -1,0 +1,44 @@
+{
+  "cli": {
+    "version": ">= 2.4.1"
+  },
+  "build": {
+    "development": {
+      "distribution": "internal",
+      "android": {
+        "gradleCommand": ":app:assembleDebug"
+      },
+      "ios": {
+        "buildConfiguration": "Debug",
+        "resourceClass": "m1-medium"
+      },
+      "channel": "development"
+    },
+    "preview": {
+
+      "channel": "preview",
+      "android": {
+        "buildType": "apk"
+      },
+      "distribution": "internal"
+    },
+    "production": {
+      "ios": {
+        "resourceClass": "m1-medium"
+      },
+      "channel": "production"
+    }
+  },
+  "submit": {
+    "production": {
+      "android": {
+        "serviceAccountKeyPath": "./gateway-308a9-a3a5883a9dfb.json"
+      },
+      "ios": {
+        "appleId": "orjiace@gmail.com",
+        "ascAppId": "687SG3TFF6",
+        "appleTeamId": "V6L897K9UX"
+      }
+    }
+  }
+}

@@ -1,0 +1,1313 @@
+import React, {SetStateAction, Dispatch, useCallback, useMemo, useRef, useState, useEffect} from 'react';
+
+import {
+    Text,
+    View,
+    StyleSheet,
+    Platform,
+    TouchableOpacity,
+    ScrollView,
+    Modal,
+    Image,
+    ActivityIndicator,
+    Button, Alert, Dimensions, ImageBackground, Pressable
+} from 'react-native';
+import {SafeAreaView} from "react-native-safe-area-context";
+import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
+import {AntDesign, Entypo, Feather, FontAwesome5, Ionicons, Octicons} from "@expo/vector-icons";
+import {RootStackScreenProps} from "../../../types";
+import {StatusBar} from "expo-status-bar";
+import SegmentedControl from "../../components/SegmentContol";
+import Colors from "../../constants/Colors";
+import {Fonts} from "../../constants/Fonts";
+import {IF} from "../../helpers/ConditionJsx";
+import {RectButton} from "../../components/RectButton";
+import BottomSheet, {BottomSheetBackdrop, BottomSheetView} from "@gorhom/bottom-sheet";
+import Checkbox from "expo-checkbox";
+import {Portal} from "@gorhom/portal";
+import {
+    BottomSheetDefaultBackdropProps
+} from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
+import * as yup from "yup";
+import {useFormik} from "formik";
+import BottomSheetTextInput from "../../components/inputs/BottomSheetTextInput";
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
+import {
+    getAdventure,
+    getAdventureReviews,
+    getLessonsByModule,
+    getModuleByAdventure, getModuleTask, getNextAdventure,
+    startAdventure, submitTask
+} from "../../action/action";
+import {useRefreshOnFocus} from "../../helpers";
+import {useAppDispatch, useAppSelector} from "../../app/hooks";
+import dayjs from "dayjs";
+import Animated, {
+    Easing,
+    FadeInDown,
+    FadeInLeft, FadeInUp,
+    FadeOutDown,
+    FadeOutLeft,
+    FadeOutRight,
+    Layout
+} from 'react-native-reanimated';
+import YoutubePlayer from "react-native-youtube-iframe";
+import {setResponse, unSetResponse} from "../../app/slices/userSlice";
+import Toast from "../../components/Toast";
+import FastImage from "react-native-fast-image";
+import Constants from "expo-constants";
+import * as WebBrowser from 'expo-web-browser';
+
+
+
+
+const dimensionsForScreen = Dimensions.get('screen');
+const formSchema = yup.object().shape({
+   // twitterName: yup.string().required('Twitter username is required'),
+   // IGName: yup.string().required('Instagram username is required'),
+    munaName: yup.string().required('Username or email is required'),
+});
+
+interface cardProps {
+    title: string,
+    message?: string,
+}
+
+interface reviewProps {
+    text: string,
+    rating?: string,
+    userName?: string,
+    updatedAt?: string,
+}
+
+interface moduleProps {
+    name: string,
+    loadingLessons: boolean,
+    lessons: [],
+    description?: string,
+    setCurrentIndex: Dispatch<SetStateAction<null>>,
+    currentIndex: number | string | null,
+    index: number | null,
+}
+
+const AboutCard = ({title, message}: cardProps) => {
+    return (
+        <Animated.View key={title} entering={FadeInLeft} exiting={FadeOutLeft}
+                       layout={Layout.easing(Easing.bounce).delay(20)} style={styles.aboutCard}>
+            <Text style={styles.aboutTitle}>
+                {title}
+            </Text>
+            <Text style={styles.aboutBodyText}>
+                {message}
+            </Text>
+        </Animated.View>
+    )
+
+}
+
+
+const ReviewCard = ({text, userName, updatedAt, rating}: reviewProps) => {
+    return (
+        <Animated.View key={text} entering={FadeInLeft} exiting={FadeOutLeft}
+                       layout={Layout.easing(Easing.bounce).delay(20)} style={styles.reviewCard}>
+            <View style={styles.nameStars}>
+                <Text style={styles.reviewTitle}>
+                    {userName}
+                </Text>
+                <View style={styles.stars}>
+                    <Octicons name="star-fill" size={14} color={"#EDBA13"}/>
+                    <Octicons name="star-fill" size={14} color={"#fff"}/>
+                    <Octicons name="star-fill" size={14} color={"#fff"}/>
+                </View>
+            </View>
+            <Text style={styles.reviewBodyText}>
+                {text}
+            </Text>
+            <Text style={styles.reviewDateText}>
+                {dayjs(updatedAt).format('DD MMM, YYYY')}
+
+            </Text>
+        </Animated.View>
+    )
+
+}
+
+
+const MissionCard = ({
+                         name,
+                         description,
+                         currentIndex,
+                         setCurrentIndex,
+                         index,
+                         lessons,
+                         loadingLessons
+                     }: moduleProps) => {
+
+    return (
+        <Animated.View key={"MissionCard"} entering={FadeInLeft} exiting={FadeOutLeft}
+                       layout={Layout.easing(Easing.bounce).delay(20)} style={styles.missionCard}>
+            <>
+                <View style={styles.missionCardHead}>
+
+
+                    <TouchableOpacity activeOpacity={0.8} onPress={() => {
+                        setCurrentIndex(index === currentIndex ? null : index);
+                    }} style={styles.missionCardLeft}>
+
+
+                        <View style={styles.nameStars}>
+                            <Text style={styles.missionTitle}>
+                                {name}
+                            </Text>
+                            <Entypo name="dot-single" size={24} color="#fff"/>
+
+                            {/*  <Text style={styles.reviewTitle}>
+                        2mins
+                    </Text>*/}
+
+                        </View>
+                        <Text style={styles.reviewBodyText}>
+                            {description}
+                        </Text>
+
+                    </TouchableOpacity>
+                    <TouchableOpacity activeOpacity={0.8}>
+                        <Feather name="play-circle" size={28} color={Colors.primaryColor}/>
+                    </TouchableOpacity>
+                </View>
+                {index === currentIndex && (
+
+
+                    !loadingLessons && lessons &&
+                    lessons.length > 0 &&
+                    lessons.map((({name, id}) => (
+                        <Animated.View key={id} entering={FadeInDown} exiting={FadeOutDown}
+                                       layout={Layout.easing(Easing.bounce).delay(20)} style={styles.subCategoriesList}>
+                            <Text style={{
+                                color: "#fff"
+                            }}>
+                                {name}
+                            </Text>
+                        </Animated.View>
+                    )))
+
+
+                )}
+
+                {loadingLessons && <ActivityIndicator size={'small'} color={Colors.primaryColor}/>}
+            </>
+        </Animated.View>
+    )
+
+}
+
+
+interface Interface {
+    data: [{
+        amount: string
+    }],
+    setData: (newArray: any) => void,
+    index: number | null,
+    item: {
+        name: string
+    },
+    setCurrentIndex: Dispatch<SetStateAction<null>>,
+    currentIndex: number | string | null
+}
+
+const isRunningInExpoGo = Constants.appOwnership === 'expo'
+const AdventureHome = ({navigation}: RootStackScreenProps<'AdventureHome'>) => {
+
+
+    const dispatch = useAppDispatch()
+    const queryClient = useQueryClient();
+
+    const dataSlice = useAppSelector(state => state.data)
+    const user = useAppSelector(state => state.user)
+    const [lessonId, setLessonId] = useState('');
+
+    const {responseState, responseType, responseMessage} = user
+    const {missionId} = dataSlice
+    const [terms, setTerms] = useState(false);
+    const [download, setDownload] = useState(false);
+    const [joinDiscord, setJoinDiscord] = useState(false);
+    const video = React.useRef(null);
+    const [status, setStatus] = React.useState({});
+
+
+    const sheetRef = useRef<BottomSheet>(null);
+
+    const _handlePressButtonAsync = async (url:string) => {
+        let result = await WebBrowser.openBrowserAsync(url);
+
+    };
+
+
+
+    // variables
+    const snapPoints = useMemo(() => ["1%", "70%"], []);
+    const handleSnapPress = useCallback((index: number) => {
+        sheetRef.current?.snapToIndex(index);
+    }, []);
+    const handleClosePress = useCallback(() => {
+        sheetRef.current?.close();
+    }, []);
+
+
+    const sheetFormRef = useRef<BottomSheet>(null);
+
+    // variables
+    const snapPointsForm = useMemo(() => ["1%", "70%"], []);
+    const handleSnapPressForm = useCallback((index: number) => {
+        sheetFormRef.current?.snapToIndex(index);
+    }, []);
+    const handleClosePressForm = useCallback(() => {
+        sheetFormRef.current?.close();
+    }, []);
+    const [currentIndex, setCurrentIndex] = useState<number | null | string>(null);
+
+    const sheetRefReward = useRef<BottomSheet>(null);
+
+    // variables
+
+    const handleSnapPressReward = useCallback((index: number) => {
+        sheetRefReward.current?.snapToIndex(index);
+    }, []);
+    const handleClosePressReward = useCallback(() => {
+        sheetRefReward.current?.close();
+    }, []);
+
+    const [tabIndex, setTabIndex] = useState(0);
+    const handleTabsChange = useCallback((index: SetStateAction<number>) => {
+        setTabIndex(index);
+    }, [tabIndex]);
+
+
+    const {data:task,mutate:getTask,isLoading:gettingTask} = useMutation(['getModuleTask'],getModuleTask,{
+        onSuccess:(data)=>{
+
+
+            if(data.success){
+                handleSnapPress(1)
+            }else {
+                 navigation.navigate('VideoScreen', {
+                     lessonId
+                 })
+            }
+        }
+    })
+
+
+    const {mutate: startAdventureNow, isLoading: startingAdventure} = useMutation(['startAdventure'], startAdventure, {
+        onSuccess: (data) => {
+//console.log(data)
+            if (data.success) {
+                getTask(data?.data?.currentLesson.moduleId)
+                setLessonId(data?.data?.currentLesson?.id)
+            } else {
+                dispatch(setResponse({
+                    responseMessage: data.message,
+                    responseState: true,
+                    responseType: 'error',
+                }))
+            }
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries(['startAdventure']);
+        }
+    })
+
+    const {mutate: submitTaskNow, isLoading: submittingTask} = useMutation(['submitTask'], submitTask, {
+        onSuccess: (data) => {
+//console.log(data)
+            if (data.success) {
+         handleClosePressForm()
+                handleClosePress()
+                navigation.navigate('VideoScreen', {
+                    lessonId
+                })
+
+            } else {
+                dispatch(setResponse({
+                    responseMessage: data.message,
+                    responseState: true,
+                    responseType: 'error',
+                }))
+            }
+        },
+        onError:(error)=>{
+            console.log(error)
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries(['submitTask']);
+        }
+    })
+
+
+    const {isLoading, data, refetch, isRefetching, isFetching} = useQuery(['getAdventure'], () => getAdventure(missionId))
+
+
+
+    const {isLoading: loadingReviews, data: reviews, refetch: fetchReviews} = useQuery(['getAdventureReviews'],
+        () => getAdventureReviews(data?.data?.id), {
+            enabled: !!data?.data?.id
+        })
+
+
+    const {isLoading: loadingModules, data: modules, refetch: fetchModules} = useQuery(['getModuleByAdventure'],
+        () => getModuleByAdventure(data?.data?.id), {
+            enabled: !!data?.data?.id
+        })
+
+    const {isLoading: loadingLessons, data: lessons, refetch: fetchLessons} = useQuery(['getLessonsByModule'],
+        () => getLessonsByModule(currentIndex), {
+            enabled: !!currentIndex
+        })
+
+
+//console.log("reviews")
+
+    // renders
+    const renderBackdrop = useCallback(
+        (props: JSX.IntrinsicAttributes & BottomSheetDefaultBackdropProps) => (
+            <BottomSheetBackdrop
+                style={{
+                    backgroundColor: 'rgba(25,25,25,0.34)'
+                }}
+                {...props}
+                disappearsOnIndex={0}
+                appearsOnIndex={1}
+            />
+        ),
+        []
+    );
+
+    const nextSheet = () => {
+        handleClosePress()
+        handleSnapPressForm(1)
+    }
+
+    const {
+        resetForm,
+        handleChange, handleSubmit, handleBlur,
+        setFieldValue,
+        isSubmitting,
+        setSubmitting,
+        values,
+        errors,
+        touched,
+        isValid
+    } = useFormik({
+        validationSchema: formSchema,
+        initialValues: {
+
+
+            munaName: '',
+
+        },
+        onSubmit: (values) => {
+            const {munaName} = values;
+            const data = JSON.stringify({
+                response:munaName
+            })
+            submitTaskNow({id:task?.data?.id, body:data})
+
+
+        }
+    });
+
+    const goBack = () => {
+        navigation.goBack()
+    }
+
+
+    const startQuiz = () => {
+        if (!loadingModules && modules) {
+            startAdventureNow(missionId)
+        }
+//navigation.navigate('VideoScreen')
+        /* navigation.navigate('QuizScreen',{
+             lessonId:'37143140-f606-4992-b2a1-4aee4df46c45'
+         })*/
+        // handleSnapPress(1)
+    }
+
+    const nextQuiz = () => {
+      /*  if (!loadingModules && modules) {
+            nexAdventure(missionId)
+        }*/
+        //5b43c812-029b-467d-8d0f-b41f6a02dfa0
+        // handleSnapPress(1)
+        /*  navigation.navigate('QuizScreen', {
+
+             lessonId:'5b43c812-029b-467d-8d0f-b41f6a02dfa0'
+          })
+  */
+
+        navigation.navigate('VideoScreen', {
+            lessonId: data?.data?.userAdventure?.currentLessonId,
+            adventureId:missionId
+        })
+
+
+    }
+
+
+
+    useEffect(() => {
+        if (currentIndex) {
+            fetchLessons()
+        }
+
+    }, [currentIndex]);
+
+    useRefreshOnFocus(refetch)
+    useRefreshOnFocus(fetchModules)
+    useRefreshOnFocus(fetchReviews)
+
+    const dispatchCurrentIndex = (index: number) => {
+        setCurrentIndex(index)
+    }
+
+
+    useEffect(() => {
+        // console.log(user)
+        let time: NodeJS.Timeout | undefined;
+        if (responseState || responseMessage) {
+
+            time = setTimeout(() => {
+                dispatch(unSetResponse())
+            }, 3000)
+
+        }
+        return () => {
+            clearTimeout(time)
+        };
+    }, [responseState, responseMessage])
+
+
+    // console.log(modules?.data?.result)
+    return (
+
+        <>
+
+            <SafeAreaView style={styles.safeArea}>
+                <Toast message={responseMessage} state={responseState} type={responseType}/>
+                <StatusBar style={'light'}/>
+                <View style={styles.topViewWrap}>
+                    <View style={[styles.navBar, {
+                        paddingHorizontal: pixelSizeHorizontal(20)
+                    }]}>
+                        <TouchableOpacity style={styles.backBtn} onPress={goBack} activeOpacity={0.8}>
+                            <AntDesign name="arrowleft" size={24} color="black"/>
+                        </TouchableOpacity>
+                    </View>
+
+
+                    <View style={styles.videoContainer}>
+
+                        {
+                            isRunningInExpoGo ?
+                                <Image
+                                    style={styles.adventureCard}
+                                    source={{
+                                        uri: data?.data?.imageUrl ,
+
+                                    }}
+                                />
+                                :
+                        <FastImage
+                            style={styles.adventureCard}
+                            source={{
+                                uri: data?.data?.imageUrl,
+                                cache: FastImage.cacheControl.web,
+                                priority: FastImage.priority.normal,
+                            }}
+                            resizeMode={FastImage.resizeMode.contain}
+                        />
+
+                        }
+
+                        {/* <YoutubePlayer
+                                width={dimensionsForScreen.width}
+                                height={150}
+
+                                play={playing}
+                                videoId={"gh4TGfVJW7s"}
+                                onChangeState={onStateChange}
+                            />*/}
+
+                    </View>
+
+                </View>
+
+                {
+                    isFetching && <ActivityIndicator size="large" color={Colors.primaryColor}
+                                                     style={[StyleSheet.absoluteFill, {
+                                                         zIndex: 10,
+                                                         backgroundColor: 'rgba(0,0,0,0.5)'
+                                                     }]}/>
+                }
+                {
+                    gettingTask && <ActivityIndicator size="large" color={Colors.primaryColor}
+                                                     style={[StyleSheet.absoluteFill, {
+                                                         zIndex: 10,
+                                                         backgroundColor: '#fff'
+                                                     }]}/>
+                }
+                {
+                    !isLoading &&
+
+                    <View style={styles.container}>
+
+
+                        <ScrollView
+                            style={{width: '100%',}} contentContainerStyle={styles.scrollView} scrollEnabled
+                            showsVerticalScrollIndicator={false}>
+                            <View style={styles.details}>
+                                <View style={styles.cardBottom}>
+
+                                    <View style={styles.cardBottomLeft}>
+
+                                        <Text onPress={()=>navigation.navigate('LeaveReview',{
+                                            adventureId:missionId
+                                        })} style={[styles.cardBottomLeftText, {}]}>
+                                            {data?.data?.name}
+                                        </Text>
+                                        <Text style={styles.cardTextSmall}>
+                                            {modules?.data?.result?.length} missions
+                                        </Text>
+                                    </View>
+                                    <View style={styles.cardTopLeft}>
+                                        <FontAwesome5 name="gift" size={16} color={Colors.success}/>
+                                        <Text style={styles.cardTopLeftText}>
+                                            {data?.data?.rewardPoint} Reward Points
+                                        </Text>
+                                    </View>
+                                </View>
+                            </View>
+
+                            <SegmentedControl tabs={["About", "Missions", "Reviews"]}
+                                              currentIndex={tabIndex}
+                                              onChange={handleTabsChange}
+                                              segmentedControlBackgroundColor={"#0E0E0E"}
+                                              activeSegmentBackgroundColor={Colors.primaryColor}
+                                              activeTextColor={"#fff"}
+                                              textColor={"#fff"}
+                                              paddingVertical={pixelSizeVertical(10)}/>
+
+                            <View style={styles.cardContainer}>
+                                <IF condition={tabIndex == 0}>
+
+                                    <AboutCard title={"What to Expect"} message={data?.data?.expectations}/>
+                                    <AboutCard title="What to Gain" message={data?.data?.gains}/>
+
+                                    <AboutCard title="What to Earn" message={data?.data?.earnings}/>
+
+                                </IF>
+
+                                <IF condition={tabIndex == 1}>
+                                    {loadingModules
+                                        && <ActivityIndicator size='small' color={Colors.primaryColor}/>
+                                    }
+
+                                    {
+                                        !loadingModules && modules && modules?.data?.result?.map((({
+                                                                                                       id,
+                                                                                                       name,
+                                                                                                       description
+                                                                                                   }) => (
+                                            <MissionCard loadingLessons={loadingLessons} index={id}
+                                                         lessons={lessons?.data?.result} setCurrentIndex={setCurrentIndex}
+                                                         currentIndex={currentIndex} key={id} name={name}
+                                                         description={description}/>
+                                        )))
+
+                                    }
+
+                                </IF>
+                                <IF condition={tabIndex == 2}>
+                                    {loadingReviews
+                                        && <ActivityIndicator size='small' color={Colors.primaryColor}/>
+                                    }
+                                    {
+                                        !loadingReviews && reviews && reviews?.data?.map((({
+                                                                                               id,
+                                                                                               text,
+                                                                                               user,
+                                                                                               updatedAt,
+                                                                                               rating
+                                                                                           }) => (
+                                            <ReviewCard key={id} text={text} userName={user?.fullName}
+                                                        updatedAt={updatedAt} rating={rating}/>
+                                        )))
+                                    }
+
+
+                                </IF>
+                            </View>
+
+
+                            {
+                                data?.data?.startedAdventure ?
+                                    <RectButton disabled={data?.data?.userAdventure?.status == 'COMPLETED'} onPress={nextQuiz} style={{
+                                        width: widthPixel(200),
+                                        position: 'absolute',
+                                        bottom: 5
+                                    }}>
+
+
+                                        {
+
+                                            data?.data?.userAdventure?.status == 'COMPLETED' ?
+                                                <Text style={styles.buttonText}>
+                                                    Completed
+
+                                                </Text>
+                                                :
+                                                <Text style={styles.buttonText}>
+                                                    Continue
+
+                                                </Text>
+                                        }
+                                    </RectButton>
+
+                                    :
+
+                                    <RectButton onPress={startQuiz} disabled={startingAdventure} style={{
+                                        width: widthPixel(200),
+                                        position: 'absolute',
+                                        bottom: 5
+                                    }}>
+                                        {
+                                            startingAdventure ? <ActivityIndicator size='small' color="#fff"/> :
+
+                                                <Text style={styles.buttonText}>
+                                                    Start Mission
+
+                                                </Text>
+                                        }
+                                    </RectButton>
+                            }
+
+                        </ScrollView>
+                    </View>
+                }
+            </SafeAreaView>
+
+
+            <Portal>
+
+                <BottomSheet
+                    index={0}
+
+                    handleIndicatorStyle={Platform.OS == 'android' && {display: 'none'}}
+                    backdropComponent={renderBackdrop}
+                    ref={sheetRef}
+                    snapPoints={snapPoints}
+
+                >
+                    <BottomSheetView style={styles.sheetContainer}>
+
+                        {
+                            Platform.OS == 'android' &&
+
+                            <View style={styles.sheetHead}>
+
+                                <TouchableOpacity activeOpacity={0.8} onPress={() => handleClosePress()}
+                                                  style={styles.dismiss}>
+                                    <Ionicons name="ios-close" size={24} color="black"/>
+                                </TouchableOpacity>
+
+                            </View>
+                        }
+                        <View style={styles.sheetBody}>
+
+                            <View style={styles.sheetHeadRow}>
+                                <Text style={styles.sheetHeadText}>
+                                    Complete these tasks and
+                                    earn points
+                                </Text>
+
+                                <Text style={styles.sheetHeadTextNumber}>
+01
+                                </Text>
+                            </View>
+
+                            <Text style={styles.sheetHeadTextSmall}>
+
+                            </Text>
+
+
+                        </View>
+
+                        <View style={[styles.checks,{
+                            alignItems:'center',
+
+                        }]}>
+
+
+
+                                <View style={styles.descriptionTxt}>
+                                    <Text style={{
+                                        color: terms ? "#1579E4" : Colors.light.text,
+                                        fontFamily: Fonts.quicksandRegular,
+                                        lineHeight: heightPixel(20)
+                                    }}>
+                                        {task?.data?.description}
+                                    </Text>
+                                </View>
+
+                            <Pressable onPress={() =>_handlePressButtonAsync(task?.data?.linkUrl)} style={{marginTop:10}}>
+                            <Text style={{
+                                color: "#1579E4",
+                                fontFamily: Fonts.quickSandBold,
+                                lineHeight: heightPixel(20)
+                            }}>
+                             Start here
+                            </Text>
+                            </Pressable>
+                           {/* <TouchableOpacity activeOpacity={0.9} onPress={() => setJoinDiscord(!joinDiscord)}
+                                              style={styles.terms}>
+                                <View style={styles.checkboxContainer}>
+
+
+                                    <Checkbox
+                                        style={{
+                                            width: 15,
+                                            height: 15,
+                                        }}
+                                        // style={styles.checkbox}
+                                        value={joinDiscord}
+                                        onValueChange={(value) => setJoinDiscord(value)}
+                                        color={joinDiscord ? "#1579E4" : undefined}
+                                    />
+                                </View>
+
+
+                                <View style={styles.termsText}>
+                                    <Text style={{
+                                        color: joinDiscord ? "#1579E4" : Colors.light.text,
+                                        fontFamily: Fonts.quicksandRegular,
+                                        lineHeight: heightPixel(20)
+                                    }}>
+                                        Join our discord group @gatewaydiscord
+                                    </Text>
+                                </View>
+                            </TouchableOpacity>
+
+
+                            <TouchableOpacity activeOpacity={0.9} onPress={() => setDownload(!download)} style={styles.terms}>
+                                <View style={styles.checkboxContainer}>
+
+
+                                    <Checkbox
+                                        style={{
+                                            width: 15,
+                                            height: 15,
+                                        }}
+                                        // style={styles.checkbox}
+                                        value={download}
+                                        onValueChange={(value) => setDownload(value)}
+                                        color={download ? "#1579E4" : undefined}
+                                    />
+                                </View>
+
+
+                                <View style={styles.termsText}>
+                                    <Text style={{
+                                        color: download ? "#1579E4" : Colors.light.text,
+                                        fontFamily: Fonts.quicksandRegular,
+                                        lineHeight: heightPixel(20)
+                                    }}>
+                                        Download Muna from Google Playstore
+                                        or App Store
+                                    </Text>
+                                </View>
+                            </TouchableOpacity>
+
+                       */}
+                        </View>
+
+                        <RectButton onPress={nextSheet} style={{
+                            width: 200,
+
+                        }}>
+                            <Text style={{
+                                position: 'absolute',
+                                fontSize: fontPixel(16),
+                                color: "#fff",
+                                fontFamily: Fonts.quickSandBold
+                            }}>
+                                Continue
+
+                            </Text>
+
+                        </RectButton>
+
+                    </BottomSheetView>
+                </BottomSheet>
+
+
+                <BottomSheet
+                    index={0}
+                    keyboardBehavior={"interactive"}
+                    handleIndicatorStyle={Platform.OS == 'android' && {display: 'none'}}
+                    backdropComponent={renderBackdrop}
+                    ref={sheetFormRef}
+                    snapPoints={snapPointsForm}
+
+                >
+                    <BottomSheetView style={styles.sheetContainer}>
+
+                        {
+                            Platform.OS == 'android' &&
+
+                            <View style={styles.sheetHead}>
+
+                                <TouchableOpacity activeOpacity={0.8} onPress={() => handleClosePress()}
+                                                  style={styles.dismiss}>
+                                    <Ionicons name="ios-close" size={24} color="black"/>
+                                </TouchableOpacity>
+
+                            </View>
+                        }
+                        <View style={styles.sheetBody}>
+
+                            <View style={styles.sheetHeadRow}>
+                                <Text style={styles.sheetHeadText}>
+                                    Submit your information
+                                </Text>
+
+                                <Text style={styles.sheetHeadTextNumber}>
+                                    02
+                                </Text>
+                            </View>
+
+                            <Text style={styles.sheetHeadTextSmall}>
+                                We need these information to verify if your
+                                tasks were completed.
+                            </Text>
+
+
+                        </View>
+
+                        <View style={styles.sheetFormContainer}>
+
+                            {/*<BottomSheetTextInput
+                                placeholder="@"
+                                label={"Your Twitter Username"}
+                                keyboardType={"default"}
+                                touched={touched.twitterName}
+                                error={touched.twitterName && errors.twitterName}
+
+                                onChangeText={(e) => {
+                                    handleChange('twitterName')(e);
+                                }}
+                                onBlur={(e) => {
+                                    handleBlur('twitterName')(e);
+
+                                }}
+                                value={values.twitterName}
+                            />*/}
+
+                           {/* <BottomSheetTextInput
+                                placeholder="@"
+                                label={"Your Instagram Username"}
+                                keyboardType={"default"}
+                                touched={touched.IGName}
+                                error={touched.IGName && errors.IGName}
+
+                                onChangeText={(e) => {
+                                    handleChange('IGName')(e);
+                                }}
+                                onBlur={(e) => {
+                                    handleBlur('IGName')(e);
+
+                                }}
+                                value={values.IGName}
+                            />*/}
+                            <BottomSheetTextInput
+                                placeholder="@"
+                                label={"Your handle / email"}
+                                keyboardType={"default"}
+                                touched={touched.munaName}
+                                error={touched.munaName && errors.munaName}
+
+                                onChangeText={(e) => {
+                                    handleChange('munaName')(e);
+                                }}
+                                onBlur={(e) => {
+                                    handleBlur('munaName')(e);
+
+                                }}
+                                value={values.munaName}
+                            />
+
+                        </View>
+
+                        <RectButton onPress={() => handleSubmit()} disabled={!isValid} style={{
+                            width: 200,
+
+                        }}>
+
+                            {
+                                submittingTask ? <ActivityIndicator size='small' color='#fff'/>
+                                    :
+
+                            <Text style={{
+                                position: 'absolute',
+                                fontSize: fontPixel(16),
+                                color: "#fff",
+                                fontFamily: Fonts.quickSandBold
+                            }}>
+                                Continue
+
+                            </Text>
+                            }
+                        </RectButton>
+
+                    </BottomSheetView>
+                </BottomSheet>
+
+            </Portal>
+        </>
+    );
+};
+
+const styles = StyleSheet.create({
+    safeArea: {
+        width: '100%',
+        flex: 1,
+        alignItems:'center',
+        // paddingHorizontal: pixelSizeHorizontal(20),
+        backgroundColor: "#0E0E0E",
+    },
+    navBar: {
+        position: 'absolute',
+        top: 10,
+        zIndex: 300,
+        width: '100%',
+        height: heightPixel(70),
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+    },
+    backBtn: {
+        width: 40,
+        height: 40,
+        borderRadius: 40,
+        backgroundColor: '#fff',
+
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    leftBody: {
+        width: '60%',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        height: '100%'
+    },
+    container: {
+        top: -30,
+        zIndex: 3,
+        borderTopRightRadius: 50,
+        borderTopLeftRadius: 50,
+        backgroundColor: "#0E0E0E",
+        flex: 1,
+        overflow: 'hidden',
+        width: '100%',
+        paddingHorizontal: pixelSizeHorizontal(20)
+    },
+
+
+    videoContainer: {
+
+        width: '100%',
+        height: '100%',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    video: {
+        width: '100%',
+        height: '100%',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    adventureCard: {
+        resizeMode: 'cover',
+
+        width: '100%',
+        height: '100%',
+
+    },
+    buttons: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    details: {
+        marginTop: 20,
+        height: heightPixel(100),
+        width: '100%',
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    scrollView: {
+        overflow: 'hidden',
+        //  backgroundColor: Colors.background,
+        width: '100%',
+
+        alignItems: 'center'
+    },
+    topViewWrap: {
+      //  zIndex: -30,
+
+        width: '100%',
+        backgroundColor: "#ccc",
+        height: heightPixel(280),
+        alignItems: 'center',
+
+    },
+    cardBottom: {
+        width: '100%',
+        height: 70,
+        alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+    cardTopLeft: {
+        minWidth: 100,
+        height: 35,
+        alignItems: 'center',
+        flexDirection: 'row',
+    },
+    cardTopLeftText: {
+        marginLeft: 5,
+        color: "#fff",
+        fontSize: fontPixel(14),
+        fontFamily: Fonts.quicksandMedium
+    },
+    cardBottomLeft: {
+width:'90%',
+        height: 50,
+        alignItems: 'flex-start',
+        justifyContent: 'space-between',
+    },
+    cardBottomLeftText: {
+        textTransform: 'capitalize',
+        fontFamily: Fonts.quicksandSemiBold,
+        color: "#fff",
+        lineHeight:heightPixel(20),
+        fontSize: fontPixel(14),
+    },
+    cardTextSmall: {
+        color: "#fff",
+        fontSize: fontPixel(14),
+        fontFamily: Fonts.quicksandRegular
+    },
+    cardContainer: {
+        minHeight: heightPixel(350),
+        marginTop: 30,
+        width: '100%',
+    },
+    aboutCard: {
+        marginVertical: pixelSizeVertical(10),
+        width: '100%',
+        minHeight: heightPixel(80),
+        alignItems: 'flex-start',
+        justifyContent: 'flex-start',
+    },
+    aboutTitle: {
+        color: Colors.primaryColor,
+        fontSize: fontPixel(18),
+        fontFamily: Fonts.quicksandRegular
+    },
+
+    aboutBodyText: {
+        marginTop: 5,
+        color: "#ccc",
+        lineHeight: heightPixel(20),
+        fontSize: fontPixel(12),
+        fontFamily: Fonts.quicksandRegular
+    },
+    buttonText: {
+        position: 'absolute',
+        fontSize: fontPixel(16),
+        color: "#fff",
+        fontFamily: Fonts.quickSandBold
+    },
+    sheetContainer: {
+
+        width: '100%',
+        alignItems: 'center',
+        paddingHorizontal: pixelSizeHorizontal(20),
+        paddingVertical: pixelSizeVertical(20)
+    },
+    sheetBody: {
+        width: '100%',
+        marginBottom: 30,
+    },
+    sheetHeadRow: {
+        width: '100%',
+        alignItems: 'flex-start',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+
+    sheetHeadTextNumber: {
+        fontSize: fontPixel(20),
+        color: "#999999",
+        fontFamily: Fonts.quickSandBold
+    },
+    sheetHeadText: {
+        lineHeight: heightPixel(26),
+        width: '75%',
+        fontSize: fontPixel(18),
+        color: "#1E1E1E",
+        fontFamily: Fonts.quickSandBold
+    },
+    sheetHeadTextSmall: {
+        marginTop: 8,
+        width: '75%',
+        fontSize: fontPixel(14),
+        color: "#333333",
+        fontFamily: Fonts.quicksandRegular
+    },
+    sheetHead: {
+        height: 50,
+        top: -20,
+        width: '100%',
+        alignItems: 'flex-start',
+        justifyContent: 'flex-end',
+        flexDirection: 'row'
+    },
+
+    dismiss: {
+        backgroundColor: "#fff",
+        borderRadius: 30,
+        height: 35,
+        width: 35,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.10,
+        shadowRadius: 7.22,
+
+        elevation: 3,
+    },
+    terms: {
+        marginVertical: pixelSizeVertical(10),
+        width: '100%',
+        minHeight: heightPixel(40),
+        alignItems: 'center',
+        justifyContent: 'center',
+
+        flexDirection: 'row'
+    },
+    checkboxContainer: {
+        height: '90%',
+        width: '8%',
+        alignItems: 'flex-start',
+        justifyContent: 'flex-start'
+    },
+    termsText: {
+        height: '100%',
+        width: '90%',
+        alignItems: 'flex-start',
+        justifyContent: 'flex-start'
+    },
+    descriptionTxt:{
+        width: '100%',
+        alignItems: 'flex-start',
+        justifyContent: 'flex-start'
+    },
+    checks: {
+        height: heightPixel(300),
+
+    },
+
+    sheetFormContainer: {
+
+        height: heightPixel(350),
+        justifyContent: 'flex-start',
+        width: '100%',
+        alignItems: 'flex-start',
+    },
+
+    reviewTitle: {
+        color: "#fff",
+        fontSize: fontPixel(18),
+        fontFamily: Fonts.quickSandBold
+    },
+    reviewCard: {
+        marginVertical: pixelSizeVertical(10),
+        width: '100%',
+        minHeight: heightPixel(80),
+        alignItems: 'flex-start',
+        justifyContent: 'flex-start',
+    },
+    nameStars: {
+        width: '100%',
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        alignItems: 'center'
+    },
+    stars: {
+        minWidth: 50,
+        marginLeft: 10,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+    },
+    reviewBodyText: {
+        marginTop: 5,
+        color: "#fff",
+        fontSize: fontPixel(12),
+        fontFamily: Fonts.quicksandRegular
+    }, reviewDateText: {
+        marginTop: 5,
+        color: "#777777",
+        fontSize: fontPixel(12),
+        fontFamily: Fonts.quicksandRegular
+    },
+    missionCardHead: {
+        paddingVertical: pixelSizeVertical(10),
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexDirection: 'row',
+        width: '100%',
+    },
+    missionCard: {
+        marginBottom: 5,
+        width: '100%',
+        minHeight: heightPixel(80),
+        alignItems: 'center',
+        flexDirection: 'column',
+        justifyContent: 'flex-start',
+    },
+    missionCardLeft: {
+        width: '80%',
+        alignItems: 'flex-start',
+    },
+    missionTitle: {
+        color: Colors.primaryColor,
+        fontSize: fontPixel(18),
+        fontFamily: Fonts.quickSandBold
+    },
+    subCategoriesList: {
+        width: '90%',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexDirection: "row",
+        height: 40,
+        marginTop: 20,
+    },
+})
+
+
+export default AdventureHome;

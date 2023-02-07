@@ -15,7 +15,10 @@ export default function useCachedResources() {
         // Load fonts
         await Font.loadAsync({
           ...FontAwesome.font,
-          'space-mono': require('../assets/fonts/SpaceMono-Regular.ttf'),
+          'Quicksand-reg': require('../assets/fonts/Quicksand-Regular.ttf'),
+          'Quicksand-bold': require('../assets/fonts/Quicksand-Bold.ttf'),
+          'Quicksand-semibold': require('../assets/fonts/Quicksand-SemiBold.ttf'),
+          'Quicksand-medium': require('../assets/fonts/Quicksand-Medium.ttf'),
         });
       } catch (e) {
         // We might want to provide this error information to an error reporting service
