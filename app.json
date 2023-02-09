@@ -2,15 +2,15 @@
   "expo": {
     "name": "Gateway",
     "slug": "gateway-mobile-app",
-    "version": "1.8.0",
+    "version": "1.9.1",
     "owner": "gateway-app",
     "orientation": "portrait",
     "jsEngine": "hermes",
-    "icon": "./assets/images/icon.png",
+    "icon": "./src/assets/images/app-icon.png",
     "scheme": "gateway",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/images/splash.png",
+      "image": "./src/assets/images/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -23,11 +23,11 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "icon": "./assets/images/app-icon.png",
+      "icon": "./src/assets/images/app-icon.png",
       "userInterfaceStyle": "light",
       "googleServicesFile": "./GoogleService-Info.plist",
       "bundleIdentifier": "com.gatewaymobile.app",
-      "buildNumber": "9",
+      "buildNumber": "11",
       "usesIcloudStorage": true,
       "infoPlist": {
         "remote-notification": "Allow user to receive remote notification",
@@ -39,7 +39,7 @@
       }
     },
     "android": {
-      "versionCode": 9,
+      "versionCode": 11,
       "useNextNotificationsApi": true,
       "userInterfaceStyle": "light",
       "package": "com.gatewaymobile.app",
@@ -57,12 +57,12 @@
         "android.permission.RECORD_AUDIO"
       ],
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/gateway-adaptive.png",
+        "foregroundImage": "./src/assets/images/gateway-adaptive.png",
         "backgroundColor": "#ffffff"
       }
     },
     "web": {
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./src/assets/images/favicon.png"
     },
     "extra": {
       "eas": {

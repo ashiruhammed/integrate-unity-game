@@ -1,12 +1,12 @@
 import {StatusBar} from 'expo-status-bar';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 
-import useCachedResources from './hooks/useCachedResources';
-import useColorScheme from './hooks/useColorScheme';
-import Navigation from './navigation';
+import useCachedResources from './src/hooks/useCachedResources';
+import useColorScheme from './src/hooks/useColorScheme';
+import Navigation from './src/navigation';
 import {enableScreens} from "react-native-screens";
 import 'react-native-gesture-handler';
-import OnBoarding from "./screens/onboarding/OnBoarding";
+import OnBoarding from "./src/screens/onboarding/OnBoarding";
 import {useEffect, useState} from "react";
 
 import {PersistQueryClientProvider} from "@tanstack/react-query-persist-client";
@@ -16,7 +16,7 @@ import {
 } from '@tanstack/react-query'
 import {createSyncStoragePersister} from "@tanstack/query-sync-storage-persister";
 import {Provider} from "react-redux";
-import {persistor, store} from "./app/store";
+import {persistor, store} from "./src/app/store";
 import {PersistGate} from "redux-persist/integration/react";
 import {PortalProvider} from "@gorhom/portal";
 import AsyncStorage from "@react-native-async-storage/async-storage";
