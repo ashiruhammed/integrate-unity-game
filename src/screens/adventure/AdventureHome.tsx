@@ -764,7 +764,7 @@ const AdventureHome = ({navigation}: RootStackScreenProps<'AdventureHome'>) => {
                                 fontFamily: Fonts.quickSandBold,
                                 lineHeight: heightPixel(20)
                             }}>
-                             Start here
+                                link
                             </Text>
                             </Pressable>
                            {/* <TouchableOpacity activeOpacity={0.9} onPress={() => setJoinDiscord(!joinDiscord)}

@@ -583,7 +583,7 @@ const Wallet = () => {
 
 
                     <Text style={styles.sheetTitle}>
-                        CUSD Withdrawal
+                        Near Withdrawal
                     </Text>
                     {Platform.OS == 'android' && <TouchableOpacity onPress={handleClosePress}
                                                                    style={[styles.dismiss, {
@@ -612,7 +612,7 @@ const Wallet = () => {
                     />
 
                     <BottomSheetTextInput
-                        placeholder="Enter CUSD Address"
+                        placeholder="Enter NEAR Address"
                         label={"Address"}
                         keyboardType={"default"}
                         touched={touched.walletAddress}
@@ -681,25 +681,6 @@ const Wallet = () => {
 };
 
 
-const slides = [
-    {
-        id: '1',
-        walletName: 'CUSD Balance',
-        balance: "34,564.20",
-        amount: '$4601'
-    },
-    {
-        id: '2',
-        walletName: 'BUSD Balance',
-        balance: "14564",
-        amount: '$450'
-    }, {
-        id: '3',
-        walletName: 'USDT Balance',
-        balance: "23564",
-        amount: '$3450'
-    },
-]
 
 const styles = StyleSheet.create({
 

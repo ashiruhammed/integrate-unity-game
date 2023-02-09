@@ -221,24 +221,25 @@ const ConfirmPhonenumber = ({navigation}: RootStackScreenProps<'ConfirmPhonenumb
                 </View>
 
 
-                <RectButton disabled={!isValid} style={{
-                    width: widthPixel(200),
-                    marginTop: 40,
-                }} onPress={() => handleSubmit()}>
-                    {
-                        isLoading ? <ActivityIndicator size='small' color="#fff"/>
-                            :
-                            <Text style={styles.buttonText}>
-                                Continue
 
-                            </Text>
-                    }
-                </RectButton>
 
 
             </KeyboardAwareScrollView>
 
+            <RectButton disabled={!isValid} style={{
+                width: widthPixel(200),
+                bottom: 40,
+                position:'absolute'
+            }} onPress={() => handleSubmit()}>
+                {
+                    isLoading ? <ActivityIndicator size='small' color="#fff"/>
+                        :
+                        <Text style={styles.buttonText}>
+                            Continue
 
+                        </Text>
+                }
+            </RectButton>
         </SafeAreaView>
     );
 };
