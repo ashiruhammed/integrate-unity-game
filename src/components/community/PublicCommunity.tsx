@@ -366,7 +366,7 @@ const PublicCommunity = ({theme}: props) => {
 
     const renderItem = useCallback(({item}) => (
         <PublicCommunityCard loadingBadge={loadingBadge} joinModal={joinModal} theme={theme} item={item}/>
-    ), [loadingBadge])
+    ), [loadingBadge,theme])
 
     const loadMore = () => {
         if (hasNextPage) {

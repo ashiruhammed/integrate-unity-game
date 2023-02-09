@@ -105,7 +105,7 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
                     responseState: true,
                     responseType: 'success',
                 }))
-                navigation.navigate('Dashboard')
+
             } else {
                 dispatch(setResponse({
                     responseMessage: data.message,

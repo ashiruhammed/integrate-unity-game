@@ -11,6 +11,8 @@ import {useQuery} from "@tanstack/react-query";
 import {getUserPointsExchangeRate} from "../../action/action";
 import Colors from "../../constants/Colors";
 import {MaterialCommunityIcons} from "@expo/vector-icons";
+import {useAppSelector} from "../../app/hooks";
+import textInput from "../inputs/TextInput";
 
 
 const formSchema = yup.object().shape({
@@ -35,6 +37,12 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance}: props) => {
 
     const [convertedPoints, setConvertedPoints] = useState('');
 
+
+    const dataSlice = useAppSelector(state => state.data)
+    const {theme} = dataSlice
+
+    const lightTextColor = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
+    const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
 
     const {
         resetForm,
@@ -96,12 +104,12 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance}: props) => {
             />
 
             <View style={styles.exchangeView}>
-                <MaterialCommunityIcons name="swap-vertical-circle" size={45} color="rgba(0, 0, 0, 0.8)"/>
+                <MaterialCommunityIcons name="swap-vertical-circle" size={45} color={ theme == 'light' ? "rgba(0, 0, 0, 0.8)" : "rgba(227,227,227,0.8)" }/>
             </View>
             <AdvancedTextInput
                 mainWallet
                 editable={false}
-                inputBg={"#ccc"}
+
                 placeholder="0.00"
                 label={"Amount"}
                 defaultValue={`${data?.data[0].value * +points}`}
@@ -119,14 +127,18 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance}: props) => {
             />
 
             <View style={styles.conversionRate}>
-                <Text>
+                <Text style={[styles.label,{
+                    color: textColor
+                }]}>
                     Redeem conversion rate:
                 </Text>
 
                 {
                     loadingRates ? <ActivityIndicator size="small" color={Colors.primaryColor}/>
                         :
-                        <Text>
+                        <Text style={[styles.label,{
+                           color: textColor
+                        }]}>
                             1 Points = {data?.data[0].value} {data?.data[0].token}
                         </Text>
                 }
@@ -187,6 +199,10 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         alignItems: 'center',
 
+    },
+    label:{
+        fontFamily:Fonts.quicksandMedium,
+        fontSize:fontPixel(14)
     }
 })
 

@@ -39,12 +39,6 @@ const AllCommunities = () => {
     const dataSlice = useAppSelector(state => state.data)
     const {theme} = dataSlice
     const {responseState, responseType, responseMessage} = user
-    const [tabIndex, setTabIndex] = useState(0);
-    const handleTabsChange = useCallback((index: SetStateAction<number>) => {
-        setTabIndex(index);
-    }, [tabIndex]);
-    const scrollX = new Animated.Value(0)
-    let position = Animated.divide(scrollX, width)
 
     const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
@@ -52,6 +46,18 @@ const AllCommunities = () => {
     const [badgeId, setBadgeId] = useState('');
     const [communityId, setCommunityId] = useState('');
     const [requiredBadges, setRequiredBadges] = useState('');
+    const [tabIndex, setTabIndex] = useState(0);
+    const handleTabsChange = useCallback((index: SetStateAction<number>) => {
+        setTabIndex(index);
+    }, [tabIndex]);
+    const scrollX = new Animated.Value(0)
+    let position = Animated.divide(scrollX, width)
+
+
+    const backgroundColor = theme == 'light' ? Colors.light.background : Colors.dark.background
+    const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
+    const borderColor = theme == 'light' ? Colors.borderColor : '#313131'
+
 
     const {
         isLoading: loadingBadge,
@@ -160,7 +166,9 @@ const AllCommunities = () => {
 
 
     return (
-        <SafeAreaView style={styles.safeArea}>
+        <SafeAreaView style={[styles.safeArea,{
+            backgroundColor
+        }]}>
 
 
             <Modal
@@ -237,7 +245,9 @@ const AllCommunities = () => {
                 <SearchValue isWidth={"80%"} placeholder={'Search for all types of Communities'}
                              value={searchValue}/>
 
-                <View style={styles.searchTangible}>
+                <View style={[styles.searchTangible,{
+                    borderColor
+                }]}>
                     <Ionicons name="md-search-outline" size={20} color="#666666"/>
                 </View>
             </View>
@@ -246,7 +256,7 @@ const AllCommunities = () => {
                 <SegmentedControl tabs={["All Communities", "My Communities"]}
                                   currentIndex={tabIndex}
                                   onChange={handleTabsChange}
-                                  segmentedControlBackgroundColor={"#fff"}
+                                  segmentedControlBackgroundColor={backgroundColor}
                                   activeSegmentBackgroundColor={Colors.primaryColor}
                                   activeTextColor={"#fff"}
                                   textColor={"#888888"}
@@ -257,7 +267,9 @@ const AllCommunities = () => {
             <IF condition={tabIndex == 0}>
                 <View style={styles.listWrap}>
                     <View style={styles.ActivityCardTop}>
-                        <Text style={styles.listTitle}>
+                        <Text style={[styles.listTitle,{
+                            color: textColor
+                        }]}>
                             Public Communities
                         </Text>
 

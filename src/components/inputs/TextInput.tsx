@@ -82,7 +82,10 @@ const BottomSheetInput: FC<Props> = ({
             {
                 label && <View style={styles.labelWrap}>
                     <Text style={[
-                        {color: theme == 'light'? validationLabelColor : validationLabelDarkColor},
+                        {
+                            color: theme == 'light'? validationLabelColor : validationLabelDarkColor
+
+                        },
                         styles.label]}>
                         {label}
                     </Text>

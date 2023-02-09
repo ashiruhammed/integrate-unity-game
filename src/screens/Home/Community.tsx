@@ -254,7 +254,8 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
                             }]}>
                                 Private Communities
                             </Text>
-                            <TouchableOpacity activeOpacity={0.7} style={styles.seeAll}>
+                            <TouchableOpacity onPress={seeAllPublic
+                            } activeOpacity={0.7} style={styles.seeAll}>
                                 <Text style={[styles.tintText, {
                                     color: textColor
                                 }]}>See all</Text>
@@ -313,7 +314,9 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
                     <IF condition={tabIndex == 2}>
 
                         <View style={styles.startCommunity}>
-                            <Text style={styles.TextTitle}>
+                            <Text style={[styles.TextTitle,{
+                                color: textColor
+                            }]}>
                                 Create your own Community
                             </Text>
                             <RectButton style={{
@@ -336,11 +339,19 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
                 <BottomSheet
                     index={0}
 
-                    handleIndicatorStyle={{display: 'none'}}
+
                     backdropComponent={renderBackdrop}
                     ref={sheetRef}
                     snapPoints={snapPoints}
-
+                    style={{
+                        paddingHorizontal: pixelSizeHorizontal(20)
+                    }}
+                    backgroundStyle={{
+                        backgroundColor,
+                    }}
+                    handleIndicatorStyle={[{
+                        backgroundColor: theme == 'light' ? "#121212" : '#cccccc'
+                    },Platform.OS == 'android' && {display: 'none'}]}
                 >
                     <BottomSheetView style={styles.sheetContainer}>
                         <View style={styles.sheetHead}>
@@ -350,15 +361,20 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
                             }]}>
                                 Create a Community Group
                             </Text>
+
+                            {
+                                Platform.OS == 'android' &&
                             <TouchableOpacity activeOpacity={0.8} onPress={() => handleClosePress()}
                                               style={styles.dismiss}>
                                 <Ionicons name="ios-close" size={24} color="black"/>
                             </TouchableOpacity>
-
+                            }
                         </View>
 
                         <View style={styles.sheetBody}>
-                            <Text style={styles.bodyText}>
+                            <Text style={[styles.bodyText,{
+                                color: textColor
+                            }]}>
                                 The Community page allows gateway learners
                                 to find the best communities to join and learn
                                 with their tribe. All learners are in various
@@ -366,7 +382,9 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
                                 having unique interests. Communities connect
                                 them together!
                             </Text>
-                            <Text style={styles.bodyText}>
+                            <Text style={[styles.bodyText,{
+                                color: textColor
+                            }]}>
                                 Do you want to start a community for your
                                 group, country or specific topic to make
                                 learning more fun & engaging for gateway
@@ -402,6 +420,7 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
 
                             <View style={styles.termsText}>
                                 <Text style={{
+                                    color:textColor,
                                     fontFamily: Fonts.quicksandRegular,
                                     lineHeight: heightPixel(20)
                                 }}>
@@ -433,22 +452,37 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
                 <BottomSheet
                     index={0}
 
-                    handleIndicatorStyle={{display: 'none'}}
                     backdropComponent={renderBackdrop}
                     ref={sheetRefMore}
                     snapPoints={snapPointsMore}
-
+                    style={{
+                        paddingHorizontal: pixelSizeHorizontal(20)
+                    }}
+                    backgroundStyle={{
+                        backgroundColor,
+                    }}
+                    handleIndicatorStyle={[{
+                        backgroundColor: theme == 'light' ? "#121212" : '#cccccc'
+                    },Platform.OS == 'android' && {display: 'none'}]}
                 >
                     <BottomSheetView style={styles.sheetContainer}>
                         <View style={styles.sheetHead}>
 
-                            <Text style={styles.sheetTitle}>
+                            <Text style={[styles.sheetTitle,{
+                                color: textColor
+                            }]}>
                                 Requirements and Guidelines
                             </Text>
-                            <TouchableOpacity activeOpacity={0.8} onPress={() => handleClosePressMore()}
-                                              style={styles.dismiss}>
-                                <Ionicons name="ios-close" size={24} color="black"/>
-                            </TouchableOpacity>
+
+                            {
+                                Platform.OS == 'android' &&
+
+                                <TouchableOpacity activeOpacity={0.8} onPress={() => handleClosePressMore()}
+                                                  style={styles.dismiss}>
+                                    <Ionicons name="ios-close" size={24} color="black"/>
+                                </TouchableOpacity>
+                            }
+
 
                         </View>
 
@@ -457,7 +491,9 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
 
                             <View style={styles.list}>
                                 <Entypo name="dot-single" size={20} color="black"/>
-                                <Text style={styles.bodyText}>
+                                <Text style={[styles.bodyText,{
+                                    color: textColor
+                                }]}>
                                     Existing communities built primarily for
                                     education with more than 1000 members
                                     can create a community page.
@@ -465,14 +501,18 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
                             </View>
                             <View style={styles.list}>
                                 <Entypo name="dot-single" size={20} color="black"/>
-                                <Text style={styles.bodyText}>
+                                <Text style={[styles.bodyText,{
+                                    color: textColor
+                                }]}>
                                     Your account should be at least 3 months
                                     old, with constant user activities.
                                 </Text>
                             </View>
                             <View style={styles.list}>
                                 <Entypo name="dot-single" size={20} color="black"/>
-                                <Text style={styles.bodyText}>
+                                <Text style={[styles.bodyText,{
+                                    color: textColor
+                                }]}>
                                     If you do not have an existing community
                                     and will like to create a new one on
                                     gateway.
@@ -480,7 +520,9 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
                             </View>
                             <View style={styles.list}>
                                 <Entypo name="dot-single" size={20} color="black"/>
-                                <Text style={styles.bodyText}>
+                                <Text style={[styles.bodyText,{
+                                    color: textColor
+                                }]}>
                                     The community topic should reflect and
                                     further discussions around adventures on
                                     gateway.
@@ -488,7 +530,9 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
                             </View>
                             <View style={styles.list}>
                                 <Entypo name="dot-single" size={20} color="black"/>
-                                <Text style={styles.bodyText}>
+                                <Text style={[styles.bodyText,{
+                                    color: textColor
+                                }]}>
                                     Product-centric communities cannot create
                                     a community page except if they have
                                     been featured in one of gateway
@@ -497,7 +541,9 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
                             </View>
                             <View style={styles.list}>
                                 <Entypo name="dot-single" size={20} color="black"/>
-                                <Text style={styles.bodyText}>
+                                <Text style={[styles.bodyText,{
+                                    color: textColor
+                                }]}>
                                     Product advertising in communities is not
                                     allowed and will be deleted except if they
                                     have been featured in one of gateway
@@ -721,7 +767,7 @@ const styles = StyleSheet.create({
     sheetContainer: {
         width: '100%',
         alignItems: 'center',
-        paddingHorizontal: pixelSizeHorizontal(20)
+       // paddingHorizontal: pixelSizeHorizontal(20)
     },
     sheetBody: {
         width: '100%',

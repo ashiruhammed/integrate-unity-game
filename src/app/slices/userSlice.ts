@@ -16,6 +16,7 @@ export interface UserState {
         "email": string,
         "phone": string,
         "avatar": string,
+
         "interests": [],
         "phoneNumberVerified": boolean
     },

@@ -95,6 +95,9 @@ const FullPhoneNumber = ({
 
     validationDarkColor = !touched ? Colors.dark.borderColor : focus ? "#eee" : error ? Colors.errorRed : Colors.light.text
     validationLabelDarkColor = !touched ? Colors.dark.text : focus ? Colors.dark.text : error ? Colors.errorRed : Colors.dark.text
+    const borderColor = theme == 'light' ? Colors.borderColor : '#313131'
+
+    const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
 
     let phoneUtil = null
 
@@ -139,12 +142,17 @@ const FullPhoneNumber = ({
                 bottomDivider
             />*/
 
-        <TouchableOpacity onPress={() => selectedCountry(item)} style={styles.listItem}>
-            <Text style={styles.codeText}>
+        <TouchableOpacity onPress={() => selectedCountry(item)} style={[styles.listItem, {
+            borderBottomColor: borderColor
+        }]}>
+            <Text style={[styles.codeText, {
+                color: textColor
+            }]}>
                 {item.emoji}
             </Text>
             <Text style={[styles.codeText, {
                 marginLeft: 10,
+                color: textColor
             }]}>
                 {item.name} ({item.phone})
             </Text>
@@ -177,12 +185,12 @@ const FullPhoneNumber = ({
             <View style={[styles.inputWrap, {
                 height: heightPixel(115),
                 width: '100%',
-
+                backgroundColor
             }]}>
                 {
                     label && <View style={styles.labelWrap}>
                         <Text style={[
-                            {color: theme == 'light'? validationLabelColor : validationLabelDarkColor},
+                            {color: theme == 'light' ? validationLabelColor : validationLabelDarkColor},
                             styles.label]}>
                             {label}
                         </Text>
@@ -199,15 +207,16 @@ const FullPhoneNumber = ({
 
                     </View>
                 }
-                <View style={[styles.ViewWrap,{
+                <View style={[styles.ViewWrap, {
                     backgroundColor
                 }]}>
                     <View style={styles.buttonViewStyle}>
-                        <TouchableOpacity style={[styles.buttonStyle,{
-                            borderColor:theme == 'light' ? validationColor : validationDarkColor,
+                        <TouchableOpacity style={[styles.buttonStyle, {
+                            borderColor: theme == 'light' ? validationColor : validationDarkColor,
                         }]} onPress={() => selectCountry()}>
 
-                            <Entypo name="chevron-small-down" style={{}} size={20} color={theme == 'light' ?'#131313' : '#fff'}/>
+                            <Entypo name="chevron-small-down" style={{}} size={20}
+                                    color={theme == 'light' ? '#131313' : '#fff'}/>
                             <Text style={styles.buttonText}>
                                 {emoji}
                             </Text>
@@ -217,7 +226,7 @@ const FullPhoneNumber = ({
                     <View style={styles.inputViewStyle}>
                         <View style={[styles.inputContainer, {
                             borderRadius: 10,
-                            borderColor:theme == 'light' ? validationColor : validationDarkColor,
+                            borderColor: theme == 'light' ? validationColor : validationDarkColor,
                             height: heightPixel(56),
                         }]}>
                             <View style={styles.leftIcon}>
@@ -235,7 +244,7 @@ const FullPhoneNumber = ({
                                 placeholderTextColor={"#9CA3AF"}
                                 style={[styles.input, {
                                     width: '80%',
-                                    color: theme == 'light' ?'#131313' : '#fff',
+                                    color: theme == 'light' ? '#131313' : '#fff',
                                 }]}/>
                         </View>
                     </View>
@@ -258,9 +267,18 @@ const FullPhoneNumber = ({
                 fullScreen
                 isVisible={isVisible}
 
+                style={{
+                    backgroundColor
+                }
+                }
+                backdropStyle={{
+                    backgroundColor
+                }}
                 onBackdropPress={closeOverlay}>
                 <Animated.View key={isVisible + "isVisible"} entering={FadeInDown}
-                               exiting={FadeOutDown} style={styles.overlay}>
+                               exiting={FadeOutDown} style={[styles.overlay, {
+                    backgroundColor
+                }]}>
 
                     <TouchableOpacity style={styles.dismiss} onPress={closeOverlay}>
                         <AntDesign name="close" size={24} color="#fff"/>

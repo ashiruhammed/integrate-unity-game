@@ -6,6 +6,7 @@ import {fontPixel, heightPixel, pixelSizeHorizontal} from "../../helpers/normali
 import {Entypo, Ionicons} from "@expo/vector-icons";
 import {Fonts} from "../../constants/Fonts";
 import Animated, {Easing, FadeInDown, FadeInUp, FadeOutDown, Layout} from "react-native-reanimated";
+import {useAppSelector} from "../../app/hooks";
 
 
 interface Props extends TextInputProps {
@@ -55,10 +56,19 @@ const AdvancedTextInput: FC<Props> = ({
                                       }) => {
 
 
-    let validationColor, validationLabelColor;
+    const dataSlice = useAppSelector(state => state.data)
+    const {theme} = dataSlice
+    const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
+    const lightTextColor = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
+    let validationColor, validationLabelColor,validationDarkColor,validationLabelDarkColor;
+
+    validationDarkColor = !touched ? Colors.dark.borderColor : focus ? "#eee" : error ? Colors.errorRed : Colors.light.text
+
+
+
+
 
     validationColor = !touched ? Colors.border : error ? Colors.errorRed : focus ? Colors.primaryColor : Colors.border
-    validationLabelColor = !touched ? Colors.light.text : error ? Colors.errorRed : focus ? Colors.primaryColor : Colors.light.text
 
     return (
         <View style={[styles.inputWrap, {
@@ -69,8 +79,8 @@ const AdvancedTextInput: FC<Props> = ({
 
             <View style={[styles.inputContainer, {
                 borderRadius: borderRadius ? borderRadius : 10,
-                borderColor: validationColor,
-                backgroundColor: inputBg ? "#FAFAFA" : 'transparent',
+                borderColor:theme == 'light' ? validationColor : validationDarkColor,
+                backgroundColor: props.editable  === false?   Colors.dark.disable : "transparent",
                 height: inputHeight ? inputHeight : heightPixel(80),
             }]}>
 
@@ -85,7 +95,7 @@ const AdvancedTextInput: FC<Props> = ({
                         placeholderTextColor={"#9CA3AF"}
                         style={[styles.input, {
                             width: "80%",
-                            color: '#131313',
+                            color:textColor,
 
                         }]}/>
 
@@ -94,15 +104,19 @@ const AdvancedTextInput: FC<Props> = ({
 
                             <TouchableOpacity onPress={actionSelectWallet} style={styles.passBtn}>
 
-                                <Text style={styles.label}>
-                                    Near  <Entypo name="chevron-down" size={14} color="black" />
+                                <Text style={[styles.label,{
+                                    color:textColor,
+                                }]}>
+                                    Near  <Entypo name="chevron-down" size={14} color={textColor} />
                                 </Text>
 
                             </TouchableOpacity>
                             :
                             <View style={styles.passBtn}>
 
-                                <Text style={styles.label}>
+                                <Text style={[styles.label,{
+                                    color:textColor,
+                                }]}>
                                     Points
                                 </Text>
 
@@ -113,8 +127,10 @@ const AdvancedTextInput: FC<Props> = ({
                 </View>
 
                 <View style={styles.bottomInputWrap}>
-                    <Text style={styles.bottomText}>
-                        Balance: <Text style={{color:Colors.light.text}}>{balanceText}</Text>
+                    <Text style={[styles.bottomText,{
+                        color:textColor,
+                    }]}>
+                        Balance: <Text style={{color:lightTextColor}}>{balanceText}</Text>
                     </Text>
                     {  !mainWallet &&
                     <Text style={[styles.maxText]} onPress={actionMax}>

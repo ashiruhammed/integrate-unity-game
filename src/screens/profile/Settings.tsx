@@ -85,6 +85,7 @@ const Settings = () => {
         false: theme == 'light' ? "#fff" : "#1B2531",
 
     };
+
     const backgroundColor = theme == 'light' ? "#fff" : Colors.dark.background
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
     /*  const color = Animated.interpolateColors(1, {

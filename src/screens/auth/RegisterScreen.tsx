@@ -42,7 +42,7 @@ const height = Dimensions.get('window').height
 
 
 const formSchema = yup.object().shape({
-    phoneNumber: yup.string().required('Phone number is required').min(10, 'Please enter a valid phone number'),
+    phoneNumber: yup.string().required('Phone number is required').trim('Spaces not allowed').strict().min(10, 'Please enter a valid phone number'),
     fullName: yup.string().required('Phone number is required'),
     email: yup.string().email('Please provide a valid email').required('Email is required'),
     password: yup.string().required('Password is required').matches(
@@ -164,7 +164,7 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
             const {phoneNumber,fullName,email,password,referralCode} = values;
             const data = JSON.stringify({
                 fullName,
-                phone:phoneNumber,
+                phone:phoneNumber.trim(),
                 email:email.toLowerCase(),
                 countryCode,
                 password,
@@ -174,6 +174,7 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
             mutate(data)
         }
     });
+
 
     useEffect(() => {
         // console.log(user)

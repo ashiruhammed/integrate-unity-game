@@ -44,7 +44,7 @@ const SelectInput = ({
 
     validationColor = !touched ? Colors.border : error ? Colors.border : Colors.border
     validationDarkColor = !touched ? Colors.dark.borderColor : error ? Colors.errorRed : Colors.borderColor
-
+    const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
     validationLabelColor = !touched ? Colors.light.darkText : error ? Colors.errorRed : Colors.light.darkText
     validationLabelDarkColor = !touched ? Colors.dark.text : error ? Colors.errorRed : Colors.dark.text
     return (
@@ -77,7 +77,7 @@ const SelectInput = ({
                     placeholderTextColor="#6D6D6D"
                     style={[styles.input, {
                         //  backgroundColor:  'rgba(151, 151, 151, 0.25)',
-                        color: '#131313',
+                        color:textColor,
 
                     }]}/>
                 {

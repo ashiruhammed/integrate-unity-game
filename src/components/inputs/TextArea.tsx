@@ -5,6 +5,7 @@ import Colors from "../../constants/Colors";
 import {fontPixel, heightPixel, pixelSizeVertical} from "../../helpers/normalize";
 import {Ionicons} from "@expo/vector-icons";
 import {Fonts} from "../../constants/Fonts";
+import {useAppSelector} from "../../app/hooks";
 
 
 interface Props extends TextInputProps {
@@ -49,12 +50,21 @@ const TextAreaInput: FC<Props> = ({
                                          ...props
                                      }) => {
 
+    const dataSlice = useAppSelector(state => state.data)
+    const {theme} = dataSlice
 
 
 
-    let validationColor;
 
-    validationColor = !touched ?  Colors.border : error ? '#FF5A5F' : focus ? Colors.primary :  Colors.border
+
+
+    let validationColor, validationLabelDarkColor, validationLabelColor, validationDarkColor;
+
+    validationColor = !touched ? Colors.border : error ? Colors.border : Colors.border
+    validationDarkColor = !touched ? Colors.dark.borderColor : error ? Colors.errorRed : Colors.borderColor
+    const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
+    validationLabelColor = !touched ? Colors.light.darkText : error ? Colors.errorRed : Colors.light.darkText
+    validationLabelDarkColor = !touched ? Colors.dark.text : error ? Colors.errorRed : Colors.dark.text
 
     return (
         <View style={[styles.inputWrap,{
@@ -66,7 +76,7 @@ const TextAreaInput: FC<Props> = ({
                     justifyContent: rightText ? 'space-between' : 'flex-start',
                 }]}>
                     <Text style={[
-                        {color: Colors.textDark},
+                        {color: textColor},
                         styles.label]}>
                         {label}
 
@@ -75,7 +85,7 @@ const TextAreaInput: FC<Props> = ({
                     {
                         optional &&
                         <Text style={[
-                    {color: Colors.primary},
+                    {color:textColor},
                         styles.labelOptional]}>
                         (Optional)
                         </Text>
@@ -110,7 +120,7 @@ const TextAreaInput: FC<Props> = ({
                     style={[styles.input, {
                         padding:15,
                         width:  '90%',
-                        color:  '#131313',
+                        color:  textColor,
 
                     }]}/>
                 {

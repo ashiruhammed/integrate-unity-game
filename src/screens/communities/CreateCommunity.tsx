@@ -24,8 +24,8 @@ import * as FileSystem from "expo-file-system";
 import TextAreaInput from '../../components/inputs/TextArea';
 import {RectButton} from "../../components/RectButton";
 import HorizontalLine from "../../components/HorizontalLine";
-import {useMutation, useQueryClient} from "@tanstack/react-query";
-import {createCommunity, updateCompleteProfile, uploadToCloudinary} from "../../action/action";
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
+import {allAvailableBadges, createCommunity, updateCompleteProfile, uploadToCloudinary} from "../../action/action";
 import Toast from "../../components/Toast";
 import {isLessThanTheMB} from "../../helpers";
 import {api_key, upload_preset} from "../../constants";
@@ -47,8 +47,8 @@ const formSchema = yup.object().shape({
     //   category: yup.string().required('Category is required').trim('No white spaces'),
     memberLimit: yup.string().required('Member is required'),
     gateWayUsername: yup.string().required('Gateway username is required'),
-    // badgeRequired: yup.string().required('Please provide Badge access'),
-    amountOfBadge: yup.string().required('Please provide number of Badges access'),
+    badgeId: yup.string().required('Please provide Badge required for access'),
+    // amountOfBadge: yup.string().required('Please provide number of Badges access'),
     // NFTAccess: yup.string().required('Please provide NFTs required for access'),
     about: yup.string().required('Please community description'),
 
@@ -70,9 +70,9 @@ const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) 
     const [communityName, setCommunityName] = useState('');
     const [fCommunityName, setFCommunityName] = useState(false);
 
-    const [amountOfBadge, setAmountOfBadge] = useState('');
-    const [fAmountOfBadge, setFAmountOfBadge] = useState(false);
+    const [category, setCategory] = useState('');
 
+    const [badgeId, setBadgeId] = useState('');
 
     const [gateWayUsername, setGateWayUsername] = useState('');
     const [fGateWayUsername, setFGateWayUsername] = useState(false);
@@ -82,7 +82,7 @@ const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) 
     const [fMemberLimit, setFMemberLimit] = useState(false);
 
 
-    const snapPoints = useMemo(() => ["1%", "75%"], []);
+    const snapPoints = useMemo(() => ["1%", "45%"], []);
 
     const sheetRefCategory = useRef<BottomSheet>(null);
     const handleSnapPressCategory = useCallback((index: number) => {
@@ -107,6 +107,7 @@ const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) 
     }, []);
 
 
+    const {isLoading: loadingBadges, data} = useQuery(['allAvailableBadges'], allAvailableBadges)
 
 
     const {mutate: addCommunity, isLoading: creating} = useMutation(['createCommunity'], createCommunity,
@@ -173,7 +174,7 @@ const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) 
             category: '',
             memberLimit: '',
             gateWayUsername: '',
-            badgeRequired: '',
+            badgeId: '',
             amountOfBadge: '',
             NFTAccess: '',
             about: ''
@@ -181,20 +182,23 @@ const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) 
 
         },
         onSubmit: (values) => {
-            const {communityName, memberLimit, about} = values
+            const {communityName,badgeId, gateWayUsername, memberLimit, category, about} = values
             if (imageUrl !== '') {
 
 
                 const body = JSON.stringify({
+                    badgeid:badgeId,
                     "name": communityName,
-                    "slug": "newcommunity2",
+                    "slug": gateWayUsername,
                     memberLimit,
                     "displayPhoto": imageUrl,
-                    "visibility": "PUBLIC",
-                    "description": about
+                    "description": about,
+                    "visibility": category.toUpperCase(),
+
                 })
 
                 addCommunity(body)
+
             } else {
                 dispatch(setResponse({
                     responseMessage: "Please provide and image",
@@ -204,8 +208,6 @@ const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) 
             }
         }
     });
-
-
 
 
     const {mutate, isLoading} = useMutation(['uploadToCloudinary'], uploadToCloudinary,
@@ -285,13 +287,12 @@ const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) 
                 let type = await image?.substring(image.lastIndexOf(".") + 1);
                 let fileName = image.split('/').pop()
 
-                data.append("file", image, "[PROXY]");
                 data.append("upload_preset", upload_preset);
                 data.append("api_key", api_key);
                 data.append('file', {uri: image, name: fileName, type: `image/${type}`} as any)
 
 
-                mutate({body:data, resource_type:'image'})
+                mutate({body: data, resource_type: 'image'})
 
             })()
         }
@@ -318,14 +319,32 @@ const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) 
 
     const selectCategory = (category: string,) => {
         setFieldValue('category', category)
+        setCategory(category)
         handleClosePressCategory()
+
+    }
+    const selectBadge = (badge: string, badgeId: string) => {
+        setFieldValue('badgeId', badgeId)
+        setBadgeId(badge)
+        handleClosePressBadge()
 
     }
 
 
     const renderItem = useCallback(({item}: any) => (
-        <TouchableOpacity style={styles.selectBox} onPress={() => selectCategory(item.name)}>
-            <Text style={styles.selectBoxText}>{item.name}</Text>
+        <TouchableOpacity style={[styles.selectBox, {}]} onPress={() => selectCategory(item.title)}>
+            <Text style={[styles.selectBoxText, {
+                color: textColor
+            }]}>{item.title}</Text>
+        </TouchableOpacity>
+    ), [])
+
+
+    const renderItemBadgeAccess = useCallback(({item}: any) => (
+        <TouchableOpacity style={[styles.selectBox, {}]} onPress={() => selectBadge(item.title, item.id)}>
+            <Text style={[styles.selectBoxText, {
+                color: textColor
+            }]}>{item.title}</Text>
         </TouchableOpacity>
     ), [])
 
@@ -375,12 +394,12 @@ const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) 
                         <TouchableOpacity onPress={pickImage} activeOpacity={0.8} style={styles.profileDetailsImage}>
 
                             {
-                                image &&
+                                imageUrl &&
 
                                 <Image
                                     style={styles.profileImageSource}
                                     source={{
-                                        uri: image,
+                                        uri: imageUrl,
                                         // cache: 'only-if-cached'
                                     }}
 
@@ -428,9 +447,9 @@ const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) 
 
                             onChangeText={(e) => {
                                 handleChange('category')(e);
-
+                                setCategory(category)
                             }}
-
+                            defaultValue={category}
                             icon='chevron-down'
 
                             value={values.category}
@@ -483,24 +502,24 @@ const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) 
                             editable={false}
                             action={() => handleSnapPressBadge(1)}
                             label='Set Badge required for access'
-                            error={errors.badgeRequired}
+                            error={errors.badgeId}
                             autoCapitalize='none'
                             keyboardType='default'
                             returnKeyType='next'
                             returnKeyLabel='next'
 
                             onChangeText={(e) => {
-                                handleChange('badgeRequired')(e);
+                                handleChange('badgeId')(e);
 
                             }}
-
+                            defaultValue={badgeId}
                             icon='chevron-down'
 
-                            value={values.badgeRequired}
+                            value={values.badgeId}
                             Btn={true}/>
 
 
-                        <TextInput
+                        {/*  <TextInput
 
                             keyboardType={"number-pad"}
                             touched={touched.amountOfBadge}
@@ -518,9 +537,9 @@ const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) 
                             focus={fAmountOfBadge}
                             value={values.amountOfBadge}
                             label="Amount of Badge required"/>
+*/}
 
-
-                        <SelectInput
+                        {/*  <SelectInput
                             //placeholder={"Business Size"}
                             editable={false}
                             action={() => handleSnapPressBadge(1)}
@@ -540,7 +559,7 @@ const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) 
 
                             value={values.NFTAccess}
                             Btn={true}/>
-
+*/}
 
                         <TextAreaInput
 
@@ -595,22 +614,85 @@ const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) 
                 ref={sheetRefCategory}
                 snapPoints={snapPoints}
                 backdropComponent={renderBackdrop}
+
+                style={{
+                    paddingHorizontal: pixelSizeHorizontal(20)
+                }}
+                backgroundStyle={{
+                    backgroundColor,
+                }}
+                handleIndicatorStyle={[{
+                    backgroundColor: theme == 'light' ? "#121212" : '#cccccc'
+                }, Platform.OS == 'android' && {display: 'none'}]}
             >
                 <View style={styles.sheetHead}>
-                    <View style={{
-                        width: '10%'
-                    }}/>
-                    <Text style={styles.sheetTitle}>
+                    {
+                        Platform.OS == 'android' && <View style={{
+                            width: '10%'
+                        }}/>
+                    }
+                    <Text style={[styles.sheetTitle, {
+                        color: textColor
+                    }]}>
                         Categories
                     </Text>
-                    <TouchableOpacity activeOpacity={0.8} onPress={() => handleClosePressCategory()}
-                                      style={styles.dismiss}>
-                        <Ionicons name="ios-close" size={24} color="black"/>
-                    </TouchableOpacity>
+                    {
+                        Platform.OS == 'android' &&
+
+                        <TouchableOpacity activeOpacity={0.8} onPress={() => handleClosePressCategory()}
+                                          style={styles.dismiss}>
+                            <Ionicons name="ios-close" size={24} color="black"/>
+                        </TouchableOpacity>
+                    }
 
                 </View>
                 <BottomSheetFlatList data={Category}
                                      renderItem={renderItem}
+                                     keyExtractor={keyExtractor}
+                                     showsVerticalScrollIndicator={false}/>
+
+            </BottomSheet>
+
+            <BottomSheet
+
+                index={0}
+                ref={sheetRefBadge}
+                snapPoints={snapPoints}
+                backdropComponent={renderBackdrop}
+
+                style={{
+                    paddingHorizontal: pixelSizeHorizontal(20)
+                }}
+                backgroundStyle={{
+                    backgroundColor,
+                }}
+                handleIndicatorStyle={[{
+                    backgroundColor: theme == 'light' ? "#121212" : '#cccccc'
+                }, Platform.OS == 'android' && {display: 'none'}]}
+            >
+                <View style={styles.sheetHead}>
+                    {
+                        Platform.OS == 'android' && <View style={{
+                            width: '10%'
+                        }}/>
+                    }
+                    <Text style={[styles.sheetTitle, {
+                        color: textColor
+                    }]}>
+                        Categories
+                    </Text>
+                    {
+                        Platform.OS == 'android' &&
+
+                        <TouchableOpacity activeOpacity={0.8} onPress={() => handleClosePressBadge()}
+                                          style={styles.dismiss}>
+                            <Ionicons name="ios-close" size={24} color="black"/>
+                        </TouchableOpacity>
+                    }
+
+                </View>
+                <BottomSheetFlatList data={data?.data?.result}
+                                     renderItem={renderItemBadgeAccess}
                                      keyExtractor={keyExtractor}
                                      showsVerticalScrollIndicator={false}/>
 
@@ -623,10 +705,10 @@ const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) 
 const Category = [
     {
         id: '1',
-        title: "Finance"
+        title: "Public"
     }, {
         id: '2',
-        title: "Service"
+        title: "Private"
     },
 ]
 
@@ -662,11 +744,11 @@ const styles = StyleSheet.create({
         marginBottom: 35,
     },
     selectBox: {
-        marginHorizontal: pixelSizeHorizontal(20),
-        width: '90%',
+        //marginHorizontal: pixelSizeHorizontal(20),
+        width: '100%',
         height: heightPixel(60),
-        borderTopWidth: 0.2,
-        borderTopColor: Colors.borderColor,
+        borderBottomWidth: 0.2,
+        borderBottomColor: Colors.borderColor,
         justifyContent: 'center'
     },
     selectBoxText: {

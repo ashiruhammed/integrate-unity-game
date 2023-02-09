@@ -65,11 +65,13 @@ interface props {
         "decimals": number,
         "address": string
     },
+    textColor:string,
+    lightTextColor:string,
     openSheet:() =>void
     openRedeem:() =>void
 }
 
-const WalletItem = ({item,openSheet,openRedeem}: props) => {
+const WalletItem = ({item,textColor,lightTextColor,openSheet,openRedeem}: props) => {
     const {width} = useWindowDimensions()
     return (
         <>
@@ -77,11 +79,15 @@ const WalletItem = ({item,openSheet,openRedeem}: props) => {
         <View style={[{width}, styles.WalletItem
         ]}>
             <View style={styles.walletItemBody}>
-                <Text style={styles.walletName}>
+                <Text style={[styles.walletName,{
+                    color: lightTextColor
+                }]}>
                     {item.name}
                 </Text>
 
-                <Text style={styles.walletBalance}>
+                <Text style={[styles.walletBalance,{
+                    color: textColor
+                }]}>
                     {item.balance}
                 </Text>
 
@@ -130,6 +136,8 @@ const Wallet = () => {
     const [walletData, setWalletData] = useState<any>([]);
     const backgroundColor = theme == 'light' ? "#fff" : Colors.dark.background
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
+
+    const lightTextColor = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
     // ref
     const bottomSheetRef = useRef<BottomSheet>(null);
     const redeemSheetRef = useRef<BottomSheet>(null);
@@ -301,7 +309,7 @@ const Wallet = () => {
 
     const viewConfig = useRef({viewAreaCoveragePercentThreshold: 50}).current;
 
-    const renderItem = useCallback(({item}) => (<WalletItem openRedeem={openRedeem} openSheet={openSheet} item={item}/>), [])
+    const renderItem = useCallback(({item}) => (<WalletItem lightTextColor={lightTextColor} textColor={textColor} openRedeem={openRedeem} openSheet={openSheet} item={item}/>), [])
     const keyExtractor = useCallback((item: { id: any; }) =>
             item.id
         , [])
@@ -500,7 +508,7 @@ const Wallet = () => {
                             Recent Transactions
                         </Text>
 
-                        <Entypo name="back-in-time" size={20} color="black"/>
+                        <Entypo name="back-in-time" size={20} color={textColor}/>
                     </View>
 
                     <View style={styles.transactions}>
@@ -526,7 +534,9 @@ const Wallet = () => {
                                             }]}>
                                                 {type}
                                             </Text>
-                                            <Text style={styles.transactionCardDate}>
+                                            <Text style={[styles.transactionCardDate,{
+                                                color: lightTextColor
+                                            }]}>
                                                 {dayjs(createdAt).format('DD/MM/YYYY h:mm A')}
                                             </Text>
                                         </View>
@@ -646,13 +656,19 @@ const Wallet = () => {
             <BottomSheet
                 ref={redeemSheetRef}
                 index={0}
-                handleIndicatorStyle={Platform.OS == 'android' && {display: 'none'}}
+
                 snapPoints={snapPointsRedeem}
                 keyboardBehavior="interactive"
                 backdropComponent={renderBackdrop}
                 style={{
                     paddingHorizontal: pixelSizeHorizontal(20)
                 }}
+                backgroundStyle={{
+                    backgroundColor,
+                }}
+                handleIndicatorStyle={[{
+                    backgroundColor: theme == 'light' ? "#121212" : '#cccccc'
+                },Platform.OS == 'android' && {display: 'none'}]}
             >
                 {/*  <BottomSheetTextInput style={styles.input} />*/}
 
@@ -660,7 +676,8 @@ const Wallet = () => {
 
 
                     <Text style={[styles.sheetTitle, {
-                        fontFamily: Fonts.quickSandBold
+                        fontFamily: Fonts.quickSandBold,
+                        color: textColor
                     }]}>
                         Redeem Points
                     </Text>

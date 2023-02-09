@@ -72,14 +72,14 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
     const dispatch = useAppDispatch()
     const queryClient = useQueryClient();
     const user = useAppSelector(state => state.user)
-    const {responseMessage, responseType, responseState} = user
+    const {responseMessage, responseType, responseState, userData} = user
 
 
     const [image, setImage] = useState('');
     const [imageUrl, setImageUrl] = useState('');
 
     const [countryCode, setCountryCode] = useState('NG');
-    const [phoneNumber, setPhoneNumber] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState(userData?.phone);
     const phoneInput = useRef<PhoneInput>(null);
     const [value, setValue] = useState("");
     const [formattedValue, setFormattedValue] = useState("");
@@ -88,13 +88,13 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
     const {theme} = dataSlice
     const backgroundColor = theme == 'light' ? "#fff" : Colors.dark.background
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
-
+    const borderColor = theme == 'light' ? Colors.borderColor : '#313131'
 
     const {isLoading: loadingUser, refetch, data} = useQuery(['user-data'], getUser, {
         onSuccess: (data) => {
             if (data.success) {
 
-                dispatch(updateUserInfo(data.data))
+    dispatch(updateUserInfo(data.data))
 
             }
         },
@@ -102,7 +102,7 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
 
 
     const [focusFullName, setFocusFullName] = useState(false);
-    const [contentFullName, setContentFullName] = useState('');
+    const [contentFullName, setContentFullName] = useState(userData?.fullName);
 
     const [focusEmail, setFocusEmail] = useState(false);
     const [contentEmail, setContentEmail] = useState(data?.data?.email);
@@ -301,10 +301,10 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
         validationSchema: formSchema,
         initialValues: {
 
-            fullName: '',
-            phoneNumber: '',
-            email: data?.data?.email,
-            userName: '',
+            fullName: userData?.fullName,
+            phoneNumber: userData?.phone,
+            email: userData?.email,
+            userName: userData?.username,
 
         },
         onSubmit: (values) => {
@@ -423,9 +423,9 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
 
                         </Pressable>
 
-                        <Text style={styles.joinedOn}>
+                       {/* <Text style={styles.joinedOn}>
                             Joined 23 Oct 2022
-                        </Text>
+                        </Text>*/}
 
 
                     </View>
@@ -512,6 +512,7 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
                             onChangeText={(text) => {
                                 handleChange('phoneNumber')(text);
                             }}
+
                             value={values.phoneNumber}
                             errorMessage=''
                             placeholder="Phone number"/>
