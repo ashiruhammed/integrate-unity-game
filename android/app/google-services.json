@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "450276546603",
+    "project_id": "gateway-308a9",
+    "storage_bucket": "gateway-308a9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:450276546603:android:1e4d8ef61528cb4218326e",
+        "android_client_info": {
+          "package_name": "com.gatewaymobile.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "450276546603-gf61lqab42p6d8n792d677cjuiu7eod6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAb6P_5bIUcYFreB_PsZJpY3gQ39UrM0cE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "450276546603-gf61lqab42p6d8n792d677cjuiu7eod6.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "450276546603-nbqqhqaa8jjb1b5hlvp0bprsripoupke.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.gatewaymobile.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
