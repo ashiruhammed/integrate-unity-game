@@ -171,7 +171,7 @@ const ConfirmPhonenumber = ({navigation}: RootStackScreenProps<'ConfirmPhonenumb
                         justifyContent: 'flex-start'
                     }]}>
                         <Text style={styles.label}>
-                            Enter the 4-digit code sent to you at {userData.phone}
+                            Enter the 6-digit code sent to you at {userData?.phone}
                         </Text>
                     </View>
                     <PinInput value={values.phoneOtpCode}
