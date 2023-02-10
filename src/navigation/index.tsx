@@ -44,6 +44,8 @@ import PostScreen from "../screens/communities/PostScreen";
 import Followers from "../screens/communities/Followers";
 import CommunityInfo from "../screens/communities/CommunityInfo";
 import LeaveReview from "../screens/adventure/LeaveReview";
+import GroupSettings from "../screens/communities/GroupSettings";
+import LeaveCommunity from "../screens/communities/LeaveCommunity";
 
 export default function Navigation({colorScheme}: { colorScheme: ColorSchemeName }) {
   const data = useAppSelector(state => state.data)
@@ -104,6 +106,8 @@ function RootNavigator() {
                         <Stack.Screen name="CreateCommunity" component={CreateCommunity}/>
                         <Stack.Screen name="ConfirmPhonenumber" component={ConfirmPhonenumber}/>
                         <Stack.Screen name="ViewCommunity" component={ViewCommunity}/>
+                        <Stack.Screen name="GroupSettings" component={GroupSettings}/>
+                        <Stack.Screen name="LeaveCommunity" component={LeaveCommunity}/>
                         <Stack.Screen name="PostScreen" options={{
                         animation:'slide_from_right'
                         }} component={PostScreen}/>

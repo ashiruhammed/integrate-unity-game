@@ -9,7 +9,7 @@ import Animated, {
     SlideInRight,
     SlideOutRight
 } from "react-native-reanimated";
-import {FontAwesome5, Ionicons, Octicons} from "@expo/vector-icons";
+import {FontAwesome, FontAwesome5, Ionicons, Octicons} from "@expo/vector-icons";
 import {fontPixel, heightPixel, pixelSizeHorizontal, widthPixel} from "../../../helpers/normalize";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {getCommunityInfo, unFollowCommunity} from "../../../action/action";
@@ -30,76 +30,46 @@ interface props {
 const Drawer = ({menuToggle, communityId}: props) => {
 
     const navigation = useNavigation()
-    const queryClient = useQueryClient();
-    const dispatch = useAppDispatch()
+
     const dataSlice = useAppSelector(state => state.data)
     const {theme} = dataSlice
     const backgroundColor = theme == 'light' ? "#fff" : Colors.dark.background
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
 
 
-    const {isLoading: loading, mutate: unfollow} = useMutation(['unFollowCommunity'], unFollowCommunity, {
-        onSuccess: async (data) => {
-            if (data.success) {
 
 
-                navigation.navigate('Dashboard', {
-                    screen: 'Community'
-                })
-
-
-            } else {
-                menuToggle()
-                dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'error',
-                }))
-
-                /*  navigation.navigate('EmailConfirm', {
-                      email:contentEmail
-                  })*/
-
-
-            }
-        },
-        onError:(error)=>{
-            menuToggle()
-            dispatch(setResponse({
-                responseMessage: error.message,
-                responseState: true,
-                responseType: 'error',
-            }))
-        },
-         onSettled: () => {
-            queryClient.invalidateQueries(['unFollowCommunity']);
-        }
-    })
-
-    const leaveCommunity = () => {
-        unfollow(communityId)
-    }
 
     const {isLoading, data, refetch} = useQuery(['getCommunityInfo'], () => getCommunityInfo(communityId), {
         enabled: !!communityId
     })
 
-    const openScreen = (screen: 'Followers' | 'CommunityInfo') => {
+    const openScreen = (screen: 'Followers' | 'CommunityInfo' | 'GroupSettings') => {
         menuToggle()
         navigation.navigate(screen, {
             id: communityId
         })
     }
+    const leaveCommunity = () => {
+        menuToggle()
+      navigation.navigate('LeaveCommunity',{
+          id:communityId
+      })
+    }
 
     return (
         <Animated.View entering={FadeInRight} key={"backdrop"} layout={Layout.easing(Easing.bounce).delay(50)}
-                       exiting={FadeOutRight} style={styles.fullScreenMenu}>
+                       exiting={FadeOutRight} style={[styles.fullScreenMenu,{
+
+        }]}>
             <View
                 style={styles.backdrop}
             />
 
             <Animated.View entering={SlideInRight} layout={Layout.easing(Easing.bounce).delay(100)}
-                           exiting={SlideOutRight} style={[styles.menu]}>
+                           exiting={SlideOutRight} style={[styles.menu,{
+                backgroundColor
+            }]}>
                 <TouchableOpacity activeOpacity={0.8} onPress={menuToggle}
                                   style={styles.dismiss}>
                     <Ionicons name="ios-close" size={24} color="black"/>
@@ -134,16 +104,23 @@ const Drawer = ({menuToggle, communityId}: props) => {
                             </Text>
                         </Pressable>
 
-                        <Pressable onPress={leaveCommunity} disabled={loading} style={styles.tabButton}>
+                        <Pressable onPress={() => openScreen('GroupSettings')} style={styles.tabButton}>
+                            <FontAwesome name="cog" size={18} color={textColor} />
+                            <Text style={[styles.tabText, {
+                                color: textColor
+                            }]}>
+                                Group Settings
+                            </Text>
+                        </Pressable>
+
+                        <Pressable onPress={leaveCommunity}  style={styles.tabButton}>
                             <Octicons name="sign-out" size={18} color={Colors.primaryColor}/>
                             <Text style={[styles.tabText, {
                                 color: Colors.primaryColor
                             }]}>
                                 Leave group
                             </Text>
-                            {
-                                loading && <ActivityIndicator color={Colors.primaryColor} size="small"/>
-                            }
+
                         </Pressable>
                     </View>
 

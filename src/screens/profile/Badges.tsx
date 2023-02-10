@@ -29,9 +29,12 @@ const BadgeItem = ({amount, imageUrl}: props) => {
 
         <Animated.View key={"badgeItem"} entering={FadeInDown} exiting={FadeOutDown}
                        layout={Layout.easing(Easing.bounce).delay(20)} style={styles.badgeImageWrap}>
-            <Image
-                source={{uri: imageUrl}}
-                style={styles.badgeImage}/>
+            <View style={styles.badgeImageContainer}>
+                <Image
+                    source={{uri: imageUrl}}
+                    style={styles.badgeImage}/>
+            </View>
+
 
             <View style={styles.badgeStreakScore}>
                 <Text style={styles.badgeStreakText}>
@@ -168,7 +171,7 @@ const styles = StyleSheet.create({
     },
     streakView: {
         width: '100%',
-        height: heightPixel(150),
+        height: heightPixel(200),
         alignItems: 'center',
         justifyContent: "center"
     },
@@ -257,6 +260,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         margin: 10,
         justifyContent: 'center',
+    },
+    badgeImageContainer: {
+        height:80,
+        width: 80,
+ alignItems:'center',
+        justifyContent:'center'
+
     },
     badgeImage: {
         height: '100%',

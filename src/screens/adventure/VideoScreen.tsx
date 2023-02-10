@@ -297,6 +297,7 @@ const VideoScreen = ({navigation, route}: RootStackScreenProps<'VideoScreen'>) =
                 {
                     !lesson?.data?.video?.url &&
                     <View style={[styles.videoContainer,{
+
                         paddingHorizontal:pixelSizeHorizontal(15)
                     }]}>
 
@@ -316,7 +317,9 @@ const VideoScreen = ({navigation, route}: RootStackScreenProps<'VideoScreen'>) =
                     lesson?.data?.video?.url
                     &&
 
-                    <View style={styles.videoContainer}>
+                    <View style={[styles.videoContainer,{
+                        height: heightPixel(400),
+                    }]}>
                         <Video
                             ref={video}
 
@@ -404,7 +407,7 @@ const styles = StyleSheet.create({
     videoContainer: {
 
         width: '100%',
-        height: heightPixel(400),
+
         alignItems: 'center',
         justifyContent: 'center',
     },

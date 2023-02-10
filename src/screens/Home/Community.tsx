@@ -39,9 +39,10 @@ import {useAppDispatch, useAppSelector} from "../../app/hooks";
 import AdventuresIcon from "../../assets/images/tabs/home/AdventuresIcon";
 import Toast from "../../components/Toast";
 import {unSetResponse} from "../../app/slices/userSlice";
-import {useInfiniteQuery} from "@tanstack/react-query";
-import {getFollowedCommunities, getPublicCommunities} from "../../action/action";
+import {useInfiniteQuery, useQuery} from "@tanstack/react-query";
+import {getFollowedCommunities, getMyCommunities, getPublicCommunities} from "../../action/action";
 import {useRefreshOnFocus} from "../../helpers";
+import CardPublicCommunity from "../../components/community/PublicCard";
 
 
 const wait = (timeout: number) => {
@@ -60,9 +61,7 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
     const {responseState, responseType, responseMessage} = user
     const [terms, setTerms] = useState(false);
     const [tabIndex, setTabIndex] = useState(0);
-    const handleTabsChange = useCallback((index: SetStateAction<number>) => {
-        setTabIndex(index);
-    }, [tabIndex]);
+
     const scrollX = new Animated.Value(0)
     let position = Animated.divide(scrollX, width)
     const [dataList, setDataList] = useState(CommunityData)
@@ -136,6 +135,24 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
             getPreviousPageParam: (firstPage, allPages) => firstPage.prevCursor,
         })
 
+    const handleTabsChange = useCallback((index: SetStateAction<number>) => {
+        setTabIndex(index);
+
+    }, [tabIndex]);
+    const {
+        isLoading: loading,
+        data: allMyCommunities,
+
+        refetch: fetchMyCommunity,
+
+    } = useQuery([`MyCommunities`], getMyCommunities.mine,
+        {
+            networkMode: 'online',
+            onSuccess: (data) => {
+
+            }
+        })
+
 
     // renders
     const renderBackdrop = useCallback(
@@ -161,10 +178,9 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
     useRefreshOnFocus(refetch)
 
 
-
-    const seeCommunity = (id:string) => {
+    const seeCommunity = (id: string) => {
         dispatch(unSetResponse())
-        navigation.navigate('ViewCommunity',{
+        navigation.navigate('ViewCommunity', {
             id
         })
     }
@@ -176,6 +192,13 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
         wait(2000).then(() => setRefreshing(false));
     }
 
+
+    const leaveCommunity = (communityId:string) => {
+
+        navigation.navigate('LeaveCommunity',{
+            id:communityId
+        })
+    }
     useEffect(() => {
         // console.log(user)
         let time: NodeJS.Timeout | undefined;
@@ -219,7 +242,7 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
                     </View>
 
                     <View style={styles.segmentWrap}>
-                        <SegmentedControl tabs={["All Communities",  "Followed communities", "My Communities",]}
+                        <SegmentedControl tabs={["All Communities", "Followed communities", "My Communities",]}
                                           currentIndex={tabIndex}
                                           onChange={handleTabsChange}
                                           segmentedControlBackgroundColor={backgroundColor}
@@ -274,29 +297,34 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
                     <IF condition={tabIndex == 1}>
 
 
-
                         {
                             isLoading && <ActivityIndicator size='small' color={Colors.primaryColor}/>
                         }
                         {
                             !isLoading && data?.pages[0]?.data?.result.map((({id, community, totalUsersJoined}) => (
-                                <TouchableOpacity  key={id} activeOpacity={0.8} onPress={() =>seeCommunity(community?.id)}
-                                                  style={styles.myCommunityCard}>
+                                <TouchableOpacity key={id} activeOpacity={0.8} onPress={() => seeCommunity(community?.id)}
+                                                  style={[styles.myCommunityCard, {
+                                                      backgroundColor: theme == 'dark' ? '#141414' : "#fff"
+                                                  }]}>
 
                                     <View style={styles.communityLogo}>
                                         <Image source={{uri: community?.displayPhoto}} style={styles.communityLogoImag}/>
                                     </View>
 
                                     <View style={styles.bodyCard}>
-                                        <Text style={styles.cardTitle}>
+                                        <Text style={[styles.cardTitle, {
+                                            color: textColor
+                                        }]}>
                                             {community?.name}
                                         </Text>
-                                        <Text style={styles.cardTitleSub}>
+                                        <Text style={[styles.cardTitleSub, {
+                                            color: textColor
+                                        }]}>
                                             {totalUsersJoined} Members
                                         </Text>
                                     </View>
 
-                                    <SmallRectButton style={{}}>
+                                    <SmallRectButton onPress={()=>leaveCommunity(id)} style={{}}>
                                         <Text style={styles.buttonText}>
                                             Leave
 
@@ -314,7 +342,7 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
                     <IF condition={tabIndex == 2}>
 
                         <View style={styles.startCommunity}>
-                            <Text style={[styles.TextTitle,{
+                            <Text style={[styles.TextTitle, {
                                 color: textColor
                             }]}>
                                 Create your own Community
@@ -327,6 +355,7 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
                                 </Text>
                             </RectButton>
                         </View>
+
 
                     </IF>
 
@@ -351,7 +380,7 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
                     }}
                     handleIndicatorStyle={[{
                         backgroundColor: theme == 'light' ? "#121212" : '#cccccc'
-                    },Platform.OS == 'android' && {display: 'none'}]}
+                    }, Platform.OS == 'android' && {display: 'none'}]}
                 >
                     <BottomSheetView style={styles.sheetContainer}>
                         <View style={styles.sheetHead}>
@@ -364,15 +393,15 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
 
                             {
                                 Platform.OS == 'android' &&
-                            <TouchableOpacity activeOpacity={0.8} onPress={() => handleClosePress()}
-                                              style={styles.dismiss}>
-                                <Ionicons name="ios-close" size={24} color="black"/>
-                            </TouchableOpacity>
+                                <TouchableOpacity activeOpacity={0.8} onPress={() => handleClosePress()}
+                                                  style={styles.dismiss}>
+                                    <Ionicons name="ios-close" size={24} color="black"/>
+                                </TouchableOpacity>
                             }
                         </View>
 
                         <View style={styles.sheetBody}>
-                            <Text style={[styles.bodyText,{
+                            <Text style={[styles.bodyText, {
                                 color: textColor
                             }]}>
                                 The Community page allows gateway learners
@@ -382,7 +411,7 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
                                 having unique interests. Communities connect
                                 them together!
                             </Text>
-                            <Text style={[styles.bodyText,{
+                            <Text style={[styles.bodyText, {
                                 color: textColor
                             }]}>
                                 Do you want to start a community for your
@@ -420,7 +449,7 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
 
                             <View style={styles.termsText}>
                                 <Text style={{
-                                    color:textColor,
+                                    color: textColor,
                                     fontFamily: Fonts.quicksandRegular,
                                     lineHeight: heightPixel(20)
                                 }}>
@@ -463,12 +492,12 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
                     }}
                     handleIndicatorStyle={[{
                         backgroundColor: theme == 'light' ? "#121212" : '#cccccc'
-                    },Platform.OS == 'android' && {display: 'none'}]}
+                    }, Platform.OS == 'android' && {display: 'none'}]}
                 >
                     <BottomSheetView style={styles.sheetContainer}>
                         <View style={styles.sheetHead}>
 
-                            <Text style={[styles.sheetTitle,{
+                            <Text style={[styles.sheetTitle, {
                                 color: textColor
                             }]}>
                                 Requirements and Guidelines
@@ -491,7 +520,7 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
 
                             <View style={styles.list}>
                                 <Entypo name="dot-single" size={20} color="black"/>
-                                <Text style={[styles.bodyText,{
+                                <Text style={[styles.bodyText, {
                                     color: textColor
                                 }]}>
                                     Existing communities built primarily for
@@ -501,7 +530,7 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
                             </View>
                             <View style={styles.list}>
                                 <Entypo name="dot-single" size={20} color="black"/>
-                                <Text style={[styles.bodyText,{
+                                <Text style={[styles.bodyText, {
                                     color: textColor
                                 }]}>
                                     Your account should be at least 3 months
@@ -510,7 +539,7 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
                             </View>
                             <View style={styles.list}>
                                 <Entypo name="dot-single" size={20} color="black"/>
-                                <Text style={[styles.bodyText,{
+                                <Text style={[styles.bodyText, {
                                     color: textColor
                                 }]}>
                                     If you do not have an existing community
@@ -520,7 +549,7 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
                             </View>
                             <View style={styles.list}>
                                 <Entypo name="dot-single" size={20} color="black"/>
-                                <Text style={[styles.bodyText,{
+                                <Text style={[styles.bodyText, {
                                     color: textColor
                                 }]}>
                                     The community topic should reflect and
@@ -530,7 +559,7 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
                             </View>
                             <View style={styles.list}>
                                 <Entypo name="dot-single" size={20} color="black"/>
-                                <Text style={[styles.bodyText,{
+                                <Text style={[styles.bodyText, {
                                     color: textColor
                                 }]}>
                                     Product-centric communities cannot create
@@ -541,7 +570,7 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
                             </View>
                             <View style={styles.list}>
                                 <Entypo name="dot-single" size={20} color="black"/>
-                                <Text style={[styles.bodyText,{
+                                <Text style={[styles.bodyText, {
                                     color: textColor
                                 }]}>
                                     Product advertising in communities is not
@@ -688,7 +717,7 @@ const styles = StyleSheet.create({
         },
         shadowOpacity: 0.12,
         shadowRadius: 7.22,
-        backgroundColor: '#fff',
+
         elevation: 3,
     },
     communityLogo: {
@@ -767,7 +796,7 @@ const styles = StyleSheet.create({
     sheetContainer: {
         width: '100%',
         alignItems: 'center',
-       // paddingHorizontal: pixelSizeHorizontal(20)
+        // paddingHorizontal: pixelSizeHorizontal(20)
     },
     sheetBody: {
         width: '100%',

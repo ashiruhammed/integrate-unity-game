@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 
-import {Text, View, StyleSheet, TouchableOpacity, Image, Dimensions} from 'react-native';
+import {Text, View, StyleSheet, TouchableOpacity, Image, Dimensions, ActivityIndicator} from 'react-native';
 import {SafeAreaView} from "react-native-safe-area-context";
 import {RootStackScreenProps} from "../../../types";
 import {AntDesign, Ionicons, Octicons, SimpleLineIcons} from "@expo/vector-icons";
@@ -19,6 +19,10 @@ import Colors from "../../constants/Colors";
 import {StatusBar} from "expo-status-bar";
 import HorizontalLine from "../../components/HorizontalLine";
 import Drawer from "./components/Drawer";
+import {useMutation, useQuery} from "@tanstack/react-query";
+import {getCommunityPost, likeAPost} from "../../action/action";
+import dayjs from "dayjs";
+import {useRefreshOnFocus} from "../../helpers";
 
 
 
@@ -32,15 +36,31 @@ const {postId,communityId} = route.params
     const {theme} = dataSlice
     const backgroundColor = theme == 'light' ? "#fff" : Colors.dark.background
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
+
+
+    const backgroundColorCard = theme == 'light' ? '#fff' : Colors.dark.disable
+
+    const lightTextColor = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
+    const borderColor = theme == 'light' ? Colors.borderColor : '#313131'
     const goBack = () => {
         navigation.goBack()
     }
+    const {data,isLoading,refetch} =  useQuery(['getCommunityPost'],()=>getCommunityPost(postId))
+
+
+    const { mutate} =useMutation(['likeAPost'],likeAPost,{
+        onSuccess:(data)=>{
+           refetch()
+        }
+    })
+
 
     const menuToggle = () => {
         offset.value = Math.random()
         setToggleMenu(!toggleMenu)
     }
 
+    useRefreshOnFocus(refetch)
 
     return (
 
@@ -57,7 +77,9 @@ const {postId,communityId} = route.params
                     <TouchableOpacity onPress={goBack} style={styles.goBack} activeOpacity={0.8}>
                         <AntDesign name="arrowleft" size={24} color={textColor}/>
 
-                        <Text style={styles.screenTitle}>
+                        <Text style={[styles.screenTitle,{
+                            color: textColor
+                        }]}>
                             Wave community
                         </Text>
 
@@ -69,18 +91,33 @@ const {postId,communityId} = route.params
                     </TouchableOpacity>
                 </View>
 
+                {
+                    isLoading &&
 
-                <View style={styles.postCard}>
+                    <ActivityIndicator color={Colors.primaryColor} size={"small"}
+                                       style={[StyleSheet.absoluteFillObject, {
+                                           backgroundColor: 'rgba(0,0,0,0.2)',
+                                           zIndex: 2,
+                                       }]}/>
+                }
+                <View style={[styles.postCard,{
+                    backgroundColor: backgroundColorCard
+                }]}>
                     <View style={styles.topPostSection}>
                         <View style={styles.userImage}>
+
+                                <Image source={{uri: !data?.user?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'  : data?.user?.avatar}} style={styles.avatar}/>
+
 
                         </View>
 
                         <View style={styles.details}>
 
                             <View style={styles.nameTag}>
-                                <Text style={styles.postName}>
-                                    Peter
+                                <Text style={[styles.postName,{
+                                    color: textColor
+                                }]}>
+                                    {data?.data?.user?.fullName}
                                 </Text>
 
                                 <View style={styles.tag}>
@@ -91,7 +128,8 @@ const {postId,communityId} = route.params
 
                             </View>
                             <Text style={styles.postDate}>
-                                08 May 2022
+
+                                {dayjs(data?.user?.createdAt).format('DD MMM YYYY')}
                             </Text>
                         </View>
 
@@ -101,24 +139,29 @@ const {postId,communityId} = route.params
                     <View style={styles.postSnippet}>
 
 
-                        <Text style={styles.postHead}>
-                            Lorem ipsum dolor sit amet consectetur. Ultricies
-                            amet fermentum... <Text style={{fontFamily: Fonts.quickSandBold}}>Read more</Text>
+                        <Text style={[styles.postHead,{
+                            color: textColor
+                        }]}>
+                            {data?.data?.content}
                         </Text>
                     </View>
+                    {
+                        data?.data?.thumbnailUrl &&
 
                     <View style={styles.postImageWrap}>
                         <Image
-                            source={{uri: 'https://images.unsplash.com/photo-1671707433570-9d1c95b4803f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80'}}
+                            source={{uri:  data?.data?.thumbnailUrl}}
                             style={styles.postImage}
                         />
                     </View>
+                    }
+
 
                     <View style={styles.actionButtons}>
-                        <TouchableOpacity style={styles.actionButton}>
-                            <AntDesign name="like2" size={20} color="#838383"/>
+                        <TouchableOpacity activeOpacity={0.8} onPress={() => mutate(postId)} style={styles.actionButton}>
+                            <AntDesign name="like2" size={20} color={data?.data?.liked ? Colors.primaryColor : "#838383"}/>
                             <Text style={styles.actionButtonText}>
-                                60 likes
+                                {data?.data?.likes} likes
                             </Text>
                         </TouchableOpacity>
 
@@ -292,6 +335,13 @@ const styles = StyleSheet.create({
         height: "100%",
         borderRadius: 35,
         resizeMode: 'cover'
+    },
+    avatar: {
+        borderRadius: 40,
+        resizeMode: 'cover',
+        backgroundColor: Colors.border,
+        width: "100%",
+        height: "100%",
     },
 
 })

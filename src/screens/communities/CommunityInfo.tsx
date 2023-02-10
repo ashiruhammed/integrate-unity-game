@@ -136,10 +136,14 @@ const CommunityInfo = ({navigation, route}: RootStackScreenProps<'CommunityInfo'
                             </View>
                             <View style={styles.statsRow}>
 
-                                <Text style={styles.statsTitle}>
+                                <Text style={[styles.statsTitle,{
+                                    color:textColor
+                                }]}>
                                     {data?.data?.visibility} group
                                 </Text>
-                                <Text style={styles.statsText}>
+                                <Text style={[styles.statsText,{
+                                    color:lightTextColor
+                                }]}>
                                     Anyone can see who’s in the group and
                                     what they post.
                                 </Text>
@@ -155,10 +159,14 @@ const CommunityInfo = ({navigation, route}: RootStackScreenProps<'CommunityInfo'
                             </View>
                             <View style={styles.statsRow}>
 
-                                <Text style={styles.statsTitle}>
+                                <Text style={[styles.statsTitle,{
+                                    color:textColor
+                                }]}>
                                     Visible
                                 </Text>
-                                <Text style={styles.statsText}>
+                                <Text style={[styles.statsText,{
+                                    color:lightTextColor
+                                }]}>
                                     Anyone can find this group.
                                 </Text>
 
@@ -172,10 +180,14 @@ const CommunityInfo = ({navigation, route}: RootStackScreenProps<'CommunityInfo'
                             </View>
                             <View style={styles.statsRow}>
 
-                                <Text style={styles.statsTitle}>
+                                <Text style={[styles.statsTitle,{
+                                    color:textColor
+                                }]}>
                                     History
                                 </Text>
-                                <Text style={styles.statsText}>
+                                <Text style={[styles.statsText,{
+                                    color:lightTextColor
+                                }]}>
                                     Group created on {dayjs(data.data.createdAt).format('DD MMMM YYYY')}.
                                 </Text>
 
@@ -259,10 +271,14 @@ const CommunityInfo = ({navigation, route}: RootStackScreenProps<'CommunityInfo'
                             </View>
                             <View style={styles.statsRow}>
 
-                                <Text style={styles.statsTitle}>
+                                <Text style={[styles.statsTitle,{
+                                    color:textColor
+                                }]}>
                                    0 new post today
                                 </Text>
-                                <Text style={styles.statsText}>
+                                <Text style={[styles.statsText,{
+                                    color:lightTextColor
+                                }]}>
                                     Anyone can see who’s in the group and
                                     what they post.
                                 </Text>
@@ -278,10 +294,14 @@ const CommunityInfo = ({navigation, route}: RootStackScreenProps<'CommunityInfo'
                             </View>
                             <View style={styles.statsRow}>
 
-                                <Text style={styles.statsTitle}>
+                                <Text style={[styles.statsTitle,{
+                                    color:textColor
+                                }]}>
                                     {data?.data?.totalFollowers} members
                                 </Text>
-                                <Text style={styles.statsText}>
+                                <Text style={[styles.statsText,{
+                                    color:lightTextColor
+                                }]}>
                                     +20 in the last week
                                 </Text>
 

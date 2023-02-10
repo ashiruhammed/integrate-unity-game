@@ -225,9 +225,6 @@ export const requestPhoneVerification = async (userdata: any) => {
 }
 
 
-
-
-
 export const passwordReset = async (userdata: signupProps) => {
     const myHeaders = {
         'Content-Type': 'application/json',
@@ -327,9 +324,9 @@ export const updateUserImage = async (imageUrl: any) => {
 
 export const userNotifications = {
 
-    notifications: async ({pageParam = 1}:{pageParam?:number}) => {
+    notifications: async ({pageParam = 1}: { pageParam?: number }) => {
         let Token = await SecureStore.getItemAsync('Gateway-Token');
-       // console.log(Token)
+        // console.log(Token)
         let timeoutId: NodeJS.Timeout
         const myHeaders = {
             'Content-Type': 'application/json',
@@ -386,7 +383,7 @@ export const getUserDashboard = async () => {
 
     ])
 }
-export const uploadToCloudinary = async ({body,resource_type}:{body: any, resource_type: string}) => {
+export const uploadToCloudinary = async ({body, resource_type}: { body: any, resource_type: string }) => {
 
     const myHeaders = new Headers();
     myHeaders.append("Authorization", "Basic e3thcGlfa2V5fX06e3thcGlfc2VjcmV0fX0=");
@@ -842,105 +839,106 @@ export const getUserCompletedAdventure = async () => {
 
 export const getAllAdventure = {
 
-        adventures: async (pageParam: string) => {
+    adventures: async (pageParam: string) => {
 
-            let Token = await SecureStore.getItemAsync('Gateway-Token');
+        let Token = await SecureStore.getItemAsync('Gateway-Token');
 
-            const myHeaders = {
+        const myHeaders = {
 
-                'Authorization': `Bearer ${Token}`
-            }
-            let timeoutId: NodeJS.Timeout
-
-
-            const requestOptions = {
-                method: 'GET',
-                headers: myHeaders,
-
-            };
-
-
-            return Promise.race([
-                fetch(`${BASE_URL}/adventure`, requestOptions)
-                    .then(response => response.json()),
-                new Promise((resolve, reject) => {
-                    timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
-
-                    //  clearTimeout(timeoutId)
-                }).then(() => {
-                    clearTimeout(timeoutId)
-                })
-
-            ])
+            'Authorization': `Bearer ${Token}`
         }
+        let timeoutId: NodeJS.Timeout
+
+
+        const requestOptions = {
+            method: 'GET',
+            headers: myHeaders,
+
+        };
+
+
+        return Promise.race([
+            fetch(`${BASE_URL}/adventure`, requestOptions)
+                .then(response => response.json()),
+            new Promise((resolve, reject) => {
+                timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+                //  clearTimeout(timeoutId)
+            }).then(() => {
+                clearTimeout(timeoutId)
+            })
+
+        ])
     }
+}
 
 
 export const getEnrolledAdventure = {
     userEnrolled: async (pageParam: string) => {
 
-            let Token = await SecureStore.getItemAsync('Gateway-Token');
+        let Token = await SecureStore.getItemAsync('Gateway-Token');
 
-            const myHeaders = {
+        const myHeaders = {
 
-                'Authorization': `Bearer ${Token}`
-            }
-            let timeoutId: NodeJS.Timeout
-
-
-            const requestOptions = {
-                method: 'GET',
-                headers: myHeaders,
-
-            };
-
-
-            return Promise.race([
-                fetch(`${BASE_URL}/adventure/enrollment`, requestOptions)
-                    .then(response => response.json()),
-                new Promise((resolve, reject) => {
-                    timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
-
-                    //  clearTimeout(timeoutId)
-                }).then(() => {
-                    clearTimeout(timeoutId)
-                })
-
-            ])
+            'Authorization': `Bearer ${Token}`
         }
+        let timeoutId: NodeJS.Timeout
+
+
+        const requestOptions = {
+            method: 'GET',
+            headers: myHeaders,
+
+        };
+
+
+        return Promise.race([
+            fetch(`${BASE_URL}/adventure/enrollment`, requestOptions)
+                .then(response => response.json()),
+            new Promise((resolve, reject) => {
+                timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+                //  clearTimeout(timeoutId)
+            }).then(() => {
+                clearTimeout(timeoutId)
+            })
+
+        ])
     }
-export const getInProgressAdventure = {inProgress: async (pageParam: string) => {
+}
+export const getInProgressAdventure = {
+    inProgress: async (pageParam: string) => {
 
-            let Token = await SecureStore.getItemAsync('Gateway-Token');
+        let Token = await SecureStore.getItemAsync('Gateway-Token');
 
-            const myHeaders = {
+        const myHeaders = {
 
-                'Authorization': `Bearer ${Token}`
-            }
-            let timeoutId: NodeJS.Timeout
-
-
-            const requestOptions = {
-                method: 'GET',
-                headers: myHeaders,
-
-            };
-
-
-            return Promise.race([
-                fetch(`${BASE_URL}/adventure/enrollment/progress`, requestOptions)
-                    .then(response => response.json()),
-                new Promise((resolve, reject) => {
-                    timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
-
-                    //  clearTimeout(timeoutId)
-                }).then(() => {
-                    clearTimeout(timeoutId)
-                })
-
-            ])
+            'Authorization': `Bearer ${Token}`
         }
+        let timeoutId: NodeJS.Timeout
+
+
+        const requestOptions = {
+            method: 'GET',
+            headers: myHeaders,
+
+        };
+
+
+        return Promise.race([
+            fetch(`${BASE_URL}/adventure/enrollment/progress`, requestOptions)
+                .then(response => response.json()),
+            new Promise((resolve, reject) => {
+                timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+                //  clearTimeout(timeoutId)
+            }).then(() => {
+                clearTimeout(timeoutId)
+            })
+
+        ])
     }
+}
 
 
 export const getAdventure = async (id: string) => {
@@ -1259,6 +1257,38 @@ export const getFollowedCommunities = {
         ])
     }
 }
+export const getMyCommunities = {
+
+    mine: async () => {
+
+        let Token = await SecureStore.getItemAsync('Gateway-Token');
+
+        const myHeaders = {
+            'Authorization': `Bearer ${Token}`
+        }
+        let timeoutId: NodeJS.Timeout
+
+
+        const requestOptions = {
+            method: 'GET',
+            headers: myHeaders,
+        };
+
+
+        return Promise.race([
+            fetch(`${BASE_URL}/community/user`, requestOptions)
+                .then(response => response.json()),
+            new Promise((resolve, reject) => {
+                timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+                //  clearTimeout(timeoutId)
+            }).then(() => {
+                clearTimeout(timeoutId)
+            })
+
+        ])
+    }
+}
 
 
 export const getPublicCommunities = {
@@ -1327,7 +1357,7 @@ export const getPrivateCommunities = {
 }
 export const getCommunityPosts = {
 
-    posts: async (pageParam: string,id:string) => {
+    posts: async (pageParam: string, id: string) => {
 
         let Token = await SecureStore.getItemAsync('Gateway-Token');
 
@@ -1359,7 +1389,69 @@ export const getCommunityPosts = {
 }
 
 
-export const postToCommunity = async ({body}:{body:any}) => {
+export const likeAPost = async (id: string) => {
+
+    let Token = await SecureStore.getItemAsync('Gateway-Token');
+
+    const myHeaders = {
+        'Authorization': `Bearer ${Token}`
+    }
+    let timeoutId: NodeJS.Timeout
+
+
+    const requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+
+    };
+
+
+    return Promise.race([
+        fetch(`${BASE_URL}/post/like/${id}`, requestOptions)
+            .then(response => response.json()),
+        new Promise((resolve, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+            //  clearTimeout(timeoutId)
+        }).then(() => {
+            clearTimeout(timeoutId)
+        })
+
+    ])
+}
+
+
+export const getPostLike = async (id: string) => {
+
+    let Token = await SecureStore.getItemAsync('Gateway-Token');
+
+    const myHeaders = {
+        'Authorization': `Bearer ${Token}`
+    }
+    let timeoutId: NodeJS.Timeout
+
+
+    const requestOptions = {
+        method: 'GET',
+        headers: myHeaders,
+
+    };
+
+
+    return Promise.race([
+        fetch(`${BASE_URL}/post/likes/${id}`, requestOptions)
+            .then(response => response.json()),
+        new Promise((resolve, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+            //  clearTimeout(timeoutId)
+        }).then(() => {
+            clearTimeout(timeoutId)
+        })
+
+    ])
+}
+export const postToCommunity = async ({body}: { body: any }) => {
 
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
@@ -1373,12 +1465,44 @@ export const postToCommunity = async ({body}:{body:any}) => {
     const requestOptions = {
         method: 'POST',
         headers: myHeaders,
-body
+        body
     };
 
 
     return Promise.race([
         fetch(`${BASE_URL}/post/community`, requestOptions)
+            .then(response => response.json()),
+        new Promise((resolve, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+            //  clearTimeout(timeoutId)
+        }).then(() => {
+            clearTimeout(timeoutId)
+        })
+
+    ])
+}
+
+
+export const getCommunityPost = async (id:  string ) => {
+
+    let Token = await SecureStore.getItemAsync('Gateway-Token');
+
+    const myHeaders = {
+        'Authorization': `Bearer ${Token}`
+    }
+    let timeoutId: NodeJS.Timeout
+
+
+    const requestOptions = {
+        method: 'GET',
+        headers: myHeaders,
+
+    };
+
+
+    return Promise.race([
+        fetch(`${BASE_URL}/post/${id}`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -1423,7 +1547,7 @@ export const getCommunityFollowers = async (id: string) => {
 
     ])
 }
-export const getCommunityInfo = async (id?: string|any) => {
+export const getCommunityInfo = async (id?: string | any) => {
 
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
@@ -1454,7 +1578,7 @@ export const getCommunityInfo = async (id?: string|any) => {
 
     ])
 }
-export const unFollowCommunity = async (id?: string|any) => {
+export const unFollowCommunity = async (id?: string | any) => {
 
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
@@ -1578,9 +1702,7 @@ export const getModuleTask = async (id: string) => {
 }
 
 
-
-
-export const submitTask = async ({id,body}: { id: string,body:any }) => {
+export const submitTask = async ({id, body}: { id: string, body: any }) => {
 
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 

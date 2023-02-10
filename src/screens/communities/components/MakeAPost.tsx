@@ -74,7 +74,8 @@ const MakeAPost = ({navigation, route}: RootStackScreenProps<'MakeAPost'>) => {
     const {responseState, responseType, responseMessage} = user
     const backgroundColor = theme == 'light' ? Colors.light.background : Colors.dark.background
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
-    const borderColor = theme == 'light' ? "#DBDBDB" : Colors.dark.borderColor
+
+    const borderColor = theme == 'light' ? Colors.borderColor : '#313131'
     const optionBg = theme == 'light' ? "#fff" : "#141414"
     const [status, setStatus] = React.useState({});
 
@@ -453,7 +454,7 @@ const MakeAPost = ({navigation, route}: RootStackScreenProps<'MakeAPost'>) => {
                     showsVerticalScrollIndicator={false}>
 
                     <TextInput
-
+keyboardAppearance={theme}
                         keyboardType={"default"}
                         touched={touched.title}
                         error={touched.title && errors.title}
@@ -542,7 +543,7 @@ const MakeAPost = ({navigation, route}: RootStackScreenProps<'MakeAPost'>) => {
                             />
                         </View>
                     }
-                    <HorizontalLine color="#EAEAEA"/>
+                    <HorizontalLine color={borderColor}/>
 
                     <View style={styles.mediaPost}>
                         <TouchableOpacity onPress={pickImage} style={styles.mediaButton}>
@@ -555,7 +556,7 @@ const MakeAPost = ({navigation, route}: RootStackScreenProps<'MakeAPost'>) => {
                         <View style={{
                             height: '100%',
                             width: 1,
-                            backgroundColor: "#EAEAEA",
+                            backgroundColor: borderColor,
 
                         }}/>
                         <TouchableOpacity onPress={selectVideo} style={styles.mediaButton}>

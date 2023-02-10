@@ -29,6 +29,9 @@ import {allAvailableBadges, createCommunity, updateCompleteProfile, uploadToClou
 import Toast from "../../components/Toast";
 import {isLessThanTheMB} from "../../helpers";
 import {api_key, upload_preset} from "../../constants";
+import Drawer from "./components/Drawer";
+import {useSharedValue} from "react-native-reanimated";
+import Checkbox from "expo-checkbox";
 
 
 const getFileInfo = async (fileURI: string) => {
@@ -54,7 +57,7 @@ const formSchema = yup.object().shape({
 
 });
 
-const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) => {
+const GroupSettings = ({navigation}: RootStackScreenProps<'GroupSettings'>) => {
 
 
     const queryClient = useQueryClient();
@@ -64,18 +67,22 @@ const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) 
     const {theme} = dataSlice
 
     const {responseState, responseType, responseMessage} = user
+
+    const [checked, setChecked] = useState({});
+
+
     const [image, setImage] = useState('');
     const [imageUrl, setImageUrl] = useState('');
 
     const [communityName, setCommunityName] = useState('');
     const [fCommunityName, setFCommunityName] = useState(false);
 
+    const offset = useSharedValue(0);
+    const [toggleMenu, setToggleMenu] = useState(false);
+
     const [category, setCategory] = useState('');
 
-    const [badgeId, setBadgeId] = useState('');
-
-    const [gateWayUsername, setGateWayUsername] = useState('');
-    const [fGateWayUsername, setFGateWayUsername] = useState(false);
+    const [optionValue, setOptionValue] = useState('');
 
 
     const [memberLimit, setMemberLimit] = useState('');
@@ -93,21 +100,9 @@ const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) 
         sheetRefCategory.current?.close();
     }, []);
 
-
+    const borderColor = theme == 'light' ? Colors.borderColor : '#313131'
     const backgroundColor = theme == 'light' ? Colors.light.background : Colors.dark.background
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
-
-    const sheetRefBadge = useRef<BottomSheet>(null);
-    const handleSnapPressBadge = useCallback((index: number) => {
-        Keyboard.dismiss()
-        sheetRefBadge.current?.snapToIndex(index);
-    }, []);
-    const handleClosePressBadge = useCallback(() => {
-        sheetRefBadge.current?.close();
-    }, []);
-
-
-    const {isLoading: loadingBadges, data} = useQuery(['allAvailableBadges'], allAvailableBadges)
 
 
     const {mutate: addCommunity, isLoading: creating} = useMutation(['createCommunity'], createCommunity,
@@ -115,12 +110,9 @@ const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) 
         {
 
             onSuccess: async (data) => {
-
                 if (data.success) {
 
-                    navigation.navigate('ViewCommunity', {
-                        id: data.data.id
-                    })
+
                     dispatch(setResponse({
                         responseMessage: data.message,
                         responseState: true,
@@ -176,32 +168,27 @@ const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) 
             communityName: '',
             category: '',
             memberLimit: '',
-            gateWayUsername: '',
-            badgeId: '',
-            amountOfBadge: '',
-            NFTAccess: '',
-            about: ''
+
+
+
+
 
 
         },
         onSubmit: (values) => {
-            const {communityName, badgeId, gateWayUsername, memberLimit, category, about} = values
+            const {communityName, memberLimit, category} = values
             if (imageUrl !== '') {
 
 
                 const body = JSON.stringify({
-                    accessNFTBadgeId: badgeId,
-                    accessNFTBadgeAmount: '1',
                     "name": communityName,
-                    "slug": gateWayUsername,
                     memberLimit,
                     "displayPhoto": imageUrl,
-                    "description": about,
                     "visibility": category.toUpperCase(),
 
                 })
 
-                addCommunity(body)
+
 
             } else {
                 dispatch(setResponse({
@@ -327,12 +314,6 @@ const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) 
         handleClosePressCategory()
 
     }
-    const selectBadge = (badge: string, badgeId: string) => {
-        setFieldValue('badgeId', badgeId)
-        setBadgeId(badge)
-        handleClosePressBadge()
-
-    }
 
 
     const renderItem = useCallback(({item}: any) => (
@@ -344,13 +325,10 @@ const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) 
     ), [])
 
 
-    const renderItemBadgeAccess = useCallback(({item}: any) => (
-        <TouchableOpacity style={[styles.selectBox, {}]} onPress={() => selectBadge(item.title, item.id)}>
-            <Text style={[styles.selectBoxText, {
-                color: textColor
-            }]}>{item.title}</Text>
-        </TouchableOpacity>
-    ), [])
+    const menuToggle = () => {
+        offset.value = Math.random()
+        setToggleMenu(!toggleMenu)
+    }
 
 
     useEffect(() => {
@@ -372,7 +350,11 @@ const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) 
     return (
         <>
 
+            {
+                toggleMenu &&
 
+                <Drawer menuToggle={menuToggle} communityId={id}/>
+            }
             <SafeAreaView style={[styles.safeArea, {
                 backgroundColor
             }]}>
@@ -384,7 +366,7 @@ const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) 
                 }]} scrollEnabled
                     showsVerticalScrollIndicator={false}>
 
-                    <NavBar title={"Create Community"}/>
+                    <NavBar title={"Edit Profile"}/>
                     {
                         isLoading &&
                         <ActivityIndicator color={Colors.primaryColor} size={"small"}
@@ -415,6 +397,8 @@ const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) 
                         </TouchableOpacity>
                     </View>
 
+
+                    <HorizontalLine color={borderColor} margin/>
 
                     <View style={styles.authContainer}>
                         <TextInput
@@ -480,107 +464,49 @@ const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) 
                             label="Set Member Limit"/>
 
 
-                        <TextInput
+                    </View>
 
-                            keyboardType={"default"}
-                            touched={touched.gateWayUsername}
-                            error={touched.gateWayUsername && errors.gateWayUsername}
-                            onFocus={() => setFGateWayUsername(true)}
-                            onChangeText={(e) => {
-                                handleChange('gateWayUsername')(e);
-                                setGateWayUsername(e);
-                            }}
-                            onBlur={(e) => {
-                                handleBlur('gateWayUsername')(e);
-                                setFGateWayUsername(false);
-                            }}
-                            defaultValue={gateWayUsername}
-                            focus={fGateWayUsername}
-                            value={values.gateWayUsername}
-                            label="GateWay username"/>
+                    <HorizontalLine color={borderColor} margin/>
+
+                    <View style={styles.titleWrap}>
+                        <Text style={[styles.title, {
+                            color: textColor,
+
+                        }]}>
+                            Commuinty Privacy
+                        </Text>
+
+                        <View style={styles.optionsWrap}>
+                            {
+                                Options.map((({id,title}) =>(
+                                    <View key={id} style={styles.options}>
+
+                                        <Checkbox
+                                            style={{
+                                                width: 15,
+                                                height: 15,
+                                            }}
+                                            disabled={false}
+                                            value={checked[id]}
+                                            onValueChange={(newValue) => { setChecked({...checked, [id]: newValue}) }}
+
+                                            // style={styles.checkbox}
+
+                                            color={optionValue == id ? Colors.primaryColor : undefined}
+                                        />
+
+                                        <Text style={[styles.label, {
+                                            color: textColor,
+                                            marginLeft: 8,
+                                        }]}>
+                                            {title}
+                                        </Text>
+                                    </View>
+                                )))
+                            }
 
 
-                        <SelectInput
-
-                            //placeholder={"Business Size"}
-                            editable={false}
-                            action={() => handleSnapPressBadge(1)}
-                            label='Set Badge required for access'
-                            error={errors.badgeId}
-                            autoCapitalize='none'
-                            keyboardType='default'
-                            returnKeyType='next'
-                            returnKeyLabel='next'
-
-                            onChangeText={(e) => {
-                                handleChange('badgeId')(e);
-
-                            }}
-                            defaultValue={badgeId}
-                            icon='chevron-down'
-
-                            value={values.badgeId}
-                            Btn={true}/>
-
-
-                        {/*  <TextInput
-
-                            keyboardType={"number-pad"}
-                            touched={touched.amountOfBadge}
-                            error={touched.amountOfBadge && errors.amountOfBadge}
-                            onFocus={() => setFAmountOfBadge(true)}
-                            onChangeText={(e) => {
-                                handleChange('amountOfBadge')(e);
-                                setAmountOfBadge(e);
-                            }}
-                            onBlur={(e) => {
-                                handleBlur('amountOfBadge')(e);
-                                setFAmountOfBadge(false);
-                            }}
-                            defaultValue={amountOfBadge}
-                            focus={fAmountOfBadge}
-                            value={values.amountOfBadge}
-                            label="Amount of Badge required"/>
-*/}
-
-                        {/*  <SelectInput
-                            //placeholder={"Business Size"}
-                            editable={false}
-                            action={() => handleSnapPressBadge(1)}
-                            label='Set NFT required for access'
-                            error={errors.NFTAccess}
-                            autoCapitalize='none'
-                            keyboardType='default'
-                            returnKeyType='next'
-                            returnKeyLabel='next'
-
-                            onChangeText={(e) => {
-                                handleChange('NFTAccess')(e);
-
-                            }}
-
-                            icon='chevron-down'
-
-                            value={values.NFTAccess}
-                            Btn={true}/>
-*/}
-
-                        <TextAreaInput
-
-                            keyboardType={"default"}
-                            touched={touched.about}
-                            error={errors.about}
-                            onChangeText={(e) => {
-                                handleChange('about')(e);
-
-                            }}
-                            onBlur={(e) => {
-                                handleBlur('about')(e);
-                            }}
-
-                            value={values.about}
-                            label="About community "/>
-
+                        </View>
                     </View>
 
                     <View style={styles.noteWrap}>
@@ -600,7 +526,7 @@ const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) 
                                 :
 
                                 <Text style={styles.btnText}>
-                                    Continue
+                                    Save changes
 
                                 </Text>
 
@@ -657,50 +583,7 @@ const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) 
 
             </BottomSheet>
 
-            <BottomSheet
 
-                index={0}
-                ref={sheetRefBadge}
-                snapPoints={snapPoints}
-                backdropComponent={renderBackdrop}
-
-                style={{
-                    paddingHorizontal: pixelSizeHorizontal(20)
-                }}
-                backgroundStyle={{
-                    backgroundColor,
-                }}
-                handleIndicatorStyle={[{
-                    backgroundColor: theme == 'light' ? "#121212" : '#cccccc'
-                }, Platform.OS == 'android' && {display: 'none'}]}
-            >
-                <View style={styles.sheetHead}>
-                    {
-                        Platform.OS == 'android' && <View style={{
-                            width: '10%'
-                        }}/>
-                    }
-                    <Text style={[styles.sheetTitle, {
-                        color: textColor
-                    }]}>
-                        Categories
-                    </Text>
-                    {
-                        Platform.OS == 'android' &&
-
-                        <TouchableOpacity activeOpacity={0.8} onPress={() => handleClosePressBadge()}
-                                          style={styles.dismiss}>
-                            <Ionicons name="ios-close" size={24} color="black"/>
-                        </TouchableOpacity>
-                    }
-
-                </View>
-                <BottomSheetFlatList data={data?.data?.result}
-                                     renderItem={renderItemBadgeAccess}
-                                     keyExtractor={keyExtractor}
-                                     showsVerticalScrollIndicator={false}/>
-
-            </BottomSheet>
         </>
     );
 };
@@ -713,6 +596,21 @@ const Category = [
     }, {
         id: '2',
         title: "Private"
+    },
+]
+const Options = [
+    {
+        id: '1',
+        title: "Like contents"
+    }, {
+        id: '2',
+        title: "Comment on contents"
+    }, {
+        id: '3',
+        title: "Share community contents"
+    }, {
+        id: '4',
+        title: "Share community contents"
     },
 ]
 
@@ -744,9 +642,10 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-start',
         width: '100%',
         alignItems: 'center',
-        marginTop: 35,
-        marginBottom: 35,
+        marginTop: 15,
+
     },
+
     selectBox: {
         //marginHorizontal: pixelSizeHorizontal(20),
         width: '100%',
@@ -858,7 +757,32 @@ const styles = StyleSheet.create({
     note: {
         fontSize: fontPixel(14),
         fontFamily: Fonts.quicksandRegular
+    },
+
+    titleWrap: {
+        width: '90%',
+
+    },
+    title: {
+        fontSize: fontPixel(16),
+        fontFamily: Fonts.quickSandBold,
+
+    },
+    label: {
+        fontSize: fontPixel(14),
+        fontFamily: Fonts.quicksandRegular,
+
+    },
+    optionsWrap: {
+        width: '100%',
+    },
+    options: {
+        height: 40,
+        alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'flex-start'
     }
 })
 
-export default CreateCommunity;
+export default GroupSettings;
+

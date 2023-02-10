@@ -6,6 +6,8 @@
 import {BottomTabScreenProps} from '@react-navigation/bottom-tabs';
 import {CompositeScreenProps, NavigatorScreenParams} from '@react-navigation/native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import GroupSettings from "./src/screens/communities/GroupSettings";
+import LeaveCommunity from "./src/screens/communities/LeaveCommunity";
 
 declare global {
     namespace ReactNavigation {
@@ -61,6 +63,13 @@ export type RootStackParamList = {
         adventureId:string
     }
     CommunityInfo:{
+        id:string
+    }
+    GroupSettings:{
+        id:string
+    }
+
+    LeaveCommunity:{
         id:string
     }
     NotFound: undefined;

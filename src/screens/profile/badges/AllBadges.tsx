@@ -40,9 +40,12 @@ const BadgeItem = ({
             borderBottomColor: theme == 'light' ? Colors.borderColor : '#313131',
         }]}>
             <View style={styles.badgeImageWrap}>
-                <Image
-                    source={{uri: item.imageUrl}}
-                    style={styles.badgeImage}/>
+                <View style={styles.badgeImageContainer}>
+                    <Image
+                        source={{uri: item.imageUrl}}
+                        style={styles.badgeImage}/>
+                </View>
+
 
                 <View style={styles.streakScore}>
                     <Text style={styles.streakText}>
@@ -195,6 +198,13 @@ const styles = StyleSheet.create({
         width: widthPixel(85),
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    badgeImageContainer: {
+        height:80,
+        width: 80,
+        alignItems:'center',
+        justifyContent:'center'
+
     },
     badgeImage: {
         height: '100%',

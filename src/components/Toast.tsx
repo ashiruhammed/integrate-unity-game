@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
     mascot:{
         height:50,
         width:40,
-        resizeMode:'center'
+        resizeMode:'contain'
     },
     toastMessage: {
         width: "80%",

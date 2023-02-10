@@ -33,8 +33,15 @@ import Colors from "../../constants/Colors";
 import HorizontalLine from "../../components/HorizontalLine";
 import {StatusBar} from "expo-status-bar";
 import {SearchBar} from "react-native-screens";
-import {useInfiniteQuery, useQuery} from "@tanstack/react-query";
-import {getAllAdventure, getCommunityInfo, getCommunityPosts, getUser} from "../../action/action";
+import {useInfiniteQuery, useMutation, useQuery} from "@tanstack/react-query";
+import {
+    getAllAdventure,
+    getCommunityInfo,
+    getCommunityPosts,
+    getPostLike,
+    getUser,
+    likeAPost
+} from "../../action/action";
 import {updateUserInfo} from "../../app/slices/userSlice";
 import FastImage from "react-native-fast-image";
 import Constants from "expo-constants";
@@ -62,6 +69,7 @@ interface cardProps {
         "content": string,
         "description": string,
         "thumbnailUrl": string,
+        likes:number,
         "createdAt": string,
         "user": {
             "avatar": string,
@@ -70,13 +78,25 @@ interface cardProps {
             "username": null,
         },
     },
+    myId:string,
     viewPost: (id: string) => void
 }
 
 const PostCard = ({theme, item, viewPost}: cardProps) => {
 
+    const {data:likes, refetch} =useQuery(['getPostLikes'],()=>getPostLike(item.id))
+    const { mutate} =useMutation(['likeAPost'],likeAPost)
+
+    const backgroundColorCard = theme == 'light' ? '#fff' : Colors.dark.disable
+    const backgroundColor = theme == 'light' ? "#EDEDED" : Colors.dark.background
+    const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
+    const lightTextColor = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
+    const borderColor = theme == 'light' ? Colors.borderColor : '#313131'
+
     return (
-        <Pressable onPress={() => viewPost(item.id)} style={styles.postCard}>
+        <Pressable onPress={() => viewPost(item.id)} style={[styles.postCard,{
+            backgroundColor: backgroundColorCard
+        }]}>
             <View style={styles.topPostSection}>
                 <View style={styles.userImage}>
                     <Image source={{uri: !item?.user?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'  : item?.user?.avatar}} style={styles.avatar}/>
@@ -85,11 +105,15 @@ const PostCard = ({theme, item, viewPost}: cardProps) => {
                 <View style={styles.details}>
 
                     <View style={styles.nameTag}>
-                        <Text style={styles.postName}>
+                        <Text style={[styles.postName,{
+                            color: textColor
+                        }]}>
                             {item?.user?.fullName}
                         </Text>
 
-                        <View style={styles.tag}>
+                        <View style={[styles.tag,{
+                           // backgroundColor
+                        }]}>
                             <Text style={styles.tagText}>
                                 Admin
                             </Text>
@@ -108,7 +132,9 @@ const PostCard = ({theme, item, viewPost}: cardProps) => {
             <View style={styles.postSnippet}>
 
 
-                <Text style={styles.postHead}>
+                <Text style={[styles.postHead,{
+                    color: textColor
+                }]}>
                     {truncate(item.content, 50)} <Text style={{fontFamily: Fonts.quickSandBold}}>Read more</Text>
                 </Text>
             </View>
@@ -123,9 +149,9 @@ const PostCard = ({theme, item, viewPost}: cardProps) => {
             }
             <View style={styles.actionButtons}>
                 <TouchableOpacity style={styles.actionButton}>
-                    <AntDesign name="like2" size={20} color="#838383"/>
+                    <AntDesign name="like2" size={20} color={"#838383"}/>
                     <Text style={styles.actionButtonText}>
-                        60 likes
+                        {item.likes} likes
                     </Text>
                 </TouchableOpacity>
 
@@ -154,8 +180,11 @@ const ViewCommunity = ({navigation, route}: RootStackScreenProps<'ViewCommunity'
 
     const dataSlice = useAppSelector(state => state.data)
     const {theme} = dataSlice
-    const backgroundColor = theme == 'light' ? "#fff" : Colors.dark.background
+    const backgroundColor = theme == 'light' ? "#EDEDED" : Colors.dark.background
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
+    const lightTextColor = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
+    const borderColor = theme == 'light' ? Colors.borderColor : '#313131'
+
     const goBack = () => {
         navigation.goBack()
     }
@@ -221,7 +250,7 @@ const ViewCommunity = ({navigation, route}: RootStackScreenProps<'ViewCommunity'
 
     const renderItem = useCallback(
         ({item}) => (
-            <PostCard viewPost={viewPost} theme={theme} item={item}/>
+            <PostCard myId={user?.userData?.id} viewPost={viewPost} theme={theme} item={item}/>
         ),
         [],
     );
@@ -251,7 +280,9 @@ const ViewCommunity = ({navigation, route}: RootStackScreenProps<'ViewCommunity'
         setToggleMenu(!toggleMenu)
     }
     return (
-        <SafeAreaView style={styles.safeArea}>
+        <SafeAreaView style={[styles.safeArea,{
+           // backgroundColor
+        }]}>
             <Toast message={responseMessage} state={responseState} type={responseType}/>
             {
                 isLoading &&
@@ -291,11 +322,14 @@ const ViewCommunity = ({navigation, route}: RootStackScreenProps<'ViewCommunity'
                 </MyAnimated.View>
 
                 <MyAnimated.View style={[styles.topBox, {
+                    backgroundColor,
                     height: topScrollHeight,
                     opacity: headerScrollOpacity
                 }]}>
                     <View style={styles.titleWrap}>
-                        <Text style={styles.title}>
+                        <Text style={[styles.title,{
+                            color: textColor
+                        }]}>
                             {data?.data?.name}
                         </Text>
                     </View>
@@ -303,30 +337,36 @@ const ViewCommunity = ({navigation, route}: RootStackScreenProps<'ViewCommunity'
                     <View style={styles.statsBox}>
                         <View style={styles.statsRowWrap}>
                             <View style={styles.statsRow}>
-                                <FontAwesome name="globe" size={14} color="#575757"/>
-                                <Text style={styles.statsText}>
+                                <FontAwesome name="globe" size={14} color={theme == 'light' ? '#575757' : "#fff" }/>
+                                <Text style={[styles.statsText,{
+                                    color: lightTextColor
+                                }]}>
                                     {data?.data?.visibility} group
                                 </Text>
                             </View>
-                            <Entypo name="dot-single" size={20} color="black"/>
+                            <Entypo name="dot-single" size={20} color={textColor}/>
 
                             <View style={styles.statsRow}>
 
-                                <Text style={styles.statsText}>
+                                <Text style={[styles.statsText,{
+                                    color: textColor
+                                }]}>
                                     {data?.data?.totalFollowers} members
                                 </Text>
                             </View>
                         </View>
                         <View style={styles.statsRowWrap}>
                             <View style={styles.statsRow}>
-                                <Ionicons name="person" size={14} color="#575757"/>
-                                <Text style={styles.statsText}>
+                                <Ionicons name="person" size={14} color={theme == 'light' ? '#575757' : "#fff" }/>
+                                <Text style={[styles.statsText,{
+                                    color: textColor
+                                }]}>
                                     4 followed
                                 </Text>
                             </View>
                         </View>
                     </View>
-                    <HorizontalLine color="#EAEAEA"/>
+                    <HorizontalLine color={borderColor}/>
 
                     <View style={styles.writePost}>
                         <View style={styles.userImage}>
@@ -353,20 +393,27 @@ const ViewCommunity = ({navigation, route}: RootStackScreenProps<'ViewCommunity'
                                     />
                             }
                         </View>
-                        <Pressable onPress={makePost} style={styles.postInput}>
-                            <Text style={styles.placeHolder}>
+                        <Pressable onPress={makePost} style={[styles.postInput,{
+                            backgroundColor,
+                            borderColor
+                        }]}>
+                            <Text style={[styles.placeHolder,{
+                                color: textColor
+                            }]}>
                                 Write Something...
                             </Text>
                         </Pressable>
                         {/* <TextInput placeholder={"Write Something..."} style={styles.postInput}/>*/}
                     </View>
 
-                    <HorizontalLine color="#EAEAEA"/>
+                    <HorizontalLine color={borderColor}/>
 
                     <View style={styles.mediaPost}>
                         <TouchableOpacity onPress={makePost} activeOpacity={0.8} style={styles.mediaButton}>
                             <Ionicons name="ios-images" size={18} color={Colors.primaryColor}/>
-                            <Text style={styles.mediaButtonText}>
+                            <Text style={[styles.mediaButtonText,{
+                                color: textColor
+                            }]}>
                                 Photo
                             </Text>
                         </TouchableOpacity>
@@ -374,13 +421,15 @@ const ViewCommunity = ({navigation, route}: RootStackScreenProps<'ViewCommunity'
                         <View style={{
                             height: '100%',
                             width: 1,
-                            backgroundColor: "#EAEAEA",
+                            backgroundColor:borderColor,
 
                         }}/>
                         <TouchableOpacity onPress={makePost} activeOpacity={0.8} style={styles.mediaButton}>
                             <FontAwesome name="video-camera" size={18} color={Colors.success}/>
 
-                            <Text style={styles.mediaButtonText}>
+                            <Text style={[styles.mediaButtonText,{
+                                color: textColor
+                            }]}>
                                 Video
                             </Text>
                         </TouchableOpacity>
@@ -535,13 +584,13 @@ const styles = StyleSheet.create({
         width: '100%',
         flex: 1,
         alignItems: 'center',
-        backgroundColor: "#EDEDED",
+
 
     },
     scrollView: {
         flex: 1,
         //  backgroundColor: Colors.background,
-        backgroundColor: "#EDEDED",
+
         width: '100%',
         alignItems: 'center'
     },
