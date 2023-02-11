@@ -100,6 +100,7 @@ const PostCard = ({theme, item, viewPost}: cardProps) => {
             <View style={styles.topPostSection}>
                 <View style={styles.userImage}>
                     <Image source={{uri: !item?.user?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'  : item?.user?.avatar}} style={styles.avatar}/>
+
                 </View>
 
                 <View style={styles.details}>

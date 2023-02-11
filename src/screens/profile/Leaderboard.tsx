@@ -26,7 +26,9 @@ const Leaderboard = ({}: RootStackScreenProps<'Leaderboard'>) => {
     const backgroundColor = theme == 'light' ? "#fff" : Colors.dark.background
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
     // ref
-//console.log(data?.data?.result)
+
+   // console.log(data?.data?.result)
+
     return (
         <SafeAreaView style={[styles.safeArea,{
             backgroundColor
@@ -163,6 +165,7 @@ const Leaderboard = ({}: RootStackScreenProps<'Leaderboard'>) => {
                                            style={styles.listCard}>
                                 <View style={styles.leftCard}>
                                     <View style={styles.listCardImage}>
+                                        <Image source={{uri: !item?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'  : item?.avatar}} style={styles.avatar}/>
 
                                     </View>
                                     <Text style={[styles.cardText,{
@@ -287,6 +290,12 @@ const styles = StyleSheet.create({
         height: 40,
         borderRadius: 45,
         backgroundColor: Colors.primaryColor
+    },
+    avatar: {
+        borderRadius: 40,
+        resizeMode: 'cover',
+        width: "100%",
+        height: "100%",
     },
     listContainer: {
         marginTop: 30,

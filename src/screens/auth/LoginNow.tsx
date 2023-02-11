@@ -19,8 +19,13 @@ import * as SecureStore from 'expo-secure-store';
 import {getUser, loginUser} from "../../action/action";
 import Toast from "../../components/Toast";
 import * as Haptics from 'expo-haptics';
+import * as WebBrowser from 'expo-web-browser';
+import * as Google from "expo-auth-session/providers/google";
+import * as AppleAuthentication from 'expo-apple-authentication';
+import GoogleIcon from "../../components/GoogleIcon";
 
 
+WebBrowser.maybeCompleteAuthSession();
 
 const formSchema = yup.object().shape({
 
@@ -42,12 +47,62 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
     const [focusFirstName, setFocusFirstName] = useState<boolean>(false);
     const [contentFirstName, setContentFirstName] = useState<string>('');
 
+    const [accessToken, setAccessToken] = useState('');
+
     const [focusEmail, setFocusEmail] = useState<boolean>(false);
     const [contentEmail, setContentEmail] = useState<string>('');
     const [togglePass, setTogglePass] = useState(true)
 
     const [focusPassword, setFocusPassword] = useState<boolean>(false);
     const [contentPassword, setContentPassword] = useState<string>('');
+
+
+    const [_, googleResponse, googleAuth] = Google.useAuthRequest({
+        //redirectUri:"https://auth.expo.io/@bluetanks/Bluetanks",
+        expoClientId:
+            "450276546603-kv794hqhb9orlqla7fv5fk64fljbhhnq.apps.googleusercontent.com",
+        iosClientId:
+            "450276546603-nbqqhqaa8jjb1b5hlvp0bprsripoupke.apps.googleusercontent.com",
+        androidClientId:
+            "450276546603-fe4l1d0uq37bvjra4pdpfph9nvursbua.apps.googleusercontent.com",
+        webClientId: "GOOGLE_GUID.apps.googleusercontent.com",
+        selectAccount: true,
+    });
+
+
+
+
+    useEffect(() => {
+        async function loginUserWithGoogle(access_token: string) {
+            try {
+                let response = await fetch('https://www.googleapis.com/auth/userinfo.profile',{
+                    headers:{ Authorizatiion: `Bearer ${access_token}`}
+                })
+
+             return await response.json()
+
+                //   const user = await googleLoginOrRegister(access_token);
+
+            } catch (error) {
+
+            } finally {
+
+            }
+        }
+
+        if (googleResponse?.type === "success") {
+            const {access_token,id_token}  = googleResponse.params;
+                console.log(access_token)
+
+           /*     console.log(id_token)*/
+           // setAccessToken(access_token)
+            loginUserWithGoogle(access_token).then(res =>{
+             console.log(res)
+            });
+        }
+    }, [googleResponse]);
+
+
 
     const signupNow = () => {
         navigation.navigate('RegisterScreen')
@@ -292,6 +347,47 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                         }
                     </RectButton>
 
+                    <TouchableOpacity   onPress={async () => await googleAuth()} activeOpacity={0.6} style={[styles.buttonSignUp,{
+                        borderWidth:1,
+                        borderColor:Colors.light.text,
+                        marginVertical:pixelSizeVertical(10),
+                    }]}>
+
+                        <GoogleIcon/>
+                        <Text style={[ {
+                            fontFamily:Fonts.quicksandMedium,
+                            fontSize:fontPixel(14),
+                            color: Colors.light.text,
+                        }]}>
+                            Sign Up with Google
+                        </Text>
+                    </TouchableOpacity>
+
+                    <AppleAuthentication.AppleAuthenticationButton
+                        buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+                        buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+                        cornerRadius={5}
+                        style={styles.buttonSignUp}
+                        onPress={async () => {
+                            try {
+                                const credential = await AppleAuthentication.signInAsync({
+                                    requestedScopes: [
+                                        AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+                                        AppleAuthentication.AppleAuthenticationScope.EMAIL,
+                                    ],
+                                });
+                                 //  console.log(credential)
+                                // signed in
+                            } catch (e) {
+                                if (e.code === 'ERR_CANCELED') {
+                                    // handle that the user canceled the sign-in flow
+                                } else {
+                                    // handle other errors
+                                }
+                            }
+                        }}
+                    />
+
                     <TouchableOpacity style={styles.signUpBtn}>
 
                         <Text onPress={signupNow} style={styles.alreadyHaveAcc}>
@@ -439,7 +535,16 @@ position:'relative',
         fontSize: fontPixel(16),
         color: "#fff",
         fontFamily: Fonts.quickSandBold
-    }
+    },
+    buttonSignUp: {
+        flexDirection:'row',
+        alignItems: 'center',
+        justifyContent: 'space-evenly',
+        borderRadius: 10,
+        width: widthPixel(292),
+
+        height: heightPixel(56)
+    },
 })
 
 export default LoginNow;

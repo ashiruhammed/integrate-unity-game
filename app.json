@@ -21,6 +21,7 @@
     "assetBundlePatterns": [
       "**/*"
     ],
+    "plugins": ["expo-apple-authentication"],
     "ios": {
       "supportsTablet": true,
       "icon": "./src/assets/images/app-icon.png",
