@@ -3,9 +3,9 @@ import React, {useEffect} from 'react';
 import {Text, View, StyleSheet, Platform, ActivityIndicator} from 'react-native';
 import Toast from "../../components/Toast";
 import {SafeAreaView} from "react-native-safe-area-context";
-import {setResponse, unSetResponse} from "../../app/slices/userSlice";
+import {setResponse, unSetResponse, updateUserInfo} from "../../app/slices/userSlice";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
-import {useMutation, useQueryClient} from "@tanstack/react-query";
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import Colors from "../../constants/Colors";
 import NavBar from "../../components/layout/NavBar";
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
@@ -16,7 +16,7 @@ import PinInput from "../../components/inputs/PinInput";
 import {Fonts} from "../../constants/Fonts";
 import {RootStackScreenProps} from "../../../types";
 import {RectButton} from "../../components/RectButton";
-import {requestPhoneVerification, verifyPhone} from "../../action/action";
+import {getUser, requestPhoneVerification, verifyPhone} from "../../action/action";
 
 
 const formSchema = yup.object().shape({
@@ -40,10 +40,21 @@ const ConfirmPhonenumber = ({navigation}: RootStackScreenProps<'ConfirmPhonenumb
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
 
 
+    const {isLoading: loadingUser, refetch: fetchUser} = useQuery(['user-data'], getUser, {
+        onSuccess: (data) => {
+            if (data.success) {
+
+                dispatch(updateUserInfo(data.data))
+
+            }
+        },
+    })
+
     const {isLoading, mutate} = useMutation(['verifyPhone'], verifyPhone, {
         onSuccess: (data) => {
 
                 if (data.success) {
+                    fetchUser()
                     dispatch(setResponse({
                         responseMessage: data.message,
                         responseState: true,

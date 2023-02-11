@@ -1,14 +1,15 @@
 import {StatusBar} from 'expo-status-bar';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
-
+import * as SecureStore from 'expo-secure-store';
 import useCachedResources from './src/hooks/useCachedResources';
 import useColorScheme from './src/hooks/useColorScheme';
 import Navigation from './src/navigation';
 import {enableScreens} from "react-native-screens";
 import 'react-native-gesture-handler';
 import OnBoarding from "./src/screens/onboarding/OnBoarding";
-import {useEffect, useState} from "react";
-
+import {useEffect, useRef, useState} from "react";
+import * as Application from 'expo-application';
+import {PermissionsAndroid} from 'react-native'
 import {PersistQueryClientProvider} from "@tanstack/react-query-persist-client";
 import {
     QueryClient,
@@ -20,8 +21,27 @@ import {persistor, store} from "./src/app/store";
 import {PersistGate} from "redux-persist/integration/react";
 import {PortalProvider} from "@gorhom/portal";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import messaging from '@react-native-firebase/messaging';
+import {Platform} from "react-native";
+import {useNavigation} from "@react-navigation/native";
+import * as Notifications from 'expo-notifications';
+import * as Device from 'expo-device';
+import {
+    getFcmToken,
+    getFcmTokenFromLocalStorage,
+    requestUserPermission,
+    notificationListener,
+} from './notification';
+import {localStorage} from './storage';
 enableScreens()
+
+Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: false,
+        shouldSetBadge: false,
+    }),
+});
 
 
 const persister = createSyncStoragePersister({
@@ -53,7 +73,73 @@ const queryClient = new QueryClient({
 export default function App() {
     const isLoadingComplete = useCachedResources();
     const colorScheme = useColorScheme();
+
+    const fcmToken = SecureStore.getItemAsync('fcmtoken');
+    const [generatedToken, setGeneratedToken] = useState();
+    const isDarkMode = useColorScheme() === 'dark';
+ //  const navigation = useNavigation();
     const [firstLaunch, setFirstLaunch] = useState(true);
+    const [loading, setLoading] = useState(true);
+    const [initialRoute, setInitialRoute] = useState('Home');
+    const [responseMessage, setResponseMessage] = useState('');
+    const [responseState, setResponseState] = useState(false);
+
+    const [expoPushToken, setExpoPushToken] = useState('');
+    const [notification, setNotification] = useState(false);
+
+   // const notificationListener = useRef();
+    const responseListener = useRef();
+
+
+
+
+    useEffect(() => {
+        //console.log('storage', fcmToken, 'newly generated', generatedToken);
+    }, [fcmToken, generatedToken]);
+
+    useEffect(() => {
+        const fetchToken = async () => {
+            const token = await getFcmToken();
+            if (token) {
+                setGeneratedToken(token);
+            }
+        };
+        const fetchTokenByLocal = async () => {
+            await getFcmTokenFromLocalStorage();
+        };
+        void fetchToken();
+        void fetchTokenByLocal();
+        void requestUserPermission();
+        void notificationListener();
+    }, []);
+
+
+   /* useEffect(() => {
+        registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
+
+        notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+            setNotification(notification);
+        });
+
+        responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+            console.log(response);
+        });
+
+        return () => {
+            Notifications.removeNotificationSubscription(notificationListener.current);
+            Notifications.removeNotificationSubscription(responseListener.current);
+        };
+    }, []);
+*/
+
+
+
+
+
+
+
+
+
 
     useEffect(() => {
         AsyncStorage.getItem("gateway_user_first_time")
@@ -116,4 +202,37 @@ export default function App() {
             </SafeAreaProvider>
         );
     }
+}
+
+
+
+async function registerForPushNotificationsAsync() {
+    let token;
+    if (Device.isDevice) {
+        const { status: existingStatus } = await Notifications.getPermissionsAsync();
+        let finalStatus = existingStatus;
+        if (existingStatus !== 'granted') {
+            const { status } = await Notifications.requestPermissionsAsync();
+            finalStatus = status;
+        }
+        if (finalStatus !== 'granted') {
+            alert('Failed to get push token for push notification!');
+            return;
+        }
+        token = (await Notifications.getExpoPushTokenAsync()).data;
+        console.log(token);
+    } else {
+        alert('Must use physical device for Push Notifications');
+    }
+
+    if (Platform.OS === 'android') {
+        Notifications.setNotificationChannelAsync('default', {
+            name: 'default',
+            importance: Notifications.AndroidImportance.MAX,
+            vibrationPattern: [0, 250, 250, 250],
+            lightColor: '#FF231F7C',
+        });
+    }
+
+    return token;
 }

@@ -2,13 +2,19 @@
   "expo": {
     "name": "Gateway",
     "slug": "gateway-mobile-app",
-    "version": "1.9.3",
+    "version": "1.9.4",
     "owner": "gateway-app",
     "orientation": "portrait",
     "jsEngine": "hermes",
     "icon": "./src/assets/images/app-icon.png",
     "scheme": "gateway",
     "userInterfaceStyle": "automatic",
+    "notification": {
+      "iosDisplayInForeground": true,
+      "androidMode": "collapse",
+      "androidCollapsedTitle": "Gateway Block-Edu",
+      "icon": "./src/assets/images/app-icon.png"
+    },
     "splash": {
       "image": "./src/assets/images/splash.png",
       "resizeMode": "contain",
@@ -28,7 +34,7 @@
       "userInterfaceStyle": "light",
       "googleServicesFile": "./GoogleService-Info.plist",
       "bundleIdentifier": "com.gatewaymobile.app",
-      "buildNumber": "13",
+      "buildNumber": "14",
       "usesIcloudStorage": true,
       "infoPlist": {
         "remote-notification": "Allow user to receive remote notification",
@@ -40,7 +46,7 @@
       }
     },
     "android": {
-      "versionCode": 13,
+      "versionCode": 14,
       "useNextNotificationsApi": true,
       "userInterfaceStyle": "light",
       "package": "com.gatewaymobile.app",

@@ -78,8 +78,7 @@ const VideoScreen = ({navigation, route}: RootStackScreenProps<'VideoScreen'>) =
         isLoading: loadingMission
     } = useMutation(['getNextMission'], getNextAdventure, {
         onSuccess: (data) => {
-             console.log("NEXT MISSION")
-             console.log(data)
+
 
             if (data.success) {
                 getQuiz()

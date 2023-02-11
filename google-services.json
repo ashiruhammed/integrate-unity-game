@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "450276546603-diavufana6j53frun0dghv5mrvd5m9jq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.gatewaymobile.app",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
           "client_id": "450276546603-gf61lqab42p6d8n792d677cjuiu7eod6.apps.googleusercontent.com",
           "client_type": 3
         }

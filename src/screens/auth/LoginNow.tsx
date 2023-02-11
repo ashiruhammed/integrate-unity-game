@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import * as yup from 'yup';
-import {Text, View, StyleSheet, Dimensions, TouchableOpacity, Image, ActivityIndicator} from 'react-native';
+import {Text, View, StyleSheet, Dimensions, TouchableOpacity, Image, ActivityIndicator, Platform} from 'react-native';
 import {AuthStackScreenProps} from "../../../types";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
@@ -362,6 +362,8 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                             Sign Up with Google
                         </Text>
                     </TouchableOpacity>
+                    {
+                        Platform.OS == 'ios' &&
 
                     <AppleAuthentication.AppleAuthenticationButton
                         buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
@@ -387,7 +389,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                             }
                         }}
                     />
-
+                    }
                     <TouchableOpacity style={styles.signUpBtn}>
 
                         <Text onPress={signupNow} style={styles.alreadyHaveAcc}>

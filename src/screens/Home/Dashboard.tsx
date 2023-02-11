@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 
 import {
     Text,
@@ -9,7 +9,7 @@ import {
     ImageBackground,
     TouchableOpacity,
     Image,
-    ActivityIndicator, Pressable
+    ActivityIndicator, Pressable, RefreshControl
 } from 'react-native';
 import {SafeAreaView} from "react-native-safe-area-context";
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
@@ -28,6 +28,7 @@ import FastImage from 'react-native-fast-image';
 import Constants from "expo-constants";
 import {setAdventure} from "../../app/slices/dataSlice";
 import {RootTabScreenProps} from "../../../types";
+import {useRefreshOnFocus} from "../../helpers";
 
 
 
@@ -79,6 +80,7 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
     const dataSlice = useAppSelector(state => state.data)
     const {theme} = dataSlice
 
+    const [refreshing, setRefreshing] = useState(false);
 
     const backgroundColor = theme == 'light' ? "#FEF1F1" : "#141414"
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
@@ -153,6 +155,13 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
         navigation.navigate('AdventureHome')
 
     }
+    const refresh = () => {
+        setRefreshing(true)
+        refetch()
+
+        wait(2000).then(() => setRefreshing(false));
+    }
+
 
     const verifyPhoneNumber = () => {
         const body = JSON.stringify({
@@ -163,11 +172,15 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
 
     }
 
+    useRefreshOnFocus(fetchUser)
+
     return (
         <SafeAreaView style={[styles.safeArea, {
             backgroundColor
         }]}>
             <ScrollView
+                refreshControl={<RefreshControl tintColor={Colors.primaryColor}
+                                                refreshing={refreshing} onRefresh={refresh}/>}
                 style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {
                 backgroundColor
             }]} scrollEnabled
