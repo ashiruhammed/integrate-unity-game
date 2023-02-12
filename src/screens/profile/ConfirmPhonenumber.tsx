@@ -55,6 +55,7 @@ const ConfirmPhonenumber = ({navigation}: RootStackScreenProps<'ConfirmPhonenumb
 
                 if (data.success) {
                     fetchUser()
+
                     dispatch(setResponse({
                         responseMessage: data.message,
                         responseState: true,

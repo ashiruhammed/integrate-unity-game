@@ -50,9 +50,8 @@ const AdventureItem = ({item, action, setAdventure}: itemProps) => {
         }} style={styles.pressCard}>
             {
 
-                    isRunningInExpoGo &&
-                <ImageBackground  resizeMode={"cover"} source={{uri: item.imageUrl}} style={styles.adventureCard}>
-
+                isRunningInExpoGo &&
+                <ImageBackground resizeMode={"cover"} source={{uri: item.imageUrl}} style={styles.adventureCard}>
 
 
                     <View style={styles.backDrop}/>
@@ -72,7 +71,7 @@ const AdventureItem = ({item, action, setAdventure}: itemProps) => {
                         <View style={styles.cardBottomLeft}>
 
                             <Text style={[styles.cardBottomLeftText, {}]}>
-                                {truncate(item.name,25)}
+                                {truncate(item.name, 25)}
                             </Text>
                             <Text style={styles.cardTextSmall}>
                                 {item.enrollments} missions
@@ -96,45 +95,48 @@ const AdventureItem = ({item, action, setAdventure}: itemProps) => {
             {
                 !isRunningInExpoGo &&
 
-            <FastImage  resizeMode={FastImage.resizeMode.cover} source={{uri: item.imageUrl, cache: FastImage.cacheControl.web, priority: FastImage.priority.normal,}} style={styles.adventureCard}>
+                <FastImage resizeMode={FastImage.resizeMode.cover} source={{
+                    uri: item.imageUrl,
+                    cache: FastImage.cacheControl.web,
+                    priority: FastImage.priority.normal,
+                }} style={styles.adventureCard}>
 
 
+                    <View style={styles.backDrop}/>
+                    <View style={styles.cardTop}>
+                        <View style={styles.cardTopLeft}>
 
-                <View style={styles.backDrop}/>
-                <View style={styles.cardTop}>
-                    <View style={styles.cardTopLeft}>
-
+                        </View>
+                        <View style={styles.cardTopLeft}>
+                            <FontAwesome5 name="gift" size={16} color={Colors.success}/>
+                            <Text style={styles.cardTopLeftText}>
+                                {item.rewardPoint} Reward Points
+                            </Text>
+                        </View>
                     </View>
-                    <View style={styles.cardTopLeft}>
-                        <FontAwesome5 name="gift" size={16} color={Colors.success}/>
-                        <Text style={styles.cardTopLeftText}>
-                            {item.rewardPoint} Reward Points
-                        </Text>
+
+                    <View style={styles.cardBottom}>
+                        <View style={styles.cardBottomLeft}>
+
+                            <Text style={[styles.cardBottomLeftText, {}]}>
+                                {truncate(item.name, 25)}
+                            </Text>
+                            <Text style={styles.cardTextSmall}>
+                                {item.enrollments} missions
+                            </Text>
+                        </View>
+                        <TouchableOpacity activeOpacity={0.8} onPress={() => {
+                            setAdventure(item.id, item.name)
+                            action(true)
+
+                        }} style={styles.startButton}>
+                            <Text style={styles.btnText}>
+                                Start Adventure
+                            </Text>
+                        </TouchableOpacity>
                     </View>
-                </View>
 
-                <View style={styles.cardBottom}>
-                    <View style={styles.cardBottomLeft}>
-
-                        <Text style={[styles.cardBottomLeftText, {}]}>
-                            {truncate(item.name,25)}
-                        </Text>
-                        <Text style={styles.cardTextSmall}>
-                            {item.enrollments} missions
-                        </Text>
-                    </View>
-                    <TouchableOpacity activeOpacity={0.8} onPress={() => {
-                        setAdventure(item.id, item.name)
-                        action(true)
-
-                    }} style={styles.startButton}>
-                        <Text style={styles.btnText}>
-                            Start Adventure
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-
-            </FastImage>
+                </FastImage>
 
             }
         </Pressable>
@@ -155,7 +157,7 @@ const AllAdventure = ({action}: props) => {
         isLoading,
         data,
         hasNextPage,
-        fetchNextPage: fetchNextPageWallet,
+        fetchNextPage,
         isFetchingNextPage,
         refetch,
 
@@ -177,7 +179,7 @@ const AllAdventure = ({action}: props) => {
 
     const loadMore = () => {
         if (hasNextPage) {
-            fetchNextPageWallet();
+            fetchNextPage();
         }
     };
     const selectAdventure = (id: string, name: string, modules: []) => {
@@ -190,6 +192,7 @@ const AllAdventure = ({action}: props) => {
         <AdventureItem setAdventure={selectAdventure} action={action} item={item}/>
     ), [])
     useRefreshOnFocus(refetch)
+    //  const { ref, inView } = useInView()
 
     return (
         <View style={styles.Body}>
@@ -222,6 +225,18 @@ const AllAdventure = ({action}: props) => {
                         <ActivityIndicator size="small" color={Colors.primaryColor}/> : null}
                 />
             }
+
+            <Button
+
+                onPress={() => fetchNextPage()}
+                disabled={!hasNextPage || isFetchingNextPage}
+                title={isFetchingNextPage
+                    ? 'Loading more...'
+                    : hasNextPage
+                        ? 'Load Newer'
+                        : 'Nothing more to load'}/>
+
+
         </View>
     );
 };
@@ -299,7 +314,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     cardBottomLeft: {
-width:'55%',
+        width: '55%',
         height: 50,
         alignItems: 'flex-start',
         justifyContent: 'space-evenly',

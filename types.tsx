@@ -8,6 +8,7 @@ import {CompositeScreenProps, NavigatorScreenParams} from '@react-navigation/nat
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import GroupSettings from "./src/screens/communities/GroupSettings";
 import LeaveCommunity from "./src/screens/communities/LeaveCommunity";
+import CommentOnPost from "./src/screens/communities/components/CommentOnPost";
 
 declare global {
     namespace ReactNavigation {
@@ -70,6 +71,9 @@ export type RootStackParamList = {
     }
 
     LeaveCommunity:{
+        id:string
+    }
+    CommentOnPost:{
         id:string
     }
     NotFound: undefined;

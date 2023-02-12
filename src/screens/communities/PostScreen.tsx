@@ -1,9 +1,19 @@
-import React, {useState} from 'react';
+import React, {useCallback, useState} from 'react';
 
-import {Text, View, StyleSheet, TouchableOpacity, Image, Dimensions, ActivityIndicator} from 'react-native';
+import {
+    Text,
+    View,
+    StyleSheet,
+    TouchableOpacity,
+    Image,
+    Dimensions,
+    ActivityIndicator,
+    RefreshControl,
+    ScrollView, TextInput as RNTextInput, Pressable, Animated as MyAnimated, FlatList
+} from 'react-native';
 import {SafeAreaView} from "react-native-safe-area-context";
 import {RootStackScreenProps} from "../../../types";
-import {AntDesign, Ionicons, Octicons, SimpleLineIcons} from "@expo/vector-icons";
+import {AntDesign, Ionicons, MaterialIcons, Octicons, SimpleLineIcons} from "@expo/vector-icons";
 import Animated, {
     Easing,
     FadeInRight,
@@ -19,19 +29,159 @@ import Colors from "../../constants/Colors";
 import {StatusBar} from "expo-status-bar";
 import HorizontalLine from "../../components/HorizontalLine";
 import Drawer from "./components/Drawer";
-import {useMutation, useQuery} from "@tanstack/react-query";
-import {getCommunityPost, likeAPost} from "../../action/action";
+import {useInfiniteQuery, useMutation, useQuery} from "@tanstack/react-query";
+import {getCommunityPost, getCommunityPosts, getPostComments, getPostLike, likeAPost} from "../../action/action";
 import dayjs from "dayjs";
-import {useRefreshOnFocus} from "../../helpers";
+import {truncate, useRefreshOnFocus} from "../../helpers";
+import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
+import Constants from "expo-constants";
+import FastImage from "react-native-fast-image";
+import {FlashList} from "@shopify/flash-list";
 
 
+const wait = (timeout: number) => {
+    return new Promise((resolve) => {
+        setTimeout(resolve, timeout);
+    });
+};
 
+
+const isRunningInExpoGo = Constants.appOwnership === 'expo'
+
+interface cardProps {
+    theme: 'light' | 'dark',
+    item: {
+        "id": string,
+        "content": string,
+        "imageUrl": "",
+        "userId": string,
+        "postId": string,
+        "commentLikesCount": 0,
+        "commentDislikesCount": 0,
+        "commentRepliesCount": 0,
+        "isEdited": true,
+        "parentId": null,
+        "isDeleted": false,
+        "createdAt": string,
+        "updatedAt": string,
+        "deletedAt": null,
+        "user": {
+            "username": null,
+            "avatar": string,
+            "fullName": string,
+            "id": string
+        },
+        "liked": false
+    },
+
+
+}
+
+const CommentCard = ({theme, item}: cardProps) => {
+
+    //  const {data: likes, refetch} = useQuery(['getPostLikes'], () => getPostLike(item.id))
+//    const {mutate} = useMutation(['likeAPost'], likeAPost)
+
+    const backgroundColorCard = theme == 'light' ? '#fff' : Colors.dark.disable
+    const backgroundColor = theme == 'light' ? "#EDEDED" : Colors.dark.background
+    const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
+    const lightTextColor = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
+    const borderColor = theme == 'light' ? Colors.borderColor : '#313131'
+
+    return (
+        <Pressable style={[styles.postCard, {
+            backgroundColor: backgroundColorCard
+        }]}>
+            <View style={styles.topPostSection}>
+                <View style={styles.userImage}>
+
+                    {/* {
+                        isRunningInExpoGo ?
+                            <Image
+
+                                source={{uri:!item?.user?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : item?.user?.avatar}}
+                                style={styles.avatar}
+                            />
+                            :
+                            <FastImage
+                                resizeMode={FastImage.resizeMode.cover}
+                                source={{
+                                    uri: !item?.user?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : item?.user?.avatar,
+                                    cache: FastImage.cacheControl.web,
+                                    priority: FastImage.priority.normal,
+                                }}
+
+                                style={styles.avatar}
+                            />
+                    }*/}
+                </View>
+
+                <View style={styles.details}>
+
+                    <View style={styles.nameTag}>
+                        <Text style={[styles.postName, {
+                            color: textColor
+                        }]}>
+                            Orji ace
+                        </Text>
+
+                        <View style={[styles.tag, {
+                            // backgroundColor
+                        }]}>
+                            <Text style={styles.tagText}>
+                                Admin
+                            </Text>
+                        </View>
+
+                    </View>
+                    <Text style={styles.postDate}>
+                        2Min
+                        {/*{dayjs(item.createdAt).format('DD MMM YYYY')}*/}
+                    </Text>
+                </View>
+
+
+            </View>
+
+            <View style={[styles.postSnippet, {}]}>
+
+
+                <Text style={[styles.postHead, {
+                    color: textColor
+                }]}>
+                    {/*     {truncate(item.content.trim(), 80)}*/}
+                    Lorem ipsum dolor sit amet consectetur. Ultricies
+                    amet fermentum
+                </Text>
+            </View>
+
+            <View style={styles.actionButtons}>
+                <TouchableOpacity style={styles.actionButton}>
+                    <MaterialIcons name="reply" size={20} color={"#838383"}/>
+                    <Text style={styles.actionButtonText}>
+                        Reply
+                    </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.actionButton}>
+
+                    <AntDesign name="like2" size={20} color={"#838383"}/>
+                    <Text style={styles.actionButtonText}>
+                        likes
+                    </Text>
+                </TouchableOpacity>
+            </View>
+        </Pressable>
+    )
+}
 const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => {
 
-const {postId,communityId} = route.params
+    const {postId, communityId} = route.params
     const offset = useSharedValue(0);
     const [toggleMenu, setToggleMenu] = useState(false);
 
+    const [refreshing, setRefreshing] = useState(false);
+    const [content, setContent] = useState('');
     const dataSlice = useAppSelector(state => state.data)
     const {theme} = dataSlice
     const backgroundColor = theme == 'light' ? "#fff" : Colors.dark.background
@@ -45,21 +195,178 @@ const {postId,communityId} = route.params
     const goBack = () => {
         navigation.goBack()
     }
-    const {data,isLoading,refetch} =  useQuery(['getCommunityPost'],()=>getCommunityPost(postId))
+    const {data, isLoading, refetch} = useQuery(['getCommunityPost'], () => getCommunityPost(postId))
 
-
-    const { mutate} =useMutation(['likeAPost'],likeAPost,{
-        onSuccess:(data)=>{
-           refetch()
+    const {mutate} = useMutation(['likeAPost'], likeAPost, {
+        onSuccess: (data) => {
+            refetch()
         }
     })
 
+
+    const {
+        isLoading: loadingComments,
+        data: comments,
+        hasNextPage,
+        fetchNextPage: fetchNextPageComment,
+        isFetchingNextPage,
+        refetch: fetchComments,
+
+        isRefetching
+    } = useInfiniteQuery([`PostComments`], ({pageParam = 1}) => getPostComments.comments(pageParam, postId),
+        {
+            networkMode: 'online',
+            getNextPageParam: lastPage => {
+                if (lastPage.next !== null) {
+                    return lastPage.next;
+                }
+
+                return lastPage;
+            },
+            getPreviousPageParam: (firstPage, allPages) => firstPage.prevCursor,
+        })
+
+
+    //console.log(comments?.pages[0]?.data?.result)
+    const renderItem = useCallback(
+        ({item}) => (
+
+                <CommentCard theme={theme} item={item}/>
+        ),
+        [],
+    );
+
+    const renderHeaderItem = useCallback(
+        ({}) => (
+
+            <View style={[styles.postCard, {backgroundColor: backgroundColorCard}]}>
+                <View style={styles.topPostSection}>
+                    <View style={styles.userImage}>
+
+                        <Image
+                            source={{uri: !data?.data?.user?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : data?.data?.user?.avatar}}
+                            style={styles.avatar}/>
+
+
+                    </View>
+
+                    <View style={styles.details}>
+
+                        <View style={styles.nameTag}>
+                            <Text style={[styles.postName, {
+                                color: textColor
+                            }]}>
+                                {data?.data?.user?.fullName}
+                            </Text>
+
+                            <View style={styles.tag}>
+                                <Text style={styles.tagText}>
+                                    Admin
+                                </Text>
+                            </View>
+
+                        </View>
+                        <Text style={styles.postDate}>
+
+                            {dayjs(data?.user?.createdAt).format('DD MMM YYYY')}
+                        </Text>
+                    </View>
+
+
+                </View>
+
+                <View style={[styles.postSnippet, {
+                    marginBottom: data?.data?.thumbnailUrl !== '' ? 10 : 0
+                }]}>
+
+
+                    <Text style={[styles.postHead, {
+                        color: textColor
+                    }]}>
+                        {data?.data?.content}
+                    </Text>
+                </View>
+                {
+                    data?.data?.thumbnailUrl &&
+
+                    <View style={styles.postImageWrap}>
+                        <Image
+                            source={{uri: data?.data?.thumbnailUrl}}
+                            style={styles.postImage}
+                        />
+                    </View>
+                }
+
+
+                <View style={styles.actionButtons}>
+                    <TouchableOpacity activeOpacity={0.8} onPress={() => mutate(postId)}
+                                      style={styles.actionButton}>
+                        <AntDesign name="like2" size={20}
+                                   color={data?.data?.liked ? Colors.primaryColor : "#838383"}/>
+                        <Text style={styles.actionButtonText}>
+                            {data?.data?.likes} likes
+                        </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.actionButton}>
+
+                        <Octicons name="comment" size={20} color="#838383"/>
+                        <Text style={styles.actionButtonText}>
+                            {data?.data?.commentCount} comments
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        ),
+        [],
+    );  const renderFooterItem = useCallback(
+        ({}) => (
+            <View style={styles.replyInputContainer}>
+                <View  style={[styles.inputContainer, {}]}>
+
+                    <RNTextInput
+                        multiline
+
+                        onChangeText={(e) => {
+                            setContent(e)
+                        }}
+
+                        value={content}
+
+                        placeholder={'Write something...'}
+                        placeholderTextColor="#6D6D6D"
+                        style={[styles.input, {
+                            padding: 10,
+
+                            color: textColor,
+
+                        }]}/>
+                    <Text>
+                        Post
+                    </Text>
+                </View>
+            </View>
+
+        ),
+        [content],
+    );
+    const keyExtractor = useCallback((item: { id: any; }) => item.id, [],);
 
     const menuToggle = () => {
         offset.value = Math.random()
         setToggleMenu(!toggleMenu)
     }
+    const refresh = () => {
+        setRefreshing(true)
+        refetch()
 
+        wait(2000).then(() => setRefreshing(false));
+    }
+
+    const _scrollToInput = (reactNode: any) => {
+        // Add a 'scroll' ref to your ScrollView
+        // scroll.props.scrollToFocusedInput(reactNode)
+    }
     useRefreshOnFocus(refetch)
 
     return (
@@ -77,7 +384,7 @@ const {postId,communityId} = route.params
                     <TouchableOpacity onPress={goBack} style={styles.goBack} activeOpacity={0.8}>
                         <AntDesign name="arrowleft" size={24} color={textColor}/>
 
-                        <Text style={[styles.screenTitle,{
+                        <Text style={[styles.screenTitle, {
                             color: textColor
                         }]}>
                             Wave community
@@ -90,7 +397,17 @@ const {postId,communityId} = route.params
                         <SimpleLineIcons name="menu" size={24} color={textColor}/>
                     </TouchableOpacity>
                 </View>
+                {/*   <KeyboardAwareScrollView
+                    automaticallyAdjustKeyboardInsets={true}
+                    enableAutomaticScroll
 
+                    refreshControl={<RefreshControl tintColor={Colors.primaryColor}
+                                                    refreshing={refreshing} onRefresh={refresh}/>}
+                    style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {
+
+                    backgroundColor
+                }]} scrollEnabled
+                    showsVerticalScrollIndicator={false}>*/}
                 {
                     isLoading &&
 
@@ -100,81 +417,61 @@ const {postId,communityId} = route.params
                                            zIndex: 2,
                                        }]}/>
                 }
-                <View style={[styles.postCard,{
-                    backgroundColor: backgroundColorCard
-                }]}>
-                    <View style={styles.topPostSection}>
-                        <View style={styles.userImage}>
 
-                                <Image source={{uri: !data?.user?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'  : data?.user?.avatar}} style={styles.avatar}/>
-
-
-                        </View>
-
-                        <View style={styles.details}>
-
-                            <View style={styles.nameTag}>
-                                <Text style={[styles.postName,{
-                                    color: textColor
-                                }]}>
-                                    {data?.data?.user?.fullName}
-                                </Text>
-
-                                <View style={styles.tag}>
-                                    <Text style={styles.tagText}>
-                                        Admin
-                                    </Text>
-                                </View>
-
-                            </View>
-                            <Text style={styles.postDate}>
-
-                                {dayjs(data?.user?.createdAt).format('DD MMM YYYY')}
-                            </Text>
-                        </View>
-
-
-                    </View>
-
-                    <View style={styles.postSnippet}>
-
-
-                        <Text style={[styles.postHead,{
-                            color: textColor
-                        }]}>
-                            {data?.data?.content}
-                        </Text>
-                    </View>
-                    {
-                        data?.data?.thumbnailUrl &&
-
-                    <View style={styles.postImageWrap}>
-                        <Image
-                            source={{uri:  data?.data?.thumbnailUrl}}
-                            style={styles.postImage}
-                        />
-                    </View>
-                    }
-
-
-                    <View style={styles.actionButtons}>
-                        <TouchableOpacity activeOpacity={0.8} onPress={() => mutate(postId)} style={styles.actionButton}>
-                            <AntDesign name="like2" size={20} color={data?.data?.liked ? Colors.primaryColor : "#838383"}/>
-                            <Text style={styles.actionButtonText}>
-                                {data?.data?.likes} likes
-                            </Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={styles.actionButton}>
-
-                            <Octicons name="comment" size={20} color="#838383"/>
-                            <Text style={styles.actionButtonText}>
-                                6 comments
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
                 <HorizontalLine color={theme == 'light' ? Colors.borderColor : '#313131'}/>
+                <View style={{
+                    width: '100%',
+                    flex: 1,
+                }}>
+
+                    <FlatList
+
+                        automaticallyAdjustKeyboardInsets={true}
+                        ListHeaderComponent={renderHeaderItem}
+                        scrollEventThrottle={16}
+
+                        refreshing={isLoading}
+                        onRefresh={refetch}
+                        scrollEnabled
+                        showsVerticalScrollIndicator={false}
+                        data={comments?.pages[0]?.data?.result}
+                        renderItem={renderItem}
+
+                        keyExtractor={keyExtractor}
+                        onEndReachedThreshold={0.3}
+automaticallyAdjustContentInsets
+                       ListFooterComponent={isFetchingNextPage ?
+                            <ActivityIndicator size="small" color={Colors.primaryColor}/> : null}
+
+                   /*     contentContainerStyle={{flexGrow: 1}}
+                        ListFooterComponentStyle={{flex:1, justifyContent: 'flex-end' }}*/
+
+                    />
+
+                   {/* <View style={styles.replyInputContainer}>
+                        <View  style={[styles.inputContainer, {}]}>
+
+                            <RNTextInput
+                                multiline
+
+                                onChangeText={(e) => {
+                                    setContent(e)
+                                }}
+
+                                value={content}
+
+                                placeholder={'Write something...'}
+                                placeholderTextColor="#6D6D6D"
+                                style={[styles.input, {
+                                    padding: 10,
+
+                                    color: textColor,
+
+                                }]}/>
+
+                        </View>
+                    </View>*/}
+                </View>
 
             </SafeAreaView>
 
@@ -189,6 +486,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: "#EDEDED",
 
+    },
+    scrollView: {
+        //  paddingHorizontal: pixelSizeHorizontal(20),
+        //  backgroundColor: Colors.background,
+        //  backgroundColor: "#fff",
+        width: '100%',
+        alignItems: 'center'
     },
     navBar: {
         paddingHorizontal: pixelSizeHorizontal(24),
@@ -282,7 +586,7 @@ const styles = StyleSheet.create({
 
         alignItems: 'flex-start',
         justifyContent: 'flex-start',
-        height: 60
+
     },
     postHead: {
         lineHeight: heightPixel(22),
@@ -342,6 +646,32 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.border,
         width: "100%",
         height: "100%",
+    },
+    replyInputContainer: {
+        borderTopColor: Colors.borderColor,
+        borderTopWidth: 1,
+     //   backgroundColor: 'red',
+        width: '100%',
+        height: 70,
+
+
+    },
+    input: {
+        fontSize: fontPixel(16),
+        paddingTop: 10,
+        width:'80%',
+        fontFamily: Fonts.quicksandSemiBold,
+        height: '100%',
+    },
+    inputContainer: {
+
+        width: '100%',
+        marginTop: 8,
+        marginBottom: 10,
+        borderRadius: 10,
+        flexDirection: 'row',
+
+
     },
 
 })

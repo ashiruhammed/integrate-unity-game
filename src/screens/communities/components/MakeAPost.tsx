@@ -158,7 +158,7 @@ const MakeAPost = ({navigation, route}: RootStackScreenProps<'MakeAPost'>) => {
             onSuccess: async (data) => {
                 if (data.success) {
 
-
+                    navigation.goBack()
                     dispatch(setResponse({
                         responseMessage: data.message,
                         responseState: true,
@@ -394,7 +394,6 @@ const MakeAPost = ({navigation, route}: RootStackScreenProps<'MakeAPost'>) => {
     }, [video]);
 
 
-
     useEffect(() => {
         // console.log(user)
         let time: NodeJS.Timeout | undefined;
@@ -409,7 +408,6 @@ const MakeAPost = ({navigation, route}: RootStackScreenProps<'MakeAPost'>) => {
             clearTimeout(time)
         };
     }, [responseState, responseMessage])
-
 
 
     return (
@@ -428,9 +426,10 @@ const MakeAPost = ({navigation, route}: RootStackScreenProps<'MakeAPost'>) => {
                         </Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity onPress={() => handleSubmit()} disabled={!isValid || posting} style={[styles.postBtn, {
-                        backgroundColor: isValid ? Colors.primaryColor : borderColor,
-                    }]}>
+                    <TouchableOpacity onPress={() => handleSubmit()} disabled={!isValid || posting}
+                                      style={[styles.postBtn, {
+                                          backgroundColor: isValid ? Colors.primaryColor : borderColor,
+                                      }]}>
 
                         <Text style={styles.btnText}>
                             Post
@@ -454,7 +453,7 @@ const MakeAPost = ({navigation, route}: RootStackScreenProps<'MakeAPost'>) => {
                     showsVerticalScrollIndicator={false}>
 
                     <TextInput
-keyboardAppearance={theme}
+                        keyboardAppearance={theme}
                         keyboardType={"default"}
                         touched={touched.title}
                         error={touched.title && errors.title}
@@ -674,9 +673,9 @@ const styles = StyleSheet.create({
 
     },
     input: {
-        fontSize: fontPixel(16),
+        fontSize: fontPixel(14),
         paddingTop: 10,
-        fontFamily: Fonts.quicksandSemiBold,
+        fontFamily: Fonts.quicksandMedium,
         height: '100%',
     },
     scrollView: {

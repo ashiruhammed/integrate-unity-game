@@ -54,6 +54,8 @@ interface cardProps {
         accessNFTBadgeAmount: string,
         badgeId: string,
         owner: {
+
+            id: string
             fullName: string
         }
     },
@@ -63,12 +65,19 @@ interface cardProps {
 const isRunningInExpoGo = Constants.appOwnership === 'expo'
 
 const PublicCommunityCard = ({theme, loadingBadge, item, joinModal}: cardProps) => {
+    const user = useAppSelector(state => state.user)
+    const {userData} = user
 
 
     const {isLoading, data} = useQuery(['getCommunityFollowers'], () => getCommunityFollowers(item.id))
 
     const navigation = useNavigation()
     const open = () => {
+        if(item?.owner?.id == userData.id){
+            navigation.navigate('ViewCommunity', {
+                id: item.id
+            })
+        }else
         if (item.currentUserJoined) {
             navigation.navigate('ViewCommunity', {
                 id: item.id
@@ -79,7 +88,7 @@ const PublicCommunityCard = ({theme, loadingBadge, item, joinModal}: cardProps) 
     }
     const backgroundColor = theme == 'light' ? Colors.light.background : Colors.dark.background
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
-    const tintTextColor = theme == 'light' ? "#AEAEAE": Colors.dark.tintTextColor
+    const tintTextColor = theme == 'light' ? "#AEAEAE" : Colors.dark.tintTextColor
     const barBg = theme == 'light' ? "#FEF1F1" : "#141414"
 
     const props = {size: 40, strokeWidth: 2, text: 'hello'}
@@ -126,7 +135,7 @@ const PublicCommunityCard = ({theme, loadingBadge, item, joinModal}: cardProps) 
 
             <View style={styles.cardBody}>
                 <Text style={[styles.bodyText, {
-                    color:tintTextColor
+                    color: tintTextColor
                 }]}>
                     Created by: <Text style={{
                     color: textColor,
@@ -137,8 +146,8 @@ const PublicCommunityCard = ({theme, loadingBadge, item, joinModal}: cardProps) 
                 <View style={styles.bodyTextWrap}>
 
 
-                    <Text style={[styles.bodyText,{
-                        color:tintTextColor
+                    <Text style={[styles.bodyText, {
+                        color: tintTextColor
                     }]}>
                         {truncate(item.description, 130)}
                     </Text>
@@ -219,6 +228,21 @@ const PublicCommunityCard = ({theme, loadingBadge, item, joinModal}: cardProps) 
 
                 </View>
             </View>
+            {
+                item?.owner?.id == userData.id &&
+
+                <RectButton
+                    onPress={open} style={{
+                    width: 150
+                }}>
+                    <Text style={styles.buttonText}>
+
+                        Open
+                    </Text>
+
+                </RectButton>
+            }
+
 
             {
                 item.currentUserJoined &&
@@ -235,7 +259,7 @@ const PublicCommunityCard = ({theme, loadingBadge, item, joinModal}: cardProps) 
                 </RectButton>
             }
             {
-                !item.currentUserJoined &&
+                !item.currentUserJoined && item?.owner?.id !== userData.id &&
 
                 <RectButton disabled={loadingBadge}
                             onPress={open} style={{
@@ -356,7 +380,7 @@ const PublicCommunity = ({theme}: props) => {
         setCommunityId(communityId)
         mutate()
 
-    },[badgeId])
+    }, [badgeId])
 
     const followCommunityNow = () => {
         follow({id: communityId})
@@ -366,7 +390,7 @@ const PublicCommunity = ({theme}: props) => {
 
     const renderItem = useCallback(({item}) => (
         <PublicCommunityCard loadingBadge={loadingBadge} joinModal={joinModal} theme={theme} item={item}/>
-    ), [loadingBadge,theme])
+    ), [loadingBadge, theme])
 
     const loadMore = () => {
         if (hasNextPage) {
@@ -458,7 +482,7 @@ const PublicCommunity = ({theme}: props) => {
                 !isLoading && data && data?.pages[0]?.data?.result.length > 0 &&
 
                 <FlatList
-                    data={data?.pages[0]?.data?.result?.slice(0,8)}
+                    data={data?.pages[0]?.data?.result?.slice(0, 8)}
                     onMomentumScrollEnd={updateCurrentSlideIndex}
                     keyExtractor={keyExtractor}
                     horizontal

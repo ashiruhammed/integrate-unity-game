@@ -111,8 +111,7 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
     const handleClosePressMore = useCallback(() => {
         sheetRefMore.current?.close();
     }, []);
-
-
+    
     const {
         isLoading,
         data,

@@ -70,6 +70,7 @@ interface cardProps {
         "description": string,
         "thumbnailUrl": string,
         likes:number,
+        commentCount:number,
         "createdAt": string,
         "user": {
             "avatar": string,
@@ -130,22 +131,40 @@ const PostCard = ({theme, item, viewPost}: cardProps) => {
 
             </View>
 
-            <View style={styles.postSnippet}>
+            <View style={[styles.postSnippet,{
+                marginBottom: item.thumbnailUrl !== '' ? 10 : 0
+            }]}>
 
 
                 <Text style={[styles.postHead,{
                     color: textColor
                 }]}>
-                    {truncate(item.content, 50)} <Text style={{fontFamily: Fonts.quickSandBold}}>Read more</Text>
+                    {truncate(item.content.trim(), 80)} <Text style={{fontFamily: Fonts.quickSandBold}}>Read more</Text>
                 </Text>
             </View>
             {
                 item.thumbnailUrl !== '' &&
                 <View style={styles.postImageWrap}>
-                    <Image
-                        source={{uri: item.thumbnailUrl}}
-                        style={styles.postImage}
-                    />
+
+                    {
+                        isRunningInExpoGo ?
+                            <Image
+
+                                source={{uri: item.thumbnailUrl}}
+                                style={styles.postImage}
+                            />
+                            :
+                            <FastImage
+                                resizeMode={FastImage.resizeMode.cover}
+                                source={{
+                                    uri: item.thumbnailUrl,
+                                    cache: FastImage.cacheControl.web,
+                                    priority: FastImage.priority.normal,
+                                }}
+
+                                style={styles.postImage}
+                            />
+                    }
                 </View>
             }
             <View style={styles.actionButtons}>
@@ -160,7 +179,7 @@ const PostCard = ({theme, item, viewPost}: cardProps) => {
 
                     <Octicons name="comment" size={20} color="#838383"/>
                     <Text style={styles.actionButtonText}>
-                        6 comments
+                        {item.commentCount} comments
                     </Text>
                 </TouchableOpacity>
             </View>
@@ -258,6 +277,148 @@ const ViewCommunity = ({navigation, route}: RootStackScreenProps<'ViewCommunity'
     const keyExtractor = useCallback((item: { id: any; }) => item.id, [],);
 
 
+    const renderHeaderItem = useCallback(
+        ({}) => (
+<>
+
+    <View style={[styles.cover, {
+
+    }]}>
+
+        <View style={styles.navBar}>
+            <TouchableOpacity onPress={goBack} activeOpacity={0.8}>
+                <AntDesign name="arrowleft" size={24} color="#fff"/>
+            </TouchableOpacity>
+
+
+            <TouchableOpacity onPress={menuToggle} activeOpacity={0.8} style={styles.rightButton}>
+                <SimpleLineIcons name="menu" size={24} color="#fff"/>
+            </TouchableOpacity>
+        </View>
+
+        <Image
+            source={{uri: data?.data?.displayPhoto}}
+            style={{flex: 0.7, width: 200, borderRadius:5,}}
+            resizeMode={"contain"}/>
+    </View>
+
+    <View style={[styles.topBox, {
+        backgroundColor:theme == 'light' ? '#fff' : Colors.dark.background,
+    }]}>
+        <View style={styles.titleWrap}>
+            <Text style={[styles.title,{
+                color: textColor
+            }]}>
+                {data?.data?.name}
+            </Text>
+        </View>
+
+        <View style={styles.statsBox}>
+            <View style={styles.statsRowWrap}>
+                <View style={styles.statsRow}>
+                    <FontAwesome name="globe" size={14} color={theme == 'light' ? '#575757' : "#fff" }/>
+                    <Text style={[styles.statsText,{
+                        color: lightTextColor
+                    }]}>
+                        {data?.data?.visibility} group
+                    </Text>
+                </View>
+                <Entypo name="dot-single" size={20} color={textColor}/>
+
+                <View style={styles.statsRow}>
+
+                    <Text style={[styles.statsText,{
+                        color: textColor
+                    }]}>
+                        {data?.data?.totalFollowers} members
+                    </Text>
+                </View>
+            </View>
+            <View style={styles.statsRowWrap}>
+                <View style={styles.statsRow}>
+                    <Ionicons name="person" size={14} color={theme == 'light' ? '#575757' : "#fff" }/>
+                    <Text style={[styles.statsText,{
+                        color: textColor
+                    }]}>
+                        4 followed
+                    </Text>
+                </View>
+            </View>
+        </View>
+        <HorizontalLine color={borderColor}/>
+
+        <View style={styles.writePost}>
+            <View style={styles.userImage}>
+                {
+                    isRunningInExpoGo ?
+                        <Image
+                            style={styles.userImagePhoto}
+                            source={{
+                                uri: !userInfo?.data?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : userInfo?.data?.avatar,
+
+                            }}
+                        />
+                        :
+
+                        <FastImage
+                            style={styles.userImagePhoto}
+                            source={{
+                                uri: !userInfo?.data?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : userInfo?.data?.avatar,
+
+                                cache: FastImage.cacheControl.web,
+                                priority: FastImage.priority.normal,
+                            }}
+                            resizeMode={FastImage.resizeMode.cover}
+                        />
+                }
+            </View>
+            <Pressable onPress={makePost} style={[styles.postInput,{
+                backgroundColor,
+                borderColor
+            }]}>
+                <Text style={[styles.placeHolder,{
+                    color: textColor
+                }]}>
+                    Write Something...
+                </Text>
+            </Pressable>
+            {/* <TextInput placeholder={"Write Something..."} style={styles.postInput}/>*/}
+        </View>
+
+        <HorizontalLine color={borderColor}/>
+
+        <View style={styles.mediaPost}>
+            <TouchableOpacity onPress={makePost} activeOpacity={0.8} style={styles.mediaButton}>
+                <Ionicons name="ios-images" size={18} color={Colors.primaryColor}/>
+                <Text style={[styles.mediaButtonText,{
+                    color: textColor
+                }]}>
+                    Photo
+                </Text>
+            </TouchableOpacity>
+
+            <View style={{
+                height: '100%',
+                width: 1,
+                backgroundColor:borderColor,
+
+            }}/>
+            <TouchableOpacity onPress={makePost} activeOpacity={0.8} style={styles.mediaButton}>
+                <FontAwesome name="video-camera" size={18} color={Colors.success}/>
+
+                <Text style={[styles.mediaButtonText,{
+                    color: textColor
+                }]}>
+                    Video
+                </Text>
+            </TouchableOpacity>
+        </View>
+
+
+    </View>
+</>
+        ),[])
+
     const offset = useSharedValue(0);
 
     const defaultSpringStyles = useAnimatedStyle(() => {
@@ -269,6 +430,7 @@ const ViewCommunity = ({navigation, route}: RootStackScreenProps<'ViewCommunity'
 //console.log(posts?.pages[0]?.data?.result)
 
     useRefreshOnFocus(refetch)
+    useRefreshOnFocus(fetchPosts)
     const makePost = () => {
         navigation.navigate('MakeAPost', {
             id
@@ -301,143 +463,7 @@ const ViewCommunity = ({navigation, route}: RootStackScreenProps<'ViewCommunity'
             }
             <View style={styles.scrollView}>
 
-                <MyAnimated.View style={[styles.cover, {
-                    height: headerScrollHeight
-                }]}>
 
-                    <View style={styles.navBar}>
-                        <TouchableOpacity onPress={goBack} activeOpacity={0.8}>
-                            <AntDesign name="arrowleft" size={24} color="#fff"/>
-                        </TouchableOpacity>
-
-
-                        <TouchableOpacity onPress={menuToggle} activeOpacity={0.8} style={styles.rightButton}>
-                            <SimpleLineIcons name="menu" size={24} color="#fff"/>
-                        </TouchableOpacity>
-                    </View>
-
-                    <Image
-                        source={{uri: data?.data?.displayPhoto}}
-                        style={{flex: 0.7, width: 200,}}
-                        resizeMode={"contain"}/>
-                </MyAnimated.View>
-
-                <MyAnimated.View style={[styles.topBox, {
-                    backgroundColor,
-                    height: topScrollHeight,
-                    opacity: headerScrollOpacity
-                }]}>
-                    <View style={styles.titleWrap}>
-                        <Text style={[styles.title,{
-                            color: textColor
-                        }]}>
-                            {data?.data?.name}
-                        </Text>
-                    </View>
-
-                    <View style={styles.statsBox}>
-                        <View style={styles.statsRowWrap}>
-                            <View style={styles.statsRow}>
-                                <FontAwesome name="globe" size={14} color={theme == 'light' ? '#575757' : "#fff" }/>
-                                <Text style={[styles.statsText,{
-                                    color: lightTextColor
-                                }]}>
-                                    {data?.data?.visibility} group
-                                </Text>
-                            </View>
-                            <Entypo name="dot-single" size={20} color={textColor}/>
-
-                            <View style={styles.statsRow}>
-
-                                <Text style={[styles.statsText,{
-                                    color: textColor
-                                }]}>
-                                    {data?.data?.totalFollowers} members
-                                </Text>
-                            </View>
-                        </View>
-                        <View style={styles.statsRowWrap}>
-                            <View style={styles.statsRow}>
-                                <Ionicons name="person" size={14} color={theme == 'light' ? '#575757' : "#fff" }/>
-                                <Text style={[styles.statsText,{
-                                    color: textColor
-                                }]}>
-                                    4 followed
-                                </Text>
-                            </View>
-                        </View>
-                    </View>
-                    <HorizontalLine color={borderColor}/>
-
-                    <View style={styles.writePost}>
-                        <View style={styles.userImage}>
-                            {
-                                isRunningInExpoGo ?
-                                    <Image
-                                        style={styles.userImagePhoto}
-                                        source={{
-                                            uri: !userInfo?.data?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : userInfo?.data?.avatar,
-
-                                        }}
-                                    />
-                                    :
-
-                                    <FastImage
-                                        style={styles.userImagePhoto}
-                                        source={{
-                                            uri: !userInfo?.data?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : userInfo?.data?.avatar,
-
-                                            cache: FastImage.cacheControl.web,
-                                            priority: FastImage.priority.normal,
-                                        }}
-                                        resizeMode={FastImage.resizeMode.cover}
-                                    />
-                            }
-                        </View>
-                        <Pressable onPress={makePost} style={[styles.postInput,{
-                            backgroundColor,
-                            borderColor
-                        }]}>
-                            <Text style={[styles.placeHolder,{
-                                color: textColor
-                            }]}>
-                                Write Something...
-                            </Text>
-                        </Pressable>
-                        {/* <TextInput placeholder={"Write Something..."} style={styles.postInput}/>*/}
-                    </View>
-
-                    <HorizontalLine color={borderColor}/>
-
-                    <View style={styles.mediaPost}>
-                        <TouchableOpacity onPress={makePost} activeOpacity={0.8} style={styles.mediaButton}>
-                            <Ionicons name="ios-images" size={18} color={Colors.primaryColor}/>
-                            <Text style={[styles.mediaButtonText,{
-                                color: textColor
-                            }]}>
-                                Photo
-                            </Text>
-                        </TouchableOpacity>
-
-                        <View style={{
-                            height: '100%',
-                            width: 1,
-                            backgroundColor:borderColor,
-
-                        }}/>
-                        <TouchableOpacity onPress={makePost} activeOpacity={0.8} style={styles.mediaButton}>
-                            <FontAwesome name="video-camera" size={18} color={Colors.success}/>
-
-                            <Text style={[styles.mediaButtonText,{
-                                color: textColor
-                            }]}>
-                                Video
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-
-
-                </MyAnimated.View>
 
                 <View style={{
                     width: '100%',
@@ -448,6 +474,7 @@ const ViewCommunity = ({navigation, route}: RootStackScreenProps<'ViewCommunity'
 
 
                         <FlashList
+                            ListHeaderComponent={renderHeaderItem}
                             onScroll={MyAnimated.event([
 
                                 {nativeEvent: {contentOffset: {y: scrollOffsetY}}}
@@ -468,111 +495,7 @@ const ViewCommunity = ({navigation, route}: RootStackScreenProps<'ViewCommunity'
                         />
                     }
                 </View>
-                {/*     <View style={styles.postCard}>
-                    <View style={styles.topPostSection}>
-                        <View style={styles.userImage}>
 
-                        </View>
-
-                        <View style={styles.details}>
-                            <Text style={styles.postName}>
-                                Peter
-                            </Text>
-                            <Text style={styles.postDate}>
-                                08 May 2022
-                            </Text>
-                        </View>
-
-
-                    </View>
-
-                    <View style={styles.postSnippet}>
-                        <Text style={styles.postHead}>
-                            Lorem ipsum dolor sit amet consectetur. Ultricies
-                            amet fermentum... <Text style={{fontFamily: Fonts.quickSandBold}}>Read more</Text>
-                        </Text>
-                    </View>
-
-                    <HorizontalLine color="#EAEAEA"/>
-
-                    <View style={styles.actionButtons}>
-                        <TouchableOpacity style={styles.actionButton}>
-                            <AntDesign name="like2" size={20} color="#838383"/>
-                            <Text style={styles.actionButtonText}>
-                                60 likes
-                            </Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={styles.actionButton}>
-
-                            <Octicons name="comment" size={20} color="#838383"/>
-                            <Text style={styles.actionButtonText}>
-                                6 comments
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-                <View style={styles.postCard}>
-                    <View style={styles.topPostSection}>
-                        <View style={styles.userImage}>
-
-                        </View>
-
-                        <View style={styles.details}>
-
-                            <View style={styles.nameTag}>
-                                <Text style={styles.postName}>
-                                    Peter
-                                </Text>
-
-                                <View style={styles.tag}>
-                                    <Text style={styles.tagText}>
-                                        Admin
-                                    </Text>
-                                </View>
-
-                            </View>
-                            <Text style={styles.postDate}>
-                                08 May 2022
-                            </Text>
-                        </View>
-
-
-                    </View>
-
-                    <View style={styles.postSnippet}>
-
-
-                        <Text style={styles.postHead}>
-                            Lorem ipsum dolor sit amet consectetur. Ultricies
-                            amet fermentum... <Text style={{fontFamily: Fonts.quickSandBold}}>Read more</Text>
-                        </Text>
-                    </View>
-
-                    <View style={styles.postImageWrap}>
-                        <Image
-                            source={{uri: 'https://images.unsplash.com/photo-1671707433570-9d1c95b4803f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80'}}
-                            style={styles.postImage}
-                        />
-                    </View>
-
-                    <View style={styles.actionButtons}>
-                        <TouchableOpacity style={styles.actionButton}>
-                            <AntDesign name="like2" size={20} color="#838383"/>
-                            <Text style={styles.actionButtonText}>
-                                60 likes
-                            </Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={styles.actionButton}>
-
-                            <Octicons name="comment" size={20} color="#838383"/>
-                            <Text style={styles.actionButtonText}>
-                                6 comments
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>*/}
 
 
             </View>
@@ -839,10 +762,10 @@ const styles = StyleSheet.create({
 
         alignItems: 'flex-start',
         justifyContent: 'flex-start',
-        height: 60
     },
     postHead: {
-        lineHeight: heightPixel(22),
+   textAlign:'left',
+        lineHeight: heightPixel(18),
         fontFamily: Fonts.quicksandMedium,
         fontSize: fontPixel(14),
         color: Colors.light.text,

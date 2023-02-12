@@ -35,6 +35,8 @@ const Drawer = ({menuToggle, communityId}: props) => {
     const {theme} = dataSlice
     const backgroundColor = theme == 'light' ? "#fff" : Colors.dark.background
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
+    const user = useAppSelector(state => state.user)
+    const {userData} = user
 
 
 
@@ -43,6 +45,7 @@ const Drawer = ({menuToggle, communityId}: props) => {
     const {isLoading, data, refetch} = useQuery(['getCommunityInfo'], () => getCommunityInfo(communityId), {
         enabled: !!communityId
     })
+
 
     const openScreen = (screen: 'Followers' | 'CommunityInfo' | 'GroupSettings') => {
         menuToggle()
@@ -104,6 +107,9 @@ const Drawer = ({menuToggle, communityId}: props) => {
                             </Text>
                         </Pressable>
 
+                        {
+                            data?.data?.ownerId == userData.id
+                        &&
                         <Pressable onPress={() => openScreen('GroupSettings')} style={styles.tabButton}>
                             <FontAwesome name="cog" size={18} color={textColor} />
                             <Text style={[styles.tabText, {
@@ -112,7 +118,7 @@ const Drawer = ({menuToggle, communityId}: props) => {
                                 Group Settings
                             </Text>
                         </Pressable>
-
+                        }
                         <Pressable onPress={leaveCommunity}  style={styles.tabButton}>
                             <Octicons name="sign-out" size={18} color={Colors.primaryColor}/>
                             <Text style={[styles.tabText, {
@@ -187,15 +193,15 @@ const styles = StyleSheet.create({
     },
     menuTabs: {
         width: '90%',
-        height: 200,
+        minHeight:150,
         alignItems: 'flex-start',
-        justifyContent: 'space-evenly'
+        justifyContent: 'flex-start'
     },
     tabButton: {
         width: '80%',
         justifyContent: 'flex-start',
         alignItems: 'center',
-        height: heightPixel(45),
+        height: heightPixel(55),
         flexDirection: 'row'
     },
     tabText: {

@@ -1355,9 +1355,7 @@ export const getPrivateCommunities = {
         ])
     }
 }
-export const getCommunityPosts = {
-
-    posts: async (pageParam: string, id: string) => {
+export const getCommunityPosts = {posts: async (pageParam: string, id: string) => {
 
         let Token = await SecureStore.getItemAsync('Gateway-Token');
 
@@ -1375,6 +1373,38 @@ export const getCommunityPosts = {
 
         return Promise.race([
             fetch(`${BASE_URL}/post/community/${id}`, requestOptions)
+                .then(response => response.json()),
+            new Promise((resolve, reject) => {
+                timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+                //  clearTimeout(timeoutId)
+            }).then(() => {
+                clearTimeout(timeoutId)
+            })
+
+        ])
+    }
+}
+
+export const getPostComments = {
+    comments: async (pageParam: string, id: string) => {
+
+        let Token = await SecureStore.getItemAsync('Gateway-Token');
+
+        const myHeaders = {
+            'Authorization': `Bearer ${Token}`
+        }
+        let timeoutId: NodeJS.Timeout
+
+
+        const requestOptions = {
+            method: 'GET',
+            headers: myHeaders,
+        };
+
+
+        return Promise.race([
+            fetch(`${BASE_URL}/post/comment/${id}`, requestOptions)
                 .then(response => response.json()),
             new Promise((resolve, reject) => {
                 timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
