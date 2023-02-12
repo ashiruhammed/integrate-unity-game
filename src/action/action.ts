@@ -45,6 +45,40 @@ export const loginUser = async (userData: {}) => {
 
 
 }
+export const userGoogleAuth = async (userData: {}) => {
+    //let Token = await SecureStore.getItemAsync('token');
+    // await setHeaderToken(Token)
+    /*  const response = await request.get(
+          `/`,
+      );*/
+    const myHeaders = {
+        'Content-Type': 'application/json',
+    }
+    let timeoutId: NodeJS.Timeout
+
+    let requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: userData,
+    };
+
+    return Promise.race([
+        fetch(`${BASE_URL}/auth/google/callback`, requestOptions)
+            .then(response => response.json()),
+        new Promise((resolve, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+            //  clearTimeout(timeoutId)
+        }).then(() => {
+            clearTimeout(timeoutId)
+        })
+
+    ])
+
+    // return request.post(`/auth/login`, {userData})
+
+
+}
 
 
 export const createAccount = async (userdata: signupProps) => {
@@ -180,6 +214,69 @@ export const verifyPhone = async (userdata: any) => {
 
     return Promise.race([
         fetch(`${BASE_URL}/user/phone/verify`, requestOptions)
+            .then(response => response.json()),
+        new Promise((resolve, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+            //  clearTimeout(timeoutId)
+        }).then(() => {
+            clearTimeout(timeoutId)
+        })
+
+    ])
+
+}
+
+
+export const getUserSettings = async () => {
+
+    let Token = await SecureStore.getItemAsync('Gateway-Token');
+
+    const myHeaders = {
+        'Authorization': `Bearer ${Token}`
+    }
+    let timeoutId: NodeJS.Timeout
+
+
+    const requestOptions = {
+        method: 'GET',
+        headers: myHeaders,
+
+    };
+
+
+    return Promise.race([
+        fetch(`${BASE_URL}/preferences`, requestOptions)
+            .then(response => response.json()),
+        new Promise((resolve, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+            //  clearTimeout(timeoutId)
+        }).then(() => {
+            clearTimeout(timeoutId)
+        })
+
+    ])
+}
+export const userSettings = async (userdata: any) => {
+
+
+    let Token = await SecureStore.getItemAsync('Gateway-Token');
+
+    const myHeaders = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${Token}`
+    }
+    let timeoutId: NodeJS.Timeout
+
+    const requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: userdata,
+    };
+
+    return Promise.race([
+        fetch(`${BASE_URL}/preferences/update`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)

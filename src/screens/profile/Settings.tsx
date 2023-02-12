@@ -16,8 +16,8 @@ import {RectButton} from "../../components/RectButton";
 import {useSelector} from "react-redux";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
 import {toggleTheme} from "../../app/slices/dataSlice";
-import {useMutation, useQueryClient} from "@tanstack/react-query";
-import {changePassword} from "../../action/action";
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
+import {changePassword, getUserSettings} from "../../action/action";
 import Toast from "../../components/Toast";
 import {setResponse, unSetResponse} from "../../app/slices/userSlice";
 
@@ -57,10 +57,13 @@ const Settings = () => {
             email
         }
     } = user
-    const [soundEffect, setSoundEffect] = useState(false);
-    const [rewardNotifications, setRewardNotification] = useState(false);
-    const [adventureNotifications, setAdventureNotification] = useState(false);
-    const [systemPrompt, setSystemPrompt] = useState(false);
+
+    const {data} = useQuery(['getUserSettings'],getUserSettings)
+
+    const [soundEffect, setSoundEffect] = useState(data?.data?.soundEffect);
+    const [rewardNotifications, setRewardNotification] = useState(data?.data?.rewardNotification);
+    const [adventureNotifications, setAdventureNotification] = useState(data?.data?.adventureNotification);
+    const [systemPrompt, setSystemPrompt] = useState(data?.data?.systemPrompts);
 
     const switchTheme = () => {
         dispatch(toggleTheme())
@@ -79,6 +82,10 @@ const Settings = () => {
 
     const [focusConfirmPassword, setFocusConfirmPassword] = useState<boolean>(false);
     const [confirmPassword, setConfirmPassword] = useState<string>('');
+
+
+
+
 
     const SWITCH_TRACK_COLOR = {
         true: theme == 'light' ? "#fff" : Colors.dark.background,
@@ -201,7 +208,7 @@ const Settings = () => {
                             marginRight: 8,
                             color: textColor
                         }]}>
-                            ENG
+                            {data?.data?.language?.toUpperCase()}
                         </Text>
 
                     </View>
@@ -211,9 +218,10 @@ const Settings = () => {
 
                             <MaterialCommunityIcons name="lightbulb-on-outline" size={20} color={textColor}/>
                             <Text style={[styles.utilityRowTitle, {
-                                color: textColor
+                                color: textColor,
+                                textTransform:'capitalize'
                             }]}>
-                                Dark Mode
+                                {theme} Mode
                             </Text>
                         </View>
 

@@ -2,6 +2,9 @@ import messaging from '@react-native-firebase/messaging';
 
 import * as SecureStore from 'expo-secure-store';
 import {Alert} from 'react-native';
+import {useAppDispatch} from "./src/app/hooks";
+import {store} from "./src/app/store";
+import {setResponse} from "./src/app/slices/userSlice";
 
 const requestUserPermission = async () => {
     const authStatus = await messaging().requestPermission();
@@ -10,7 +13,7 @@ const requestUserPermission = async () => {
         authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
     if (enabled) {
-        console.log('Authorization status:', authStatus);
+        //console.log('Authorization status:', authStatus);
     }
 };
 
@@ -24,7 +27,7 @@ const getFcmTokenFromLocalStorage = async () => {
             console.error(error);
         }
     } else {
-        console.log('token found', fcmtoken);
+       // console.log('token found', fcmtoken);
     }
 };
 const getFcmToken = async () => {
@@ -40,10 +43,10 @@ const notificationListener = () => {
     // Assume a message-notification contains a "type" property in the data payload of the screen to open
 
     messaging().onNotificationOpenedApp(remoteMessage => {
-        console.log(
+      /*  console.log(
             'Notification caused app to open from background state:',
             remoteMessage.notification,
-        );
+        );*/
     });
 
     // Check whether an initial notification is available
@@ -51,16 +54,21 @@ const notificationListener = () => {
         .getInitialNotification()
         .then(remoteMessage => {
             if (remoteMessage) {
-                console.log(
+            /*    console.log(
                     'Notification caused app to open from quit state:',
                     remoteMessage.notification,
-                );
+                );*/
             }
         })
         .catch(error => console.log('failed', error));
 
     messaging().onMessage(async remoteMessage => {
-        Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
+        store.dispatch(setResponse({
+            responseMessage:remoteMessage?.notification?.body,
+            responseType:'info',
+            responseState:true,
+        }))
+       // Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
     });
 };
 

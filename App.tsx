@@ -32,7 +32,7 @@ import {
     requestUserPermission,
     notificationListener,
 } from './notification';
-import {localStorage} from './storage';
+
 enableScreens()
 
 Notifications.setNotificationHandler({

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 
 import {
     Text,
@@ -23,12 +23,13 @@ import {useAppDispatch, useAppSelector} from "../../app/hooks";
 import {useInfiniteQuery, useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {getAllAdventure, getBadges, getUser, requestPhoneVerification, verifyPhone} from "../../action/action";
 import Animated, {Easing, FadeInDown, FadeInUp, FadeOutDown, Layout} from "react-native-reanimated";
-import {setResponse, updateUserInfo} from "../../app/slices/userSlice";
+import {setResponse, unSetResponse, updateUserInfo} from "../../app/slices/userSlice";
 import FastImage from 'react-native-fast-image';
 import Constants from "expo-constants";
 import {setAdventure} from "../../app/slices/dataSlice";
 import {RootTabScreenProps} from "../../../types";
 import {useRefreshOnFocus} from "../../helpers";
+import Toast from "../../components/Toast";
 
 
 
@@ -76,7 +77,7 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
     const dispatch = useAppDispatch()
     const queryClient = useQueryClient();
     const user = useAppSelector(state => state.user)
-    const {userData} = user
+    const {userData,responseState, responseType, responseMessage} = user
     const dataSlice = useAppSelector(state => state.data)
     const {theme} = dataSlice
 
@@ -172,12 +173,28 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
 
     }
 
+
+    useEffect(() => {
+        // console.log(user)
+        let time: NodeJS.Timeout | undefined;
+        if (responseState || responseMessage) {
+
+            time = setTimeout(() => {
+                dispatch(unSetResponse())
+            }, 3000)
+
+        }
+        return () => {
+            clearTimeout(time)
+        };
+    }, [responseState, responseMessage])
     useRefreshOnFocus(fetchUser)
 
     return (
         <SafeAreaView style={[styles.safeArea, {
             backgroundColor
         }]}>
+            <Toast message={responseMessage} state={responseState} type={responseType}/>
             <ScrollView
                 refreshControl={<RefreshControl tintColor={Colors.primaryColor}
                                                 refreshing={refreshing} onRefresh={refresh}/>}
@@ -328,6 +345,7 @@ const styles = StyleSheet.create({
     safeArea: {
         width: '100%',
         flex: 1,
+        alignItems:'center',
         backgroundColor: "#FEF1F1",
         paddingBottom: Platform.OS === 'ios' ? -40 : 0
     },

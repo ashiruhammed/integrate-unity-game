@@ -111,6 +111,8 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
     const handleClosePressMore = useCallback(() => {
         sheetRefMore.current?.close();
     }, []);
+
+
     
     const {
         isLoading,
@@ -198,6 +200,10 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
             id:communityId
         })
     }
+    
+    const joinModal = () => {
+      
+    }
     useEffect(() => {
         // console.log(user)
         let time: NodeJS.Timeout | undefined;
@@ -213,7 +219,7 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
         };
     }, [responseState, responseMessage])
 
-
+useRefreshOnFocus(fetchMyCommunity)
     return (
         <>
 
@@ -355,9 +361,12 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
                             </RectButton>
 
 
-
                         </View>
-
+                        {
+                            allMyCommunities?.data?.result.map((item) =>(
+                                <CardPublicCommunity key={item.id}  joinModal={joinModal} theme={theme} item={item}/>
+                            ))
+                        }
 
                     </IF>
 

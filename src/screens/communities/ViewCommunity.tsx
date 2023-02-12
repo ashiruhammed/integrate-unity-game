@@ -9,8 +9,8 @@ import {
     TextInput,
     Image,
     Animated as MyAnimated,
-    ActivityIndicator,
-    Pressable
+    ActivityIndicator, Pressable,
+
 } from 'react-native';
 import {RootStackScreenProps} from "../../../types";
 import NavBar from "../../components/layout/NavBar";
@@ -20,9 +20,11 @@ import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPix
 import {Fonts} from "../../constants/Fonts";
 import {AntDesign, Entypo, FontAwesome, Ionicons, Octicons, SimpleLineIcons} from "@expo/vector-icons";
 import {BottomSheetBackdrop} from "@gorhom/bottom-sheet";
+
 import Animated, {
-    Easing,
-    FadeInRight, FadeOutRight, Layout,
+
+    Easing, FadeInDown,
+    FadeInRight, FadeOutDown, FadeOutRight, Layout,
     SlideInRight,
     SlideOutRight,
     useAnimatedStyle,
@@ -52,6 +54,7 @@ import {truncate, useRefreshOnFocus} from "../../helpers";
 import Drawer from "./components/Drawer";
 import Toast from "../../components/Toast";
 import dayjs from "dayjs";
+import {Video} from "expo-av";
 
 const fullHeight = Dimensions.get('window').height
 
@@ -93,11 +96,12 @@ const PostCard = ({theme, item, viewPost}: cardProps) => {
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
     const lightTextColor = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
     const borderColor = theme == 'light' ? Colors.borderColor : '#313131'
-
+    let type =  item.thumbnailUrl?.substring(item.thumbnailUrl.lastIndexOf(".") + 1);
+    const videoRef =useRef(null);
     return (
-        <Pressable onPress={() => viewPost(item.id)} style={[styles.postCard,{
-            backgroundColor: backgroundColorCard
-        }]}>
+        <Animated.View key={item.id} entering={FadeInDown} exiting={FadeOutDown}
+                       layout={Layout.easing(Easing.ease).delay(20)}>
+        <Pressable onPress={() => viewPost(item.id)} style={[styles.postCard,{backgroundColor: backgroundColorCard}]}>
             <View style={styles.topPostSection}>
                 <View style={styles.userImage}>
                     <Image source={{uri: !item?.user?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'  : item?.user?.avatar}} style={styles.avatar}/>
@@ -147,13 +151,7 @@ const PostCard = ({theme, item, viewPost}: cardProps) => {
                 <View style={styles.postImageWrap}>
 
                     {
-                        isRunningInExpoGo ?
-                            <Image
-
-                                source={{uri: item.thumbnailUrl}}
-                                style={styles.postImage}
-                            />
-                            :
+                     type !== 'mov'  && type !== 'mp4' &&
                             <FastImage
                                 resizeMode={FastImage.resizeMode.cover}
                                 source={{
@@ -164,6 +162,31 @@ const PostCard = ({theme, item, viewPost}: cardProps) => {
 
                                 style={styles.postImage}
                             />
+                    }
+
+                    {
+                        type !== 'jpeg' && type !== 'png' && type !== 'jpg' && type !== 'gif' && type !== 'jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' &&
+                    <Video
+                        ref={videoRef}
+
+                        style={{
+                            height: '100%',
+                            borderRadius: 10,
+                            width: '100%',
+                        }}
+                        videoStyle={{backgroundColor: '#fff'}}
+
+                        source={{
+                            //lesson?.data?.video?.url
+                            uri: item.thumbnailUrl,
+
+                        }}
+                        useNativeControls
+                        resizeMode="contain"
+
+                        isLooping={false}
+                       // onPlaybackStatusUpdate={status => setStatus(() => status)}
+                    />
                     }
                 </View>
             }
@@ -184,6 +207,7 @@ const PostCard = ({theme, item, viewPost}: cardProps) => {
                 </TouchableOpacity>
             </View>
         </Pressable>
+        </Animated.View>
     )
 }
 
@@ -272,13 +296,13 @@ const ViewCommunity = ({navigation, route}: RootStackScreenProps<'ViewCommunity'
         ({item}) => (
             <PostCard myId={user?.userData?.id} viewPost={viewPost} theme={theme} item={item}/>
         ),
-        [data, theme,posts],
+        [data,posts],
     );
     const keyExtractor = useCallback((item: { id: any; }) => item.id, [],);
 
 
     const renderHeaderItem = useCallback(
-        ({}) => (
+        () => (
 <>
 
     <View style={[styles.cover, {
@@ -417,15 +441,11 @@ const ViewCommunity = ({navigation, route}: RootStackScreenProps<'ViewCommunity'
 
     </View>
 </>
-        ),[data, theme,posts])
+        ),[data,posts])
 
     const offset = useSharedValue(0);
 
-    const defaultSpringStyles = useAnimatedStyle(() => {
-        return {
-            transform: [{translateX: withSpring(offset.value * 255)}],
-        };
-    });
+
 
 //console.log(posts?.pages[0]?.data?.result)
 

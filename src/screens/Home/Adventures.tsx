@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     segmentWrap: {
-        height: heightPixel(130),
+        height: heightPixel(80),
         width: '100%',
         justifyContent: 'center',
         alignItems: 'center'

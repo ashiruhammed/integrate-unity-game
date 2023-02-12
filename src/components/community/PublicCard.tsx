@@ -17,7 +17,7 @@ import {useAppSelector} from "../../app/hooks";
 const isRunningInExpoGo = Constants.appOwnership === 'expo'
 
 interface cardProps {
-    loadingBadge: boolean,
+    loadingBadge?: boolean,
     theme: 'light' | 'dark',
     item: {
         status: string,

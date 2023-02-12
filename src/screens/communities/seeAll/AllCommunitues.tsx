@@ -383,7 +383,7 @@ const AllCommunities = () => {
                             onRefresh={refetch}
                             scrollEnabled
                             showsVerticalScrollIndicator={false}
-                            data={allMyCommunities?.pages[0]?.data?.result?.slice(0, 8)}
+                            data={allMyCommunities?.pages[0]?.data?.result}
                             renderItem={renderItem}
                             onEndReached={loadMore}
                             keyExtractor={keyExtractor}

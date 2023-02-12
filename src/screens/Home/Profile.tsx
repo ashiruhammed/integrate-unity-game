@@ -14,11 +14,15 @@ import AdventuresIcon from "../../assets/images/tabs/home/AdventuresIcon";
 import {RootTabScreenProps} from "../../../types";
 import {logoutUser, updateUserDashboard, updateUserInfo} from "../../app/slices/userSlice";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
-import {useQuery} from "@tanstack/react-query";
+import {QueryCache, useQuery, useQueryClient} from "@tanstack/react-query";
 import {getUser, getUserDashboard} from "../../action/action";
 import Constants from "expo-constants";
 import FastImage from "react-native-fast-image";
 import {useRefreshOnFocus} from "../../helpers";
+import * as SecureStore from "expo-secure-store";
+import {cleanData} from "../../app/slices/dataSlice";
+
+
 
 
 const isRunningInExpoGo = Constants.appOwnership === 'expo'
@@ -32,6 +36,17 @@ const Profile = ({navigation}: RootTabScreenProps<'Profile'>) => {
 
     const backgroundColor = theme == 'light' ? "#fff" : Colors.dark.background
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
+
+    const queryClient = useQueryClient();
+    const queryCache = new QueryCache({
+        onError: error => {
+            console.log(error)
+        },
+        onSuccess: data => {
+            console.log(data)
+        }
+    })
+
 
     const openNotifications = ()=>{
         navigation.navigate('Notifications')
@@ -54,6 +69,23 @@ const Profile = ({navigation}: RootTabScreenProps<'Profile'>) => {
 useRefreshOnFocus(refetch)
     const openScreen = (screen: 'EditProfile' | 'Wallet' | 'Leaderboard' | 'Badges' | 'Settings' | 'MyReferrals') => {
         navigation.navigate(screen)
+    }
+
+
+    const logout =  () => {
+
+        queryClient.invalidateQueries()
+             SecureStore.setItemAsync('Gateway-Token', '')
+             queryCache.clear()
+            //await queryClient.removeQueries()
+
+            dispatch(logoutUser())
+            dispatch(cleanData())
+
+
+
+
+        // setLoggingOut(false)
     }
 
     return (
@@ -400,7 +432,7 @@ useRefreshOnFocus(refetch)
                 </View>
 
 
-                <TouchableOpacity onPress={() => dispatch(logoutUser())} style={styles.logoutBtn} activeOpacity={0.9}>
+                <TouchableOpacity onPress={logout} style={styles.logoutBtn} activeOpacity={0.9}>
                     <Text style={styles.logoutText}>
                         Log Out
                     </Text>

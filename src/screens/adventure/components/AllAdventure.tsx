@@ -226,7 +226,7 @@ const AllAdventure = ({action}: props) => {
                 />
             }
 
-            <Button
+          {/*  <Button
 
                 onPress={() => fetchNextPage()}
                 disabled={!hasNextPage || isFetchingNextPage}
@@ -235,7 +235,7 @@ const AllAdventure = ({action}: props) => {
                     : hasNextPage
                         ? 'Load Newer'
                         : 'Nothing more to load'}/>
-
+*/}
 
         </View>
     );

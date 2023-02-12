@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 
 import {
     Text,
@@ -15,8 +15,8 @@ import {SafeAreaView} from "react-native-safe-area-context";
 import {RootStackScreenProps} from "../../../types";
 import {AntDesign, Ionicons, MaterialIcons, Octicons, SimpleLineIcons} from "@expo/vector-icons";
 import Animated, {
-    Easing,
-    FadeInRight,
+    Easing, FadeIn, FadeInDown,
+    FadeInRight, FadeOut, FadeOutDown,
     FadeOutRight,
     Layout,
     SlideInRight, SlideOutRight,
@@ -44,6 +44,7 @@ import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 import Constants from "expo-constants";
 import FastImage from "react-native-fast-image";
 import {FlashList} from "@shopify/flash-list";
+import {Video} from "expo-av";
 
 var relativeTime = require('dayjs/plugin/relativeTime')
 dayjs.extend(relativeTime)
@@ -99,6 +100,8 @@ const CommentCard = ({theme, item}: cardProps) => {
 
 
     return (
+        <Animated.View key={item.id} entering={FadeInDown} exiting={FadeOutDown}
+                       layout={Layout.easing(Easing.ease).delay(20)}>
         <Pressable style={[styles.postCard, {
             minHeight: heightPixel(80),
 
@@ -190,6 +193,7 @@ const CommentCard = ({theme, item}: cardProps) => {
                 </TouchableOpacity>
             </View>
         </Pressable>
+        </Animated.View>
     )
 }
 const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => {
@@ -204,7 +208,7 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
     const {theme} = dataSlice
     const backgroundColor = theme == 'light' ? "#fff" : Colors.dark.background
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
-
+    const videoRef = useRef(null);
 
     const backgroundColorCard = theme == 'light' ? '#fff' : Colors.dark.disable
 
@@ -245,6 +249,7 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
             getPreviousPageParam: (firstPage, allPages) => firstPage.prevCursor,
         })
 
+    let type =  data?.data?.thumbnailUrl?.substring(data?.data?.thumbnailUrl.lastIndexOf(".") + 1);
 
     //console.log(comments?.pages[0]?.data?.result)
     const renderItem = useCallback(
@@ -264,16 +269,24 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
 
     const renderHeaderItem = useCallback(
         ({}) => (
+            <Animated.View key={data?.data.id} entering={FadeIn} exiting={FadeOut}
+                           layout={Layout.easing(Easing.ease).delay(20)} style={[styles.postCard, {backgroundColor: backgroundColorCard}]}>
 
-            <View style={[styles.postCard, {backgroundColor: backgroundColorCard}]}>
                 <View style={styles.topPostSection}>
                     <View style={styles.userImage}>
 
-                        <Image
-                            source={{uri: !data?.data?.user?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : data?.data?.user?.avatar}}
-                            style={styles.avatar}/>
 
 
+                        <FastImage
+                            resizeMode={FastImage.resizeMode.cover}
+                            source={{
+                                uri: !data?.data?.user?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : data?.data?.user?.avatar,
+                                cache: FastImage.cacheControl.web,
+                                priority: FastImage.priority.normal,
+                            }}
+
+                            style={styles.avatar}
+                        />
                     </View>
 
                     <View style={styles.details}>
@@ -316,10 +329,45 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
                     data?.data?.thumbnailUrl &&
 
                     <View style={styles.postImageWrap}>
-                        <Image
-                            source={{uri: data?.data?.thumbnailUrl}}
+                        {
+                            type !== 'mov'  && type !== 'mp4' &&
+                        <FastImage
+                            resizeMode={FastImage.resizeMode.cover}
+                            source={{
+                                uri: data?.data?.thumbnailUrl,
+                                cache: FastImage.cacheControl.web,
+                                priority: FastImage.priority.normal,
+                            }}
+
                             style={styles.postImage}
                         />
+                        }
+
+                        {
+                            type !== 'jpeg' && type !== 'png' && type !== 'jpg' && type !== 'gif' && type !== 'jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' &&
+                            <Video
+                                ref={videoRef}
+
+                                style={{
+                                    height: '100%',
+                                    borderRadius: 10,
+                                    width: '100%',
+                                }}
+                                videoStyle={{backgroundColor: '#fff'}}
+
+                                source={{
+                                    //lesson?.data?.video?.url
+                                    uri: data?.data?.thumbnailUrl,
+
+                                }}
+                                useNativeControls
+                                resizeMode="contain"
+
+                                isLooping={false}
+                                // onPlaybackStatusUpdate={status => setStatus(() => status)}
+                            />
+                        }
+
                     </View>
                 }
 
@@ -342,7 +390,7 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
                         </Text>
                     </TouchableOpacity>
                 </View>
-            </View>
+            </Animated.View>
         ),
         [data,theme],
     );

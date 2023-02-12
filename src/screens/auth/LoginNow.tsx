@@ -16,7 +16,7 @@ import {useAppDispatch, useAppSelector} from "../../app/hooks";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {setAuthenticated, setResponse, unSetResponse, updateUserInfo} from "../../app/slices/userSlice";
 import * as SecureStore from 'expo-secure-store';
-import {getUser, loginUser} from "../../action/action";
+import {getUser, loginUser, userGoogleAuth} from "../../action/action";
 import Toast from "../../components/Toast";
 import * as Haptics from 'expo-haptics';
 import * as WebBrowser from 'expo-web-browser';
@@ -71,34 +71,74 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
 
 
 
+    const {mutate:googleAuthLogin, isLoading:googleAuthenticating} = useMutation(['userGoogleAuth'], userGoogleAuth, {
 
-    useEffect(() => {
-        async function loginUserWithGoogle(access_token: string) {
-            try {
-                let response = await fetch('https://www.googleapis.com/auth/userinfo.profile',{
-                    headers:{ Authorizatiion: `Bearer ${access_token}`}
+        onSuccess: async (data) => {
+
+            if (data.success) {
+
+
+                SecureStore.setItemAsync('Gateway-Token', data.data.token).then(() => {
+                    fetchUser()
                 })
 
-             return await response.json()
 
-                //   const user = await googleLoginOrRegister(access_token);
+            } else {
+                if (data.message == 'Your email is not verified, kindly verify your email to continue.') {
+                    navigation.navigate('EmailConfirm', {
+                        email: contentEmail
+                    })
+                } else {
+                    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
+                    dispatch(setResponse({
+                        responseMessage: data.message,
+                        responseState: true,
+                        responseType: 'error',
+                    }))
 
-            } catch (error) {
+                }
+                /*  navigation.navigate('EmailConfirm', {
+                      email:contentEmail
+                  })*/
 
-            } finally {
 
             }
+        },
+
+        onError: (err) => {
+            dispatch(setResponse({
+                responseMessage: err.message,
+                responseState: true,
+                responseType: 'error',
+            }))
+
+
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries(['userGoogleAuth']);
         }
+
+    })
+
+
+
+    useEffect(() => {
+
+
 
         if (googleResponse?.type === "success") {
             const {access_token,id_token}  = googleResponse.params;
-                console.log(access_token)
+               // console.log(access_token)
 
-           /*     console.log(id_token)*/
+               // console.log(id_token)
            // setAccessToken(access_token)
-            loginUserWithGoogle(access_token).then(res =>{
-             console.log(res)
-            });
+            const body = JSON.stringify({
+                code:id_token,
+                "referralCode": "gate"
+            })
+
+            googleAuthLogin(body)
+
         }
     }, [googleResponse]);
 
@@ -123,9 +163,10 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
         },
     })
 
-    const {mutate, isLoading} = useMutation(['login-user'], loginUser,
 
-        {
+
+
+    const {mutate, isLoading} = useMutation(['login-user'], loginUser, {
 
             onSuccess: async (data) => {
 
@@ -332,12 +373,12 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                     </View>
 
 
-                    <RectButton disabled={isLoading || !isValid} style={{
+                    <RectButton disabled={isLoading || !isValid || googleAuthenticating} style={{
 
                         width: widthPixel(200)
                     }} onPress={() => handleSubmit()}>
                         {
-                            isLoading ? <ActivityIndicator size='small' color="#fff"/>
+                            isLoading || googleAuthenticating ? <ActivityIndicator size='small' color="#fff"/>
                                 :
 
                                 <Text style={styles.buttonText}>
@@ -349,17 +390,17 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
 
                     <TouchableOpacity   onPress={async () => await googleAuth()} activeOpacity={0.6} style={[styles.buttonSignUp,{
                         borderWidth:1,
-                        borderColor:Colors.light.text,
+                        borderColor:Colors.borderColor,
                         marginVertical:pixelSizeVertical(10),
                     }]}>
 
                         <GoogleIcon/>
                         <Text style={[ {
-                            fontFamily:Fonts.quicksandMedium,
+                            fontFamily:Fonts.quicksandSemiBold,
                             fontSize:fontPixel(14),
                             color: Colors.light.text,
                         }]}>
-                            Sign Up with Google
+                            Continue with Google
                         </Text>
                     </TouchableOpacity>
                     {
