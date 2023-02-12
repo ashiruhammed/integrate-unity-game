@@ -74,7 +74,8 @@ export type RootStackParamList = {
         id:string
     }
     CommentOnPost:{
-        id:string
+        id:string,
+        post:{}
     }
     NotFound: undefined;
 };

@@ -1355,7 +1355,8 @@ export const getPrivateCommunities = {
         ])
     }
 }
-export const getCommunityPosts = {posts: async (pageParam: string, id: string) => {
+export const getCommunityPosts = {
+    posts: async (pageParam: string, id: string) => {
 
         let Token = await SecureStore.getItemAsync('Gateway-Token');
 
@@ -1419,6 +1420,69 @@ export const getPostComments = {
 }
 
 
+export const commentOnAPost = async (body: any) => {
+
+    let Token = await SecureStore.getItemAsync('Gateway-Token');
+
+    const myHeaders = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${Token}`
+    }
+    let timeoutId: NodeJS.Timeout
+
+
+    const requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body
+    };
+
+
+    return Promise.race([
+        fetch(`${BASE_URL}/post/comment`, requestOptions)
+            .then(response => response.json()),
+        new Promise((resolve, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+            //  clearTimeout(timeoutId)
+        }).then(() => {
+            clearTimeout(timeoutId)
+        })
+
+    ])
+}
+
+
+export const likeAComment = async (id: string) => {
+
+    let Token = await SecureStore.getItemAsync('Gateway-Token');
+
+    const myHeaders = {
+        'Authorization': `Bearer ${Token}`
+    }
+    let timeoutId: NodeJS.Timeout
+
+
+    const requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+
+    };
+
+
+    return Promise.race([
+        fetch(`${BASE_URL}/post/comment/like/${id}`, requestOptions)
+            .then(response => response.json()),
+        new Promise((resolve, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+            //  clearTimeout(timeoutId)
+        }).then(() => {
+            clearTimeout(timeoutId)
+        })
+
+    ])
+}
 export const likeAPost = async (id: string) => {
 
     let Token = await SecureStore.getItemAsync('Gateway-Token');
@@ -1514,7 +1578,7 @@ export const postToCommunity = async ({body}: { body: any }) => {
 }
 
 
-export const getCommunityPost = async (id:  string ) => {
+export const getCommunityPost = async (id: string) => {
 
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 

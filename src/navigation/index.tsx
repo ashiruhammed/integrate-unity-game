@@ -46,6 +46,7 @@ import CommunityInfo from "../screens/communities/CommunityInfo";
 import LeaveReview from "../screens/adventure/LeaveReview";
 import GroupSettings from "../screens/communities/GroupSettings";
 import LeaveCommunity from "../screens/communities/LeaveCommunity";
+import CommentOnPost from "../screens/communities/components/CommentOnPost";
 
 export default function Navigation({colorScheme}: { colorScheme: ColorSchemeName }) {
   const data = useAppSelector(state => state.data)
@@ -108,6 +109,7 @@ function RootNavigator() {
                         <Stack.Screen name="ViewCommunity" component={ViewCommunity}/>
                         <Stack.Screen name="GroupSettings" component={GroupSettings}/>
                         <Stack.Screen name="LeaveCommunity" component={LeaveCommunity}/>
+
                         <Stack.Screen name="PostScreen" options={{
                         animation:'slide_from_right'
                         }} component={PostScreen}/>
@@ -124,6 +126,9 @@ function RootNavigator() {
                         <Stack.Screen name="Notifications" options={{
                               animation: 'slide_from_bottom'
                         }}  component={Notifications}/>
+                        <Stack.Screen name="CommentOnPost" options={{
+                            animation: 'slide_from_bottom'
+                        }} component={CommentOnPost}/>
                         <Stack.Screen name="NFTs" component={NFTs}/>
                         <Stack.Screen name="MakeAPost" options={{
                             animation: 'slide_from_bottom'

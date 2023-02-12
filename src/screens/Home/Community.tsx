@@ -353,6 +353,9 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
                                     Create Community
                                 </Text>
                             </RectButton>
+
+
+
                         </View>
 
 

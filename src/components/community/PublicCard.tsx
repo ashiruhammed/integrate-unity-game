@@ -11,6 +11,7 @@ import {Fonts} from "../../constants/Fonts";
 import {isWhatPercentOf, truncate} from "../../helpers";
 import {RectButton} from "../RectButton";
 import Constants from "expo-constants";
+import {useAppSelector} from "../../app/hooks";
 
 
 const isRunningInExpoGo = Constants.appOwnership === 'expo'
@@ -31,18 +32,25 @@ interface cardProps {
         accessNFTBadgeAmount: string,
         badgeId: string,
         owner: {
+            id: string,
             fullName: string
         }
     },
     joinModal: (badgeId: string, accessNFTBadgeAmount: string, communityId: string) => void
 }
 const CardPublicCommunity = ({theme, loadingBadge, item, joinModal}: cardProps) => {
-
+    const user = useAppSelector(state => state.user)
+    const {userData} = user
 
     const {isLoading, data} = useQuery(['getCommunityFollowers'], () => getCommunityFollowers(item.id))
 
     const navigation = useNavigation()
     const open = () => {
+        if(item?.owner?.id == userData.id){
+            navigation.navigate('ViewCommunity', {
+                id: item.id
+            })
+        }else
         if (item.currentUserJoined) {
             navigation.navigate('ViewCommunity', {
                 id: item.id
@@ -195,6 +203,22 @@ const CardPublicCommunity = ({theme, loadingBadge, item, joinModal}: cardProps) 
             </View>
 
             {
+                item?.owner?.id == userData.id &&
+
+                <RectButton
+                    onPress={open} style={{
+                    width: 150
+                }}>
+                    <Text style={styles.buttonText}>
+
+                        Open
+                    </Text>
+
+                </RectButton>
+            }
+
+
+            {
                 item.currentUserJoined &&
 
                 <RectButton
@@ -209,7 +233,8 @@ const CardPublicCommunity = ({theme, loadingBadge, item, joinModal}: cardProps) 
                 </RectButton>
             }
             {
-                !item.currentUserJoined &&
+                !item.currentUserJoined && item?.owner?.id !== userData.id &&
+
 
                 <RectButton disabled={loadingBadge}
                             onPress={open} style={{

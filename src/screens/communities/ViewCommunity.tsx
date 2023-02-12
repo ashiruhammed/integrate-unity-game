@@ -1,4 +1,4 @@
-import React, {useCallback, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 
 import {
     Text,
@@ -248,7 +248,7 @@ const ViewCommunity = ({navigation, route}: RootStackScreenProps<'ViewCommunity'
         isRefetching
     } = useInfiniteQuery([`CommunityPosts`], ({pageParam = 1}) => getCommunityPosts.posts(pageParam, id),
         {
-            networkMode: 'online',
+
             getNextPageParam: lastPage => {
                 if (lastPage.next !== null) {
                     return lastPage.next;
@@ -272,7 +272,7 @@ const ViewCommunity = ({navigation, route}: RootStackScreenProps<'ViewCommunity'
         ({item}) => (
             <PostCard myId={user?.userData?.id} viewPost={viewPost} theme={theme} item={item}/>
         ),
-        [],
+        [data, theme,posts],
     );
     const keyExtractor = useCallback((item: { id: any; }) => item.id, [],);
 
@@ -417,7 +417,7 @@ const ViewCommunity = ({navigation, route}: RootStackScreenProps<'ViewCommunity'
 
     </View>
 </>
-        ),[])
+        ),[data, theme,posts])
 
     const offset = useSharedValue(0);
 
@@ -437,7 +437,9 @@ const ViewCommunity = ({navigation, route}: RootStackScreenProps<'ViewCommunity'
         })
     }
 
-
+    useEffect(()=>{
+   refetch
+    },[id])
     const menuToggle = () => {
         offset.value = Math.random()
         setToggleMenu(!toggleMenu)

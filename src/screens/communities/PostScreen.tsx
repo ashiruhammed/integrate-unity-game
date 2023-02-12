@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 
 import {
     Text,
@@ -30,14 +30,23 @@ import {StatusBar} from "expo-status-bar";
 import HorizontalLine from "../../components/HorizontalLine";
 import Drawer from "./components/Drawer";
 import {useInfiniteQuery, useMutation, useQuery} from "@tanstack/react-query";
-import {getCommunityPost, getCommunityPosts, getPostComments, getPostLike, likeAPost} from "../../action/action";
+import {
+    getCommunityPost,
+    getCommunityPosts,
+    getPostComments,
+    getPostLike,
+    likeAComment,
+    likeAPost
+} from "../../action/action";
 import dayjs from "dayjs";
-import {truncate, useRefreshOnFocus} from "../../helpers";
+import {isLessThan24HourAgo, truncate, useRefreshOnFocus} from "../../helpers";
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 import Constants from "expo-constants";
 import FastImage from "react-native-fast-image";
 import {FlashList} from "@shopify/flash-list";
 
+var relativeTime = require('dayjs/plugin/relativeTime')
+dayjs.extend(relativeTime)
 
 const wait = (timeout: number) => {
     return new Promise((resolve) => {
@@ -80,7 +89,7 @@ interface cardProps {
 const CommentCard = ({theme, item}: cardProps) => {
 
     //  const {data: likes, refetch} = useQuery(['getPostLikes'], () => getPostLike(item.id))
-//    const {mutate} = useMutation(['likeAPost'], likeAPost)
+   const {mutate} = useMutation(['likeAComment'], likeAComment)
 
     const backgroundColorCard = theme == 'light' ? '#fff' : Colors.dark.disable
     const backgroundColor = theme == 'light' ? "#EDEDED" : Colors.dark.background
@@ -88,14 +97,19 @@ const CommentCard = ({theme, item}: cardProps) => {
     const lightTextColor = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
     const borderColor = theme == 'light' ? Colors.borderColor : '#313131'
 
+
     return (
         <Pressable style={[styles.postCard, {
+            minHeight: heightPixel(80),
+
+            borderTopColor:borderColor,
+            borderTopWidth:1,
             backgroundColor: backgroundColorCard
         }]}>
             <View style={styles.topPostSection}>
                 <View style={styles.userImage}>
 
-                    {/* {
+                     {
                         isRunningInExpoGo ?
                             <Image
 
@@ -113,7 +127,7 @@ const CommentCard = ({theme, item}: cardProps) => {
 
                                 style={styles.avatar}
                             />
-                    }*/}
+                    }
                 </View>
 
                 <View style={styles.details}>
@@ -122,21 +136,24 @@ const CommentCard = ({theme, item}: cardProps) => {
                         <Text style={[styles.postName, {
                             color: textColor
                         }]}>
-                            Orji ace
+                            {
+                                item.user.fullName
+                            }
                         </Text>
 
-                        <View style={[styles.tag, {
+                     {/*   <View style={[styles.tag, {
                             // backgroundColor
                         }]}>
                             <Text style={styles.tagText}>
                                 Admin
                             </Text>
-                        </View>
+                        </View>*/}
 
                     </View>
                     <Text style={styles.postDate}>
-                        2Min
-                        {/*{dayjs(item.createdAt).format('DD MMM YYYY')}*/}
+                        { dayjs(item.createdAt).fromNow() }
+
+
                     </Text>
                 </View>
 
@@ -149,25 +166,26 @@ const CommentCard = ({theme, item}: cardProps) => {
                 <Text style={[styles.postHead, {
                     color: textColor
                 }]}>
-                    {/*     {truncate(item.content.trim(), 80)}*/}
-                    Lorem ipsum dolor sit amet consectetur. Ultricies
-                    amet fermentum
+                    {item.content}
+
                 </Text>
             </View>
 
-            <View style={styles.actionButtons}>
+            <View style={[styles.actionButtons,{
+                height: heightPixel(30),
+            }]}>
                 <TouchableOpacity style={styles.actionButton}>
                     <MaterialIcons name="reply" size={20} color={"#838383"}/>
                     <Text style={styles.actionButtonText}>
-                        Reply
+                        Reply  {item.commentRepliesCount} replies
                     </Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.actionButton}>
+                <TouchableOpacity onPress={()=> mutate(item.id)} style={styles.actionButton}>
 
                     <AntDesign name="like2" size={20} color={"#838383"}/>
                     <Text style={styles.actionButtonText}>
-                        likes
+                        {item.commentLikesCount} likes
                     </Text>
                 </TouchableOpacity>
             </View>
@@ -196,6 +214,7 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
         navigation.goBack()
     }
     const {data, isLoading, refetch} = useQuery(['getCommunityPost'], () => getCommunityPost(postId))
+    const {mutate: getPost} = useMutation(['getCommunityPost'], getCommunityPost)
 
     const {mutate} = useMutation(['likeAPost'], likeAPost, {
         onSuccess: (data) => {
@@ -231,10 +250,17 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
     const renderItem = useCallback(
         ({item}) => (
 
-                <CommentCard theme={theme} item={item}/>
+            <CommentCard theme={theme} item={item}/>
         ),
-        [],
+        [theme],
     );
+
+    const commentOnPost = () => {
+        navigation.navigate('CommentOnPost', {
+            id: postId,
+            post: data?.data
+        })
+    }
 
     const renderHeaderItem = useCallback(
         ({}) => (
@@ -308,7 +334,7 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
                         </Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.actionButton}>
+                    <TouchableOpacity activeOpacity={0.9} onPress={commentOnPost} style={styles.actionButton}>
 
                         <Octicons name="comment" size={20} color="#838383"/>
                         <Text style={styles.actionButtonText}>
@@ -318,11 +344,12 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
                 </View>
             </View>
         ),
-        [],
-    );  const renderFooterItem = useCallback(
+        [data,theme],
+    );
+    const renderFooterItem = useCallback(
         ({}) => (
             <View style={styles.replyInputContainer}>
-                <View  style={[styles.inputContainer, {}]}>
+                <View style={[styles.inputContainer, {}]}>
 
                     <RNTextInput
                         multiline
@@ -363,10 +390,15 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
         wait(2000).then(() => setRefreshing(false));
     }
 
+
     const _scrollToInput = (reactNode: any) => {
         // Add a 'scroll' ref to your ScrollView
         // scroll.props.scrollToFocusedInput(reactNode)
     }
+    /* useEffect(()=>{
+         getPost(postId)
+     },[postId])*/
+    useRefreshOnFocus(fetchComments)
     useRefreshOnFocus(refetch)
 
     return (
@@ -424,8 +456,8 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
                     flex: 1,
                 }}>
 
-                    <FlatList
-
+                    <FlashList
+                        estimatedItemSize={100}
                         automaticallyAdjustKeyboardInsets={true}
                         ListHeaderComponent={renderHeaderItem}
                         scrollEventThrottle={16}
@@ -439,38 +471,16 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
 
                         keyExtractor={keyExtractor}
                         onEndReachedThreshold={0.3}
-automaticallyAdjustContentInsets
-                       ListFooterComponent={isFetchingNextPage ?
+                        automaticallyAdjustContentInsets
+                        ListFooterComponent={isFetchingNextPage ?
                             <ActivityIndicator size="small" color={Colors.primaryColor}/> : null}
 
-                   /*     contentContainerStyle={{flexGrow: 1}}
-                        ListFooterComponentStyle={{flex:1, justifyContent: 'flex-end' }}*/
+                        /*     contentContainerStyle={{flexGrow: 1}}
+                             ListFooterComponentStyle={{flex:1, justifyContent: 'flex-end' }}*/
 
                     />
 
-                   {/* <View style={styles.replyInputContainer}>
-                        <View  style={[styles.inputContainer, {}]}>
 
-                            <RNTextInput
-                                multiline
-
-                                onChangeText={(e) => {
-                                    setContent(e)
-                                }}
-
-                                value={content}
-
-                                placeholder={'Write something...'}
-                                placeholderTextColor="#6D6D6D"
-                                style={[styles.input, {
-                                    padding: 10,
-
-                                    color: textColor,
-
-                                }]}/>
-
-                        </View>
-                    </View>*/}
                 </View>
 
             </SafeAreaView>
@@ -612,7 +622,7 @@ const styles = StyleSheet.create({
     actionButtonText: {
         marginLeft: 8,
         fontFamily: Fonts.quicksandMedium,
-        fontSize: fontPixel(14),
+        fontSize: fontPixel(12),
         color: "#838383",
     },
     postImageWrap: {
@@ -650,7 +660,7 @@ const styles = StyleSheet.create({
     replyInputContainer: {
         borderTopColor: Colors.borderColor,
         borderTopWidth: 1,
-     //   backgroundColor: 'red',
+        //   backgroundColor: 'red',
         width: '100%',
         height: 70,
 
@@ -659,7 +669,7 @@ const styles = StyleSheet.create({
     input: {
         fontSize: fontPixel(16),
         paddingTop: 10,
-        width:'80%',
+        width: '80%',
         fontFamily: Fonts.quicksandSemiBold,
         height: '100%',
     },

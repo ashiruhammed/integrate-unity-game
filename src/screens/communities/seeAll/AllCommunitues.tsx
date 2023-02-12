@@ -21,8 +21,14 @@ import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPix
 import {Fonts} from "../../../constants/Fonts";
 import {RectButton} from "../../../components/RectButton";
 import {SmallRectButton} from "../../../components/buttons/SmallRectButton";
-import {useInfiniteQuery, useMutation, useQueryClient} from "@tanstack/react-query";
-import {followACommunity, getBadge, getPublicCommunities, getSingleBadge} from "../../../action/action";
+import {useInfiniteQuery, useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
+import {
+    followACommunity,
+    getBadge,
+    getMyCommunities,
+    getPublicCommunities,
+    getSingleBadge
+} from "../../../action/action";
 import CardPublicCommunity from "../../../components/community/PublicCard";
 import {setResponse} from "../../../app/slices/userSlice";
 import {useAppDispatch, useAppSelector} from "../../../app/hooks";
@@ -70,16 +76,15 @@ const AllCommunities = () => {
             if (data.success) {
 
 
-                    setModalVisible(true)
+                setModalVisible(true)
 
             }
 
         },
-        onSettled:()=>{
+        onSettled: () => {
             queryClient.invalidateQueries(['getSingleBadge'])
         }
     })
-
 
 
     const {
@@ -102,6 +107,21 @@ const AllCommunities = () => {
                 return lastPage;
             },
             getPreviousPageParam: (firstPage, allPages) => firstPage.prevCursor,
+        })
+
+
+    const {
+        isLoading: loading,
+        data: allMyCommunities,
+
+        refetch: fetchMyCommunity,
+
+    } = useInfiniteQuery([`UserOwnedCommunities`], getMyCommunities.mine,
+        {
+            networkMode: 'online',
+            onSuccess: (data) => {
+
+            }
         })
 
     const {isLoading: following, mutate: follow} = useMutation(['followACommunity'], followACommunity, {
@@ -138,7 +158,7 @@ const AllCommunities = () => {
         setCommunityId(communityId)
         mutate()
 
-    },[badgeId])
+    }, [badgeId])
     const followCommunityNow = () => {
         follow({id: communityId})
     }
@@ -147,7 +167,7 @@ const AllCommunities = () => {
 
     const renderItem = useCallback(({item}) => (
         <CardPublicCommunity loadingBadge={loadingBadge} joinModal={joinModal} theme={theme} item={item}/>
-    ), [loadingBadge])
+    ), [loadingBadge,theme,tabIndex])
 
 
     const updateCurrentSlideIndex = (e: { nativeEvent: { contentOffset: { x: any; }; }; }) => {
@@ -156,6 +176,15 @@ const AllCommunities = () => {
         setCurrentSlideIndex(currentIndex);
 
     };
+
+
+    const renderHeaderItem = useCallback(
+        ({}) => (
+            <>
+
+
+            </>
+        ), [tabIndex])
 
     const closeModal = () => {
         setModalVisible(false)
@@ -166,7 +195,7 @@ const AllCommunities = () => {
 
 
     return (
-        <SafeAreaView style={[styles.safeArea,{
+        <SafeAreaView style={[styles.safeArea, {
             backgroundColor
         }]}>
 
@@ -240,19 +269,20 @@ const AllCommunities = () => {
                 </View>
             </Modal>
             <NavBar title={"Community"}/>
+
             <View style={styles.searchWrap}>
 
                 <SearchValue isWidth={"80%"} placeholder={'Search for all types of Communities'}
                              value={searchValue}/>
 
-                <View style={[styles.searchTangible,{
+                <View style={[styles.searchTangible, {
                     borderColor
                 }]}>
                     <Ionicons name="md-search-outline" size={20} color="#666666"/>
                 </View>
             </View>
 
-            <View style={styles.segmentWrap}>
+            <View  style={styles.segmentWrap}>
                 <SegmentedControl tabs={["All Communities", "My Communities"]}
                                   currentIndex={tabIndex}
                                   onChange={handleTabsChange}
@@ -263,42 +293,102 @@ const AllCommunities = () => {
                                   paddingVertical={pixelSizeVertical(8)}/>
             </View>
 
+            <View style={styles.ActivityCardTop}>
+                {
+                    tabIndex == 0
+                    &&
+                    <Text style={[styles.listTitle, {
+                        color: textColor
+                    }]}>
+                        Public Communities
+                    </Text>
+                }
+                {
+                    tabIndex == 1
+                    &&
+                    <Text style={[styles.listTitle, {
+                        color: textColor
+                    }]}>
+                        My Communities
+                    </Text>
+                }
+            </View>
+
+            {
+                isLoading && <ActivityIndicator size='small' color={Colors.primaryColor}/>
+            }
+            {
+                loading && <ActivityIndicator size='small' color={Colors.primaryColor}/>
+            }
 
             <IF condition={tabIndex == 0}>
                 <View style={styles.listWrap}>
-                    <View style={styles.ActivityCardTop}>
-                        <Text style={[styles.listTitle,{
-                            color: textColor
-                        }]}>
-                            Public Communities
-                        </Text>
-
-                    </View>
+                    {/*    */}
 
 
-                    {
-                        isLoading && <ActivityIndicator size='small' color={Colors.primaryColor}/>
-                    }
 
 
-                    {
-                        !isLoading && data && data?.pages[0]?.data?.result.length > 0 &&
 
 
-                        <FlashList
+
+                        <FlatList
+
+                            ListHeaderComponent={renderHeaderItem}
+
+                            ListHeaderComponentStyle={{
+
+                                alignItems: 'center',
+                                width: '100%'
+                            }
+                            }
 
 
-                            estimatedItemSize={200}
                             refreshing={isLoading}
                             onRefresh={refetch}
                             scrollEnabled
                             showsVerticalScrollIndicator={false}
-                            data={data?.pages[0]?.data?.result?.slice(0,8)}
+                            data={data?.pages[0]?.data?.result?.slice(0, 8)}
                             renderItem={renderItem}
                             onEndReached={loadMore}
                             keyExtractor={keyExtractor}
                             onEndReachedThreshold={0.3}
                             ListFooterComponent={isFetchingNextPage ?
+                                <ActivityIndicator size="small" color={Colors.primaryColor}/> : null}
+                        />
+
+
+
+                </View>
+            </IF>
+            <IF condition={tabIndex == 1}>
+                <View style={styles.listWrap}>
+
+
+
+
+                    {
+
+
+
+                        <FlatList
+                            ListHeaderComponent={renderHeaderItem}
+                            ListHeaderComponentStyle={{
+
+                                alignItems: 'center',
+                                width: '100%'
+                            }
+                            }
+
+                            refreshing={isLoading}
+                            onRefresh={refetch}
+                            scrollEnabled
+                            showsVerticalScrollIndicator={false}
+                            data={allMyCommunities?.pages[0]?.data?.result?.slice(0, 8)}
+                            renderItem={renderItem}
+                            onEndReached={loadMore}
+                            keyExtractor={keyExtractor}
+                            onEndReachedThreshold={0.3}
+                            ListFooterComponent={loading ?
                                 <ActivityIndicator size="small" color={Colors.primaryColor}/> : null}
                         />
                     }
@@ -327,7 +417,7 @@ const styles = StyleSheet.create({
     safeArea: {
         width: '100%',
         flex: 1,
-alignItems:'center',
+        alignItems: 'center',
         backgroundColor: "#fff",
         paddingBottom: Platform.OS === 'ios' ? -40 : 0
     },

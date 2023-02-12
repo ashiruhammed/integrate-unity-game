@@ -135,3 +135,13 @@ export function useRefreshOnFocus<T>(refetch: () => Promise<T>) {
         }, [refetch])
     )
 }
+
+
+export function isLessThan24HourAgo(date: number) {
+    // 👇️                    hour  min  sec  milliseconds
+    const twentyFourHrInMs = 24 * 60 * 60 * 1000;
+
+    const twentyFourHoursAgo = Date.now() - twentyFourHrInMs;
+
+    return date > twentyFourHoursAgo && date <= Date.now();
+}
