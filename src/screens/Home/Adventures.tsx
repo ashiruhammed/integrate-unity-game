@@ -34,7 +34,7 @@ import AllEnrolledAdventure from '../adventure/components/EnrolledAdventure';
 const Adventures = ({navigation}: RootTabScreenProps<'Adventures'>) => {
 
 const dataSlice = useAppSelector(state => state.data)
-    const {missionName,theme} = dataSlice
+    const {adventure,theme} = dataSlice
     const [tabIndex, setTabIndex] = useState(0);
     const handleTabsChange = useCallback((index: SetStateAction<number>) => {
         setTabIndex(index);
@@ -60,6 +60,7 @@ const dataSlice = useAppSelector(state => state.data)
         navigation.navigate('AdventureHome')
     }
 
+
     return (
         <SafeAreaView style={[styles.safeArea,{
             backgroundColor
@@ -77,7 +78,9 @@ const dataSlice = useAppSelector(state => state.data)
                 }}
             >
                 <View style={styles.backDrop}>
-                    <View style={styles.modalContainer}>
+                    <View style={[styles.modalContainer,{
+                        backgroundColor
+                    }]}>
 
                         <View style={styles.sheetHead}>
 
@@ -91,20 +94,23 @@ const dataSlice = useAppSelector(state => state.data)
                         <View style={styles.modalBody}>
                             <View style={styles.dripImageWrap}>
                                 <Image
-                                    source={{uri: 'https://res.cloudinary.com/dijyr3tlg/image/upload/v1673304924/drip_znhu2i.png'}}
+                                    source={{uri:adventure?.badge?.imageUrl}}
                                     style={styles.dripImage}/>
                             </View>
 
 
                             <View style={styles.textWrap}>
-                                <Text style={styles.missionText}>
-                                    Mission 1
-                                </Text>
+                               {/* <Text style={styles.missionText}>
+                                    Mission {adventure?._count?.modules}
+                                </Text>*/}
 
                                 <Text style={[styles.learnText,{
-                                    textAlign:'center'
+                                    textAlign:'center',
+                                    color:textColor,
+                                    lineHeight:heightPixel(22),
+                                    textTransform:'capitalize'
                                 }]}>
-                                    {missionName}
+                                    {adventure?.name}
                                 </Text>
                             </View>
 
@@ -114,12 +120,14 @@ const dataSlice = useAppSelector(state => state.data)
                                         <AdventuresIcon/>
                                         <Text style={[styles.learnText, {
                                             marginLeft: 5,
+                                            color:textColor,
                                             fontFamily: Fonts.quickSandBold
-                                        }]}>5</Text>
+                                        }]}>{adventure?._count?.modules}</Text>
                                     </View>
 
                                     <Text style={[styles.missionText, {
-                                        fontSize: fontPixel(14)
+                                        fontSize: fontPixel(14),
+                                        color:textColor,
                                     }]}>
                                         Missions
                                     </Text>
@@ -134,13 +142,14 @@ const dataSlice = useAppSelector(state => state.data)
                                                    style={styles.clock}/>
                                         </View>
                                         <Text style={[styles.learnText, {
-
+                                            color:textColor,
                                             fontFamily: Fonts.quickSandBold
                                         }]}>5</Text>
                                     </View>
 
                                     <Text style={[styles.missionText, {
-                                        fontSize: fontPixel(14)
+                                        fontSize: fontPixel(14),
+                                        color:textColor,
                                     }]}>
                                         Minutes
                                     </Text>
@@ -199,12 +208,9 @@ const dataSlice = useAppSelector(state => state.data)
 
 
                             <View style={styles.textWrap}>
-                                <Text style={styles.missionText}>
-                                    Mission 1
-                                </Text>
 
                                 <Text style={styles.learnText}>
-                                    {missionName}
+                                    {adventure?.name}
                                 </Text>
                             </View>
 
@@ -215,7 +221,7 @@ const dataSlice = useAppSelector(state => state.data)
                                         <Text style={[styles.learnText, {
                                             marginLeft: 5,
                                             fontFamily: Fonts.quickSandBold
-                                        }]}>5</Text>
+                                        }]}>{adventure?._count?.modules}</Text>
                                     </View>
 
                                     <Text style={[styles.missionText, {
@@ -358,7 +364,7 @@ const styles = StyleSheet.create({
 
     dripImage: {
 
-        resizeMode: 'center',
+        resizeMode: 'contain',
         width: "100%",
         height: "100%",
     },
@@ -375,6 +381,7 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.quicksandMedium
     },
     learnText: {
+        textAlign:'center',
         fontSize: fontPixel(16),
         color: Colors.light.text,
         fontFamily: Fonts.quickSandBold

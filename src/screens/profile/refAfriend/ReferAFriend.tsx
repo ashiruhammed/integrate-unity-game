@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 
-import {Text, View, StyleSheet, Platform, TouchableOpacity} from 'react-native';
+import {Text, View, StyleSheet, Share,Platform, TouchableOpacity} from 'react-native';
 import {SafeAreaView} from "react-native-safe-area-context";
 import {ScrollView} from "react-native-gesture-handler";
 import {fontPixel, heightPixel, pixelSizeVertical, widthPixel} from "../../../helpers/normalize";
@@ -13,7 +13,9 @@ import * as Clipboard from "expo-clipboard";
 import {useQuery} from "@tanstack/react-query";
 import {generateReferralCode} from "../../../action/action";
 import {useAppSelector} from "../../../app/hooks";
-import {truncate} from "../../../helpers";
+import {truncate, truncateString} from "../../../helpers";
+import Toast from "../../../components/Toast";
+import {unSetResponse} from "../../../app/slices/userSlice";
 
 
 const ReferAFriend = () => {
@@ -22,7 +24,7 @@ const ReferAFriend = () => {
     const dataSlice = useAppSelector(state => state.data)
     const user = useAppSelector(state => state.user)
     const {theme} = dataSlice
-    const {userData} = user
+    const {userData,responseMessage, responseType, responseState} = user
     const [copied, setCopied] = useState(false);
     const animation = useRef(null);
     useEffect(() => {
@@ -33,10 +35,6 @@ const ReferAFriend = () => {
 
     const {isLoading, data} = useQuery(['generateReferralCode'], generateReferralCode)
 
-    const inviteAFriend = () => {
-
-    }
-
 
     const backgroundColor = theme == 'light' ? "#fff" : Colors.dark.background
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
@@ -45,10 +43,48 @@ const ReferAFriend = () => {
         setCopied(true)
     };
 
+    const onShare = async () => {
+        try {
+            const result = await Share.share({
+                message: `Hello, ${userData?.username} is inviting you to join Gateway using the referral link https://www.gatewayapp.co/auth/sign-up?ref=@${userData?.username}`,
+            });
+            if (result.action === Share.sharedAction) {
+                if (result.activityType) {
+                    // shared with activity type of result.activityType
+                } else {
+                    // shared
+                }
+            } else if (result.action === Share.dismissedAction) {
+                // dismissed
+            }
+        } catch (error) {
+            alert(error.message);
+        }
+    };
+
+
+    useEffect(() => {
+
+        let time: NodeJS.Timeout | undefined;
+        if (responseState || responseMessage) {
+
+            time = setTimeout(() => {
+             setCopied(false)
+            }, 3000)
+
+        }
+        return () => {
+            clearTimeout(time)
+        };
+    }, [responseState, responseMessage])
+
+
+
     return (
         <SafeAreaView style={[styles.safeArea, {
             backgroundColor
         }]}>
+            <Toast message={"Referral link copied"} state={copied} type={'info'}/>
             <ScrollView
                 style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {
                 backgroundColor
@@ -77,11 +113,11 @@ const ReferAFriend = () => {
                     <View style={styles.copyItem}>
 
                         <Text style={styles.copyValue}>
-                            {userData?.username}
+                            {truncateString(`https://www.gatewayapp.co/auth/sign-up?ref=@${userData?.username}`,25)}
                         </Text>
                     </View>
 
-                    <TouchableOpacity onPress={() => copyToClipboard('https://www.gatewayapp.co/auth/sign-up?ref=@gatewaybot')} activeOpacity={0.8} style={styles.copyBtn}>
+                    <TouchableOpacity onPress={() => copyToClipboard(`https://www.gatewayapp.co/auth/sign-up?ref=@${userData?.username}`)} activeOpacity={0.8} style={styles.copyBtn}>
                         <Text style={styles.btnText}>COPY</Text>
                     </TouchableOpacity>
                 </View>
@@ -98,7 +134,7 @@ const ReferAFriend = () => {
 
                 </View>
 
-                <RectButton onPress={inviteAFriend} style={{marginTop: 30, width: 160}}>
+                <RectButton onPress={onShare} style={{marginTop: 30, width: 160}}>
                     <Text style={styles.buttonText}>
                         Invite Now
 
@@ -113,6 +149,7 @@ const styles = StyleSheet.create({
     safeArea: {
         width: '100%',
         flex: 1,
+        alignItems:'center',
         paddingBottom: Platform.OS === 'ios' ? -40 : 0
     },
     scrollView: {
@@ -128,7 +165,7 @@ const styles = StyleSheet.create({
 
     },
     copyBoxy: {
-        width: widthPixel(220),
+        width: widthPixel(240),
         borderRadius: 30,
         height: heightPixel(45),
         alignItems: 'center',
@@ -139,12 +176,12 @@ const styles = StyleSheet.create({
 
     },
     copyValue: {
-        fontSize: fontPixel(16),
+        fontSize: fontPixel(12),
         fontFamily: Fonts.quickSandBold,
         color: Colors.light.text
     },
     copyItem: {
-        width: '65%',
+        width: '70%',
         height: '100%',
         alignItems: 'center',
         justifyContent: 'center'

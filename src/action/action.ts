@@ -448,6 +448,35 @@ export const userNotifications = {
         ])
     }
 }
+export const referralDashboard = {
+
+    referrals: async ({pageParam = 1}: { pageParam?: number }) => {
+        let Token = await SecureStore.getItemAsync('Gateway-Token');
+        // console.log(Token)
+        let timeoutId: NodeJS.Timeout
+        const myHeaders = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${Token}`
+        }
+
+        const requestOptions = {
+            method: 'GET',
+            headers: myHeaders,
+        };
+
+        return Promise.race([
+            fetch(`${BASE_URL}/referral/dashboard`, requestOptions)
+                .then(response => response.json()),
+            new Promise((resolve, reject) => {
+                timeoutId = setTimeout(() => reject(new Error('Timeout')), 15000)
+
+            }).then(() => {
+                clearTimeout(timeoutId)
+            })
+
+        ])
+    }
+}
 
 export const getUserDashboard = async () => {
 

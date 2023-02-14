@@ -1,4 +1,4 @@
-import React, {SetStateAction, Dispatch, useCallback, useMemo, useRef, useState, useEffect} from 'react';
+import React, {SetStateAction, Dispatch, useCallback, useMemo, useRef, useState, useEffect, memo} from 'react';
 
 import {
     Text,
@@ -36,7 +36,7 @@ import {
     getAdventure,
     getAdventureReviews,
     getLessonsByModule,
-    getModuleByAdventure, getModuleTask, getNextAdventure,
+    getModuleByAdventure, getModuleTask, getNextAdventure, getQuizByLesson,
     startAdventure, submitTask
 } from "../../action/action";
 import {useRefreshOnFocus} from "../../helpers";
@@ -51,7 +51,7 @@ import Animated, {
     FadeOutRight,
     Layout
 } from 'react-native-reanimated';
-import YoutubePlayer from "react-native-youtube-iframe";
+
 import {setResponse, unSetResponse} from "../../app/slices/userSlice";
 import Toast from "../../components/Toast";
 import FastImage from "react-native-fast-image";
@@ -59,14 +59,7 @@ import Constants from "expo-constants";
 import * as WebBrowser from 'expo-web-browser';
 
 
-
-
 const dimensionsForScreen = Dimensions.get('screen');
-const formSchema = yup.object().shape({
-   // twitterName: yup.string().required('Twitter username is required'),
-   // IGName: yup.string().required('Instagram username is required'),
-    munaName: yup.string().required('Username or email is required'),
-});
 
 interface cardProps {
     title: string,
@@ -227,21 +220,10 @@ const AdventureHome = ({navigation}: RootStackScreenProps<'AdventureHome'>) => {
     const [lessonId, setLessonId] = useState('');
 
     const {responseState, responseType, responseMessage} = user
-    const {missionId} = dataSlice
-    const [terms, setTerms] = useState(false);
-    const [download, setDownload] = useState(false);
-    const [joinDiscord, setJoinDiscord] = useState(false);
-    const video = React.useRef(null);
-    const [status, setStatus] = React.useState({});
+    const {missionId, adventure} = dataSlice
 
 
     const sheetRef = useRef<BottomSheet>(null);
-
-    const _handlePressButtonAsync = async (url:string) => {
-        let result = await WebBrowser.openBrowserAsync(url);
-
-    };
-
 
 
     // variables
@@ -282,28 +264,25 @@ const AdventureHome = ({navigation}: RootStackScreenProps<'AdventureHome'>) => {
         setTabIndex(index);
     }, [tabIndex]);
 
-
-    const {data:task,mutate:getTask,isLoading:gettingTask} = useMutation(['getModuleTask'],getModuleTask,{
-        onSuccess:(data)=>{
-
-
-            if(data.success){
-                handleSnapPress(1)
-            }else {
-                 navigation.navigate('VideoScreen', {
-                     lessonId
-                 })
-            }
-        }
-    })
+    const {
+        isLoading,
+        data,
+        refetch,
+        isRefetching,
+        isFetching
+    } = useQuery(['getAdventure'], () => getAdventure(adventure?.id))
 
 
     const {mutate: startAdventureNow, isLoading: startingAdventure} = useMutation(['startAdventure'], startAdventure, {
         onSuccess: (data) => {
-//console.log(data)
+
             if (data.success) {
-                getTask(data?.data?.currentLesson.moduleId)
-                setLessonId(data?.data?.currentLesson?.id)
+               // console.log(data)
+                navigation.navigate('VideoScreen', {
+                    lessonId: data?.data?.currentLessonId,
+                    adventureId: data?.data?.id
+                })
+
             } else {
                 dispatch(setResponse({
                     responseMessage: data.message,
@@ -317,46 +296,16 @@ const AdventureHome = ({navigation}: RootStackScreenProps<'AdventureHome'>) => {
         }
     })
 
-    const {mutate: submitTaskNow, isLoading: submittingTask} = useMutation(['submitTask'], submitTask, {
-        onSuccess: (data) => {
-//console.log(data)
-            if (data.success) {
-         handleClosePressForm()
-                handleClosePress()
-                navigation.navigate('VideoScreen', {
-                    lessonId
-                })
-
-            } else {
-                dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'error',
-                }))
-            }
-        },
-        onError:(error)=>{
-            console.log(error)
-        },
-        onSettled: () => {
-            queryClient.invalidateQueries(['submitTask']);
-        }
-    })
-
-
-    const {isLoading, data, refetch, isRefetching, isFetching} = useQuery(['getAdventure'], () => getAdventure(missionId))
-
-
 
     const {isLoading: loadingReviews, data: reviews, refetch: fetchReviews} = useQuery(['getAdventureReviews'],
-        () => getAdventureReviews(data?.data?.id), {
-            enabled: !!data?.data?.id
+        () => getAdventureReviews(adventure?.id), {
+            enabled: !!adventure?.id
         })
 
 
     const {isLoading: loadingModules, data: modules, refetch: fetchModules} = useQuery(['getModuleByAdventure'],
-        () => getModuleByAdventure(data?.data?.id), {
-            enabled: !!data?.data?.id
+        () => getModuleByAdventure(adventure?.id), {
+            enabled: !!adventure?.id
         })
 
     const {isLoading: loadingLessons, data: lessons, refetch: fetchLessons} = useQuery(['getLessonsByModule'],
@@ -365,56 +314,15 @@ const AdventureHome = ({navigation}: RootStackScreenProps<'AdventureHome'>) => {
         })
 
 
-//console.log("reviews")
+
 
     // renders
-    const renderBackdrop = useCallback(
-        (props: JSX.IntrinsicAttributes & BottomSheetDefaultBackdropProps) => (
-            <BottomSheetBackdrop
-                style={{
-                    backgroundColor: 'rgba(25,25,25,0.34)'
-                }}
-                {...props}
-                disappearsOnIndex={0}
-                appearsOnIndex={1}
-            />
-        ),
-        []
-    );
 
     const nextSheet = () => {
         handleClosePress()
         handleSnapPressForm(1)
     }
 
-    const {
-        resetForm,
-        handleChange, handleSubmit, handleBlur,
-        setFieldValue,
-        isSubmitting,
-        setSubmitting,
-        values,
-        errors,
-        touched,
-        isValid
-    } = useFormik({
-        validationSchema: formSchema,
-        initialValues: {
-
-
-            munaName: '',
-
-        },
-        onSubmit: (values) => {
-            const {munaName} = values;
-            const data = JSON.stringify({
-                response:munaName
-            })
-            submitTaskNow({id:task?.data?.id, body:data})
-
-
-        }
-    });
 
     const goBack = () => {
         navigation.goBack()
@@ -423,7 +331,7 @@ const AdventureHome = ({navigation}: RootStackScreenProps<'AdventureHome'>) => {
 
     const startQuiz = () => {
         if (!loadingModules && modules) {
-            startAdventureNow(missionId)
+            startAdventureNow(adventure?.id)
         }
 //navigation.navigate('VideoScreen')
         /* navigation.navigate('QuizScreen',{
@@ -431,27 +339,19 @@ const AdventureHome = ({navigation}: RootStackScreenProps<'AdventureHome'>) => {
          })*/
         // handleSnapPress(1)
     }
-
+useRefreshOnFocus(refetch)
     const nextQuiz = () => {
-      /*  if (!loadingModules && modules) {
-            nexAdventure(missionId)
-        }*/
-        //5b43c812-029b-467d-8d0f-b41f6a02dfa0
-        // handleSnapPress(1)
-        /*  navigation.navigate('QuizScreen', {
 
-             lessonId:'5b43c812-029b-467d-8d0f-b41f6a02dfa0'
-          })
-  */
 
         navigation.navigate('VideoScreen', {
             lessonId: data?.data?.userAdventure?.currentLessonId,
-            adventureId:missionId
+            adventureId: data?.data?.id
         })
 
 
     }
 
+    const {} = useQuery(['getQuizByLesson'], () => getQuizByLesson(data?.data?.userAdventure?.currentLessonId))
 
 
     useEffect(() => {
@@ -461,7 +361,7 @@ const AdventureHome = ({navigation}: RootStackScreenProps<'AdventureHome'>) => {
 
     }, [currentIndex]);
 
-    useRefreshOnFocus(refetch)
+
     useRefreshOnFocus(fetchModules)
     useRefreshOnFocus(fetchReviews)
 
@@ -486,7 +386,6 @@ const AdventureHome = ({navigation}: RootStackScreenProps<'AdventureHome'>) => {
     }, [responseState, responseMessage])
 
 
-    // console.log(modules?.data?.result)
     return (
 
         <>
@@ -506,471 +405,174 @@ const AdventureHome = ({navigation}: RootStackScreenProps<'AdventureHome'>) => {
 
                     <View style={styles.videoContainer}>
 
-                        {
-                            isRunningInExpoGo ?
-                                <Image
-                                    style={styles.adventureCard}
-                                    source={{
-                                        uri: data?.data?.imageUrl ,
 
-                                    }}
-                                />
-                                :
                         <FastImage
                             style={styles.adventureCard}
                             source={{
-                                uri: data?.data?.imageUrl,
+                                uri: adventure?.imageUrl,
                                 cache: FastImage.cacheControl.web,
                                 priority: FastImage.priority.normal,
                             }}
                             resizeMode={FastImage.resizeMode.contain}
                         />
 
-                        }
-
-                        {/* <YoutubePlayer
-                                width={dimensionsForScreen.width}
-                                height={150}
-
-                                play={playing}
-                                videoId={"gh4TGfVJW7s"}
-                                onChangeState={onStateChange}
-                            />*/}
 
                     </View>
 
                 </View>
-
-                {
+                {/*
+          {
                     isFetching && <ActivityIndicator size="large" color={Colors.primaryColor}
                                                      style={[StyleSheet.absoluteFill, {
                                                          zIndex: 10,
                                                          backgroundColor: 'rgba(0,0,0,0.5)'
                                                      }]}/>
-                }
-                {
-                    gettingTask && <ActivityIndicator size="large" color={Colors.primaryColor}
-                                                     style={[StyleSheet.absoluteFill, {
-                                                         zIndex: 10,
-                                                         backgroundColor: '#fff'
-                                                     }]}/>
-                }
-                {
-                    !isLoading &&
-
-                    <View style={styles.container}>
+                }*/}
 
 
-                        <ScrollView
-                            style={{width: '100%',}} contentContainerStyle={styles.scrollView} scrollEnabled
-                            showsVerticalScrollIndicator={false}>
-                            <View style={styles.details}>
-                                <View style={styles.cardBottom}>
+                <View style={styles.container}>
 
-                                    <View style={styles.cardBottomLeft}>
 
-                                        <Text onPress={()=>navigation.navigate('LeaveReview',{
-                                            adventureId:missionId
-                                        })} style={[styles.cardBottomLeftText, {}]}>
-                                            {data?.data?.name}
-                                        </Text>
-                                        <Text style={styles.cardTextSmall}>
-                                            {modules?.data?.result?.length} missions
-                                        </Text>
-                                    </View>
-                                    <View style={styles.cardTopLeft}>
-                                        <FontAwesome5 name="gift" size={16} color={Colors.success}/>
-                                        <Text style={styles.cardTopLeftText}>
-                                            {data?.data?.rewardPoint} Reward Points
-                                        </Text>
-                                    </View>
+                    <ScrollView
+                        style={{width: '100%',}} contentContainerStyle={styles.scrollView} scrollEnabled
+                        showsVerticalScrollIndicator={false}>
+                        <View style={styles.details}>
+                            <View style={styles.cardBottom}>
+
+                                <View style={styles.cardBottomLeft}>
+
+                                    <Text onPress={() => navigation.navigate('LeaveReview', {
+                                        adventureId: missionId
+                                    })} style={[styles.cardBottomLeftText, {}]}>
+                                        {adventure?.name}
+                                    </Text>
+                                    <Text style={styles.cardTextSmall}>
+                                        {modules?.data?.result?.length} missions
+                                    </Text>
+                                </View>
+                                <View style={styles.cardTopLeft}>
+                                    <FontAwesome5 name="gift" size={16} color={Colors.success}/>
+                                    <Text style={styles.cardTopLeftText}>
+                                        {adventure?.rewardPoint} Reward Points
+                                    </Text>
                                 </View>
                             </View>
+                        </View>
 
-                            <SegmentedControl tabs={["About", "Missions", "Reviews"]}
-                                              currentIndex={tabIndex}
-                                              onChange={handleTabsChange}
-                                              segmentedControlBackgroundColor={"#0E0E0E"}
-                                              activeSegmentBackgroundColor={Colors.primaryColor}
-                                              activeTextColor={"#fff"}
-                                              textColor={"#fff"}
-                                              paddingVertical={pixelSizeVertical(10)}/>
+                        <SegmentedControl tabs={["About", "Missions", "Reviews"]}
+                                          currentIndex={tabIndex}
+                                          onChange={handleTabsChange}
+                                          segmentedControlBackgroundColor={"#0E0E0E"}
+                                          activeSegmentBackgroundColor={Colors.primaryColor}
+                                          activeTextColor={"#fff"}
+                                          textColor={"#fff"}
+                                          paddingVertical={pixelSizeVertical(10)}/>
 
-                            <View style={styles.cardContainer}>
-                                <IF condition={tabIndex == 0}>
+                        <View style={styles.cardContainer}>
+                            <IF condition={tabIndex == 0}>
 
-                                    <AboutCard title={"What to Expect"} message={data?.data?.expectations}/>
-                                    <AboutCard title="What to Gain" message={data?.data?.gains}/>
+                                <AboutCard title={"What to Expect"} message={adventure?.expectations}/>
+                                <AboutCard title="What to Gain" message={adventure?.gains}/>
 
-                                    <AboutCard title="What to Earn" message={data?.data?.earnings}/>
+                                <AboutCard title="What to Earn" message={adventure?.earnings}/>
 
-                                </IF>
+                            </IF>
 
-                                <IF condition={tabIndex == 1}>
-                                    {loadingModules
-                                        && <ActivityIndicator size='small' color={Colors.primaryColor}/>
+                            <IF condition={tabIndex == 1}>
+                                {loadingModules
+                                    && <ActivityIndicator size='small' color={Colors.primaryColor}/>
+                                }
+
+                                {
+                                    !loadingModules && modules && modules?.data?.result?.map((({
+                                                                                                   id,
+                                                                                                   name,
+                                                                                                   description
+                                                                                               }) => (
+                                        <MissionCard loadingLessons={loadingLessons} index={id}
+                                                     lessons={lessons?.data?.result} setCurrentIndex={setCurrentIndex}
+                                                     currentIndex={currentIndex} key={id} name={name}
+                                                     description={description}/>
+                                    )))
+
+                                }
+
+                            </IF>
+                            <IF condition={tabIndex == 2}>
+                                {loadingReviews
+                                    && <ActivityIndicator size='small' color={Colors.primaryColor}/>
+                                }
+                                {
+                                    !loadingReviews && reviews && reviews?.data?.map((({
+                                                                                           id,
+                                                                                           text,
+                                                                                           user,
+                                                                                           updatedAt,
+                                                                                           rating
+                                                                                       }) => (
+                                        <ReviewCard key={id} text={text} userName={user?.fullName}
+                                                    updatedAt={updatedAt} rating={rating}/>
+                                    )))
+                                }
+
+
+                            </IF>
+                        </View>
+
+
+                        {
+                            data?.data?.startedAdventure ?
+                                <RectButton disabled={data?.data?.userAdventure?.status == 'COMPLETED' || isLoading}
+                                            onPress={nextQuiz} style={{
+                                    width: widthPixel(200),
+                                    position: 'absolute',
+                                    bottom: 5
+                                }}>
+                                    {
+                                        isLoading &&
+                                        <ActivityIndicator size='small' color={"#fff"}/>
                                     }
 
                                     {
-                                        !loadingModules && modules && modules?.data?.result?.map((({
-                                                                                                       id,
-                                                                                                       name,
-                                                                                                       description
-                                                                                                   }) => (
-                                            <MissionCard loadingLessons={loadingLessons} index={id}
-                                                         lessons={lessons?.data?.result} setCurrentIndex={setCurrentIndex}
-                                                         currentIndex={currentIndex} key={id} name={name}
-                                                         description={description}/>
-                                        )))
-
-                                    }
-
-                                </IF>
-                                <IF condition={tabIndex == 2}>
-                                    {loadingReviews
-                                        && <ActivityIndicator size='small' color={Colors.primaryColor}/>
-                                    }
-                                    {
-                                        !loadingReviews && reviews && reviews?.data?.map((({
-                                                                                               id,
-                                                                                               text,
-                                                                                               user,
-                                                                                               updatedAt,
-                                                                                               rating
-                                                                                           }) => (
-                                            <ReviewCard key={id} text={text} userName={user?.fullName}
-                                                        updatedAt={updatedAt} rating={rating}/>
-                                        )))
-                                    }
-
-
-                                </IF>
-                            </View>
-
-
-                            {
-                                data?.data?.startedAdventure ?
-                                    <RectButton disabled={data?.data?.userAdventure?.status == 'COMPLETED'} onPress={nextQuiz} style={{
-                                        width: widthPixel(200),
-                                        position: 'absolute',
-                                        bottom: 5
-                                    }}>
-
-
-                                        {
-
+                                       !isLoading &&
                                             data?.data?.userAdventure?.status == 'COMPLETED' ?
-                                                <Text style={styles.buttonText}>
-                                                    Completed
+                                            <Text style={styles.buttonText}>
+                                                Completed
 
-                                                </Text>
-                                                :
-                                                <Text style={styles.buttonText}>
-                                                    Continue
+                                            </Text>
+                                            :
+                                            <Text style={styles.buttonText}>
+                                                Continue
 
-                                                </Text>
-                                        }
-                                    </RectButton>
+                                            </Text>
 
-                                    :
+                                    }
+                                </RectButton>
 
-                                    <RectButton onPress={startQuiz} disabled={startingAdventure} style={{
-                                        width: widthPixel(200),
-                                        position: 'absolute',
-                                        bottom: 5
-                                    }}>
-                                        {
-                                            startingAdventure ? <ActivityIndicator size='small' color="#fff"/> :
+                                :
 
-                                                <Text style={styles.buttonText}>
-                                                    Start Mission
+                                <RectButton onPress={startQuiz} disabled={startingAdventure} style={{
+                                    width: widthPixel(200),
+                                    position: 'absolute',
+                                    bottom: 5
+                                }}>
+                                    {
+                                        startingAdventure ? <ActivityIndicator size='small' color="#fff"/> :
 
-                                                </Text>
-                                        }
-                                    </RectButton>
-                            }
+                                            <Text style={styles.buttonText}>
+                                                Start Mission
 
-                        </ScrollView>
-                    </View>
-                }
+                                            </Text>
+                                    }
+                                </RectButton>
+                        }
+
+                    </ScrollView>
+                </View>
+
             </SafeAreaView>
 
 
-            <Portal>
-
-                <BottomSheet
-                    index={0}
-
-                    handleIndicatorStyle={Platform.OS == 'android' && {display: 'none'}}
-                    backdropComponent={renderBackdrop}
-                    ref={sheetRef}
-                    snapPoints={snapPoints}
-
-                >
-                    <BottomSheetView style={styles.sheetContainer}>
-
-                        {
-                            Platform.OS == 'android' &&
-
-                            <View style={styles.sheetHead}>
-
-                                <TouchableOpacity activeOpacity={0.8} onPress={() => handleClosePress()}
-                                                  style={styles.dismiss}>
-                                    <Ionicons name="ios-close" size={24} color="black"/>
-                                </TouchableOpacity>
-
-                            </View>
-                        }
-                        <View style={styles.sheetBody}>
-
-                            <View style={styles.sheetHeadRow}>
-                                <Text style={styles.sheetHeadText}>
-                                    Complete these tasks and
-                                    earn points
-                                </Text>
-
-                                <Text style={styles.sheetHeadTextNumber}>
-01
-                                </Text>
-                            </View>
-
-                            <Text style={styles.sheetHeadTextSmall}>
-
-                            </Text>
-
-
-                        </View>
-
-                        <View style={[styles.checks,{
-                            alignItems:'center',
-
-                        }]}>
-
-
-
-                                <View style={styles.descriptionTxt}>
-                                    <Text style={{
-                                        color: terms ? "#1579E4" : Colors.light.text,
-                                        fontFamily: Fonts.quicksandRegular,
-                                        lineHeight: heightPixel(20)
-                                    }}>
-                                        {task?.data?.description}
-                                    </Text>
-                                </View>
-
-                            <Pressable onPress={() =>_handlePressButtonAsync(task?.data?.linkUrl)} style={{marginTop:10}}>
-                            <Text style={{
-                                color: "#1579E4",
-                                fontFamily: Fonts.quickSandBold,
-                                lineHeight: heightPixel(20)
-                            }}>
-                                link
-                            </Text>
-                            </Pressable>
-                           {/* <TouchableOpacity activeOpacity={0.9} onPress={() => setJoinDiscord(!joinDiscord)}
-                                              style={styles.terms}>
-                                <View style={styles.checkboxContainer}>
-
-
-                                    <Checkbox
-                                        style={{
-                                            width: 15,
-                                            height: 15,
-                                        }}
-                                        // style={styles.checkbox}
-                                        value={joinDiscord}
-                                        onValueChange={(value) => setJoinDiscord(value)}
-                                        color={joinDiscord ? "#1579E4" : undefined}
-                                    />
-                                </View>
-
-
-                                <View style={styles.termsText}>
-                                    <Text style={{
-                                        color: joinDiscord ? "#1579E4" : Colors.light.text,
-                                        fontFamily: Fonts.quicksandRegular,
-                                        lineHeight: heightPixel(20)
-                                    }}>
-                                        Join our discord group @gatewaydiscord
-                                    </Text>
-                                </View>
-                            </TouchableOpacity>
-
-
-                            <TouchableOpacity activeOpacity={0.9} onPress={() => setDownload(!download)} style={styles.terms}>
-                                <View style={styles.checkboxContainer}>
-
-
-                                    <Checkbox
-                                        style={{
-                                            width: 15,
-                                            height: 15,
-                                        }}
-                                        // style={styles.checkbox}
-                                        value={download}
-                                        onValueChange={(value) => setDownload(value)}
-                                        color={download ? "#1579E4" : undefined}
-                                    />
-                                </View>
-
-
-                                <View style={styles.termsText}>
-                                    <Text style={{
-                                        color: download ? "#1579E4" : Colors.light.text,
-                                        fontFamily: Fonts.quicksandRegular,
-                                        lineHeight: heightPixel(20)
-                                    }}>
-                                        Download Muna from Google Playstore
-                                        or App Store
-                                    </Text>
-                                </View>
-                            </TouchableOpacity>
-
-                       */}
-                        </View>
-
-                        <RectButton onPress={nextSheet} style={{
-                            width: 200,
-
-                        }}>
-                            <Text style={{
-                                position: 'absolute',
-                                fontSize: fontPixel(16),
-                                color: "#fff",
-                                fontFamily: Fonts.quickSandBold
-                            }}>
-                                Continue
-
-                            </Text>
-
-                        </RectButton>
-
-                    </BottomSheetView>
-                </BottomSheet>
-
-
-                <BottomSheet
-                    index={0}
-                    keyboardBehavior={"interactive"}
-                    handleIndicatorStyle={Platform.OS == 'android' && {display: 'none'}}
-                    backdropComponent={renderBackdrop}
-                    ref={sheetFormRef}
-                    snapPoints={snapPointsForm}
-
-                >
-                    <BottomSheetView style={styles.sheetContainer}>
-
-                        {
-                            Platform.OS == 'android' &&
-
-                            <View style={styles.sheetHead}>
-
-                                <TouchableOpacity activeOpacity={0.8} onPress={() => handleClosePress()}
-                                                  style={styles.dismiss}>
-                                    <Ionicons name="ios-close" size={24} color="black"/>
-                                </TouchableOpacity>
-
-                            </View>
-                        }
-                        <View style={styles.sheetBody}>
-
-                            <View style={styles.sheetHeadRow}>
-                                <Text style={styles.sheetHeadText}>
-                                    Submit your information
-                                </Text>
-
-                                <Text style={styles.sheetHeadTextNumber}>
-                                    02
-                                </Text>
-                            </View>
-
-                            <Text style={styles.sheetHeadTextSmall}>
-                                We need these information to verify if your
-                                tasks were completed.
-                            </Text>
-
-
-                        </View>
-
-                        <View style={styles.sheetFormContainer}>
-
-                            {/*<BottomSheetTextInput
-                                placeholder="@"
-                                label={"Your Twitter Username"}
-                                keyboardType={"default"}
-                                touched={touched.twitterName}
-                                error={touched.twitterName && errors.twitterName}
-
-                                onChangeText={(e) => {
-                                    handleChange('twitterName')(e);
-                                }}
-                                onBlur={(e) => {
-                                    handleBlur('twitterName')(e);
-
-                                }}
-                                value={values.twitterName}
-                            />*/}
-
-                           {/* <BottomSheetTextInput
-                                placeholder="@"
-                                label={"Your Instagram Username"}
-                                keyboardType={"default"}
-                                touched={touched.IGName}
-                                error={touched.IGName && errors.IGName}
-
-                                onChangeText={(e) => {
-                                    handleChange('IGName')(e);
-                                }}
-                                onBlur={(e) => {
-                                    handleBlur('IGName')(e);
-
-                                }}
-                                value={values.IGName}
-                            />*/}
-                            <BottomSheetTextInput
-                                placeholder="@"
-                                label={"Your handle / email"}
-                                keyboardType={"default"}
-                                touched={touched.munaName}
-                                error={touched.munaName && errors.munaName}
-
-                                onChangeText={(e) => {
-                                    handleChange('munaName')(e);
-                                }}
-                                onBlur={(e) => {
-                                    handleBlur('munaName')(e);
-
-                                }}
-                                value={values.munaName}
-                            />
-
-                        </View>
-
-                        <RectButton onPress={() => handleSubmit()} disabled={!isValid} style={{
-                            width: 200,
-
-                        }}>
-
-                            {
-                                submittingTask ? <ActivityIndicator size='small' color='#fff'/>
-                                    :
-
-                            <Text style={{
-                                position: 'absolute',
-                                fontSize: fontPixel(16),
-                                color: "#fff",
-                                fontFamily: Fonts.quickSandBold
-                            }}>
-                                Continue
-
-                            </Text>
-                            }
-                        </RectButton>
-
-                    </BottomSheetView>
-                </BottomSheet>
-
-            </Portal>
         </>
     );
 };
@@ -979,7 +581,7 @@ const styles = StyleSheet.create({
     safeArea: {
         width: '100%',
         flex: 1,
-        alignItems:'center',
+        alignItems: 'center',
         // paddingHorizontal: pixelSizeHorizontal(20),
         backgroundColor: "#0E0E0E",
     },
@@ -1062,7 +664,7 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     topViewWrap: {
-      //  zIndex: -30,
+        //  zIndex: -30,
 
         width: '100%',
         backgroundColor: "#ccc",
@@ -1090,7 +692,7 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.quicksandMedium
     },
     cardBottomLeft: {
-width:'90%',
+        width: '90%',
         height: 50,
         alignItems: 'flex-start',
         justifyContent: 'space-between',
@@ -1099,7 +701,7 @@ width:'90%',
         textTransform: 'capitalize',
         fontFamily: Fonts.quicksandSemiBold,
         color: "#fff",
-        lineHeight:heightPixel(20),
+        lineHeight: heightPixel(20),
         fontSize: fontPixel(14),
     },
     cardTextSmall: {
@@ -1221,7 +823,7 @@ width:'90%',
         alignItems: 'flex-start',
         justifyContent: 'flex-start'
     },
-    descriptionTxt:{
+    descriptionTxt: {
         width: '100%',
         alignItems: 'flex-start',
         justifyContent: 'flex-start'
@@ -1310,4 +912,4 @@ width:'90%',
 })
 
 
-export default AdventureHome;
+export default memo(AdventureHome);

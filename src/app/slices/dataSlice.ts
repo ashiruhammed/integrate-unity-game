@@ -16,7 +16,7 @@ export interface DataState {
     "submissions":SubmissionProps [
 
     ]
-
+    adventure:{},
     missionId: string,
     missionName: string,
     missions: string,
@@ -32,6 +32,9 @@ const initialState: DataState = {
       //  { questionId:'', optionIds:[""]}
        
     ],
+    adventure:{
+
+    },
     missionId: '',
     missionName: '',
     missions: '',
@@ -49,10 +52,8 @@ export const dataSlice = createSlice({
 
         },
         setAdventure: (state, action) => {
-            state.missionId = action.payload.missionId
-            state.missionName = action.payload.missionName
-            state.missions = action.payload.missions
-            state.modules = action.payload.modules
+            state.adventure = action.payload.adventure
+
 
         },
         UPDATE_SUBMISSIONS: (state, action) => {

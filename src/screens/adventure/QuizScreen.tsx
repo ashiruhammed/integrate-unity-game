@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import {
     Text,
@@ -9,7 +9,7 @@ import {
     Image,
     ActivityIndicator,
     Button,
-    Pressable, Modal, Alert
+    Pressable, Modal, Alert, Platform
 } from 'react-native';
 import {SafeAreaView} from "react-native-safe-area-context";
 import {RootStackScreenProps} from "../../../types";
@@ -18,7 +18,14 @@ import {AntDesign, FontAwesome5, Ionicons, Octicons} from "@expo/vector-icons";
 import {Fonts} from "../../constants/Fonts";
 import Colors from "../../constants/Colors";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
-import {getNextAdventure, getQuizByLesson, startAdventure, submitQuizAnswers} from "../../action/action";
+import {
+    getLesson, getLessonsByModule, getModuleTask,
+    getNextAdventure,
+    getQuizByLesson,
+    startAdventure,
+    submitQuizAnswers,
+    submitTask
+} from "../../action/action";
 import Animated, {
     Easing,
     FadeInDown,
@@ -38,6 +45,28 @@ import {RectButton} from "../../components/RectButton";
 import LottieView from "lottie-react-native";
 import {IF} from "../../helpers/ConditionJsx";
 import {StatusBar} from "expo-status-bar";
+import BottomSheet, {BottomSheetBackdrop, BottomSheetView} from "@gorhom/bottom-sheet";
+import BottomSheetTextInput from "../../components/inputs/BottomSheetTextInput";
+import {useFormik} from "formik";
+import * as WebBrowser from "expo-web-browser";
+import * as yup from "yup";
+import {
+    BottomSheetDefaultBackdropProps
+} from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
+
+
+
+
+const _handlePressButtonAsync = async (url:string) => {
+    let result = await WebBrowser.openBrowserAsync(url);
+
+};
+
+const formSchema = yup.object().shape({
+    // twitterName: yup.string().required('Twitter username is required'),
+    // IGName: yup.string().required('Instagram username is required'),
+    munaName: yup.string().required('Username or email is required'),
+});
 
 
 const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => {
@@ -46,7 +75,7 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
     const dispatch = useAppDispatch()
     const {lessonId, hasNextLesson, nextModuleId, isLastAdventureModule, isLastModuleLesson} = route.params
     const dataSlice = useAppSelector(state => state.data)
-    const {submissions, theme} = dataSlice
+    const {submissions, theme,adventure} = dataSlice
     const animation = useRef(null);
     const user = useAppSelector(state => state.user)
     const {responseState, responseType, responseMessage} = user
@@ -60,43 +89,84 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
     const borderColor = theme == 'light' ? "#DBDBDB" : Colors.dark.borderColor
     const optionBg = theme == 'light' ? "#fff" : "#141414"
-
+    const [terms, setTerms] = useState(false);
 //lessonId
+
+
+    const {isLoading:loadingNextLesson, data: nextLesson, mutate} = useMutation(['lesson'], getLesson,{
+        onSuccess:(data)=>{
+            if(data.success){
+               // console.log("THE NEXT LESSON IN THE NEXT MODULE")
+                navigation.navigate('VideoScreen', {
+                    lessonId: data.data.id,
+
+                })
+            }
+        }
+    })
+    const { data: currentLesson,refetch:fetchLesson} = useQuery(['lesson'], ()=>getLesson(lessonId))
 
     const {isLoading, data: lesson, refetch} = useQuery(['getQuizByLesson'], () => getQuizByLesson(lessonId))
 
+    const sheetRef = useRef<BottomSheet>(null);
+    // variables
+    const snapPoints = useMemo(() => ["1%", "70%"], []);
+    const handleSnapPress = useCallback((index: number) => {
+        sheetRef.current?.snapToIndex(index);
+    }, []);
+    const handleClosePress = useCallback(() => {
+        sheetRef.current?.close();
+    }, []);
+
+
+
+    const sheetFormRef = useRef<BottomSheet>(null);
+
+    // variables
+    const snapPointsForm = useMemo(() => ["1%", "70%"], []);
+    const handleSnapPressForm = useCallback((index: number) => {
+        sheetFormRef.current?.snapToIndex(index);
+    }, []);
+    const handleClosePressForm = useCallback(() => {
+        sheetFormRef.current?.close();
+    }, []);
+
+//console.log(adventure)
+
     const {
-        mutate: nextMission,
+        mutate: nextLevel,
         data: missionData,
         isLoading: loadingMission
     } = useMutation(['getNextMission'], getNextAdventure, {
         onSuccess: (data) => {
-           // console.log("NEXT MISSION")
+
+           // console.log(data)
+
+            //has next lesson ? get next lesson
+            //doesnt have next lesson ? get next module
+            //last adventure module ? show badge and end adventure
 
             if (data.success) {
 
-                if (data?.data?.hasNextLesson) {
-                    setModalVisible(true)
+                if (data.data.hasNextLesson) {
+                    //console.log("THIS IS GOES TO THE NEXT LESSON IN THIS MODULE")
                     navigation.navigate('VideoScreen', {
-                        lessonId: data?.data?.nextLessonId,
+                        lessonId: data.data.nextLessonId,
+
                     })
-                } else {
-                    setModalVisible(false)
-                    setBadgeModalVisible(true)
+                }else if(!data.data.isLastModuleLesson){
+                    //console.log("THIS IS GOING TO NEXT MODULE LESSON")
+                   mutate(data.data.nextLessonId)
+                }  else if (data.data.isLastAdventureModule){
+                   // console.log("THIS IS GET THE TASK TO COMPLETE ADVENTURE")
 
+                   getTask(currentLesson?.data?.moduleId)
+                    if(data.data.nextModuleId == '') {
+
+                        // getTask(currentLesson?.data?.moduleId)
+                    }
                 }
-                /*  navigation.navigate('QuizScreen', {
-                      lessonId: data?.data?.nextLessonId,
-                      nextModuleId: data?.data.nextModuleId,
-                      hasNextLesson: data.data.hasNextLesson,
-                      isLastAdventureModule: data.data.isLastAdventureModule,
-                      isLastModuleLesson: data.data.isLastModuleLesson
-                  })*/
             } else {
-
-
-                setModalVisible(false)
-                setBadgeModalVisible(false)
 
                 navigation.navigate('AdventureHome')
 
@@ -106,11 +176,71 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
                     responseType: 'error',
                 }))
             }
+
+
+
+
         },
         onSettled: () => {
             queryClient.invalidateQueries(['getNextMission']);
         }
     })
+
+
+
+    const {data:task,mutate:getTask,isLoading:gettingTask} = useMutation(['getModuleTask'],getModuleTask,{
+        onSuccess:(data)=>{
+
+//console.log("Fetching... task")
+
+            if(data.success){
+                handleSnapPress(1)
+            }else {
+              //  console.log("++++/+/++++/+/+THIS MEANS NO TASK HERE++++++++++")
+                setBadgeModalVisible(true)
+            }
+        }
+    })
+
+    const {isLoading: loadingLessons, data: lessons, mutate: fetchLessons} = useMutation(['getLessonsByModule'],
+        getLessonsByModule, {
+            onSuccess:(data)=>{
+                if(data.sucess){
+
+                    navigation.navigate('VideoScreen', {
+                        lessonId:data.result.id
+
+                    })
+                }
+            }
+        })
+
+    const {mutate: submitTaskNow, isLoading: submittingTask} = useMutation(['submitTask'], submitTask, {
+        onSuccess: (data) => {
+//console.log(data)
+            if (data.success) {
+                handleClosePressForm()
+                handleClosePress()
+              setBadgeModalVisible(true)
+
+            } else {
+                dispatch(setResponse({
+                    responseMessage: data.message,
+                    responseState: true,
+                    responseType: 'error',
+                }))
+            }
+        },
+        onError:(error)=>{
+            console.log(error)
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries(['submitTask']);
+        }
+    })
+
+
+
 
     const {mutate: submitAdventureNow, isLoading: submitting} = useMutation(['submitQuizAnswers'], submitQuizAnswers, {
         onSuccess: (data) => {
@@ -118,14 +248,16 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
             if (data.success) {
                 dispatch(clearSubmissions())
                 //   setModalVisible(true)
-                nextMission(lesson?.data?.lesson?.module?.adventure?.id)
+
+              //  console.log("ADVENTURE NEXT >>>>")
+                nextLevel(adventure.id)
                 dispatch(setResponse({
                     responseMessage: data.message,
                     responseState: true,
                     responseType: 'success',
                 }))
             } else {
-                nextMission(lesson?.data?.lesson?.module?.adventure?.id)
+                nextLevel(adventure.id)
                 dispatch(setResponse({
                     responseMessage: data.message,
                     responseState: true,
@@ -138,9 +270,42 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
         }
     })
 
-//
-//
 
+
+
+
+    const {
+        resetForm,
+        handleChange, handleSubmit, handleBlur,
+        setFieldValue,
+        isSubmitting,
+        setSubmitting,
+        values,
+        errors,
+        touched,
+        isValid
+    } = useFormik({
+        validationSchema: formSchema,
+        initialValues: {
+
+
+            munaName: '',
+
+        },
+        onSubmit: (values) => {
+            const {munaName} = values;
+            const data = JSON.stringify({
+                response:munaName
+            })
+            submitTaskNow({id:task?.data?.id, body:data})
+
+
+        }
+    });
+    const nextSheet = () => {
+        handleClosePress()
+        handleSnapPressForm(1)
+    }
 
     // console.log(data?.data?.questions[0])
     const goBack = () => {
@@ -184,6 +349,7 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
     }
 
     const submitQuestion = () => {
+
         if (selectedAnswer !== '') {
             const body = JSON.stringify({
                 "submissions": submissions
@@ -194,7 +360,7 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
 
 
     const goToNext = () => {
-        nextMission(lesson?.data?.lesson?.module?.adventure?.id)
+        nextLevel(adventure?.id)
 
     }
     const deleteAll = () => {
@@ -202,10 +368,26 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
     }
 
     const giveReview = () => {
+        setBadgeModalVisible(false)
         navigation.navigate('LeaveReview',{
             adventureId:lesson?.data?.lesson?.module?.adventure?.id
         })
     }
+
+    const renderBackdrop = useCallback(
+        (props: JSX.IntrinsicAttributes & BottomSheetDefaultBackdropProps) => (
+            <BottomSheetBackdrop
+                style={{
+                    backgroundColor: 'rgba(25,25,25,0.34)'
+                }}
+                {...props}
+                disappearsOnIndex={0}
+                appearsOnIndex={1}
+            />
+        ),
+        []
+    );
+
 
     useEffect(() => {
         // console.log(user)
@@ -222,7 +404,11 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
         };
     }, [responseState, responseMessage])
 
+
     useRefreshOnFocus(refetch)
+ //   useRefreshOnFocus(fetchLesson)
+
+
     return (
 
         <>
@@ -247,7 +433,24 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
                                        }]}/>
                 }
                 {
+                loadingNextLesson &&
+                    <ActivityIndicator size="large" color={Colors.primaryColor}
+                                       style={[StyleSheet.absoluteFill, {
+                                           zIndex: 1,
+                                           backgroundColor: 'rgba(0,0,0,0.1)'
+                                       }]}/>
+                }
+                {
                     loadingMission &&
+                    <ActivityIndicator size="large" color={Colors.primaryColor}
+                                       style={[StyleSheet.absoluteFill, {
+                                           zIndex: 1,
+                                           backgroundColor: 'rgba(0,0,0,0.1)'
+                                       }]}/>
+                }
+
+                {
+                    gettingTask &&
                     <ActivityIndicator size="large" color={Colors.primaryColor}
                                        style={[StyleSheet.absoluteFill, {
                                            zIndex: 1,
@@ -278,7 +481,7 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
                             </TouchableOpacity>
 
                         </View>*/}
-                            <IF condition={missionData?.data?.badge}>
+
 
 
                                 <View style={styles.modalBody}>
@@ -304,7 +507,7 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
                                     />
                                     <View style={styles.textWrap}>
                                         <Text style={styles.missionText}>
-                                            Mission Complete
+                                            Adventure Complete
                                         </Text>
 
                                         <Text style={[styles.learnText, {
@@ -344,58 +547,8 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
                                         </RectButton>
                                     </View>
                                 </View>
-                            </IF>
-                            <IF condition={!missionData?.data?.badge}>
-                                <View style={styles.modalBody}>
-                                    {/* <View style={styles.dripImageWrap}>
-                                    <Image
-                                        source={{uri: 'https://res.cloudinary.com/dijyr3tlg/image/upload/v1672951469/gateway/Group_151_cret7t.png'}}
-                                        style={styles.dripImage}/>
-                                </View>*/}
 
 
-                                    <View style={styles.textWrap}>
-                                        <Text style={styles.missionText}>
-                                            Quiz submitted
-                                        </Text>
-
-                                        <Text style={[styles.learnText, {
-                                            textAlign: 'center'
-                                        }]}>
-                                            You just earned 40 Reward Points
-                                        </Text>
-                                    </View>
-
-                                    <View style={styles.buttonRow}>
-
-
-                                       {/* <RectButton onPress={giveReview} style={{
-                                            width: 150,
-
-                                        }}>
-                                            <Text style={styles.buttonText}>
-                                                Leave a review
-
-                                            </Text>
-
-                                        </RectButton>*/}
-
-                                        <RectButton onPress={goToNext} style={{
-                                            width: 200,
-
-                                        }}>
-                                            {
-                                                loadingMission ? <ActivityIndicator size='small' color="#fff"/>
-                                                    :
-                                                    <Text style={styles.buttonText}>
-                                                        Next Mission
-
-                                                    </Text>
-                                            }
-                                        </RectButton>
-                                    </View>
-                                </View>
-                            </IF>
                         </View>
                     </View>
                 </Modal>
@@ -622,6 +775,190 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
 
 
             </SafeAreaView>
+
+
+
+
+            <BottomSheet
+                index={0}
+
+                handleIndicatorStyle={Platform.OS == 'android' && {display: 'none'}}
+                backdropComponent={renderBackdrop}
+                ref={sheetRef}
+                snapPoints={snapPoints}
+
+            >
+                <BottomSheetView style={styles.sheetContainer}>
+
+                    {
+                        Platform.OS == 'android' &&
+
+                        <View style={styles.sheetHead}>
+
+                            <TouchableOpacity activeOpacity={0.8} onPress={() => handleClosePress()}
+                                              style={styles.dismiss}>
+                                <Ionicons name="ios-close" size={24} color="black"/>
+                            </TouchableOpacity>
+
+                        </View>
+                    }
+                    <View style={styles.sheetBody}>
+
+                        <View style={styles.sheetHeadRow}>
+                            <Text style={styles.sheetHeadText}>
+                                Complete these tasks and
+                                earn points
+                            </Text>
+
+                            <Text style={styles.sheetHeadTextNumber}>
+                                01
+                            </Text>
+                        </View>
+
+                        <Text style={styles.sheetHeadTextSmall}>
+
+                        </Text>
+
+
+                    </View>
+
+                    <View style={[styles.checks,{
+                        alignItems:'center',
+
+                    }]}>
+
+
+
+                        <View style={styles.descriptionTxt}>
+                            <Text style={{
+                                color: terms ? "#1579E4" : Colors.light.text,
+                                fontFamily: Fonts.quicksandRegular,
+                                lineHeight: heightPixel(20)
+                            }}>
+                                {task?.data?.description}
+                            </Text>
+                        </View>
+
+                        <Pressable onPress={() =>_handlePressButtonAsync(task?.data?.linkUrl)} style={{marginTop:10}}>
+                            <Text style={{
+                                color: "#1579E4",
+                                fontFamily: Fonts.quickSandBold,
+                                lineHeight: heightPixel(20)
+                            }}>
+                                link
+                            </Text>
+                        </Pressable>
+
+                    </View>
+
+                    <RectButton onPress={nextSheet} style={{
+                        width: 200,
+
+                    }}>
+                        <Text style={{
+                            position: 'absolute',
+                            fontSize: fontPixel(16),
+                            color: "#fff",
+                            fontFamily: Fonts.quickSandBold
+                        }}>
+                            Continue
+
+                        </Text>
+
+                    </RectButton>
+
+                </BottomSheetView>
+            </BottomSheet>
+
+
+            <BottomSheet
+                index={0}
+                keyboardBehavior={"interactive"}
+                handleIndicatorStyle={Platform.OS == 'android' && {display: 'none'}}
+                backdropComponent={renderBackdrop}
+                ref={sheetFormRef}
+                snapPoints={snapPointsForm}
+
+            >
+                <BottomSheetView style={styles.sheetContainer}>
+
+                    {
+                        Platform.OS == 'android' &&
+
+                        <View style={styles.sheetHead}>
+
+                            <TouchableOpacity activeOpacity={0.8} onPress={() => handleClosePress()}
+                                              style={styles.dismiss}>
+                                <Ionicons name="ios-close" size={24} color="black"/>
+                            </TouchableOpacity>
+
+                        </View>
+                    }
+                    <View style={styles.sheetBody}>
+
+                        <View style={styles.sheetHeadRow}>
+                            <Text style={styles.sheetHeadText}>
+                                Submit your information
+                            </Text>
+
+                            <Text style={styles.sheetHeadTextNumber}>
+                                02
+                            </Text>
+                        </View>
+
+                        <Text style={styles.sheetHeadTextSmall}>
+                            We need these information to verify if your
+                            tasks were completed.
+                        </Text>
+
+
+                    </View>
+
+                    <View style={styles.sheetFormContainer}>
+
+
+                        <BottomSheetTextInput
+                            placeholder="@"
+                            label={"Your handle / email"}
+                            keyboardType={"default"}
+                            touched={touched.munaName}
+                            error={touched.munaName && errors.munaName}
+
+                            onChangeText={(e) => {
+                                handleChange('munaName')(e);
+                            }}
+                            onBlur={(e) => {
+                                handleBlur('munaName')(e);
+
+                            }}
+                            value={values.munaName}
+                        />
+
+                    </View>
+
+                    <RectButton onPress={() => handleSubmit()} disabled={!isValid} style={{
+                        width: 200,
+
+                    }}>
+
+                        {
+                            submittingTask ? <ActivityIndicator size='small' color='#fff'/>
+                                :
+
+                                <Text style={{
+                                    position: 'absolute',
+                                    fontSize: fontPixel(16),
+                                    color: "#fff",
+                                    fontFamily: Fonts.quickSandBold
+                                }}>
+                                    Continue
+
+                                </Text>
+                        }
+                    </RectButton>
+
+                </BottomSheetView>
+            </BottomSheet>
         </>
     );
 };
@@ -867,6 +1204,108 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontFamily: Fonts.quickSandBold
     },
+
+    sheetContainer: {
+
+        width: '100%',
+        alignItems: 'center',
+        paddingHorizontal: pixelSizeHorizontal(20),
+        paddingVertical: pixelSizeVertical(20)
+    },
+    sheetBody: {
+        width: '100%',
+        marginBottom: 30,
+    },
+    sheetHeadRow: {
+        width: '100%',
+        alignItems: 'flex-start',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+
+    sheetHeadTextNumber: {
+        fontSize: fontPixel(20),
+        color: "#999999",
+        fontFamily: Fonts.quickSandBold
+    },
+    sheetHeadText: {
+        lineHeight: heightPixel(26),
+        width: '75%',
+        fontSize: fontPixel(18),
+        color: "#1E1E1E",
+        fontFamily: Fonts.quickSandBold
+    },
+    sheetHeadTextSmall: {
+        marginTop: 8,
+        width: '75%',
+        fontSize: fontPixel(14),
+        color: "#333333",
+        fontFamily: Fonts.quicksandRegular
+    },
+    sheetHead: {
+        height: 50,
+        top: -20,
+        width: '100%',
+        alignItems: 'flex-start',
+        justifyContent: 'flex-end',
+        flexDirection: 'row'
+    },
+
+    dismiss: {
+        backgroundColor: "#fff",
+        borderRadius: 30,
+        height: 35,
+        width: 35,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.10,
+        shadowRadius: 7.22,
+
+        elevation: 3,
+    },
+    terms: {
+        marginVertical: pixelSizeVertical(10),
+        width: '100%',
+        minHeight: heightPixel(40),
+        alignItems: 'center',
+        justifyContent: 'center',
+
+        flexDirection: 'row'
+    },
+    checkboxContainer: {
+        height: '90%',
+        width: '8%',
+        alignItems: 'flex-start',
+        justifyContent: 'flex-start'
+    },
+    termsText: {
+        height: '100%',
+        width: '90%',
+        alignItems: 'flex-start',
+        justifyContent: 'flex-start'
+    },
+    descriptionTxt:{
+        width: '100%',
+        alignItems: 'flex-start',
+        justifyContent: 'flex-start'
+    },
+    checks: {
+        height: heightPixel(300),
+
+    },
+
+    sheetFormContainer: {
+
+        height: heightPixel(350),
+        justifyContent: 'flex-start',
+        width: '100%',
+        alignItems: 'flex-start',
+    },
+
 })
 
 export default QuizScreen;

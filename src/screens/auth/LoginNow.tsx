@@ -23,6 +23,7 @@ import * as WebBrowser from 'expo-web-browser';
 import * as Google from "expo-auth-session/providers/google";
 import * as AppleAuthentication from 'expo-apple-authentication';
 import GoogleIcon from "../../components/GoogleIcon";
+import HorizontalLine from "../../components/HorizontalLine";
 
 
 WebBrowser.maybeCompleteAuthSession();
@@ -58,7 +59,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
 
 
     const [_, googleResponse, googleAuth] = Google.useAuthRequest({
-        //redirectUri:"https://auth.expo.io/@bluetanks/Bluetanks",
+
         expoClientId:
             "450276546603-kv794hqhb9orlqla7fv5fk64fljbhhnq.apps.googleusercontent.com",
         iosClientId:
@@ -74,7 +75,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
     const {mutate:googleAuthLogin, isLoading:googleAuthenticating} = useMutation(['userGoogleAuth'], userGoogleAuth, {
 
         onSuccess: async (data) => {
-
+//console.log(data)
             if (data.success) {
 
 
@@ -127,14 +128,18 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
 
 
         if (googleResponse?.type === "success") {
-            const {access_token,id_token}  = googleResponse.params;
-               // console.log(access_token)
+
+
+
+            const {access_token,id_token,code}  = googleResponse.params;
+                //console.log(code)
 
                // console.log(id_token)
            // setAccessToken(access_token)
             const body = JSON.stringify({
-                code:id_token,
-                "referralCode": "gate"
+                "grantType": "access_token",
+                "tokens": {  access_token}
+              //  "referralCode": "gate"
             })
 
             googleAuthLogin(body)
@@ -316,6 +321,51 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                     </View>
 
 
+                    <TouchableOpacity   onPress={async () => await googleAuth()} activeOpacity={0.6} style={[styles.buttonSignUp,{
+                        borderWidth:1,
+                        borderColor:Colors.borderColor,
+                        marginVertical:pixelSizeVertical(10),
+                    }]}>
+
+                        <GoogleIcon/>
+                        <Text style={[ {
+                            fontFamily:Fonts.quicksandSemiBold,
+                            fontSize:fontPixel(14),
+                            color: Colors.light.text,
+                        }]}>
+                            Continue with Google
+                        </Text>
+                    </TouchableOpacity>
+                    {
+                        Platform.OS == 'ios' &&
+
+                        <AppleAuthentication.AppleAuthenticationButton
+                            buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+                            buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+                            cornerRadius={5}
+                            style={styles.buttonSignUp}
+                            onPress={async () => {
+                                try {
+                                    const credential = await AppleAuthentication.signInAsync({
+                                        requestedScopes: [
+                                            AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+                                            AppleAuthentication.AppleAuthenticationScope.EMAIL,
+                                        ],
+                                    });
+                                    //  console.log(credential)
+                                    // signed in
+                                } catch (e) {
+                                    if (e.code === 'ERR_CANCELED') {
+                                        // handle that the user canceled the sign-in flow
+                                    } else {
+                                        // handle other errors
+                                    }
+                                }
+                            }}
+                        />
+                    }
+
+                    <HorizontalLine margin/>
                     <TextInput
 
                         placeholder="Email address"
@@ -388,49 +438,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                         }
                     </RectButton>
 
-                    <TouchableOpacity   onPress={async () => await googleAuth()} activeOpacity={0.6} style={[styles.buttonSignUp,{
-                        borderWidth:1,
-                        borderColor:Colors.borderColor,
-                        marginVertical:pixelSizeVertical(10),
-                    }]}>
 
-                        <GoogleIcon/>
-                        <Text style={[ {
-                            fontFamily:Fonts.quicksandSemiBold,
-                            fontSize:fontPixel(14),
-                            color: Colors.light.text,
-                        }]}>
-                            Continue with Google
-                        </Text>
-                    </TouchableOpacity>
-                    {
-                        Platform.OS == 'ios' &&
-
-                    <AppleAuthentication.AppleAuthenticationButton
-                        buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
-                        buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
-                        cornerRadius={5}
-                        style={styles.buttonSignUp}
-                        onPress={async () => {
-                            try {
-                                const credential = await AppleAuthentication.signInAsync({
-                                    requestedScopes: [
-                                        AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-                                        AppleAuthentication.AppleAuthenticationScope.EMAIL,
-                                    ],
-                                });
-                                 //  console.log(credential)
-                                // signed in
-                            } catch (e) {
-                                if (e.code === 'ERR_CANCELED') {
-                                    // handle that the user canceled the sign-in flow
-                                } else {
-                                    // handle other errors
-                                }
-                            }
-                        }}
-                    />
-                    }
                     <TouchableOpacity style={styles.signUpBtn}>
 
                         <Text onPress={signupNow} style={styles.alreadyHaveAcc}>

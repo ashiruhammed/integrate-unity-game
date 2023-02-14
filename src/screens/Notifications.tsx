@@ -87,7 +87,7 @@ const Notifications = () => {
 
         })
 
-
+console.log(notifications?.pages[0])
     const loadMore = () => {
         if (hasNextPage) {
             fetchNextPage();

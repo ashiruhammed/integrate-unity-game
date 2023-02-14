@@ -16,15 +16,16 @@ const AuthStackNav = createNativeStackNavigator<AuthStackParamList>();
 
 export function AuthNavigator() {
     return(
-        <AuthStackNav.Navigator initialRouteName='SignInScreen'  screenOptions={{
+        <AuthStackNav.Navigator initialRouteName='LoginNow'  screenOptions={{
             headerShown: false,
             gestureEnabled:true,
             animation:'slide_from_left',
 
         }}>
+            <AuthStackNav.Screen name="LoginNow" component={LoginNow}/>
             <AuthStackNav.Screen name="RegisterScreen" component={RegisterScreen}/>
             <AuthStackNav.Screen name="PhoneNumberConfirm" component={PhoneNumberConfirm}/>
-            <AuthStackNav.Screen name="LoginNow" component={LoginNow}/>
+
             <AuthStackNav.Screen name="EmailConfirm" component={EmailConfirm}/>
             <AuthStackNav.Screen name="ForgotPassword" component={ForgotPassword}/>
             <AuthStackNav.Screen name="PasswordChange" component={PasswordChange}/>

@@ -151,8 +151,8 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
 
 //console.log(data?.pages[0]?.data?.result)
 
-    const goToAdventure = (id: string, name: string, modules: {}) => {
-        dispatch(setAdventure({missionId: id, missionName: name, modules}))
+    const goToAdventure = ( adventure: {}) => {
+        dispatch(setAdventure({adventure}))
         navigation.navigate('AdventureHome')
 
     }
@@ -295,15 +295,10 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
 
 
                     {
-                        data?.pages[0]?.data?.result.map((({
-                                                               id,
-                                                               imageUrl,
-                                                               name,
-                                                               modules
-                                                           }: { id: string, imageUrl: string, name: string, modules: string }) => (
-                            <Animated.View key={id} entering={FadeInDown} exiting={FadeOutDown}
+                        data?.pages[0]?.data?.result.map(((item) => (
+                            <Animated.View key={item.id} entering={FadeInDown} exiting={FadeOutDown}
                                            layout={Layout.easing(Easing.bounce).delay(20)}>
-                                <Pressable onPress={() => goToAdventure(id, name, modules)}
+                                <Pressable onPress={() => goToAdventure(item)}
                                            style={[styles.adventureItem, {
                                                backgroundColor: theme == 'dark' ? Colors.dark.background : "#fff",
                                            }]}>
@@ -313,7 +308,7 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
                                             <Image
                                                 style={styles.adventureItemImage}
                                                 source={{
-                                                    uri: imageUrl,
+                                                    uri: item.imageUrl,
                                                 }}
                                                 resizeMode={'cover'}
                                             />
@@ -321,7 +316,7 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
                                             <FastImage
                                                 style={styles.adventureItemImage}
                                                 source={{
-                                                    uri: imageUrl,
+                                                    uri: item.imageUrl,
                                                     cache: FastImage.cacheControl.web,
                                                     priority: FastImage.priority.normal,
                                                 }}

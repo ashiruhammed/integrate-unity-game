@@ -113,6 +113,7 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
         {
 
             onSuccess: async (data) => {
+
                 if (data.success) {
 
                     refetch()
@@ -312,7 +313,6 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
 
             const body = JSON.stringify({
                 username: userName,
-                fullName,
                 phoneNumber,
                 interests: []
 

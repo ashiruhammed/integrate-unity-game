@@ -37,63 +37,20 @@ interface itemProps {
     },
 
     action: (visible: boolean) => void,
-    setAdventure: (id: string, name: string, modules: []) => void
+    setAdventure: (adventure: {  }) => void
 }
 
-const isRunningInExpoGo = Constants.appOwnership === 'expo'
+
 const AdventureItem = ({item, action, setAdventure}: itemProps) => {
 
     return (
         <Pressable onPress={() => {
-            setAdventure(item.id, item.name, item.modules)
+            setAdventure(item)
             action(true)
         }} style={styles.pressCard}>
-            {
-
-                isRunningInExpoGo &&
-                <ImageBackground resizeMode={"cover"} source={{uri: item.imageUrl}} style={styles.adventureCard}>
 
 
-                    <View style={styles.backDrop}/>
-                    <View style={styles.cardTop}>
-                        <View style={styles.cardTopLeft}>
 
-                        </View>
-                        <View style={styles.cardTopLeft}>
-                            <FontAwesome5 name="gift" size={16} color={Colors.success}/>
-                            <Text style={styles.cardTopLeftText}>
-                                {item.rewardPoint} Reward Points
-                            </Text>
-                        </View>
-                    </View>
-
-                    <View style={styles.cardBottom}>
-                        <View style={styles.cardBottomLeft}>
-
-                            <Text style={[styles.cardBottomLeftText, {}]}>
-                                {truncate(item.name, 25)}
-                            </Text>
-                            <Text style={styles.cardTextSmall}>
-                                {item.enrollments} missions
-                            </Text>
-                        </View>
-                        <TouchableOpacity activeOpacity={0.8} onPress={() => {
-                            setAdventure(item.id, item.name)
-                            action(true)
-
-                        }} style={styles.startButton}>
-                            <Text style={styles.btnText}>
-                                Start Adventure
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-
-                </ImageBackground>
-
-
-            }
-            {
-                !isRunningInExpoGo &&
 
                 <FastImage resizeMode={FastImage.resizeMode.cover} source={{
                     uri: item.imageUrl,
@@ -118,15 +75,17 @@ const AdventureItem = ({item, action, setAdventure}: itemProps) => {
                     <View style={styles.cardBottom}>
                         <View style={styles.cardBottomLeft}>
 
-                            <Text style={[styles.cardBottomLeftText, {}]}>
+                            <Text style={[styles.cardBottomLeftText, {
+                                textTransform:'capitalize'
+                            }]}>
                                 {truncate(item.name, 25)}
                             </Text>
                             <Text style={styles.cardTextSmall}>
-                                {item.enrollments} missions
+                                {item?._count?.modules} missions
                             </Text>
                         </View>
                         <TouchableOpacity activeOpacity={0.8} onPress={() => {
-                            setAdventure(item.id, item.name)
+                            setAdventure(item)
                             action(true)
 
                         }} style={styles.startButton}>
@@ -138,7 +97,6 @@ const AdventureItem = ({item, action, setAdventure}: itemProps) => {
 
                 </FastImage>
 
-            }
         </Pressable>
     )
 }
@@ -182,8 +140,8 @@ const AllAdventure = ({action}: props) => {
             fetchNextPage();
         }
     };
-    const selectAdventure = (id: string, name: string, modules: []) => {
-        dispatch(setAdventure({missionId: id, missionName: name, modules}))
+    const selectAdventure = (adventure:{}) => {
+        dispatch(setAdventure({adventure}))
 
     }
     const keyExtractor = useCallback((item) => item.id, [],);

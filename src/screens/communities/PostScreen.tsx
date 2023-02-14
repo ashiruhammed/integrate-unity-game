@@ -220,7 +220,7 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
     const {data, isLoading, refetch} = useQuery(['getCommunityPost'], () => getCommunityPost(postId))
     const {mutate: getPost} = useMutation(['getCommunityPost'], getCommunityPost)
 
-    const {mutate} = useMutation(['likeAPost'], likeAPost, {
+    const {mutate,data:likedData} = useMutation(['likeAPost'], likeAPost, {
         onSuccess: (data) => {
             refetch()
         }
