@@ -1,4 +1,4 @@
-import React, {useCallback} from 'react';
+import React, {useCallback, useMemo, useRef} from 'react';
 
 import {
     Text,
@@ -7,7 +7,7 @@ import {
     Platform,
     ImageBackground,
     ActivityIndicator,
-    Animated as MyAnimated
+    Animated as MyAnimated, Keyboard, Pressable
 } from 'react-native';
 import {SafeAreaView} from "react-native-safe-area-context";
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
@@ -25,10 +25,14 @@ import Animated, {Easing, FadeInDown, FadeOutDown, Layout} from "react-native-re
 import dayjs from "dayjs";
 import {useAppSelector} from "../../app/hooks";
 import {FlashList} from "@shopify/flash-list";
+import BottomSheet, {BottomSheetBackdrop, BottomSheetView} from "@gorhom/bottom-sheet";
+import {
+    BottomSheetDefaultBackdropProps
+} from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
 
 
 interface ReferralProps {
-    theme:'light' | 'dark'
+    theme: 'light' | 'dark'
     item: {
         "id": string,
         "userId": string,
@@ -50,7 +54,8 @@ interface ReferralProps {
 const ReferralItem = ({item}: ReferralProps) => {
     return (
         <Animated.View key={item.id} entering={FadeInDown}
-              exiting={FadeOutDown} layout={Layout.easing(Easing.bounce).delay(20)} style={styles.transactionCard}>
+                       exiting={FadeOutDown} layout={Layout.easing(Easing.bounce).delay(20)}
+                       style={styles.transactionCard}>
             <View style={[styles.transactionCardIcon, {
                 backgroundColor: "#59C965"
             }]}>
@@ -82,159 +87,257 @@ const ReferralItem = ({item}: ReferralProps) => {
 const MyReferrals = ({navigation}: RootStackScreenProps<'MyReferrals'>) => {
 
     const dataSlice = useAppSelector(state => state.data)
+    const user = useAppSelector(state => state.user)
     const {theme} = dataSlice
-    const referAFriend = () => {
-        navigation.navigate('ReferAFriend')
-    }
+    const {userData} = user
 
-  //  const {isLoading, data} = useQuery(['generateReferralHistory'], generateReferralHistory)
-
-
-        const {
-            status,
-            data,
-            error,
-            isFetching,
-            isLoading,
-            refetch,
-            isFetchingNextPage,
-            isFetchingPreviousPage,
-            fetchNextPage,
-            fetchPreviousPage,
-            hasNextPage,
-            hasPreviousPage,
-        } = useInfiniteQuery(
-            [`the-categories`], ({pageParam = 1}) =>
-                referralDashboard.referrals({pageParam})
-            ,
-            {
-                retry:true,
-                getNextPageParam: lastPage => {
-                    if (lastPage.next !== null) {
-                        return lastPage.next;
-                    }
-
-                    return lastPage;
-                },
-                getPreviousPageParam: (firstPage) => firstPage.previousId ?? undefined,
-                onError:(err)=>{
-                    console.log(err)
-                }
-            },
-
-
-        )
-
-
-        const loadMore = () => {
-            if (hasNextPage) {
-                fetchNextPage();
-            }
-        }
     const backgroundColor = theme == 'light' ? "#fff" : Colors.dark.background
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
+    const borderColor = theme == 'light' ? Colors.borderColor : '#313131'
 
+    const snapPoints = useMemo(() => ["1%", "35%"], []);
+    const sheetRef = useRef<BottomSheet>(null);
+    const handleSnapPress = useCallback((index: number) => {
+        Keyboard.dismiss()
+        sheetRef.current?.snapToIndex(index);
+    }, []);
+    const handleClosePress = useCallback(() => {
+        sheetRef.current?.close();
+    }, []);
+
+
+    const renderBackdrop = useCallback(
+        (props: JSX.IntrinsicAttributes & BottomSheetDefaultBackdropProps) => (
+            <BottomSheetBackdrop
+                style={{
+                    backgroundColor: 'rgba(25,25,25,0.34)'
+                }}
+                {...props}
+                disappearsOnIndex={0}
+                appearsOnIndex={1}
+            />
+        ),
+        []
+    );
+    const referAFriend = () => {
+        if (userData.username) {
+            navigation.navigate('ReferAFriend')
+        } else {
+            handleSnapPress(1)
+        }
+
+    }
+
+    const proceedScreen = () => {
+        handleClosePress()
+        navigation.navigate('EditProfile')
+
+    }
+
+    //  const {isLoading, data} = useQuery(['generateReferralHistory'], generateReferralHistory)
+
+
+    const {
+        status,
+        data,
+        error,
+        isFetching,
+        isLoading,
+        refetch,
+        isFetchingNextPage,
+        isFetchingPreviousPage,
+        fetchNextPage,
+        fetchPreviousPage,
+        hasNextPage,
+        hasPreviousPage,
+    } = useInfiniteQuery(
+        [`the-categories`], ({pageParam = 1}) =>
+            referralDashboard.referrals({pageParam})
+        ,
+        {
+            retry: true,
+            getNextPageParam: lastPage => {
+                if (lastPage.next !== null) {
+                    return lastPage.next;
+                }
+
+                return lastPage;
+            },
+            getPreviousPageParam: (firstPage) => firstPage.previousId ?? undefined,
+            onError: (err) => {
+                console.log(err)
+            }
+        },
+    )
+
+
+    const loadMore = () => {
+        if (hasNextPage) {
+            fetchNextPage();
+        }
+    }
 
     const renderItem = useCallback(
         ({item}) => (
             <ReferralItem theme={theme} item={item}/>
         ),
-        [data,theme],
+        [data, theme],
     );
     const keyExtractor = useCallback((item: { id: any; }) => item.id, [],);
 
 
     const renderHeaderItem = useCallback(
         () => (
-<>
-    <ImageBackground source={require('../../assets/images/confetti.png')} style={[styles.topDashboard,{
-        backgroundColor
-    }]}>
-        <View style={styles.pointBox}>
-
-            <Text style={[styles.refText,{
-                color: textColor
-            }]}>
-                Total Referrals
-            </Text>
-
-            <View style={styles.points}>
-                <Text style={[styles.refText, {
-                    color: "#fff",
-                    fontSize: fontPixel(40)
+            <>
+                <ImageBackground source={require('../../assets/images/confetti.png')} style={[styles.topDashboard, {
+                    backgroundColor
                 }]}>
-                    {data?.pages[0]?.data?.totalPointsGained}
-                </Text>
-            </View>
-        </View>
+                    <View style={styles.pointBox}>
 
-        <RectButton onPress={referAFriend} style={{marginTop: 30, width: widthPixel(200)}}>
-            <Text style={styles.buttonText}>
-                Refer a Friend
+                        <Text style={[styles.refText, {
+                            color: textColor
+                        }]}>
+                            Total Referrals
+                        </Text>
 
-            </Text>
-        </RectButton>
-    </ImageBackground>
+                        <View style={styles.points}>
+                            <Text style={[styles.refText, {
+                                color: "#fff",
+                                fontSize: fontPixel(40)
+                            }]}>
+                                {data?.pages[0]?.data?.totalPointsGained}
+                            </Text>
+                        </View>
+                    </View>
 
-    <HorizontalLine width={"90%"} color={theme == 'light' ? Colors.borderColor : '#313131'}/>
-    <View style={styles.titleWrap}>
-        <Text style={[styles.utilityTitle,{
-            color: textColor
-        }]}>
-            Referral Points
-        </Text>
-    </View>
-</>
-        ),[])
+                    <RectButton onPress={referAFriend} style={{marginTop: 30, width: widthPixel(200)}}>
+                        <Text style={styles.buttonText}>
+                            Refer a Friend
+
+                        </Text>
+                    </RectButton>
+                </ImageBackground>
+
+                <HorizontalLine width={"90%"} color={theme == 'light' ? Colors.borderColor : '#313131'}/>
+                <View style={styles.titleWrap}>
+                    <Text style={[styles.utilityTitle, {
+                        color: textColor
+                    }]}>
+                        Referral Points
+                    </Text>
+                </View>
+            </>
+        ), [])
 
     return (
-        <SafeAreaView style={[styles.safeArea,{
-            backgroundColor
-        }]}>
-            <View
-             style={[styles.scrollView,{
+        <>
+
+
+            <SafeAreaView style={[styles.safeArea, {
                 backgroundColor
-            }]} >
-                <NavBar noBell title={"My Referrals"}/>
+            }]}>
+                <View
+                    style={[styles.scrollView, {
+                        backgroundColor
+                    }]}>
+                    <NavBar noBell title={"My Referrals"}/>
 
 
-
-                {
-                    isLoading && <ActivityIndicator size="small" color={Colors.primaryColor}/>
-                }
-               {
-                    !isLoading && data &&
-
-
-                   <View style={{
-                       width: '100%',
-                       flex: 1,
-                   }}>
+                    {
+                        isLoading && <ActivityIndicator size="small" color={Colors.primaryColor}/>
+                    }
+                    {
+                        !isLoading && data &&
 
 
-                        <FlashList
-                            ListHeaderComponent={renderHeaderItem}
-                            scrollEventThrottle={16}
-                            estimatedItemSize={200}
-                            refreshing={isLoading}
-                            onRefresh={refetch}
-                            scrollEnabled
-                            showsVerticalScrollIndicator={false}
-                            data={data?.pages[0]?.data?.referralHistory}
-                            renderItem={renderItem}
-
-                            keyExtractor={keyExtractor}
-                            onEndReachedThreshold={0.3}
-                            ListFooterComponent={isFetchingNextPage ?
-                                <ActivityIndicator size="small" color={Colors.primaryColor}/> : null}
-                        />
-                   </View>
-                        }
+                        <View style={{
+                            width: '100%',
+                            flex: 1,
+                        }}>
 
 
+                            <FlashList
+                                ListHeaderComponent={renderHeaderItem}
+                                scrollEventThrottle={16}
+                                estimatedItemSize={200}
+                                refreshing={isLoading}
+                                onRefresh={refetch}
+                                scrollEnabled
+                                showsVerticalScrollIndicator={false}
+                                data={data?.pages[0]?.data?.referralHistory}
+                                renderItem={renderItem}
 
-            </View>
-        </SafeAreaView>
+                                keyExtractor={keyExtractor}
+                                onEndReachedThreshold={0.3}
+                                ListFooterComponent={isFetchingNextPage ?
+                                    <ActivityIndicator size="small" color={Colors.primaryColor}/> : null}
+                            />
+                        </View>
+                    }
+
+
+                </View>
+            </SafeAreaView>
+
+
+            <BottomSheet
+                backgroundStyle={{
+                    backgroundColor,
+                }}
+                handleIndicatorStyle={{
+                    backgroundColor: theme == 'light' ? "#121212" : '#cccccc'
+                }}
+                index={0}
+                ref={sheetRef}
+                snapPoints={snapPoints}
+                backdropComponent={renderBackdrop}
+            >
+
+                <View style={styles.sheetHead}>
+                    <View style={{
+                        width: '10%'
+                    }}/>
+                    <Text style={[styles.sheetTitle, {
+                        color: textColor
+                    }]}>
+                        You have to set a unique username
+                    </Text>
+                    <View style={{
+                        width: '10%'
+                    }}/>
+
+                </View>
+
+                <BottomSheetView style={styles.optionBox}>
+                    <Pressable onPress={proceedScreen} style={[styles.deleteBtn, {
+                        backgroundColor:Colors.primaryColor
+                    }]}>
+                        <Text style={[styles.deleteBtnTxt, {
+                            color: "#fff",
+                            marginLeft: 10,
+                        }]}>
+                            Continue
+                        </Text>
+                        <Ionicons name="chevron-forward-sharp" size={24} color={"#fff"}/>
+
+                    </Pressable>
+
+                    <Pressable onPress={() => handleClosePress()} style={[styles.deleteBtn, {}]}>
+
+                        <Text style={[styles.deleteBtnTxt, {
+                            color: textColor,
+                            marginLeft: 10,
+                        }]}>
+                            Cancel
+                        </Text>
+                    </Pressable>
+
+                </BottomSheetView>
+
+            </BottomSheet>
+
+
+        </>
     );
 };
 
@@ -242,7 +345,7 @@ const styles = StyleSheet.create({
     safeArea: {
         width: '100%',
         flex: 1,
-alignItems:'center',
+        alignItems: 'center',
         paddingBottom: Platform.OS === 'ios' ? -40 : 0
     },
     scrollView: {
@@ -290,7 +393,7 @@ alignItems:'center',
 
     titleWrap: {
         marginTop: 15,
-paddingHorizontal:pixelSizeHorizontal(20),
+        paddingHorizontal: pixelSizeHorizontal(20),
         width: '100%',
 
         alignItems: 'center',
@@ -345,6 +448,59 @@ paddingHorizontal:pixelSizeHorizontal(20),
         fontFamily: Fonts.quicksandSemiBold,
 
     },
+
+    sheetHead: {
+        paddingHorizontal: pixelSizeHorizontal(20),
+        height: 50,
+        width: '100%',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexDirection: 'row'
+    },
+    sheetTitle: {
+        //width: '70%',
+        textAlign: 'center',
+        fontSize: fontPixel(16),
+        fontFamily: Fonts.quicksandSemiBold,
+
+    },
+    dismiss: {
+        backgroundColor: "#fff",
+        borderRadius: 30,
+        height: 35,
+        width: 35,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.10,
+        shadowRadius: 7.22,
+
+        elevation: 3,
+    },
+    optionBox: {
+        alignItems: 'center',
+        justifyContent: 'space-evenly',
+        width: '100%',
+        height: '80%',
+        paddingHorizontal: pixelSizeHorizontal(20),
+
+    },
+    deleteBtn: {
+        width: '90%',
+        borderRadius: 10,
+        flexDirection: 'row',
+        alignItems: 'center',
+        height: 55,
+        justifyContent: 'center'
+    },
+    deleteBtnTxt: {
+        fontSize: fontPixel(18),
+        fontFamily: Fonts.quickSandBold,
+    }
+
 })
 
 export default MyReferrals;

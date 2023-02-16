@@ -34,6 +34,9 @@ interface itemProps {
         enrollments: string,
         imageUrl: string,
         modules: [],
+        userAdventure:{
+            status:string
+        }
     },
 
     action: (visible: boolean) => void,
@@ -84,15 +87,32 @@ const AdventureItem = ({item, action, setAdventure}: itemProps) => {
                                 {item?._count?.modules} missions
                             </Text>
                         </View>
-                        <TouchableOpacity activeOpacity={0.8} onPress={() => {
-                            setAdventure(item)
-                            action(true)
+                        {
+                            item?.userAdventure?.status
 
-                        }} style={styles.startButton}>
-                            <Text style={styles.btnText}>
-                                Start Adventure
-                            </Text>
-                        </TouchableOpacity>
+                            ?
+
+                                <TouchableOpacity activeOpacity={0.8} onPress={() => {
+                                    setAdventure(item)
+                                    action(true)
+
+                                }} style={styles.startButton}>
+                                    <Text style={styles.btnText}>
+                                        {item?.userAdventure?.status}
+                                    </Text>
+                                </TouchableOpacity>
+                                :
+                                <TouchableOpacity activeOpacity={0.8} onPress={() => {
+                                    setAdventure(item)
+                                    action(true)
+
+                                }} style={styles.startButton}>
+                                    <Text style={styles.btnText}>
+                                       Start Adventure
+                                    </Text>
+                                </TouchableOpacity>
+                        }
+
                     </View>
 
                 </FastImage>

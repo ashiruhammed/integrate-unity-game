@@ -178,9 +178,9 @@
 				LastUpgradeCheck = 1410;
 				TargetAttributes = {
 					13B07F861A680F5B00A75B9A = {
-						DevelopmentTeam = Q9UB2BPKPJ;
+						DevelopmentTeam = "Q9UB2BPKPJ";
 						LastSwiftMigration = 1250;
-						ProvisioningStyle = Manual;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -349,9 +349,9 @@
 				CODE_SIGN_ENTITLEMENTS = Gateway/Gateway.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = "Q9UB2BPKPJ";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = Q9UB2BPKPJ;
 				ENABLE_BITCODE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -389,9 +389,9 @@
 				CODE_SIGN_ENTITLEMENTS = Gateway/GatewayRelease.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
-				CODE_SIGN_STYLE = Manual;
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = "Q9UB2BPKPJ";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = Q9UB2BPKPJ;
 				INFOPLIST_FILE = Gateway/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Gateway Block-Edu";

@@ -63,7 +63,6 @@ const getFileInfo = async (fileURI: string) => {
 }
 
 
-
 const isRunningInExpoGo = Constants.appOwnership === 'expo'
 
 const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
@@ -94,7 +93,7 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
         onSuccess: (data) => {
             if (data.success) {
 
-    dispatch(updateUserInfo(data.data))
+                dispatch(updateUserInfo(data.data))
 
             }
         },
@@ -275,13 +274,13 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
                 let type = await image?.substring(image.lastIndexOf(".") + 1);
                 let fileName = image.split('/').pop()
 
-               // data.append("file", image, "[PROXY]");
+                // data.append("file", image, "[PROXY]");
                 data.append("upload_preset", upload_preset);
                 data.append("api_key", api_key);
                 data.append('file', {uri: image, name: fileName, type: `image/${type}`} as any)
 
 
-                createImage({body:data,resource_type:'image'})
+                createImage({body: data, resource_type: 'image'})
 
             })()
         }
@@ -386,7 +385,7 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
                                     <Image
                                         style={styles.Image}
                                         source={{
-                                            uri: !user.userData?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' :  user.userData?.avatar,
+                                            uri: !user.userData?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : user.userData?.avatar,
 
                                         }}
                                     />
@@ -395,7 +394,7 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
                                     <FastImage
                                         style={styles.Image}
                                         source={{
-                                            uri: !user.userData?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' :  user.userData?.avatar,
+                                            uri: !user.userData?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : user.userData?.avatar,
 
                                             cache: FastImage.cacheControl.web,
                                             priority: FastImage.priority.normal,
@@ -423,7 +422,7 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
 
                         </Pressable>
 
-                       {/* <Text style={styles.joinedOn}>
+                        {/* <Text style={styles.joinedOn}>
                             Joined 23 Oct 2022
                         </Text>*/}
 
@@ -500,17 +499,18 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
 
                             }}
 
-
+                            defaultValue={userData?.username}
                             value={values.userName}
                             label="Username"/>
 
 
                         <PhoneInputText
                             error={errors.phoneNumber}
-                            defaultValue={phoneNumber}
+                            defaultValue={userData?.phone}
                             label="Phone number"
                             onChangeText={(text) => {
                                 handleChange('phoneNumber')(text);
+                                //setPhoneNumber(text)
                             }}
 
                             value={values.phoneNumber}
@@ -598,7 +598,7 @@ const styles = StyleSheet.create({
         width: "100%",
         height: "100%",
         resizeMode: 'cover',
-          borderRadius: 120,
+        borderRadius: 120,
     },
     profileImage: {
         width: 95,

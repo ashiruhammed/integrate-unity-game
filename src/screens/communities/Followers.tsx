@@ -131,7 +131,29 @@ const Followers = ({navigation, route}: RootStackScreenProps<'Followers'>) => {
     }
 
     useRefreshOnFocus(getFollowers)
+    const renderHeaderItem = useCallback(
+        () => (
+            <MyAnimated.View style={[styles.cover, {
 
+            }]}>
+
+                <View style={styles.navBar}>
+                    <TouchableOpacity onPress={goBack} activeOpacity={0.8}>
+                        <AntDesign name="arrowleft" size={24} color="#fff"/>
+                    </TouchableOpacity>
+
+
+                    <TouchableOpacity onPress={menuToggle} activeOpacity={0.8} style={styles.rightButton}>
+                        <SimpleLineIcons name="menu" size={24} color="#fff"/>
+                    </TouchableOpacity>
+                </View>
+
+                <Image
+                    source={{uri: data?.data?.displayPhoto}}
+                    style={{flex: 0.7, width: 200,}}
+                    resizeMode={"contain"}/>
+            </MyAnimated.View>
+        ),[])
 
     const keyExtractor = useCallback((item: { id: any; }) => item.id, [],);
 
@@ -149,26 +171,7 @@ const Followers = ({navigation, route}: RootStackScreenProps<'Followers'>) => {
                 backgroundColor
             }]}>
                 <Toast message={responseMessage} state={responseState} type={responseType}/>
-                <MyAnimated.View style={[styles.cover, {
-                    height: headerScrollHeight
-                }]}>
 
-                    <View style={styles.navBar}>
-                        <TouchableOpacity onPress={goBack} activeOpacity={0.8}>
-                            <AntDesign name="arrowleft" size={24} color="#fff"/>
-                        </TouchableOpacity>
-
-
-                        <TouchableOpacity onPress={menuToggle} activeOpacity={0.8} style={styles.rightButton}>
-                            <SimpleLineIcons name="menu" size={24} color="#fff"/>
-                        </TouchableOpacity>
-                    </View>
-
-                    <Image
-                        source={{uri: data?.data?.displayPhoto}}
-                        style={{flex: 0.7, width: 200,}}
-                        resizeMode={"contain"}/>
-                </MyAnimated.View>
 
                 <View style={styles.flatlist}>
 
@@ -180,6 +183,7 @@ const Followers = ({navigation, route}: RootStackScreenProps<'Followers'>) => {
 
 
                         <FlashList
+                            ListHeaderComponent={renderHeaderItem}
                             onScroll={MyAnimated.event([
 
                                 {nativeEvent: {contentOffset: {y: scrollOffsetY}}}

@@ -23,14 +23,7 @@ import {Fonts} from "../../constants/Fonts";
 import {IF} from "../../helpers/ConditionJsx";
 import {RectButton} from "../../components/RectButton";
 import BottomSheet, {BottomSheetBackdrop, BottomSheetView} from "@gorhom/bottom-sheet";
-import Checkbox from "expo-checkbox";
-import {Portal} from "@gorhom/portal";
-import {
-    BottomSheetDefaultBackdropProps
-} from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
-import * as yup from "yup";
-import {useFormik} from "formik";
-import BottomSheetTextInput from "../../components/inputs/BottomSheetTextInput";
+
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {
     getAdventure,
@@ -443,7 +436,9 @@ useRefreshOnFocus(refetch)
 
                                     <Text onPress={() => navigation.navigate('LeaveReview', {
                                         adventureId: missionId
-                                    })} style={[styles.cardBottomLeftText, {}]}>
+                                    })} style={[styles.cardBottomLeftText, {
+                                        marginBottom:5,
+                                    }]}>
                                         {adventure?.name}
                                     </Text>
                                     <Text style={styles.cardTextSmall}>
@@ -675,25 +670,27 @@ const styles = StyleSheet.create({
     cardBottom: {
         width: '100%',
         height: 70,
-        alignItems: 'center',
+        alignItems: 'flex-start',
         flexDirection: 'row',
         justifyContent: 'space-between',
     },
     cardTopLeft: {
         minWidth: 100,
         height: 35,
-        alignItems: 'center',
+        alignItems: 'flex-start',
+
         flexDirection: 'row',
     },
     cardTopLeftText: {
         marginLeft: 5,
         color: "#fff",
-        fontSize: fontPixel(14),
+        fontSize: fontPixel(12),
         fontFamily: Fonts.quicksandMedium
     },
     cardBottomLeft: {
-        width: '90%',
-        height: 50,
+        width: '65%',
+        //height: 50,
+
         alignItems: 'flex-start',
         justifyContent: 'space-between',
     },

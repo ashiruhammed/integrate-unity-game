@@ -164,13 +164,17 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
     }
 
 
-    const verifyPhoneNumber = () => {
-        const body = JSON.stringify({
-            email: userData?.phone,
-        })
-        requestPhone(body)
-        navigation.navigate('ConfirmPhonenumber')
 
+    const verifyPhoneNumber = () => {
+        if(user?.userData?.phone) {
+            const body = JSON.stringify({
+                email: userData?.phone,
+            })
+            requestPhone(body)
+            navigation.navigate('ConfirmPhonenumber')
+        }else{
+            navigation.navigate('EditProfile')
+        }
     }
 
 
@@ -249,7 +253,7 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
                         <Text style={[styles.subTitle, {
                             color: textColor
                         }]}>
-                            Cocoon
+                            @{userData?.username}
                         </Text>
                     </View>
 
