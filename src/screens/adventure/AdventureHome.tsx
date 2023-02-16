@@ -157,9 +157,9 @@ const MissionCard = ({
                         </Text>
 
                     </TouchableOpacity>
-                    <TouchableOpacity activeOpacity={0.8}>
+                 {/*   <TouchableOpacity activeOpacity={0.8}>
                         <Feather name="play-circle" size={28} color={Colors.primaryColor}/>
-                    </TouchableOpacity>
+                    </TouchableOpacity>*/}
                 </View>
                 {index === currentIndex && (
 

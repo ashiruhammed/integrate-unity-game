@@ -8,7 +8,7 @@ import {
     TouchableOpacity,
     useWindowDimensions,
     Image,
-    ActivityIndicator
+    ActivityIndicator, Platform
 } from 'react-native';
 import {SafeAreaView} from "react-native-safe-area-context";
 import Colors from "../../constants/Colors";
@@ -19,26 +19,34 @@ import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 import {AuthStackScreenProps} from "../../../types";
 import {useFormik} from "formik";
 import * as yup from "yup";
-import PhoneInput from "react-native-phone-number-input";
+
 import {RectButton} from "../../components/RectButton";
 import Rectangle from "../../assets/images/svg/Rectangle";
 import BottomSheet, {BottomSheetBackdrop} from '@gorhom/bottom-sheet';
-
+import {LoginButton, AccessToken} from 'react-native-fbsdk-next';
 import Animated, {Easing, FadeInDown, FadeOutDown, Layout} from 'react-native-reanimated';
 import TextInput from "../../components/inputs/TextInput";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
-import {createAccount} from "../../action/action";
+import {createAccount, getUser, userAppleOAuth, userFBOAuth, userGoogleAuth} from "../../action/action";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
 import * as SecureStore from 'expo-secure-store';
-import {setResponse, unSetResponse} from "../../app/slices/userSlice";
+import {setAuthenticated, setResponse, unSetResponse, updateUserInfo} from "../../app/slices/userSlice";
 import PhoneInputText from "../../components/inputs/PhoneInputText";
 import Toast from "../../components/Toast";
-
-
-
+import GoogleIcon from "../../components/GoogleIcon";
+import * as AppleAuthentication from "expo-apple-authentication";
+import HorizontalLine from "../../components/HorizontalLine";
+import * as Haptics from "expo-haptics";
+import * as Google from "expo-auth-session/providers/google";
+import * as WebBrowser from "expo-web-browser";
 
 
 const height = Dimensions.get('window').height
+
+const _handlePressButtonAsync = async (url: string) => {
+    let result = await WebBrowser.openBrowserAsync(url);
+
+};
 
 
 const formSchema = yup.object().shape({
@@ -46,9 +54,9 @@ const formSchema = yup.object().shape({
     fullName: yup.string().required('Phone number is required'),
     email: yup.string().email('Please provide a valid email').required('Email is required'),
     password: yup.string().required('Password is required').matches(
-           /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#.-:;()_?\$%\^&\*])(?=.{8,})/,
-           "Must Contain 8 Characters, Uppercase, Lowercase & Number"
-       ),
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#.-:;()_?\$%\^&\*])(?=.{8,})/,
+        "Must Contain 8 Characters, Uppercase, Lowercase & Number"
+    ),
     confirmPass: yup.string().oneOf([yup.ref('password'), null], 'Passwords must match').required("Password is Required"),
 });
 
@@ -81,13 +89,77 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
     const bottomSheetRef = useRef<BottomSheet>(null);
 
 
+    const [_, googleResponse, googleAuth] = Google.useAuthRequest({
+
+        expoClientId:
+            "450276546603-kv794hqhb9orlqla7fv5fk64fljbhhnq.apps.googleusercontent.com",
+        iosClientId:
+            "450276546603-nbqqhqaa8jjb1b5hlvp0bprsripoupke.apps.googleusercontent.com",
+        androidClientId:
+            "450276546603-fe4l1d0uq37bvjra4pdpfph9nvursbua.apps.googleusercontent.com",
+        webClientId: "GOOGLE_GUID.apps.googleusercontent.com",
+        selectAccount: true,
+    });
+
 
     const loginSheet = () => {
-       navigation.navigate('LoginNow')
-      /* navigation.navigate('EmailConfirm',{
-           email:"Orjiace@gmail.com"
-       })*/
+        navigation.navigate('LoginNow')
+        /* navigation.navigate('EmailConfirm',{
+             email:"Orjiace@gmail.com"
+         })*/
     }
+    const {isLoading: loadingUser, mutate: fetchUser} = useMutation(['user-data'], getUser, {
+        onSuccess: (data) => {
+            if (data.success) {
+
+                dispatch(updateUserInfo(data.data))
+                dispatch(setAuthenticated({
+                    isAuthenticated: true
+                }))
+
+            }
+        },
+    })
+
+
+    const {mutate: FBOAuth, isLoading: fbAuthenticating} = useMutation(['userFBOAuth'], userFBOAuth, {
+
+        onSuccess: async (data) => {
+
+            if (data.success) {
+
+
+                SecureStore.setItemAsync('Gateway-Token', data.data.token).then(() => {
+                    fetchUser()
+                })
+
+
+            } else {
+                await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
+                dispatch(setResponse({
+                    responseMessage: data.message,
+                    responseState: true,
+                    responseType: 'error',
+                }))
+
+
+            }
+        },
+
+        onError: (err) => {
+            dispatch(setResponse({
+                responseMessage: err.message,
+                responseState: true,
+                responseType: 'error',
+            }))
+
+
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries(['userFBOAuth']);
+        }
+
+    })
 
 
     const {mutate, isLoading, isSuccess} = useMutation(['create-account'], createAccount,
@@ -103,7 +175,7 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
 
 
                         navigation.navigate('EmailConfirm', {
-                            email:contentEmail
+                            email: contentEmail
                         })
                     })
 
@@ -135,6 +207,95 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
         })
 
 
+    const {mutate: appleOAuth, isLoading: appleAuthenticating} = useMutation(['userAppleOAuth'], userAppleOAuth, {
+
+        onSuccess: async (data) => {
+
+            if (data.success) {
+
+
+                SecureStore.setItemAsync('Gateway-Token', data.data.token).then(() => {
+                    fetchUser()
+                })
+
+
+            } else {
+                await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
+                dispatch(setResponse({
+                    responseMessage: data.message,
+                    responseState: true,
+                    responseType: 'error',
+                }))
+
+
+            }
+        },
+
+        onError: (err) => {
+            dispatch(setResponse({
+                responseMessage: err.message,
+                responseState: true,
+                responseType: 'error',
+            }))
+
+
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries(['userAppleOAuth']);
+        }
+
+    })
+
+    const {mutate: googleAuthLogin, isLoading: googleAuthenticating} = useMutation(['userGoogleAuth'], userGoogleAuth, {
+
+        onSuccess: async (data) => {
+//console.log(data)
+            if (data.success) {
+
+
+                SecureStore.setItemAsync('Gateway-Token', data.data.token).then(() => {
+                    fetchUser()
+                })
+
+
+            } else {
+                if (data.message == 'Your email is not verified, kindly verify your email to continue.') {
+                    navigation.navigate('EmailConfirm', {
+                        email: contentEmail
+                    })
+                } else {
+                    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
+                    dispatch(setResponse({
+                        responseMessage: data.message,
+                        responseState: true,
+                        responseType: 'error',
+                    }))
+
+                }
+                /*  navigation.navigate('EmailConfirm', {
+                      email:contentEmail
+                  })*/
+
+
+            }
+        },
+
+        onError: (err) => {
+            dispatch(setResponse({
+                responseMessage: err.message,
+                responseState: true,
+                responseType: 'error',
+            }))
+
+
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries(['userGoogleAuth']);
+        }
+
+    })
+
+
     const handleClosePress = () => {
 
     }
@@ -155,17 +316,17 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
 
             phoneNumber: '',
             fullName: '',
-            email:'',
+            email: '',
             password: '',
             confirmPass: '',
             referralCode: '',
         },
         onSubmit: (values) => {
-            const {phoneNumber,fullName,email,password,referralCode} = values;
+            const {phoneNumber, fullName, email, password, referralCode} = values;
             const data = JSON.stringify({
                 fullName,
-                phone:phoneNumber.trim(),
-                email:email.toLowerCase(),
+                phone: phoneNumber.trim(),
+                email: email.toLowerCase(),
                 countryCode,
                 password,
                 referralCode,
@@ -175,6 +336,31 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
         }
     });
 
+    useEffect(() => {
+
+
+        if (googleResponse?.type === "success") {
+
+
+            const {access_token, id_token, code} = googleResponse.params;
+            //console.log(code)
+
+            // console.log(id_token)
+            // setAccessToken(access_token)
+            const body = JSON.stringify({
+                "grantType": "access_token",
+                "tokens": {access_token}
+                //  "referralCode": "gate"
+            })
+
+            googleAuthLogin(body)
+
+        }
+    }, [googleResponse]);
+
+    const goBack = () => {
+        navigation.goBack()
+    }
 
     useEffect(() => {
         // console.log(user)
@@ -198,7 +384,40 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
 
 
             <SafeAreaView style={styles.safeArea}>
+                {
+                    googleAuthenticating &&
+                    <ActivityIndicator size="large" color={Colors.primaryColor}
+                                       style={[StyleSheet.absoluteFill, {
+                                           zIndex: 1,
+                                           backgroundColor: 'rgba(0,0,0,0.1)'
+                                       }]}/>
+                }
+                {
+                    appleAuthenticating &&
+                    <ActivityIndicator size="large" color={Colors.primaryColor}
+                                       style={[StyleSheet.absoluteFill, {
+                                           zIndex: 1,
+                                           backgroundColor: 'rgba(0,0,0,0.1)'
+                                       }]}/>
+                }
+                {
+                    fbAuthenticating &&
+                    <ActivityIndicator size="large" color={Colors.primaryColor}
+                                       style={[StyleSheet.absoluteFill, {
+                                           zIndex: 1,
+                                           backgroundColor: 'rgba(0,0,0,0.1)'
+                                       }]}/>
+                }
+                {
+                    loadingUser &&
+                    <ActivityIndicator size="large" color={Colors.primaryColor}
+                                       style={[StyleSheet.absoluteFill, {
+                                           zIndex: 1,
+                                           backgroundColor: 'rgba(0,0,0,0.1)'
+                                       }]}/>
+                }
                 <Toast message={responseMessage} state={responseState} type={responseType}/>
+
                 <KeyboardAwareScrollView scrollEnabled
                                          style={{
                                              width: '100%',
@@ -225,8 +444,10 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
                     </Animated.View>
 
                     <View style={styles.authContainer}>
-                     {/*   <View style={styles.topBar}>
-                            <TouchableOpacity style={styles.backBtn}>
+
+
+                        <View style={styles.topBar}>
+                            <TouchableOpacity onPress={goBack} style={styles.backBtn}>
 
 
                                 <AntDesign name="arrowleft" size={24} color="#848484"/>
@@ -234,8 +455,7 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
                                     Back
                                 </Text>
                             </TouchableOpacity>
-                        </View>*/}
-
+                        </View>
 
                         <View style={styles.titleContainer}>
                             <Text style={styles.titleText}>
@@ -243,9 +463,95 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
                             </Text>
                         </View>
 
+
+                        <TouchableOpacity onPress={async () => await googleAuth()} activeOpacity={0.6}
+                                          style={[styles.buttonSignUp, {
+                                              borderWidth: 1,
+                                              borderColor: Colors.borderColor,
+                                              marginVertical: pixelSizeVertical(10),
+                                          }]}>
+
+                            <GoogleIcon/>
+                            <Text style={[{
+                                fontFamily: Fonts.quicksandSemiBold,
+                                fontSize: fontPixel(14),
+                                color: Colors.light.text,
+                            }]}>
+                                Sign up with Google
+                            </Text>
+                        </TouchableOpacity>
+                        <View style={{
+                            marginVertical: pixelSizeVertical(10)
+                        }}>
+
+
+                            <LoginButton
+
+                                onLoginFinished={
+                                    (error, result) => {
+                                        if (error) {
+                                            console.log("login has error: " + result.error);
+                                        } else if (result.isCancelled) {
+                                            console.log("login is cancelled.");
+                                        } else {
+                                            AccessToken.getCurrentAccessToken().then(
+                                                (data) => {
+                                                    const body = JSON.stringify({
+                                                        access_token: data.accessToken.toString(),
+
+                                                        "referralCode": "",
+                                                    })
+                                                    FBOAuth(body)
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+                                onLogoutFinished={() => console.log("logout.")}/>
+                        </View>
+
+                        {
+                            Platform.OS == 'ios' &&
+
+                            <AppleAuthentication.AppleAuthenticationButton
+
+                                buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_UP}
+                                buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+                                cornerRadius={5}
+                                style={styles.buttonSignUp}
+                                onPress={async () => {
+                                    try {
+                                        const credential = await AppleAuthentication.signInAsync({
+                                            requestedScopes: [
+                                                AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+                                                AppleAuthentication.AppleAuthenticationScope.EMAIL,
+                                            ],
+                                        });
+                                        const body = JSON.stringify({
+                                            access_token: credential.identityToken,
+                                            full_name: credential.fullName?.familyName,
+                                            referralCode: values.referralCode,
+                                            "source": "mobile"
+                                        })
+                                        appleOAuth(body)
+
+                                        // signed in
+                                    } catch (e) {
+                                        if (e.code === 'ERR_CANCELED') {
+                                            // handle that the user canceled the sign-in flow
+                                        } else {
+                                            // handle other errors
+                                        }
+                                    }
+                                }}
+                            />
+                        }
+
+                        <HorizontalLine margin/>
+
                         <TextInput
 
-                           placeholder="Enter Full name"
+                            placeholder="Enter Full name"
                             keyboardType={"default"}
                             touched={touched.fullName}
                             error={touched.fullName && errors.fullName}
@@ -288,14 +594,13 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
                             error={errors.phoneNumber}
                             defaultValue={phoneNumber}
                             label="Phone number"
-                            onChangeText={(text,code)=>{
+                            onChangeText={(text, code) => {
                                 handleChange('phoneNumber')(text);
                                 setCountryCode(code)
                             }}
                             value={values.phoneNumber}
                             errorMessage=''
                             placeholder="Phone"/>
-
 
 
                         <TextInput
@@ -348,7 +653,6 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
                             label="Confirm Password *"/>
 
 
-
                         <TextInput
 
                             placeholder="***********************"
@@ -366,7 +670,7 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
 
 
                         <RectButton disabled={isLoading || !isValid} style={{
-                            width:widthPixel(200)
+                            width: widthPixel(200)
                         }} onPress={() => handleSubmit()}>
                             {
                                 isLoading ? <ActivityIndicator size='small' color="#fff"/>
@@ -396,11 +700,15 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
                         <View style={styles.wrap}>
                             <Text style={styles.terms}>
                                 This site is protected by reCAPTCHA and the Google
-                                <Text style={{
+                                <Text
+                                    onPress={() => _handlePressButtonAsync('https://www.gatewayapp.co/privacy-policy')}
+                                    style={{
+                                        fontFamily: Fonts.quickSandBold
+                                    }}> Privacy Policy</Text> and <Text
+                                onPress={() => _handlePressButtonAsync('https://www.gatewayapp.co/terms-and-conditions')}
+                                style={{
                                     fontFamily: Fonts.quickSandBold
-                                }}> Privacy Policy</Text> and <Text style={{
-                                fontFamily: Fonts.quickSandBold
-                            }}> Terms of Service</Text> apply.
+                                }}> Terms of Service</Text> apply.
                             </Text>
 
                         </View>
@@ -408,8 +716,6 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
                     </View>
                 </KeyboardAwareScrollView>
             </SafeAreaView>
-
-
 
 
         </>
@@ -473,7 +779,7 @@ const styles = StyleSheet.create({
     },
     titleContainer: {
         width: '100%',
-        height:50,
+        height: 50,
         alignItems: 'flex-start',
         justifyContent: 'flex-start'
     },
@@ -598,12 +904,21 @@ const styles = StyleSheet.create({
         width: '90%',
         justifyContent: 'center'
     },
-    buttonText:{
+    buttonText: {
         position: 'absolute',
         fontSize: fontPixel(16),
         color: "#fff",
         fontFamily: Fonts.quickSandBold
-    }
+    },
+    buttonSignUp: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-evenly',
+        borderRadius: 10,
+        width: widthPixel(292),
+
+        height: heightPixel(56)
+    },
 
 })
 

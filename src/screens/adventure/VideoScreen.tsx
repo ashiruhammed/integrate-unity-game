@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import {SafeAreaView} from "react-native-safe-area-context";
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
-import {AntDesign, Ionicons} from "@expo/vector-icons";
+import {AntDesign, FontAwesome5, Ionicons} from "@expo/vector-icons";
 import {RectButton} from "../../components/RectButton";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {
@@ -124,17 +124,7 @@ const VideoScreen = ({navigation, route}: RootStackScreenProps<'VideoScreen'>) =
 
     //  const {isLoading, data: lesson, refetch} = useQuery(['lesson'], () => getLesson(lessonId))
     const {isLoading, data: lesson, mutate} = useMutation(['lesson'], getLesson)
-    const {isLoading: loadingLessons, data: lessons, refetch: fetchLessons} = useQuery(['getLessonsByModule'],
-        ()=> getLessonsByModule('dd04af68-ba28-4a28-b2ce-6e134e46c641'), {
-enabled:false,
-            onSuccess: (data) => {
 
-               // console.log(data)
-                if (data.sucess) {
-                  //  mutate(data.data.nextLessonId)
-                }
-            }
-        })
 
     // const {isLoading:loadingAdventure, data:adventure, refetch:fetchAdevnture,} = useQuery(['getAdventure'], () => getAdventure(adventureId))
     const {
@@ -417,13 +407,7 @@ enabled:false,
                                                          }]}/>
                 }
 
-                {
-                    loadingLessons && <ActivityIndicator size="large" color={Colors.primaryColor}
-                                                         style={[StyleSheet.absoluteFill, {
-                                                             zIndex: 10,
-                                                             backgroundColor: 'rgba(0,0,0,0.5)'
-                                                         }]}/>
-                }
+
                 <ScrollView
                     style={{width: '100%',}} contentContainerStyle={styles.scrollView} scrollEnabled
                     showsVerticalScrollIndicator={false}>
@@ -442,6 +426,14 @@ enabled:false,
                         }]}>
                             {lesson?.data?.name}
                         </Text>
+                        <View style={styles.cardTopLeft}>
+                            <FontAwesome5 name="gift" size={16} color={Colors.success}/>
+                            <Text style={[styles.cardTopLeftText,{
+                                color: textColor
+                            }]}>
+                                {adventure?.rewardPoint} Reward Points
+                            </Text>
+                        </View>
                     </View>
 
                     {
@@ -915,7 +907,17 @@ const styles = StyleSheet.create({
         width: '100%',
         alignItems: 'flex-start',
     },
+ cardTopLeft: {
+        marginTop:10,
+        flexDirection:'row',
+        alignItems: 'flex-start',
 
+    },
+    cardTopLeftText: {
+        marginLeft:5,
+        fontSize: fontPixel(14),
+        fontFamily: Fonts.quicksandMedium
+    },
 
 })
 

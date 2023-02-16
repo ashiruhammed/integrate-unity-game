@@ -1,4 +1,5 @@
 
 //cloudinary constantys
-export const upload_preset = 'wzmsno1n'
-export const api_key = '321282857135333'
+export const upload_preset = 'ehlowx2s'
+export const api_key = '525474849412913'
+

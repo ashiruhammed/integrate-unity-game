@@ -16,7 +16,7 @@ import {useAppDispatch, useAppSelector} from "../../app/hooks";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {setAuthenticated, setResponse, unSetResponse, updateUserInfo} from "../../app/slices/userSlice";
 import * as SecureStore from 'expo-secure-store';
-import {getUser, loginUser, userGoogleAuth} from "../../action/action";
+import {getUser, loginUser, userAppleOAuth, userFBOAuth, userGoogleAuth} from "../../action/action";
 import Toast from "../../components/Toast";
 import * as Haptics from 'expo-haptics';
 import * as WebBrowser from 'expo-web-browser';
@@ -24,6 +24,8 @@ import * as Google from "expo-auth-session/providers/google";
 import * as AppleAuthentication from 'expo-apple-authentication';
 import GoogleIcon from "../../components/GoogleIcon";
 import HorizontalLine from "../../components/HorizontalLine";
+import {LoginButton, AccessToken, AuthenticationToken} from 'react-native-fbsdk-next';
+
 
 
 WebBrowser.maybeCompleteAuthSession();
@@ -72,54 +74,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
 
 
 
-    const {mutate:googleAuthLogin, isLoading:googleAuthenticating} = useMutation(['userGoogleAuth'], userGoogleAuth, {
 
-        onSuccess: async (data) => {
-//console.log(data)
-            if (data.success) {
-
-
-                SecureStore.setItemAsync('Gateway-Token', data.data.token).then(() => {
-                    fetchUser()
-                })
-
-
-            } else {
-                if (data.message == 'Your email is not verified, kindly verify your email to continue.') {
-                    navigation.navigate('EmailConfirm', {
-                        email: contentEmail
-                    })
-                } else {
-                    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
-                    dispatch(setResponse({
-                        responseMessage: data.message,
-                        responseState: true,
-                        responseType: 'error',
-                    }))
-
-                }
-                /*  navigation.navigate('EmailConfirm', {
-                      email:contentEmail
-                  })*/
-
-
-            }
-        },
-
-        onError: (err) => {
-            dispatch(setResponse({
-                responseMessage: err.message,
-                responseState: true,
-                responseType: 'error',
-            }))
-
-
-        },
-        onSettled: () => {
-            queryClient.invalidateQueries(['userGoogleAuth']);
-        }
-
-    })
 
 
 
@@ -169,6 +124,130 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
     })
 
 
+     const {mutate:appleOAuth, isLoading:appleAuthenticating} = useMutation(['userAppleOAuth'], userAppleOAuth, {
+
+        onSuccess: async (data) => {
+
+            if (data.success) {
+
+
+                SecureStore.setItemAsync('Gateway-Token', data.data.token).then(() => {
+                    fetchUser()
+                })
+
+
+            } else {
+                    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
+                    dispatch(setResponse({
+                        responseMessage: data.message,
+                        responseState: true,
+                        responseType: 'error',
+                    }))
+
+
+            }
+        },
+
+        onError: (err) => {
+            dispatch(setResponse({
+                responseMessage: err.message,
+                responseState: true,
+                responseType: 'error',
+            }))
+
+
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries(['userAppleOAuth']);
+        }
+
+    })
+
+
+     const {mutate:FBOAuth, isLoading:fbAuthenticating} = useMutation(['userFBOAuth'], userFBOAuth, {
+
+        onSuccess: async (data) => {
+
+            if (data.success) {
+
+
+                SecureStore.setItemAsync('Gateway-Token', data.data.token).then(() => {
+                    fetchUser()
+                })
+
+
+            } else {
+                    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
+                    dispatch(setResponse({
+                        responseMessage: data.message,
+                        responseState: true,
+                        responseType: 'error',
+                    }))
+
+
+            }
+        },
+
+        onError: (err) => {
+            dispatch(setResponse({
+                responseMessage: err.message,
+                responseState: true,
+                responseType: 'error',
+            }))
+
+
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries(['userFBOAuth']);
+        }
+
+    })
+
+
+
+    const {mutate:googleAuthLogin, isLoading:googleAuthenticating} = useMutation(['userGoogleAuth'], userGoogleAuth, {
+
+        onSuccess: async (data) => {
+//console.log(data)
+            if (data.success) {
+
+
+                SecureStore.setItemAsync('Gateway-Token', data.data.token).then(() => {
+                    fetchUser()
+                })
+
+
+            }  else {
+                    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
+                    dispatch(setResponse({
+                        responseMessage: data.message,
+                        responseState: true,
+                        responseType: 'error',
+                    }))
+
+                }
+                /*  navigation.navigate('EmailConfirm', {
+                      email:contentEmail
+                  })*/
+
+
+
+        },
+
+        onError: (err) => {
+            dispatch(setResponse({
+                responseMessage: err.message,
+                responseState: true,
+                responseType: 'error',
+            }))
+
+
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries(['userGoogleAuth']);
+        }
+
+    })
 
 
     const {mutate, isLoading} = useMutation(['login-user'], loginUser, {
@@ -276,6 +355,39 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
 
         <SafeAreaView style={styles.safeArea}>
 
+             {
+                googleAuthenticating &&
+                <ActivityIndicator size="large" color={Colors.primaryColor}
+                                   style={[StyleSheet.absoluteFill, {
+                                       zIndex: 1,
+                                       backgroundColor: 'rgba(0,0,0,0.1)'
+                                   }]}/>
+            }
+            {
+                appleAuthenticating &&
+                <ActivityIndicator size="large" color={Colors.primaryColor}
+                                   style={[StyleSheet.absoluteFill, {
+                                       zIndex: 1,
+                                       backgroundColor: 'rgba(0,0,0,0.1)'
+                                   }]}/>
+            }
+            {
+            fbAuthenticating &&
+                <ActivityIndicator size="large" color={Colors.primaryColor}
+                                   style={[StyleSheet.absoluteFill, {
+                                       zIndex: 1,
+                                       backgroundColor: 'rgba(0,0,0,0.1)'
+                                   }]}/>
+            }
+            {
+                loadingUser &&
+                <ActivityIndicator size="large" color={Colors.primaryColor}
+                                   style={[StyleSheet.absoluteFill, {
+                                       zIndex: 1,
+                                       backgroundColor: 'rgba(0,0,0,0.1)'
+                                   }]}/>
+            }
+
             <KeyboardAwareScrollView scrollEnabled
                                      style={{
                                          width: '100%',
@@ -336,12 +448,43 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                             Continue with Google
                         </Text>
                     </TouchableOpacity>
-                    {
+                    <View style={{
+                        marginVertical:pixelSizeVertical(10)
+                    }}>
+                    <LoginButton
+
+                        onLoginFinished={
+                            (error, result) => {
+                                if (error) {
+                                    console.log("login has error: " + result.error);
+                                } else if (result.isCancelled) {
+                                    console.log("login is cancelled.");
+                                } else {
+
+                                    AccessToken.getCurrentAccessToken().then(
+                                        (data) => {
+                                           // console.log(data.accessToken.toString())
+                                            const body = JSON.stringify({
+                                                access_token: data.accessToken.toString(),
+
+                                                "referralCode" : "",
+                                            })
+                                            FBOAuth(body)
+                                        }
+                                    )
+                                }
+                            }
+                        }
+
+                        onLogoutFinished={() => console.log("logout.")}/>
+                    </View>
+
+                  {
                         Platform.OS == 'ios' &&
 
                         <AppleAuthentication.AppleAuthenticationButton
-                            buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
-                            buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+                            buttonType={AppleAuthentication.AppleAuthenticationButtonType.CONTINUE}
+                            buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.WHITE_OUTLINE}
                             cornerRadius={5}
                             style={styles.buttonSignUp}
                             onPress={async () => {
@@ -352,7 +495,15 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                                             AppleAuthentication.AppleAuthenticationScope.EMAIL,
                                         ],
                                     });
-                                    //  console.log(credential)
+
+                                    const body = JSON.stringify({
+                                        access_token: credential.identityToken,
+                                        full_name: `${credential.fullName?.familyName} ${credential.fullName?.givenName}`,
+                                        source: "mobile",
+                                        "referralCode" : "",
+                                    })
+                                    appleOAuth(body)
+
                                     // signed in
                                 } catch (e) {
                                     if (e.code === 'ERR_CANCELED') {

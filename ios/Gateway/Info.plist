@@ -94,5 +94,21 @@
 	<string>No</string>
 	<key>remote-notification</key>
 	<string>Allow user to receive remote notification</string>
+
+	<key>CFBundleURLTypes</key>
+    <array>
+      <dict>
+      <key>CFBundleURLSchemes</key>
+      <array>
+        <string>fb533333598894233</string>
+      </array>
+      </dict>
+    </array>
+    <key>FacebookAppID</key>
+    <string>533333598894233</string>
+    <key>FacebookDisplayName</key>
+    <string>Gateway</string>
+     <key>FacebookClientToken</key>
+    <string>c5e29a3734574e41f5053406b81ca87f</string>
 </dict>
 </plist>

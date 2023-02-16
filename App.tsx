@@ -32,7 +32,9 @@ import {
     requestUserPermission,
     notificationListener,
 } from './notification';
-
+import { Settings } from 'react-native-fbsdk-next'
+Settings.initializeSDK();
+Settings.setAppID('533333598894233');
 enableScreens()
 
 Notifications.setNotificationHandler({

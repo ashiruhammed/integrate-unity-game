@@ -27,7 +27,19 @@
     "assetBundlePatterns": [
       "**/*"
     ],
-    "plugins": ["expo-apple-authentication"],
+    "plugins": ["expo-apple-authentication", [
+      "react-native-fbsdk-next",
+      {
+        "appID": "533333598894233",
+        "clientToken": "c5e29a3734574e41f5053406b81ca87f",
+        "displayName": "RN SDK Demo",
+        "scheme": "fb533333598894233",
+        "advertiserIDCollectionEnabled": false,
+        "autoLogAppEventsEnabled": false,
+        "isAutoInitEnabled": true,
+        "iosUserTrackingPermission": "This identifier will be used to deliver personalized ads to you."
+      }
+    ]],
     "ios": {
       "supportsTablet": true,
       "icon": "./src/assets/images/app-icon.png",

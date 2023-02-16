@@ -45,6 +45,44 @@ export const loginUser = async (userData: {}) => {
 
 
 }
+
+
+export const userAppleOAuth = async (userData: {}) => {
+    //let Token = await SecureStore.getItemAsync('token');
+    // await setHeaderToken(Token)
+    /*  const response = await request.get(
+          `/`,
+      );*/
+
+    const myHeaders = {
+        'Content-Type': 'application/json',
+    }
+    let timeoutId: NodeJS.Timeout
+
+    let requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: userData,
+    };
+
+    return Promise.race([
+        fetch(`${BASE_URL}/auth/apple/callback`, requestOptions)
+            .then(response => response.json()),
+        new Promise((resolve, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+            //  clearTimeout(timeoutId)
+        }).then(() => {
+            clearTimeout(timeoutId)
+        })
+
+    ])
+
+    // return request.post(`/auth/login`, {userData})
+
+
+}
+
 export const userGoogleAuth = async (userData: {}) => {
     //let Token = await SecureStore.getItemAsync('token');
     // await setHeaderToken(Token)
@@ -64,6 +102,38 @@ export const userGoogleAuth = async (userData: {}) => {
 
     return Promise.race([
         fetch(`${BASE_URL}/auth/google/callback`, requestOptions)
+            .then(response => response.json()),
+        new Promise((resolve, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+            //  clearTimeout(timeoutId)
+        }).then(() => {
+            clearTimeout(timeoutId)
+        })
+
+    ])
+
+    // return request.post(`/auth/login`, {userData})
+
+
+}
+
+
+export const userFBOAuth = async (userData: any) => {
+
+    const myHeaders = {
+        'Content-Type': 'application/json',
+    }
+    let timeoutId: NodeJS.Timeout
+
+    let requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: userData,
+    };
+
+    return Promise.race([
+        fetch(`${BASE_URL}/auth/facebook/callback`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)

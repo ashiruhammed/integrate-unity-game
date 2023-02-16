@@ -80,7 +80,7 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
     const user = useAppSelector(state => state.user)
     const {responseState, responseType, responseMessage} = user
 
-    const [modalVisible, setModalVisible] = useState(false);
+
     const [badgeModalVisible, setBadgeModalVisible] = useState(false);
     const [selectedAnswer, setSelectedAnswer] = useState('');
     const [selectedAnswerId, setSelectedAnswerId] = useState('');
@@ -186,7 +186,7 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
         }
     })
 
-
+console.log(missionData)
 
     const {data:task,mutate:getTask,isLoading:gettingTask} = useMutation(['getModuleTask'],getModuleTask,{
         onSuccess:(data)=>{
@@ -488,7 +488,7 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
                                     <View style={styles.dripImageWrap}>
                                         <Image
                                             //{missionData?.data?.badge?.imageUrl}
-                                            source={{uri: 'https://res.cloudinary.com/dijyr3tlg/image/upload/v1672951469/gateway/Group_151_cret7t.png'}}
+                                            source={{uri: missionData?.data?.badge?.imageUrl}}
                                             style={styles.dripImage}/>
                                     </View>
 
@@ -554,83 +554,7 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
                 </Modal>
 
 
-                <Modal
 
-                    animationType="slide"
-                    transparent={true}
-                    visible={modalVisible}
-
-                    onRequestClose={() => {
-                        Alert.alert("Modal has been closed.");
-                        setModalVisible(!modalVisible);
-                    }}
-                >
-                    <View style={styles.backDrop}>
-                        <View style={styles.modalContainer}>
-
-                            {/* <View style={styles.sheetHead}>
-
-                            <TouchableOpacity activeOpacity={0.8} onPress={closeModal}
-                                              style={styles.dismiss}>
-                                <Ionicons name="ios-close" size={24} color="#929292"/>
-                            </TouchableOpacity>
-
-                        </View>*/}
-
-                            <View style={styles.modalBody}>
-                                {/* <View style={styles.dripImageWrap}>
-                                    <Image
-                                        source={{uri: 'https://res.cloudinary.com/dijyr3tlg/image/upload/v1672951469/gateway/Group_151_cret7t.png'}}
-                                        style={styles.dripImage}/>
-                                </View>*/}
-
-
-                                <View style={styles.textWrap}>
-                                    <Text style={styles.missionText}>
-                                        Quiz submitted
-                                    </Text>
-
-                                    <Text style={[styles.learnText, {
-                                        textAlign: 'center'
-                                    }]}>
-                                        You just earned 40 Reward Points
-                                    </Text>
-                                </View>
-
-                                <View style={styles.buttonRow}>
-
-
-                                    <RectButton onPress={giveReview}  style={{
-                                        width: 150,
-
-                                    }}>
-                                        <Text style={styles.buttonText}>
-                                            Leave a review
-
-                                        </Text>
-
-                                    </RectButton>
-
-                                    <RectButton onPress={goToNext} style={{
-                                        width: 150,
-
-                                    }}>
-                                        {
-                                            loadingMission ? <ActivityIndicator size='small' color="#fff"/>
-                                                :
-                                                <Text style={styles.buttonText}>
-                                                    Next Mission
-
-                                                </Text>
-                                        }
-                                    </RectButton>
-                                </View>
-                            </View>
-
-
-                        </View>
-                    </View>
-                </Modal>
 
 
                 <View style={styles.topBar}>
@@ -1169,7 +1093,7 @@ const styles = StyleSheet.create({
 
     dripImage: {
 
-        resizeMode: 'center',
+        resizeMode: 'contain',
         width: "100%",
         height: "100%",
     },
