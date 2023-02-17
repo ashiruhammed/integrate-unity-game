@@ -31,6 +31,7 @@ import HorizontalLine from "../../components/HorizontalLine";
 import Drawer from "./components/Drawer";
 import {useInfiniteQuery, useMutation, useQuery} from "@tanstack/react-query";
 import {
+    getCommunityInfo,
     getCommunityPost,
     getCommunityPosts,
     getPostComments,
@@ -45,6 +46,9 @@ import Constants from "expo-constants";
 import FastImage from "react-native-fast-image";
 import {FlashList} from "@shopify/flash-list";
 import {Video} from "expo-av";
+import {store} from "../../app/store";
+import {setResponse} from "../../app/slices/userSlice";
+import Toast from "../../components/Toast";
 
 var relativeTime = require('dayjs/plugin/relativeTime')
 dayjs.extend(relativeTime)
@@ -71,6 +75,7 @@ interface cardProps {
         "commentRepliesCount": 0,
         "isEdited": true,
         "parentId": null,
+        liked: boolean,
         "isDeleted": false,
         "createdAt": string,
         "updatedAt": string,
@@ -81,16 +86,16 @@ interface cardProps {
             "fullName": string,
             "id": string
         },
-        "liked": false
-    },
 
+    },
+    likeComment:(id:string) =>void
 
 }
 
-const CommentCard = ({theme, item}: cardProps) => {
+const CommentCard = ({theme, item,likeComment}: cardProps) => {
 
     //  const {data: likes, refetch} = useQuery(['getPostLikes'], () => getPostLike(item.id))
-   const {mutate} = useMutation(['likeAComment'], likeAComment)
+
 
     const backgroundColorCard = theme == 'light' ? '#fff' : Colors.dark.disable
     const backgroundColor = theme == 'light' ? "#EDEDED" : Colors.dark.background
@@ -184,9 +189,13 @@ const CommentCard = ({theme, item}: cardProps) => {
                     </Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={()=> mutate(item.id)} style={styles.actionButton}>
+                <TouchableOpacity onPress={()=> likeComment(item.id)} style={styles.actionButton}>
+                    {
+                        !item.liked ?  <AntDesign name="like2" size={20} color={"#838383"}/>
+                            :
+                            <AntDesign name="like1" size={20} color={Colors.primaryColor} />
+                    }
 
-                    <AntDesign name="like2" size={20} color={"#838383"}/>
                     <Text style={styles.actionButtonText}>
                         {item.commentLikesCount} likes
                     </Text>
@@ -198,10 +207,12 @@ const CommentCard = ({theme, item}: cardProps) => {
 }
 const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => {
 
-    const {postId, communityId} = route.params
+    const {postId, communityId,post} = route.params
+
     const offset = useSharedValue(0);
     const [toggleMenu, setToggleMenu] = useState(false);
-
+    const user = useAppSelector(state => state.user)
+    const {responseState, responseType, responseMessage} = user
     const [refreshing, setRefreshing] = useState(false);
     const [content, setContent] = useState('');
     const dataSlice = useAppSelector(state => state.data)
@@ -211,7 +222,7 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
     const videoRef = useRef(null);
 
     const backgroundColorCard = theme == 'light' ? '#fff' : Colors.dark.disable
-
+    const { data:community,} = useQuery(['getCommunityInfo'], () => getCommunityInfo(communityId))
     const lightTextColor = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
     const borderColor = theme == 'light' ? Colors.borderColor : '#313131'
     const goBack = () => {
@@ -234,7 +245,7 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
         fetchNextPage: fetchNextPageComment,
         isFetchingNextPage,
         refetch: fetchComments,
-
+isFetching,
         isRefetching
     } = useInfiniteQuery([`PostComments`], ({pageParam = 1}) => getPostComments.comments(pageParam, postId),
         {
@@ -249,15 +260,44 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
             getPreviousPageParam: (firstPage, allPages) => firstPage.prevCursor,
         })
 
-    let type =  data?.data?.thumbnailUrl?.substring(data?.data?.thumbnailUrl.lastIndexOf(".") + 1);
+
+      const {mutate:likeComment,data:liked} = useMutation(['likeAComment'], likeAComment,{
+        onSuccess: (data) => {
+
+            if (data.success) {
+                fetchComments()
+                store.dispatch(setResponse({
+                    responseMessage: data.message,
+                    responseState: true,
+                    responseType: 'success',
+                }))
+            } else {
+                store.dispatch(setResponse({
+                    responseMessage: data.message,
+                    responseState: true,
+                    responseType: 'error',
+                }))
+            }
+        }
+    })
+
+    let type =  post?.thumbnailUrl?.substring(post?.thumbnailUrl.lastIndexOf(".") + 1);
 
     //console.log(comments?.pages[0]?.data?.result)
     const renderItem = useCallback(
         ({item}) => (
 
-            <CommentCard theme={theme} item={item}/>
+                <>
+                    {
+      !loadingComments ?
+
+        <CommentCard likeComment={likeComment} theme={theme} item={item}/>
+        :
+        <ActivityIndicator size='small' color={Colors.primaryColor}/>
+}
+                </>
         ),
-        [theme],
+        [theme,loadingComments],
     );
 
     const commentOnPost = () => {
@@ -280,7 +320,7 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
                         <FastImage
                             resizeMode={FastImage.resizeMode.cover}
                             source={{
-                                uri: !data?.data?.user?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : data?.data?.user?.avatar,
+                                uri: !post?.user?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : post?.user?.avatar,
                                 cache: FastImage.cacheControl.web,
                                 priority: FastImage.priority.normal,
                             }}
@@ -295,7 +335,7 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
                             <Text style={[styles.postName, {
                                 color: textColor
                             }]}>
-                                {data?.data?.user?.fullName}
+                                {post?.user?.fullName}
                             </Text>
 
                             <View style={styles.tag}>
@@ -322,7 +362,7 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
                     <Text style={[styles.postHead, {
                         color: textColor
                     }]}>
-                        {data?.data?.content}
+                        {post?.content}
                     </Text>
                 </View>
                 {
@@ -334,7 +374,7 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
                         <FastImage
                             resizeMode={FastImage.resizeMode.cover}
                             source={{
-                                uri: data?.data?.thumbnailUrl,
+                                uri: post?.thumbnailUrl,
                                 cache: FastImage.cacheControl.web,
                                 priority: FastImage.priority.normal,
                             }}
@@ -357,7 +397,7 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
 
                                 source={{
                                     //lesson?.data?.video?.url
-                                    uri: data?.data?.thumbnailUrl,
+                                    uri: post?.thumbnailUrl,
 
                                 }}
                                 useNativeControls
@@ -375,8 +415,12 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
                 <View style={styles.actionButtons}>
                     <TouchableOpacity activeOpacity={0.8} onPress={() => mutate(postId)}
                                       style={styles.actionButton}>
-                        <AntDesign name="like2" size={20}
-                                   color={data?.data?.liked ? Colors.primaryColor : "#838383"}/>
+
+                        {
+                            !data?.data?.liked ?  <AntDesign name="like2" size={20} color={"#838383"}/>
+                                :
+                                <AntDesign name="like1" size={20} color={Colors.primaryColor} />
+                        }
                         <Text style={styles.actionButtonText}>
                             {data?.data?.likes} likes
                         </Text>
@@ -392,7 +436,7 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
                 </View>
             </Animated.View>
         ),
-        [data,theme],
+        [data,theme,post],
     );
     const renderFooterItem = useCallback(
         ({}) => (
@@ -443,10 +487,10 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
         // Add a 'scroll' ref to your ScrollView
         // scroll.props.scrollToFocusedInput(reactNode)
     }
-    /* useEffect(()=>{
-         getPost(postId)
-     },[postId])*/
-    useRefreshOnFocus(fetchComments)
+    useEffect(()=>{
+        fetchComments()
+     },[postId])
+   // useRefreshOnFocus(fetchComments)
     useRefreshOnFocus(refetch)
 
     return (
@@ -460,6 +504,7 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
             <SafeAreaView style={[styles.safeArea, {
                 backgroundColor
             }]}>
+                <Toast message={responseMessage} state={responseState} type={responseType}/>
                 <View style={styles.navBar}>
                     <TouchableOpacity onPress={goBack} style={styles.goBack} activeOpacity={0.8}>
                         <AntDesign name="arrowleft" size={24} color={textColor}/>
@@ -467,7 +512,7 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
                         <Text style={[styles.screenTitle, {
                             color: textColor
                         }]}>
-                            Wave community
+                            {community.data.name}
                         </Text>
 
                     </TouchableOpacity>
@@ -488,7 +533,7 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
                     backgroundColor
                 }]} scrollEnabled
                     showsVerticalScrollIndicator={false}>*/}
-                {
+             {/*   {
                     isLoading &&
 
                     <ActivityIndicator color={Colors.primaryColor} size={"small"}
@@ -496,7 +541,7 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
                                            backgroundColor: 'rgba(0,0,0,0.2)',
                                            zIndex: 2,
                                        }]}/>
-                }
+                }*/}
 
                 <HorizontalLine color={theme == 'light' ? Colors.borderColor : '#313131'}/>
                 <View style={{
@@ -516,7 +561,6 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
                         showsVerticalScrollIndicator={false}
                         data={comments?.pages[0]?.data?.result}
                         renderItem={renderItem}
-
                         keyExtractor={keyExtractor}
                         onEndReachedThreshold={0.3}
                         automaticallyAdjustContentInsets

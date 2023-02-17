@@ -103,17 +103,7 @@ const PublicCommunityCard = ({theme, loadingBadge, item, joinModal}: cardProps) 
 
             <View style={styles.topCard}>
                 <View style={styles.imageWrap}>
-                    {
-                        isRunningInExpoGo ?
 
-                            <Image
-                                style={styles.avatar}
-                                source={{
-                                    uri: item?.displayPhoto,
-                                }}
-                                resizeMode={'cover'}
-                            />
-                            :
                             <FastImage
                                 style={styles.avatar}
                                 source={{
@@ -123,7 +113,7 @@ const PublicCommunityCard = ({theme, loadingBadge, item, joinModal}: cardProps) 
                                 }}
                                 resizeMode={FastImage.resizeMode.cover}
                             />
-                    }
+
                 </View>
 
                 <Text style={[styles.cardTitle, {
@@ -434,7 +424,7 @@ const PublicCommunity = ({theme}: props) => {
                             </Text>
                             <View style={styles.dripImageWrap}>
                                 <Image
-                                    source={{uri: 'https://res.cloudinary.com/dijyr3tlg/image/upload/v1673304924/drip_znhu2i.png'}}
+                                    source={{uri: badge?.data?.imageUrl}}
                                     style={styles.dripImage}/>
                             </View>
 

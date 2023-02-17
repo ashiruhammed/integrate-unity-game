@@ -67,7 +67,7 @@ const AdvancedTextInput: FC<Props> = ({
 
 
 
-
+ const disableColor = theme == 'light' ? Colors.borderColor :Colors.dark.disable
     validationColor = !touched ? Colors.border : error ? Colors.errorRed : focus ? Colors.primaryColor : Colors.border
 
     return (
@@ -80,7 +80,7 @@ const AdvancedTextInput: FC<Props> = ({
             <View style={[styles.inputContainer, {
                 borderRadius: borderRadius ? borderRadius : 10,
                 borderColor:theme == 'light' ? validationColor : validationDarkColor,
-                backgroundColor: props.editable  === false?   Colors.dark.disable : "transparent",
+                backgroundColor: props.editable  === false?  disableColor  : "transparent",
                 height: inputHeight ? inputHeight : heightPixel(80),
             }]}>
 

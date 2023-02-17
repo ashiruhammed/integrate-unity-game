@@ -205,7 +205,9 @@ const MyReferrals = ({navigation}: RootStackScreenProps<'MyReferrals'>) => {
                                 color: "#fff",
                                 fontSize: fontPixel(40)
                             }]}>
-                                {data?.pages[0]?.data?.totalPointsGained}
+                                {data?.pages[0]?.data?.referralHistory.length}
+
+                        {/*        {data?.pages[0]?.data?.totalPointsGained}*/}
                             </Text>
                         </View>
                     </View>
@@ -251,7 +253,8 @@ const MyReferrals = ({navigation}: RootStackScreenProps<'MyReferrals'>) => {
 
 
                         <View style={{
-                            width: '100%',
+                            width: '90%',
+
                             flex: 1,
                         }}>
 
@@ -346,6 +349,7 @@ const styles = StyleSheet.create({
         width: '100%',
         flex: 1,
         alignItems: 'center',
+
         paddingBottom: Platform.OS === 'ios' ? -40 : 0
     },
     scrollView: {
@@ -393,7 +397,7 @@ const styles = StyleSheet.create({
 
     titleWrap: {
         marginTop: 15,
-        paddingHorizontal: pixelSizeHorizontal(20),
+
         width: '100%',
 
         alignItems: 'center',
@@ -413,7 +417,7 @@ const styles = StyleSheet.create({
     transactionCard: {
 
         height: heightPixel(80),
-        width: '90%',
+        width: '100%',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between'

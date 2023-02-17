@@ -35,7 +35,7 @@ import Colors from "../../constants/Colors";
 import HorizontalLine from "../../components/HorizontalLine";
 import {StatusBar} from "expo-status-bar";
 import {SearchBar} from "react-native-screens";
-import {useInfiniteQuery, useMutation, useQuery} from "@tanstack/react-query";
+import {useInfiniteQuery, useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {
     getAllAdventure,
     getCommunityInfo,
@@ -44,17 +44,18 @@ import {
     getUser,
     likeAPost
 } from "../../action/action";
-import {updateUserInfo} from "../../app/slices/userSlice";
+import {setResponse, unSetResponse, updateUserInfo} from "../../app/slices/userSlice";
 import FastImage from "react-native-fast-image";
 import Constants from "expo-constants";
 import {CardProps} from "react-native-elements";
-import {useAppSelector} from "../../app/hooks";
+import {useAppDispatch, useAppSelector} from "../../app/hooks";
 import {FlashList} from "@shopify/flash-list";
 import {truncate, useRefreshOnFocus} from "../../helpers";
 import Drawer from "./components/Drawer";
 import Toast from "../../components/Toast";
 import dayjs from "dayjs";
 import {Video} from "expo-av";
+import {store} from "../../app/store";
 
 const fullHeight = Dimensions.get('window').height
 
@@ -72,8 +73,9 @@ interface cardProps {
         "content": string,
         "description": string,
         "thumbnailUrl": string,
-        likes:number,
-        commentCount:number,
+        likes: number,
+        commentCount: number,
+        liked: boolean,
         "createdAt": string,
         "user": {
             "avatar": string,
@@ -82,76 +84,102 @@ interface cardProps {
             "username": null,
         },
     },
-    myId:string,
-    viewPost: (id: string) => void
+    myId: string,
+    viewPost: (id: string, post:{}) => void,
+    commentOnPost: (id: string, post: any) => void,
 }
 
-const PostCard = ({theme, item, viewPost}: cardProps) => {
+const PostCard = ({theme, item, viewPost, commentOnPost}: cardProps) => {
 
-    const {data:likes, refetch} =useQuery(['getPostLikes'],()=>getPostLike(item.id))
-    const { mutate} =useMutation(['likeAPost'],likeAPost)
+    const {data: likes, refetch} = useQuery(['getPostLikes'], () => getPostLike(item.id))
+    const {mutate} = useMutation(['likeAPost'], likeAPost, {
+        onSuccess: (data) => {
+
+            if (data.success) {
+                store.dispatch(setResponse({
+                    responseMessage: data.message,
+                    responseState: true,
+                    responseType: 'succss',
+                }))
+            } else {
+                store.dispatch(setResponse({
+                    responseMessage: data.message,
+                    responseState: true,
+                    responseType: 'error',
+                }))
+            }
+        }
+    })
 
     const backgroundColorCard = theme == 'light' ? '#fff' : Colors.dark.disable
     const backgroundColor = theme == 'light' ? "#EDEDED" : Colors.dark.background
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
     const lightTextColor = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
     const borderColor = theme == 'light' ? Colors.borderColor : '#313131'
-    let type =  item.thumbnailUrl?.substring(item.thumbnailUrl.lastIndexOf(".") + 1);
-    const videoRef =useRef(null);
+    let type = item.thumbnailUrl?.substring(item.thumbnailUrl.lastIndexOf(".") + 1);
+    const videoRef = useRef(null);
     return (
         <Animated.View key={item.id} entering={FadeInDown} exiting={FadeOutDown}
                        layout={Layout.easing(Easing.ease).delay(20)}>
-        <Pressable onPress={() => viewPost(item.id)} style={[styles.postCard,{backgroundColor: backgroundColorCard}]}>
-            <View style={styles.topPostSection}>
-                <View style={styles.userImage}>
-                    <Image source={{uri: !item?.user?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'  : item?.user?.avatar}} style={styles.avatar}/>
-
-                </View>
-
-                <View style={styles.details}>
-
-                    <View style={styles.nameTag}>
-                        <Text style={[styles.postName,{
-                            color: textColor
-                        }]}>
-                            {item?.user?.fullName}
-                        </Text>
-
-                        <View style={[styles.tag,{
-                           // backgroundColor
-                        }]}>
-                            <Text style={styles.tagText}>
-                                Admin
-                            </Text>
-                        </View>
+            <Pressable onPress={() => viewPost(item.id, item)}
+                       style={[styles.postCard, {backgroundColor: backgroundColorCard}]}>
+                <View style={styles.topPostSection}>
+                    <View style={styles.userImage}>
+                        <FastImage
+                            resizeMode={FastImage.resizeMode.cover}
+                            source={{uri: !item?.user?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : item?.user?.avatar,
+                                cache: FastImage.cacheControl.web,
+                                priority: FastImage.priority.normal,
+                        }}
+                            style={styles.avatar}/>
 
                     </View>
-                    <Text style={styles.postDate}>
 
-                        {dayjs(item.createdAt).format('DD MMM YYYY')}
-                    </Text>
+                    <View style={styles.details}>
+
+                        <View style={styles.nameTag}>
+                            <Text style={[styles.postName, {
+                                color: textColor
+                            }]}>
+                                {item?.user?.fullName}
+                            </Text>
+
+                            <View style={[styles.tag, {
+                                // backgroundColor
+                            }]}>
+                                <Text style={styles.tagText}>
+                                    Admin
+                                </Text>
+                            </View>
+
+                        </View>
+                        <Text style={styles.postDate}>
+
+                            {dayjs(item.createdAt).format('DD MMM YYYY')}
+                        </Text>
+                    </View>
+
+
                 </View>
 
-
-            </View>
-
-            <View style={[styles.postSnippet,{
-                marginBottom: item.thumbnailUrl !== '' ? 10 : 0
-            }]}>
-
-
-                <Text style={[styles.postHead,{
-                    color: textColor
+                <View style={[styles.postSnippet, {
+                    marginBottom: item.thumbnailUrl !== '' ? 10 : 0
                 }]}>
-                    {truncate(item.content.trim(), 80)} <Text style={{fontFamily: Fonts.quickSandBold}}>Read more</Text>
-                </Text>
-            </View>
-            {
-                item.thumbnailUrl !== '' &&
-                <View style={styles.postImageWrap}>
 
-                    {
-                     type !== 'mov'  && type !== 'mp4' &&
+
+                    <Text style={[styles.postHead, {
+                        color: textColor
+                    }]}>
+                        {truncate(item.content.trim(), 80)} <Text style={{fontFamily: Fonts.quickSandBold}}>Read
+                        more</Text>
+                    </Text>
+                </View>
+                {
+                    item.thumbnailUrl !== '' &&
+                    <View style={styles.postImageWrap}>
+
+                        {
+                            type !== 'mov' && type !== 'mp4' &&
                             <FastImage
                                 resizeMode={FastImage.resizeMode.cover}
                                 source={{
@@ -162,51 +190,57 @@ const PostCard = ({theme, item, viewPost}: cardProps) => {
 
                                 style={styles.postImage}
                             />
-                    }
+                        }
 
-                    {
-                        type !== 'jpeg' && type !== 'png' && type !== 'jpg' && type !== 'gif' && type !== 'jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' &&
-                    <Video
-                        ref={videoRef}
+                        {
+                            type !== 'jpeg' && type !== 'png' && type !== 'jpg' && type !== 'gif' && type !== 'jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2' &&
+                            <Video
+                                ref={videoRef}
 
-                        style={{
-                            height: '100%',
-                            borderRadius: 10,
-                            width: '100%',
-                        }}
-                        videoStyle={{backgroundColor: '#fff'}}
+                                style={{
+                                    height: '100%',
+                                    borderRadius: 10,
+                                    width: '100%',
+                                }}
+                                videoStyle={{backgroundColor: '#fff'}}
 
-                        source={{
-                            //lesson?.data?.video?.url
-                            uri: item.thumbnailUrl,
+                                source={{
+                                    //lesson?.data?.video?.url
+                                    uri: item.thumbnailUrl,
 
-                        }}
-                        useNativeControls
-                        resizeMode="contain"
+                                }}
+                                useNativeControls
+                                resizeMode="contain"
 
-                        isLooping={false}
-                       // onPlaybackStatusUpdate={status => setStatus(() => status)}
-                    />
-                    }
+                                isLooping={false}
+                                // onPlaybackStatusUpdate={status => setStatus(() => status)}
+                            />
+                        }
+                    </View>
+                }
+                <View style={styles.actionButtons}>
+                    <TouchableOpacity activeOpacity={0.9} onPress={() => mutate(item.id)} style={styles.actionButton}>
+
+                        {
+                            !item.liked ? <AntDesign name="like2" size={20} color={"#838383"}/>
+                                :
+                                <AntDesign name="like1" size={20} color={Colors.primaryColor}/>
+                        }
+                        <Text style={styles.actionButtonText}>
+                            {item.likes} likes
+                        </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity activeOpacity={0.9} onPress={() => commentOnPost(item.id, item)}
+                                      style={styles.actionButton}>
+
+                        <Octicons name="comment" size={20} color="#838383"/>
+                        <Text style={styles.actionButtonText}>
+                            {item.commentCount} comments
+                        </Text>
+                    </TouchableOpacity>
                 </View>
-            }
-            <View style={styles.actionButtons}>
-                <TouchableOpacity style={styles.actionButton}>
-                    <AntDesign name="like2" size={20} color={"#838383"}/>
-                    <Text style={styles.actionButtonText}>
-                        {item.likes} likes
-                    </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.actionButton}>
-
-                    <Octicons name="comment" size={20} color="#838383"/>
-                    <Text style={styles.actionButtonText}>
-                        {item.commentCount} comments
-                    </Text>
-                </TouchableOpacity>
-            </View>
-        </Pressable>
+            </Pressable>
         </Animated.View>
     )
 }
@@ -222,6 +256,11 @@ const ViewCommunity = ({navigation, route}: RootStackScreenProps<'ViewCommunity'
     const user = useAppSelector(state => state.user)
     const {responseState, responseType, responseMessage} = user
 
+
+    const dispatch = useAppDispatch()
+    const queryClient = useQueryClient();
+
+
     const dataSlice = useAppSelector(state => state.data)
     const {theme} = dataSlice
     const backgroundColor = theme == 'light' ? "#EDEDED" : Colors.dark.background
@@ -231,6 +270,13 @@ const ViewCommunity = ({navigation, route}: RootStackScreenProps<'ViewCommunity'
 
     const goBack = () => {
         navigation.goBack()
+    }
+
+    const commentOnPost = (postId: string, post: string) => {
+        navigation.navigate('CommentOnPost', {
+            id: postId,
+            post
+        })
     }
 
 
@@ -284,167 +330,166 @@ const ViewCommunity = ({navigation, route}: RootStackScreenProps<'ViewCommunity'
         })
 
 
-    const viewPost = (postId: string) => {
+    const viewPost = (postId: string, post:any) => {
         navigation.navigate('PostScreen', {
             postId,
-            communityId: id
+            communityId: id,
+            post
         })
     }
 
 
     const renderItem = useCallback(
         ({item}) => (
-            <PostCard myId={user?.userData?.id} viewPost={viewPost} theme={theme} item={item}/>
+            <PostCard commentOnPost={commentOnPost} myId={user?.userData?.id} viewPost={viewPost} theme={theme}
+                      item={item}/>
         ),
-        [data,posts],
+        [data, posts],
     );
     const keyExtractor = useCallback((item: { id: any; }) => item.id, [],);
 
 
     const renderHeaderItem = useCallback(
         () => (
-<>
+            <>
 
-    <View style={[styles.cover, {
+                <View style={[styles.cover, {}]}>
 
-    }]}>
-
-        <View style={styles.navBar}>
-            <TouchableOpacity onPress={goBack} activeOpacity={0.8}>
-                <AntDesign name="arrowleft" size={24} color="#fff"/>
-            </TouchableOpacity>
+                    <View style={styles.navBar}>
+                        <TouchableOpacity onPress={goBack} activeOpacity={0.8}>
+                            <AntDesign name="arrowleft" size={24} color="#fff"/>
+                        </TouchableOpacity>
 
 
-            <TouchableOpacity onPress={menuToggle} activeOpacity={0.8} style={styles.rightButton}>
-                <SimpleLineIcons name="menu" size={24} color="#fff"/>
-            </TouchableOpacity>
-        </View>
+                        <TouchableOpacity onPress={menuToggle} activeOpacity={0.8} style={styles.rightButton}>
+                            <SimpleLineIcons name="menu" size={24} color="#fff"/>
+                        </TouchableOpacity>
+                    </View>
 
-        <Image
-            source={{uri: data?.data?.displayPhoto}}
-            style={{flex: 0.7, width: 200, borderRadius:5,}}
-            resizeMode={"contain"}/>
-    </View>
-
-    <View style={[styles.topBox, {
-        backgroundColor:theme == 'light' ? '#fff' : Colors.dark.background,
-    }]}>
-        <View style={styles.titleWrap}>
-            <Text style={[styles.title,{
-                color: textColor
-            }]}>
-                {data?.data?.name}
-            </Text>
-        </View>
-
-        <View style={styles.statsBox}>
-            <View style={styles.statsRowWrap}>
-                <View style={styles.statsRow}>
-                    <FontAwesome name="globe" size={14} color={theme == 'light' ? '#575757' : "#fff" }/>
-                    <Text style={[styles.statsText,{
-                        color: lightTextColor
-                    }]}>
-                        {data?.data?.visibility} group
-                    </Text>
+                    <Image
+                        source={{uri: data?.data?.displayPhoto}}
+                        style={{flex: 0.7, width: 200, borderRadius: 5,}}
+                        resizeMode={"contain"}/>
                 </View>
-                <Entypo name="dot-single" size={20} color={textColor}/>
 
-                <View style={styles.statsRow}>
+                <View style={[styles.topBox, {
+                    backgroundColor: theme == 'light' ? '#fff' : Colors.dark.background,
+                }]}>
+                    <View style={styles.titleWrap}>
+                        <Text style={[styles.title, {
+                            color: textColor
+                        }]}>
+                            {data?.data?.name}
+                        </Text>
+                    </View>
 
-                    <Text style={[styles.statsText,{
-                        color: textColor
-                    }]}>
-                        {data?.data?.totalFollowers} members
-                    </Text>
+                    <View style={styles.statsBox}>
+                        <View style={styles.statsRowWrap}>
+                            <View style={styles.statsRow}>
+                                <FontAwesome name="globe" size={14} color={theme == 'light' ? '#575757' : "#fff"}/>
+                                <Text style={[styles.statsText, {
+                                    color: lightTextColor
+                                }]}>
+                                    {data?.data?.visibility} group
+                                </Text>
+                            </View>
+                            <Entypo name="dot-single" size={20} color={textColor}/>
+
+                            <View style={styles.statsRow}>
+
+                                <Text style={[styles.statsText, {
+                                    color: textColor
+                                }]}>
+                                    {data?.data?.totalFollowers} members
+                                </Text>
+                            </View>
+                        </View>
+                        <View style={styles.statsRowWrap}>
+                            <View style={styles.statsRow}>
+                                <Ionicons name="person" size={14} color={theme == 'light' ? '#575757' : "#fff"}/>
+                                <Text style={[styles.statsText, {
+                                    color: textColor
+                                }]}>
+                                    4 followed
+                                </Text>
+                            </View>
+                        </View>
+                    </View>
+                    <HorizontalLine color={borderColor}/>
+
+                    <View style={styles.writePost}>
+                        <View style={styles.userImage}>
+                            {
+                                isRunningInExpoGo ?
+                                    <Image
+                                        style={styles.userImagePhoto}
+                                        source={{
+                                            uri: !userInfo?.data?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : userInfo?.data?.avatar,
+
+                                        }}
+                                    />
+                                    :
+
+                                    <FastImage
+                                        style={styles.userImagePhoto}
+                                        source={{
+                                            uri: !userInfo?.data?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : userInfo?.data?.avatar,
+
+                                            cache: FastImage.cacheControl.web,
+                                            priority: FastImage.priority.normal,
+                                        }}
+                                        resizeMode={FastImage.resizeMode.cover}
+                                    />
+                            }
+                        </View>
+                        <Pressable onPress={makePost} style={[styles.postInput, {
+                            backgroundColor,
+                            borderColor
+                        }]}>
+                            <Text style={[styles.placeHolder, {
+                                color: textColor
+                            }]}>
+                                Write Something...
+                            </Text>
+                        </Pressable>
+                        {/* <TextInput placeholder={"Write Something..."} style={styles.postInput}/>*/}
+                    </View>
+
+                    <HorizontalLine color={borderColor}/>
+
+                    <View style={styles.mediaPost}>
+                        <TouchableOpacity onPress={makePost} activeOpacity={0.8} style={styles.mediaButton}>
+                            <Ionicons name="ios-images" size={18} color={Colors.primaryColor}/>
+                            <Text style={[styles.mediaButtonText, {
+                                color: textColor
+                            }]}>
+                                Photo
+                            </Text>
+                        </TouchableOpacity>
+
+                        <View style={{
+                            height: '100%',
+                            width: 1,
+                            backgroundColor: borderColor,
+
+                        }}/>
+                        <TouchableOpacity onPress={makePost} activeOpacity={0.8} style={styles.mediaButton}>
+                            <FontAwesome name="video-camera" size={18} color={Colors.success}/>
+
+                            <Text style={[styles.mediaButtonText, {
+                                color: textColor
+                            }]}>
+                                Video
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+
+
                 </View>
-            </View>
-            <View style={styles.statsRowWrap}>
-                <View style={styles.statsRow}>
-                    <Ionicons name="person" size={14} color={theme == 'light' ? '#575757' : "#fff" }/>
-                    <Text style={[styles.statsText,{
-                        color: textColor
-                    }]}>
-                        4 followed
-                    </Text>
-                </View>
-            </View>
-        </View>
-        <HorizontalLine color={borderColor}/>
-
-        <View style={styles.writePost}>
-            <View style={styles.userImage}>
-                {
-                    isRunningInExpoGo ?
-                        <Image
-                            style={styles.userImagePhoto}
-                            source={{
-                                uri: !userInfo?.data?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : userInfo?.data?.avatar,
-
-                            }}
-                        />
-                        :
-
-                        <FastImage
-                            style={styles.userImagePhoto}
-                            source={{
-                                uri: !userInfo?.data?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : userInfo?.data?.avatar,
-
-                                cache: FastImage.cacheControl.web,
-                                priority: FastImage.priority.normal,
-                            }}
-                            resizeMode={FastImage.resizeMode.cover}
-                        />
-                }
-            </View>
-            <Pressable onPress={makePost} style={[styles.postInput,{
-                backgroundColor,
-                borderColor
-            }]}>
-                <Text style={[styles.placeHolder,{
-                    color: textColor
-                }]}>
-                    Write Something...
-                </Text>
-            </Pressable>
-            {/* <TextInput placeholder={"Write Something..."} style={styles.postInput}/>*/}
-        </View>
-
-        <HorizontalLine color={borderColor}/>
-
-        <View style={styles.mediaPost}>
-            <TouchableOpacity onPress={makePost} activeOpacity={0.8} style={styles.mediaButton}>
-                <Ionicons name="ios-images" size={18} color={Colors.primaryColor}/>
-                <Text style={[styles.mediaButtonText,{
-                    color: textColor
-                }]}>
-                    Photo
-                </Text>
-            </TouchableOpacity>
-
-            <View style={{
-                height: '100%',
-                width: 1,
-                backgroundColor:borderColor,
-
-            }}/>
-            <TouchableOpacity onPress={makePost} activeOpacity={0.8} style={styles.mediaButton}>
-                <FontAwesome name="video-camera" size={18} color={Colors.success}/>
-
-                <Text style={[styles.mediaButtonText,{
-                    color: textColor
-                }]}>
-                    Video
-                </Text>
-            </TouchableOpacity>
-        </View>
-
-
-    </View>
-</>
-        ),[data,posts])
+            </>
+        ), [data, posts])
 
     const offset = useSharedValue(0);
-
 
 
 //console.log(posts?.pages[0]?.data?.result)
@@ -457,16 +502,34 @@ const ViewCommunity = ({navigation, route}: RootStackScreenProps<'ViewCommunity'
         })
     }
 
-    useEffect(()=>{
-   refetch
-    },[id])
+    useEffect(() => {
+        refetch
+    }, [id])
     const menuToggle = () => {
         offset.value = Math.random()
         setToggleMenu(!toggleMenu)
     }
+
+
+    useEffect(() => {
+        // console.log(user)
+        let time: NodeJS.Timeout | undefined;
+        if (responseState || responseMessage) {
+
+            time = setTimeout(() => {
+                dispatch(unSetResponse())
+            }, 3000)
+
+        }
+        return () => {
+            clearTimeout(time)
+        };
+    }, [responseState, responseMessage])
+
+
     return (
-        <SafeAreaView style={[styles.safeArea,{
-           // backgroundColor
+        <SafeAreaView style={[styles.safeArea, {
+            // backgroundColor
         }]}>
             <Toast message={responseMessage} state={responseState} type={responseType}/>
             {
@@ -484,7 +547,6 @@ const ViewCommunity = ({navigation, route}: RootStackScreenProps<'ViewCommunity'
                 <Drawer communityId={id} menuToggle={menuToggle}/>
             }
             <View style={styles.scrollView}>
-
 
 
                 <View style={{
@@ -517,7 +579,6 @@ const ViewCommunity = ({navigation, route}: RootStackScreenProps<'ViewCommunity'
                         />
                     }
                 </View>
-
 
 
             </View>
@@ -786,7 +847,7 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-start',
     },
     postHead: {
-   textAlign:'left',
+        textAlign: 'left',
         lineHeight: heightPixel(18),
         fontFamily: Fonts.quicksandMedium,
         fontSize: fontPixel(14),

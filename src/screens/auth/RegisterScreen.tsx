@@ -69,7 +69,7 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
     const user = useAppSelector(state => state.user)
     const {responseMessage, responseType, responseState} = user
     const [phoneNumber, setPhoneNumber] = useState('');
-    const phoneInput = useRef<PhoneInput>(null);
+
     const [value, setValue] = useState("");
     const [formattedValue, setFormattedValue] = useState("");
 
@@ -416,7 +416,7 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
                                            backgroundColor: 'rgba(0,0,0,0.1)'
                                        }]}/>
                 }
-                <Toast message={responseMessage} state={responseState} type={responseType}/>
+
 
                 <KeyboardAwareScrollView scrollEnabled
                                          style={{
@@ -442,7 +442,7 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
                             ]}/>
                         </View>
                     </Animated.View>
-
+                    <Toast message={responseMessage} state={responseState} type={responseType}/>
                     <View style={styles.authContainer}>
 
 

@@ -485,8 +485,8 @@ const VideoScreen = ({navigation, route}: RootStackScreenProps<'VideoScreen'>) =
 
                 <RectButton onPress={nextMission} style={{
                     width: widthPixel(200),
-                    position: 'absolute',
-                    bottom: 50
+
+
                 }}>
 
                     {
@@ -740,7 +740,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     lessonText: {
-        fontSize: fontPixel(16),
+        fontSize: fontPixel(14),
         fontFamily: Fonts.quicksandMedium,
         lineHeight: heightPixel(22)
     },

@@ -33,15 +33,15 @@ export type RootStackParamList = {
     CreateCommunity: undefined;
     ConfirmPhonenumber: undefined;
     ViewCommunity: {
-        id:string
+        id: string
     };
     AdventureHome: undefined;
     VideoScreen: {
-        lessonId?:string,
-        adventureId?:string
+        lessonId?: string,
+        adventureId?: string
     };
     QuizScreen: {
-        lessonId:string,
+        lessonId: string,
         "nextModuleId"?: "f5ce3abf-8e61-4bd1-b992-9904a5219129",
         "hasNextLesson"?: false,
         "isLastAdventureModule"?: true,
@@ -51,31 +51,52 @@ export type RootStackParamList = {
     NFTs: undefined;
     Notifications: undefined;
     MakeAPost: {
-        id:string
+        id: string,
+
     };
-    PostScreen:{
-        postId:string,
-        communityId:string
+    PostScreen: {
+        postId: string,
+        communityId: string,
+        post?: {
+            "id": string,
+            "communityId": null,
+            "category": string,
+            "authorId": string,
+            "title": string,
+            "content": string,
+            "description": string,
+            "thumbnailUrl": string,
+            likes: number,
+            commentCount: number,
+            liked: boolean,
+            "createdAt": string,
+            "user": {
+                "avatar": string,
+                "fullName": string,
+                "id": string,
+                "username": null,
+            },
+        }
     }
-    Followers:{
-        id:string
+    Followers: {
+        id: string
     }
-    LeaveReview:{
-        adventureId:string
+    LeaveReview: {
+        adventureId: string
     }
-    CommunityInfo:{
-        id:string
+    CommunityInfo: {
+        id: string
     }
-    GroupSettings:{
-        id:string
+    GroupSettings: {
+        id: string
     }
 
-    LeaveCommunity:{
-        id:string
+    LeaveCommunity: {
+        id: string
     }
-    CommentOnPost:{
-        id:string,
-        post:{}
+    CommentOnPost: {
+        id: string,
+        post: {}
     }
     NotFound: undefined;
 };

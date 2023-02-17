@@ -1,9 +1,9 @@
 import React, {useEffect, useRef, useState} from 'react';
 
-import {Text, View, StyleSheet, Share,Platform, TouchableOpacity} from 'react-native';
+import {Text, View, StyleSheet, Share, Platform, TouchableOpacity} from 'react-native';
 import {SafeAreaView} from "react-native-safe-area-context";
 import {ScrollView} from "react-native-gesture-handler";
-import {fontPixel, heightPixel, pixelSizeVertical, widthPixel} from "../../../helpers/normalize";
+import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../../helpers/normalize";
 import NavBar from "../../../components/layout/NavBar";
 import LottieView from 'lottie-react-native';
 import Colors from "../../../constants/Colors";
@@ -24,7 +24,7 @@ const ReferAFriend = () => {
     const dataSlice = useAppSelector(state => state.data)
     const user = useAppSelector(state => state.user)
     const {theme} = dataSlice
-    const {userData,responseMessage, responseType, responseState} = user
+    const {userData, responseMessage, responseType, responseState} = user
     const [copied, setCopied] = useState(false);
     const animation = useRef(null);
     useEffect(() => {
@@ -69,7 +69,7 @@ const ReferAFriend = () => {
         if (responseState || responseMessage) {
 
             time = setTimeout(() => {
-             setCopied(false)
+                setCopied(false)
             }, 3000)
 
         }
@@ -77,7 +77,6 @@ const ReferAFriend = () => {
             clearTimeout(time)
         };
     }, [responseState, responseMessage])
-
 
 
     return (
@@ -92,12 +91,11 @@ const ReferAFriend = () => {
                 showsVerticalScrollIndicator={false}>
 
                 <NavBar noBell title={"Refer a friend"}/>
-                <View style={[styles.topDashboard, {
-                    backgroundColor
-                }]}>
+                <View style={[styles.topDashboard, {backgroundColor}]}>
                     <LottieView
                         autoPlay
                         ref={animation}
+                        resizeMode='cover'
                         style={{
                             width: "100%",
                             height: 240,
@@ -113,11 +111,13 @@ const ReferAFriend = () => {
                     <View style={styles.copyItem}>
 
                         <Text style={styles.copyValue}>
-                            {truncateString(`https://www.gatewayapp.co/auth/sign-up?ref=@${userData?.username}`,25)}
+                            {truncateString(`https://www.gatewayapp.co/auth/sign-up?ref=@${userData?.username}`, 25)}
                         </Text>
                     </View>
 
-                    <TouchableOpacity onPress={() => copyToClipboard(`https://www.gatewayapp.co/auth/sign-up?ref=@${userData?.username}`)} activeOpacity={0.8} style={styles.copyBtn}>
+                    <TouchableOpacity
+                        onPress={() => copyToClipboard(`https://www.gatewayapp.co/auth/sign-up?ref=@${userData?.username}`)}
+                        activeOpacity={0.8} style={styles.copyBtn}>
                         <Text style={styles.btnText}>COPY</Text>
                     </TouchableOpacity>
                 </View>
@@ -133,13 +133,16 @@ const ReferAFriend = () => {
                     </Text>
 
                 </View>
+                <View style={styles.buttonWrap}>
 
-                <RectButton onPress={onShare} style={{marginTop: 30, width: 160}}>
-                    <Text style={styles.buttonText}>
-                        Invite Now
 
-                    </Text>
-                </RectButton>
+                    <RectButton onPress={onShare} style={{width: 160}}>
+                        <Text style={styles.buttonText}>
+                            Invite Now
+
+                        </Text>
+                    </RectButton>
+                </View>
             </ScrollView>
         </SafeAreaView>
     );
@@ -149,7 +152,7 @@ const styles = StyleSheet.create({
     safeArea: {
         width: '100%',
         flex: 1,
-        alignItems:'center',
+        alignItems: 'center',
         paddingBottom: Platform.OS === 'ios' ? -40 : 0
     },
     scrollView: {
@@ -220,6 +223,14 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontFamily: Fonts.quickSandBold
     },
+    buttonWrap: {
+        height:heightPixel(200),
+
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        paddingHorizontal: pixelSizeHorizontal(20)
+    }
 })
 
 export default ReferAFriend;

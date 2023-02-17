@@ -27,8 +27,8 @@ interface props {
 const BadgeItem = ({amount, imageUrl}: props) => {
     return (
 
-        <Animated.View key={"badgeItem"} entering={FadeInDown} exiting={FadeOutDown}
-                       layout={Layout.easing(Easing.bounce).delay(20)} style={styles.badgeImageWrap}>
+        <Animated.View key={"badgeItem"} entering={FadeInDown} exiting={FadeOutDown} layout={Layout.easing(Easing.bounce).delay(20)}
+                       style={styles.badgeImageWrap}>
             <View style={styles.badgeImageContainer}>
                 <Image
                     source={{uri: imageUrl}}

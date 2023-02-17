@@ -1,6 +1,17 @@
 import React, {useCallback, useState} from 'react';
 
-import {Text, View, StyleSheet, Animated, Dimensions, FlatList, Image} from 'react-native';
+import {
+    Text,
+    View,
+    StyleSheet,
+    Animated,
+    Dimensions,
+    FlatList,
+    Image,
+    ActivityIndicator,
+    Modal,
+    Alert, TouchableOpacity, Pressable
+} from 'react-native';
 
 import Colors from "../../constants/Colors";
 import {AntDesign, Ionicons, MaterialIcons} from "@expo/vector-icons";
@@ -10,11 +21,20 @@ import {RectButton} from "../RectButton";
 import {Fonts} from "../../constants/Fonts";
 
 import {Svg, Circle, Text as SVGText} from 'react-native-svg'
-import {useInfiniteQuery, useQuery} from "@tanstack/react-query";
-import {getCommunityFollowers, getPrivateCommunities, getPublicCommunities} from "../../action/action";
+import {useInfiniteQuery, useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
+import {
+    followACommunity,
+    getCommunityFollowers,
+    getPrivateCommunities,
+    getPublicCommunities,
+    getSingleBadge
+} from "../../action/action";
 import {isWhatPercentOf, truncate} from "../../helpers";
 import FastImage from "react-native-fast-image";
 import Constants from "expo-constants";
+import {useAppDispatch, useAppSelector} from "../../app/hooks";
+import {useNavigation} from "@react-navigation/native";
+import {setResponse} from "../../app/slices/userSlice";
 
 
 
@@ -37,17 +57,35 @@ interface cardProps {
             fullName: string
         }
     },
-    //joinModal: (badgeId: string, accessNFTBadgeAmount: string, communityId: string) => void
+    loadingBadge?:boolean,
+    joinModal: (badgeId: string, accessNFTBadgeAmount: string, communityId: string) => void
+
 }
 
 
 const isRunningInExpoGo = Constants.appOwnership === 'expo'
-const CommunityCard = ({theme,item}: cardProps) => {
+const CommunityCard = ({theme,item,loadingBadge,joinModal}: cardProps) => {
 
+    const user = useAppSelector(state => state.user)
+    const {userData} = user
+    const navigation = useNavigation()
 
     const {isLoading, data} = useQuery(['getCommunityFollowers'], () => getCommunityFollowers(item.id))
 
-
+    const open = () => {
+        if(item?.owner?.id == userData.id){
+            navigation.navigate('ViewCommunity', {
+                id: item.id
+            })
+        }else
+        if (item.currentUserJoined) {
+            navigation.navigate('ViewCommunity', {
+                id: item.id
+            })
+        } else {
+            joinModal(item.badgeId, item.accessNFTBadgeAmount, item.id)
+        }
+    }
     const backgroundColor = theme == 'light' ? Colors.light.background : Colors.dark.background
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
 
@@ -59,25 +97,35 @@ const CommunityCard = ({theme,item}: cardProps) => {
     const circum = radius * 2 * Math.PI;
     const svgProgress = 100 - 80;
     return (
-        <View style={[styles.communityCard,{
+        <Pressable onPress={open} style={[styles.communityCard, {
             backgroundColor
         }]}>
 
             <View style={styles.topCard}>
                 <View style={styles.imageWrap}>
 
+                    <FastImage
+                        style={styles.avatar}
+                        source={{
+                            uri: item?.displayPhoto,
+                            cache: FastImage.cacheControl.web,
+                            priority: FastImage.priority.normal,
+                        }}
+                        resizeMode={FastImage.resizeMode.cover}
+                    />
+
                 </View>
 
-                <Text style={[styles.cardTitle,{
+                <Text style={[styles.cardTitle, {
                     color: textColor
                 }]}>
-                    Waves Academy
+                    {item?.name}
                 </Text>
             </View>
 
             <View style={styles.cardBody}>
                 <Text style={[styles.bodyText, {
-                    color:tintTextColor
+                    color: tintTextColor
                 }]}>
                     Created by: <Text style={{
                     color: textColor,
@@ -88,8 +136,8 @@ const CommunityCard = ({theme,item}: cardProps) => {
                 <View style={styles.bodyTextWrap}>
 
 
-                    <Text style={[styles.bodyText,{
-                        color:tintTextColor
+                    <Text style={[styles.bodyText, {
+                        color: tintTextColor
                     }]}>
                         {truncate(item.description, 130)}
                     </Text>
@@ -170,16 +218,59 @@ const CommunityCard = ({theme,item}: cardProps) => {
 
                 </View>
             </View>
-            <RectButton style={{
-                width:widthPixel(200)
-            }}>
-                <MaterialIcons name="lock" size={14} color="#fff" />
-                <Text style={styles.buttonText}>
-                    Request to join
+            {
+                item?.owner?.id == userData.id &&
 
-                </Text>
-            </RectButton>
-        </View>
+                <RectButton
+                 style={{
+                    width: 150
+                }}>
+                    <Text style={styles.buttonText}>
+
+                        Open
+                    </Text>
+
+                </RectButton>
+            }
+
+
+            {
+                item.currentUserJoined &&
+
+                <RectButton
+                     style={{
+                    width: 150
+                }}>
+                    <Text style={styles.buttonText}>
+
+                Open
+                    </Text>
+
+                </RectButton>
+            }
+            {
+                !item.currentUserJoined && item?.owner?.id !== userData.id &&
+
+                <RectButton
+                    onPress={open}
+                          style={{
+                    width: 150
+                }}>
+                    {
+                        loadingBadge ? <ActivityIndicator size='small' color={"#fff"}/>
+                            :
+<>
+
+                            <MaterialIcons name="lock" size={14} color="#fff" />
+                        <Text style={styles.buttonText}>
+                        Request to join
+
+                        </Text>
+</>
+                    }
+                </RectButton>
+            }
+        </Pressable>
     )
 }
 
@@ -201,10 +292,32 @@ interface CardProps {
 }
 
 const PrivateCommunity = ({theme}:CardProps) => {
+
+    const dispatch = useAppDispatch()
+    const queryClient = useQueryClient();
     const scrollX = new Animated.Value(0)
     let position = Animated.divide(scrollX, width)
     const [dataList, setDataList] = useState(CommunityData)
     const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [badgeId, setBadgeId] = useState('');
+    const [communityId, setCommunityId] = useState('');
+    const [requiredBadges, setRequiredBadges] = useState('');
+    const {
+        isLoading: loadingBadge,
+        data: badge,
+        mutate,
+        isSuccess
+    } = useMutation(['getBadge'], () => getSingleBadge(badgeId), {
+
+        onSuccess: (data) => {
+            if (data.success) {
+                setModalVisible(true)
+            }
+
+        }
+    })
+
 
 
     const {
@@ -229,17 +342,128 @@ const PrivateCommunity = ({theme}:CardProps) => {
             getPreviousPageParam: (firstPage, allPages) => firstPage.prevCursor,
         })
 
+
+    const {isLoading: following, mutate: follow} = useMutation(['followACommunity'], followACommunity, {
+
+        onSuccess: (data) => {
+            if (data.success) {
+                refetch()
+                setModalVisible(false)
+                dispatch(setResponse({
+                    responseMessage: data.message,
+                    responseState: true,
+                    responseType: 'success',
+                }))
+
+            } else {
+                setModalVisible(false)
+                dispatch(setResponse({
+                    responseMessage: data.message,
+                    responseState: true,
+                    responseType: 'error',
+                }))
+            }
+        }
+    })
+    const closeModal = () => {
+        setModalVisible(false)
+    }
+
     const updateCurrentSlideIndex = (e: { nativeEvent: { contentOffset: { x: any; }; }; }) => {
         const contentOffsetX = e.nativeEvent.contentOffset.x;
         const currentIndex = Math.round(contentOffsetX / width);
         setCurrentSlideIndex(currentIndex);
 
     };
+
+    const joinModal = useCallback(async (badgeId: string, accessNFTBadgeAmount: string, communityId: string) => {
+        await setBadgeId(badgeId)
+        setRequiredBadges(accessNFTBadgeAmount)
+        setCommunityId(communityId)
+        mutate()
+
+    }, [badgeId])
+    const followCommunityNow = () => {
+        follow({id: communityId})
+    }
+
+
     const renderItem = useCallback(({item}) => (
-        <CommunityCard  theme={theme} item={item}/>
-    ), [])
+        <CommunityCard joinModal={joinModal} loadingBadge={loadingBadge}  theme={theme} item={item}/>
+    ), [loadingBadge,theme])
 
     return (
+        <>
+
+            <Modal
+
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+
+                onRequestClose={() => {
+                    Alert.alert("Modal has been closed.");
+                    setModalVisible(false);
+                }}
+            >
+                <View style={styles.backDrop}>
+                    <View style={styles.modalContainer}>
+
+                        <View style={styles.sheetHead}>
+
+                            <TouchableOpacity activeOpacity={0.8} onPress={closeModal}
+                                              style={styles.dismiss}>
+                                <Ionicons name="ios-close" size={24} color="#929292"/>
+                            </TouchableOpacity>
+
+                        </View>
+
+                        <View style={styles.modalBody}>
+
+                            <Text style={styles.missionText}>
+                                Requirements
+                            </Text>
+                            <View style={styles.dripImageWrap}>
+                                <Image
+                                    source={{uri: badge?.data?.imageUrl}}
+                                    style={styles.dripImage}/>
+                            </View>
+
+
+                            <View style={styles.textWrap}>
+                                <Text style={styles.missionText}>
+                                    {badge?.data?.title}
+                                </Text>
+
+                                <Text style={[styles.learnText, {
+                                    textAlign: 'center'
+                                }]}>
+                                    <Text style={{
+                                        color: Colors.errorRed
+                                    }}>Note:</Text> x{requiredBadges} amount of badge will
+                                    be deducted from your account
+                                </Text>
+                            </View>
+
+                        </View>
+
+
+                        <RectButton onPress={followCommunityNow} style={{
+                            width: 220,
+                        }}>
+                            {
+                                following ? <ActivityIndicator size='small' color={"#fff"}/> :
+
+                                    <Text style={styles.buttonText}>
+                                        Use {badge?.data?.title}
+                                    </Text>
+                            }
+                        </RectButton>
+
+                    </View>
+                </View>
+            </Modal>
+
         <FlatList
             data={data?.pages[0]?.data?.result?.slice(0,8)}
             onMomentumScrollEnd={updateCurrentSlideIndex}
@@ -264,6 +488,7 @@ const PrivateCommunity = ({theme}:CardProps) => {
             }
 
         />
+        </>
     );
 };
 
@@ -272,21 +497,20 @@ const styles = StyleSheet.create({
 
     communityCard: {
         width: widthPixel(320),
-        height: heightPixel(220),
+        height: heightPixel(300),
         shadowColor: "#212121",
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginHorizontal:pixelSizeHorizontal(10),
-        marginVertical:pixelSizeVertical(5),
+        marginHorizontal: pixelSizeHorizontal(10),
+        marginVertical: pixelSizeVertical(5),
         borderRadius: 10,
         padding: 15,
         shadowOffset: {
             width: 0,
             height: 1,
         },
-        shadowOpacity: 0.22,
+        shadowOpacity: 0.32,
         shadowRadius: 7.22,
-
         elevation: 3,
     },
 
@@ -420,6 +644,110 @@ marginLeft:5,
         color: Colors.light.text,
         fontFamily: Fonts.quickSandBold
     },
+    backDrop: {
+        width: '100%',
+        flex: 1,
+        backgroundColor: 'rgba(5,5,5,0.80)',
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    modalContainer: {
+        width: '80%',
+        alignItems: 'center',
+        justifyContent: 'space-evenly',
+        borderRadius: 20,
+        backgroundColor: '#fff',
+        paddingHorizontal: pixelSizeHorizontal(20),
+        height: heightPixel(385)
+    },
+    modalBody: {
+        width: '100%',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+
+        height: heightPixel(245)
+    },
+    dripImageWrap: {
+        width: 80,
+        height: 80,
+        borderRadius: 100,
+        alignItems: 'center',
+        justifyContent: 'center',
+
+    },
+
+    dripImage: {
+
+        resizeMode: 'contain',
+        width: "100%",
+        height: "100%",
+    },
+
+    textWrap: {
+        height: 110,
+        width: '100%',
+        alignItems: 'center',
+        justifyContent: 'space-evenly',
+
+    },
+    missionText: {
+        fontSize: fontPixel(16),
+        color: Colors.light.darkText,
+        fontFamily: Fonts.quicksandMedium
+    },
+
+    learnText: {
+        //  lineHeight: heightPixel(24),
+        fontSize: fontPixel(16),
+        color: Colors.light.text,
+        fontFamily: Fonts.quickSandBold
+    },
+    sheetHead: {
+        height: 50,
+        top: -15,
+        position: 'absolute',
+        width: '100%',
+        alignItems: 'flex-start',
+        justifyContent: 'flex-end',
+        flexDirection: 'row'
+    },
+
+    dismiss: {
+        right: -30,
+        backgroundColor: "#fff",
+        borderRadius: 30,
+        height: 45,
+        width: 45,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.10,
+        shadowRadius: 7.22,
+
+        elevation: 3,
+    },
+    numberView: {
+        top: 10,
+        left: -20,
+        position: 'relative',
+        backgroundColor: "#fff",
+        borderRadius: 10,
+        height: 15,
+        minWidth: 25,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.30,
+        shadowRadius: 7.22,
+
+        elevation: 3,
+    }
 
 })
 

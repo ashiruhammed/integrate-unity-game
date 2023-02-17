@@ -25,10 +25,11 @@ const formSchema = yup.object().shape({
 interface props {
     isLoading: boolean,
     redeemNow: (body: {}) => void,
-    pointBalance: string
+    pointBalance: string,
+    nearBalance: string,
 }
 
-const RedeemForm = ({isLoading, redeemNow, pointBalance}: props) => {
+const RedeemForm = ({isLoading, redeemNow, pointBalance,nearBalance}: props) => {
 
 
     const {isLoading: loadingRates, data} = useQuery(['getUserPointsExchangeRate'], getUserPointsExchangeRate)
@@ -115,7 +116,7 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance}: props) => {
                 defaultValue={`${data?.data[0].value * +points}`}
                 keyboardType={"number-pad"}
 
-                balanceText={"8242 Near"}
+                balanceText={`${nearBalance} Near`}
                 onChangeText={(e) => {
                     handleChange('walletAmount')(e);
                 }}

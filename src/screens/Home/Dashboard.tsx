@@ -244,7 +244,9 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
                     </Animated.View>
 
 
-                    <View style={styles.fullNameWrap}>
+                    <View style={[styles.fullNameWrap,{
+                        height:userData?.username ? heightPixel(80) : heightPixel(50),
+                    }]}>
                         <Text style={[styles.fullName, {
                             color: textColor
                         }]}>
@@ -253,7 +255,7 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
                         <Text style={[styles.subTitle, {
                             color: textColor
                         }]}>
-                            @{userData?.username}
+                            {userData?.username && `@${userData?.username}`}
                         </Text>
                     </View>
 
@@ -417,7 +419,7 @@ const styles = StyleSheet.create({
     fullNameWrap: {
         marginTop: 40,
         width: '100%',
-        height: heightPixel(80),
+
         alignItems: 'center',
         justifyContent: 'space-evenly'
     },

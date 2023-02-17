@@ -6,7 +6,7 @@ import {
     StyleSheet,
     Platform,
     FlatList,
-    Animated,
+    Animated as MyAnimated,
     useWindowDimensions,
     TouchableOpacity, ScrollView, ActivityIndicator
 } from 'react-native';
@@ -44,6 +44,8 @@ import Toast from "../../components/Toast";
 import AdvancedTextInput from "../../components/inputs/AdvancedTextInput";
 import RedeemForm from "../../components/wallets/RedeemForm";
 import dayjs from "dayjs";
+import Animated,
+    {Easing, FadeInDown, FadeOutDown, Layout} from "react-native-reanimated";
 
 
 const formSchema = yup.object().shape({
@@ -127,7 +129,7 @@ const Wallet = () => {
     const dispatch = useAppDispatch()
     const queryClient = useQueryClient();
     const [currentIndex, setCurrentIndex] = useState(0);
-    const scrollX = useRef(new Animated.Value(0)).current;
+    const scrollX = useRef(new MyAnimated.Value(0)).current;
     const slideRef = useRef(null);
     const dataSlice = useAppSelector(state => state.data)
     const {theme} = dataSlice
@@ -174,6 +176,8 @@ const Wallet = () => {
         },
     })
 
+    const nearBalance = data?.data?.find((wallet: { network: string; }) => wallet.network == 'near')
+
     const {isLoading: loadingTransactions, data:transactions, refetch:getTransactions} = useQuery(['getUserTransaction'], getUserTransaction, {
 
     })
@@ -211,7 +215,7 @@ const Wallet = () => {
             onSuccess: async (data) => {
 
                 if (data.success) {
-
+refetch()
                     handleClosePress()
                     getTransactions()
 
@@ -261,6 +265,8 @@ const Wallet = () => {
             onSuccess: async (data) => {
 
                 if (data.success) {
+                    refetch()
+                    fetchPoints()
                     getTransactions()
                     handleClosePressRedeem()
                     dispatch(setResponse({
@@ -466,7 +472,7 @@ const Wallet = () => {
                                           keyExtractor={keyExtractor}
                                           showsHorizontalScrollIndicator={false}
                                           bounces={false}
-                                          onScroll={Animated.event([
+                                          onScroll={MyAnimated.event([
                                               {nativeEvent: {contentOffset: {x: scrollX}}}
                                           ], {
                                               useNativeDriver: false
@@ -515,7 +521,9 @@ const Wallet = () => {
                         {
                             !loadingTransactions && transactions && transactions.data.length > 0 &&
                             transactions.data.map((({hash,amount,network,type,createdAt}) =>(
-                                <View key={hash} style={styles.transactionCard}>
+                                <Animated.View layout={Layout.easing(Easing.bounce).delay(20)}
+                                               entering={FadeInDown} exiting={FadeOutDown}
+                                               key={hash} style={styles.transactionCard}>
                                     <View style={[styles.transactionCardIcon, {
                                         backgroundColor: "#59C965"
                                     }]}>
@@ -541,7 +549,7 @@ const Wallet = () => {
                                             </Text>
                                         </View>
                                     </View>
-                                </View>
+                                </Animated.View>
                             )))
 
                         }
@@ -691,7 +699,7 @@ const Wallet = () => {
                     </TouchableOpacity>}
                 </View>
 
-                <RedeemForm isLoading={redeeming} redeemNow={redeemPointsNow} pointBalance={points?.data?.totalPoint}/>
+                <RedeemForm nearBalance={nearBalance?.balance} isLoading={redeeming} redeemNow={redeemPointsNow} pointBalance={points?.data?.totalPoint}/>
             </BottomSheet>
         </>
     );

@@ -414,7 +414,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                 <Toast message={responseMessage} state={responseState} type={responseType}/>
 
                 <View style={styles.authContainer}>
-                    <View style={styles.topBar}>
+                   {/* <View style={styles.topBar}>
                         <TouchableOpacity onPress={goBack} style={styles.backBtn}>
 
 
@@ -423,7 +423,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                                 Back
                             </Text>
                         </TouchableOpacity>
-                    </View>
+                    </View>*/}
 
 
                     <View style={styles.titleContainer}>
@@ -633,7 +633,7 @@ position:'relative',
     },
     authContainer: {
         zIndex: 1,
-        height: height - 100,
+        height: height - 50,
         bottom: 0,
         paddingHorizontal: pixelSizeHorizontal(20),
         justifyContent: 'flex-start',

@@ -2,7 +2,7 @@
   "expo": {
     "name": "Gateway",
     "slug": "gateway-mobile-app",
-    "version": "1.9.5",
+    "version": "1.9.6",
     "owner": "gateway-app",
     "orientation": "portrait",
     "jsEngine": "hermes",
@@ -32,7 +32,7 @@
       {
         "appID": "533333598894233",
         "clientToken": "c5e29a3734574e41f5053406b81ca87f",
-        "displayName": "RN SDK Demo",
+        "displayName": "Gateway Block-Edu",
         "scheme": "fb533333598894233",
         "advertiserIDCollectionEnabled": false,
         "autoLogAppEventsEnabled": false,
@@ -46,7 +46,7 @@
       "userInterfaceStyle": "light",
       "googleServicesFile": "./GoogleService-Info.plist",
       "bundleIdentifier": "com.gatewaymobile.app",
-      "buildNumber": "16",
+      "buildNumber": "20",
       "usesIcloudStorage": true,
       "infoPlist": {
         "remote-notification": "Allow user to receive remote notification",
@@ -58,7 +58,7 @@
       }
     },
     "android": {
-      "versionCode": 16,
+      "versionCode": 20,
       "useNextNotificationsApi": true,
       "userInterfaceStyle": "light",
       "package": "com.gatewaymobile.app",
