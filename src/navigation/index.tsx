@@ -47,6 +47,7 @@ import LeaveReview from "../screens/adventure/LeaveReview";
 import GroupSettings from "../screens/communities/GroupSettings";
 import LeaveCommunity from "../screens/communities/LeaveCommunity";
 import CommentOnPost from "../screens/communities/components/CommentOnPost";
+import RequestsScreen from "../screens/communities/RequestsScreen";
 
 export default function Navigation({colorScheme}: { colorScheme: ColorSchemeName }) {
   const data = useAppSelector(state => state.data)
@@ -114,6 +115,7 @@ function RootNavigator() {
                         animation:'slide_from_right'
                         }} component={PostScreen}/>
                         <Stack.Screen name="Followers" component={Followers}/>
+                        <Stack.Screen name="RequestsScreen" component={RequestsScreen}/>
                         <Stack.Screen name="LeaveReview" component={LeaveReview}/>
                         <Stack.Screen name="CommunityInfo" component={CommunityInfo}/>
                         <Stack.Screen name="AllCommunities" component={AllCommunities}/>

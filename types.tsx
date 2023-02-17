@@ -9,6 +9,7 @@ import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import GroupSettings from "./src/screens/communities/GroupSettings";
 import LeaveCommunity from "./src/screens/communities/LeaveCommunity";
 import CommentOnPost from "./src/screens/communities/components/CommentOnPost";
+import RequestsScreen from "./src/screens/communities/RequestsScreen";
 
 declare global {
     namespace ReactNavigation {
@@ -79,6 +80,9 @@ export type RootStackParamList = {
         }
     }
     Followers: {
+        id: string
+    }
+    RequestsScreen: {
         id: string
     }
     LeaveReview: {

@@ -67,7 +67,7 @@ const ReferralItem = ({item}: ReferralProps) => {
                 <Text style={[styles.transactionCardTitle, {
                     color: Colors.light.text
                 }]}>
-                    {item.amount} CUSD
+                    {item.amount} points
                 </Text>
                 <View style={styles.transactionCardBodyBottom}>
                     <Text style={[styles.transactionCardTitle, {

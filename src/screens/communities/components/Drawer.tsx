@@ -47,7 +47,7 @@ const Drawer = ({menuToggle, communityId}: props) => {
     })
 
 
-    const openScreen = (screen: 'Followers' | 'CommunityInfo' | 'GroupSettings') => {
+    const openScreen = (screen: 'Followers' | 'CommunityInfo' | 'GroupSettings' | 'RequestsScreen') => {
         menuToggle()
         navigation.navigate(screen, {
             id: communityId
@@ -106,7 +106,18 @@ const Drawer = ({menuToggle, communityId}: props) => {
                                 About
                             </Text>
                         </Pressable>
-
+                        {
+                            data?.data?.ownerId == userData.id &&
+                            data?.data?.visibility == 'PRIVATE' &&
+                        <Pressable onPress={() => openScreen('RequestsScreen')} style={styles.tabButton}>
+                            <Ionicons name="person-add" size={18} color={textColor} />
+                            <Text style={[styles.tabText, {
+                                color: textColor
+                            }]}>
+                                Requests
+                            </Text>
+                        </Pressable>
+                        }
                         {
                             data?.data?.ownerId == userData.id
                         &&

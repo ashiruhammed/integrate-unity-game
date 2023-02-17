@@ -349,8 +349,8 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
             // setAccessToken(access_token)
             const body = JSON.stringify({
                 "grantType": "access_token",
-                "tokens": {access_token}
-                //  "referralCode": "gate"
+                "tokens": {access_token},
+                "referralCode": values.referralCode
             })
 
             googleAuthLogin(body)
@@ -499,7 +499,7 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
                                                     const body = JSON.stringify({
                                                         access_token: data.accessToken.toString(),
 
-                                                        "referralCode": "",
+                                                        "referralCode":  values.referralCode,
                                                     })
                                                     FBOAuth(body)
                                                 }
