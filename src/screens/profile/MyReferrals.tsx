@@ -238,8 +238,7 @@ const MyReferrals = ({navigation}: RootStackScreenProps<'MyReferrals'>) => {
             <SafeAreaView style={[styles.safeArea, {
                 backgroundColor
             }]}>
-                <View
-                    style={[styles.scrollView, {
+                <View style={[styles.scrollView, {
                         backgroundColor
                     }]}>
                     <NavBar noBell title={"My Referrals"}/>

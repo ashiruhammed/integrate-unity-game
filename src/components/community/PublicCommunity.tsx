@@ -68,7 +68,7 @@ const PublicCommunityCard = ({theme, loadingBadge, item, joinModal}: cardProps) 
     const user = useAppSelector(state => state.user)
     const {userData} = user
 
-
+    console.log(item)
     const {isLoading, data} = useQuery(['getCommunityFollowers'], () => getCommunityFollowers(item.id))
 
     const navigation = useNavigation()

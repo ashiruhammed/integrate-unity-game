@@ -107,8 +107,6 @@ const AllBadges = () => {
     } = useInfiniteQuery([`all-user-badges`], ({pageParam = 1}) => getAllBadges.badges(pageParam),
         {
             networkMode: 'online',
-            refetchOnWindowFocus: true,
-
             getNextPageParam: lastPage => {
                 if (lastPage.next !== null) {
                     return lastPage.next;

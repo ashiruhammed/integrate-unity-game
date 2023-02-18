@@ -595,7 +595,7 @@ refetch()
                     paddingHorizontal: pixelSizeHorizontal(20)
                 }}
             >
-                {/*  <BottomSheetTextInput style={styles.input} />*/}
+
 
                 <View style={styles.sheetHead}>
 

@@ -10,28 +10,33 @@ import FruitIcon from "../../../assets/images/svg/FruitIcon";
 import WarmIcon from "../../../assets/images/svg/WarmIcon";
 import Animated, {Easing, FadeInDown, FadeOutDown, Layout} from 'react-native-reanimated';
 import {useAppSelector} from "../../../app/hooks";
+import {useInfiniteQuery} from "@tanstack/react-query";
+import {userNFTs} from "../../../action/action";
 
 
-const NFTs = () => {
 
-    const dataSlice = useAppSelector(state => state.data)
-    const {theme} = dataSlice
 
+interface badgeProps {
+    theme: 'light' | 'dark',
+
+    item: {
+        imageUrl: string,
+        "title": string,
+        amount: string,
+        worthInPoints: string,
+        id: string
+    }
+}
+
+const BadgeItem = ({
+                       theme, item
+                   }: badgeProps) => {
 
     const backgroundColor = theme == 'light' ? "#fff" : Colors.dark.background
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
-    return (
-        <SafeAreaView style={[styles.safeArea,{
-            backgroundColor
-        }]}>
-            <NavBar title={"NFT's"}/>
-            <View
-                style={[styles.scrollView,{
-                    backgroundColor
-                }]}
-            >
 
-                <Animated.View key={"badgeItem"} entering={FadeInDown} exiting={FadeOutDown} layout={Layout.easing(Easing.bounce).delay(20)}
+    return (
+        <Animated.View key={"badgeItem"} entering={FadeInDown} exiting={FadeOutDown} layout={Layout.easing(Easing.bounce).delay(20)}
                                style={[styles.badgeItem,{
                                    backgroundColor,
                                    borderBottomColor: theme == 'light' ? Colors.borderColor : '#313131',
@@ -74,6 +79,61 @@ const NFTs = () => {
 
                     </View>
                 </Animated.View>
+
+    )
+}
+const NFTs = () => {
+
+    const dataSlice = useAppSelector(state => state.data)
+    const {theme} = dataSlice
+
+
+    const backgroundColor = theme == 'light' ? "#fff" : Colors.dark.background
+    const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
+
+
+
+
+    const {
+        isLoading,
+        data,
+        hasNextPage,
+        fetchNextPage: fetchNextPage,
+        isFetchingNextPage,
+        refetch,
+
+        isRefetching
+    } = useInfiniteQuery([`all-user-nfts`], ({pageParam = 1}) => userNFTs.NFTs(pageParam),
+        {
+            networkMode: 'online',
+            getNextPageParam: lastPage => {
+                if (lastPage.next !== null) {
+                    return lastPage.next;
+                }
+
+                return lastPage;
+            },
+            getPreviousPageParam: (firstPage, allPages) => firstPage.prevCursor,
+        })
+//console.log(data?.pages[0])
+    const loadMore = () => {
+        if (hasNextPage) {
+            fetchNextPage();
+        }
+    };
+
+    return (
+        <SafeAreaView style={[styles.safeArea,{
+            backgroundColor
+        }]}>
+            <NavBar title={"NFT's"}/>
+            <View
+                style={[styles.scrollView,{
+                    backgroundColor
+                }]}
+            >
+
+
 
             </View>
         </SafeAreaView>

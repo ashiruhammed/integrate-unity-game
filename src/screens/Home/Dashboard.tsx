@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import {
     Text,
@@ -30,8 +30,20 @@ import {setAdventure} from "../../app/slices/dataSlice";
 import {RootTabScreenProps} from "../../../types";
 import {useRefreshOnFocus} from "../../helpers";
 import Toast from "../../components/Toast";
+import {RectButton} from "../../components/RectButton";
+import BottomSheet, {BottomSheetBackdrop} from "@gorhom/bottom-sheet";
+import {
+    BottomSheetDefaultBackdropProps
+} from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
+import {Portal} from "@gorhom/portal";
+import PhoneInputText from "../../components/inputs/PhoneInputText";
+import {useFormik} from "formik";
+import * as yup from "yup";
 
 
+const formSchema = yup.object().shape({
+    phoneNumber: yup.string().required('Phone number is required').min(10, 'Please enter a valid phone number'),
+});
 
 
 const wait = (timeout: number) => {
@@ -77,7 +89,7 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
     const dispatch = useAppDispatch()
     const queryClient = useQueryClient();
     const user = useAppSelector(state => state.user)
-    const {userData,responseState, responseType, responseMessage} = user
+    const {userData, responseState, responseType, responseMessage} = user
     const dataSlice = useAppSelector(state => state.data)
     const {theme} = dataSlice
 
@@ -86,6 +98,85 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
     const backgroundColor = theme == 'light' ? "#FEF1F1" : "#141414"
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
 
+
+    // ref
+    const bottomSheetRef = useRef<BottomSheet>(null);
+    // variables
+    const snapPoints = useMemo(() => ['1%', '55%'], []);
+    const handleClosePress = () => {
+        bottomSheetRef.current?.close()
+    }
+    const openSheet = () => {
+        bottomSheetRef.current?.snapToIndex(1)
+    }
+    const renderBackdrop = useCallback(
+        (props: JSX.IntrinsicAttributes & BottomSheetDefaultBackdropProps) => (
+            <BottomSheetBackdrop
+                {...props}
+                disappearsOnIndex={0}
+                appearsOnIndex={1}
+            />
+        ),
+        []
+    );
+
+
+
+    const {isLoading: loading, mutate: requestCodeNow} = useMutation(['requestPhoneVerification'],requestPhoneVerification,{
+        onSuccess: (data) => {
+            if (data.success) {
+                dispatch(setResponse({
+                    responseMessage: data.message,
+                    responseState: true,
+                    responseType: 'success',
+                }))
+                handleClosePress()
+                navigation.navigate('ConfirmPhonenumber')
+            } else {
+                dispatch(setResponse({
+                    responseMessage: data.message,
+                    responseState: true,
+                    responseType: 'error',
+                }))
+            }
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries(['requestPhoneVerification']);
+        }
+    })
+
+
+
+    const {
+        resetForm,
+        handleChange, handleSubmit, handleBlur,
+        setFieldValue,
+        isSubmitting,
+        setSubmitting,
+        values,
+        errors,
+        touched,
+        isValid
+    } = useFormik({
+        validationSchema: formSchema,
+        initialValues: {
+
+            phoneNumber: '',
+
+
+        },
+        onSubmit: (values) => {
+            const {phoneNumber} = values;
+
+            const body = JSON.stringify({
+
+                phoneNumber,
+
+
+            })
+            requestCodeNow(body)
+        }
+    });
 
     const {isLoading: loadingUser, refetch: fetchUser} = useQuery(['user-data'], getUser, {
         onSuccess: (data) => {
@@ -97,32 +188,6 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
         },
     })
 
-
-
-    const { mutate:requestPhone} = useMutation(['requestPhoneVerification'], requestPhoneVerification, {
-        onSuccess: (data) => {
-
-            if (data.success) {
-                dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'success',
-                }))
-
-            } else {
-                dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'error',
-                }))
-            }
-
-
-        },
-        onSettled: () => {
-            queryClient.invalidateQueries(['requestPhoneVerification'])
-        }
-    })
 
 
     const {
@@ -149,9 +214,9 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
             getPreviousPageParam: (firstPage, allPages) => firstPage.prevCursor,
         })
 
-//console.log(data?.pages[0]?.data?.result)
 
-    const goToAdventure = ( adventure: {}) => {
+
+    const goToAdventure = (adventure: {}) => {
         dispatch(setAdventure({adventure}))
         navigation.navigate('AdventureHome')
 
@@ -164,16 +229,15 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
     }
 
 
-
     const verifyPhoneNumber = () => {
-        if(user?.userData?.phone) {
+        if (user?.userData?.phone) {
             const body = JSON.stringify({
                 email: userData?.phone,
             })
-            requestPhone(body)
-            navigation.navigate('ConfirmPhonenumber')
-        }else{
-            navigation.navigate('EditProfile')
+            requestCodeNow(body)
+
+        } else {
+            openSheet()
         }
     }
 
@@ -195,150 +259,211 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
     useRefreshOnFocus(fetchUser)
 
     return (
-        <SafeAreaView style={[styles.safeArea, {
-            backgroundColor
-        }]}>
-            <Toast message={responseMessage} state={responseState} type={responseType}/>
-            <ScrollView
-                refreshControl={<RefreshControl tintColor={Colors.primaryColor}
-                                                refreshing={refreshing} onRefresh={refresh}/>}
-                style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {
-                backgroundColor
-            }]} scrollEnabled
-                showsVerticalScrollIndicator={false}>
-                <View style={[styles.topDashboard, {
-                    backgroundColor: theme == 'dark' ? backgroundColor : "#fff"
-                }]}>
+        <>
+
+            <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
+                <Toast message={responseMessage} state={responseState} type={responseType}/>
+                <ScrollView
+                    refreshControl={<RefreshControl tintColor={Colors.primaryColor}
+                                                    refreshing={refreshing} onRefresh={refresh}/>}
+                    style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {
+                    backgroundColor
+                }]} scrollEnabled
+                    showsVerticalScrollIndicator={false}>
+                    <View style={[styles.topDashboard, {
+                        backgroundColor: theme == 'dark' ? backgroundColor : "#fff"
+                    }]}>
 
 
-                    {/*   */}
-                    <Animated.View key={userData?.fullName} entering={FadeInUp} exiting={FadeOutDown}
-                                   layout={Layout.easing(Easing.bounce).delay(20)} style={styles.userImage}>
+                        {/*   */}
+                        <Animated.View key={userData?.fullName} entering={FadeInUp} exiting={FadeOutDown}
+                                       layout={Layout.easing(Easing.bounce).delay(20)} style={styles.userImage}>
 
-                        <View style={styles.profileImage}>
-                            {
-                                isRunningInExpoGo ?
-                                    <Image
-                                        style={styles.Image}
-                                        source={{
-                                            uri: !user.userData?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : user.userData?.avatar,
+                            <View style={styles.profileImage}>
+                                {
+                                    isRunningInExpoGo ?
+                                        <Image
+                                            style={styles.Image}
+                                            source={{
+                                                uri: !user.userData?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : user.userData?.avatar,
 
-                                        }}
-                                    />
-                                    :
+                                            }}
+                                        />
+                                        :
 
-                                    <FastImage
-                                        style={styles.Image}
-                                        source={{
-                                            uri: !user.userData?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : user.userData?.avatar,
+                                        <FastImage
+                                            style={styles.Image}
+                                            source={{
+                                                uri: !user.userData?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : user.userData?.avatar,
 
-                                            cache: FastImage.cacheControl.web,
-                                            priority: FastImage.priority.normal,
-                                        }}
-                                        resizeMode={FastImage.resizeMode.cover}
-                                    />
-                            }
+                                                cache: FastImage.cacheControl.web,
+                                                priority: FastImage.priority.normal,
+                                            }}
+                                            resizeMode={FastImage.resizeMode.cover}
+                                        />
+                                }
 
+                            </View>
+
+                        </Animated.View>
+
+
+                        <View style={[styles.fullNameWrap, {
+                            height: userData?.username ? heightPixel(80) : heightPixel(50),
+                        }]}>
+                            <Text style={[styles.fullName, {
+                                color: textColor
+                            }]}>
+                                {userData?.fullName}
+                            </Text>
+                            <Text style={[styles.subTitle, {
+                                color: textColor
+                            }]}>
+                                {userData?.username && `@${userData?.username}`}
+                            </Text>
                         </View>
 
-                    </Animated.View>
+                        <View style={styles.progressBarContainer}>
+                            <FruitIcon/>
+                            <View style={styles.progressBar}>
+                                <View style={styles.Bar}/>
 
-
-                    <View style={[styles.fullNameWrap,{
-                        height:userData?.username ? heightPixel(80) : heightPixel(50),
-                    }]}>
-                        <Text style={[styles.fullName, {
-                            color: textColor
-                        }]}>
-                            {userData?.fullName}
-                        </Text>
-                        <Text style={[styles.subTitle, {
-                            color: textColor
-                        }]}>
-                            {userData?.username && `@${userData?.username}`}
-                        </Text>
-                    </View>
-
-                    <View style={styles.progressBarContainer}>
-                        <FruitIcon/>
-                        <View style={styles.progressBar}>
-                            <View style={styles.Bar}/>
-
+                            </View>
+                            <WarmIcon/>
                         </View>
-                        <WarmIcon/>
                     </View>
-                </View>
 
 
-                {
-                    !user?.userData?.phoneNumberVerified &&
+                    {
+                        !user?.userData?.phoneNumberVerified &&
 
-                    <TouchableOpacity onPress={verifyPhoneNumber} style={[styles.verifyCard, {
+                        <TouchableOpacity onPress={verifyPhoneNumber} style={[styles.verifyCard, {
 
-                        backgroundColor: theme == 'light' ? "#fff" : Colors.dark.tFareBtn
-                    }]}>
-                        <Text style={[styles.verifyText, {
-                            color: textColor
+                            backgroundColor: theme == 'light' ? "#fff" : Colors.dark.tFareBtn
                         }]}>
-                            👋 Verify your phone number
-                        </Text>
-                        <TouchableOpacity activeOpacity={0.6} style={styles.chevronGreen}>
-                            <Ionicons name="warning-outline" size={14} color={Colors.primaryColor}/>
+                            <Text style={[styles.verifyText, {
+                                color: textColor
+                            }]}>
+                                👋 Verify your phone number
+                            </Text>
+                            <TouchableOpacity activeOpacity={0.6} style={styles.chevronGreen}>
+                                <Ionicons name="warning-outline" size={14} color={Colors.primaryColor}/>
+                            </TouchableOpacity>
                         </TouchableOpacity>
-                    </TouchableOpacity>
-                }
-
-
-                <View style={styles.badgeContainer}>
-
-                    {
-                        isLoading &&
-
-                        <View style={styles.loaderContainer}>
-                            <ActivityIndicator size='small' color={Colors.primaryColor}/>
-                        </View>
                     }
 
 
-                    {
-                        data?.pages[0]?.data?.result.map(((item) => (
-                            <Animated.View key={item.id} entering={FadeInDown} exiting={FadeOutDown}
-                                           layout={Layout.easing(Easing.bounce).delay(20)}>
-                                <Pressable onPress={() => goToAdventure(item)}
-                                           style={[styles.adventureItem, {
-                                               backgroundColor: theme == 'dark' ? Colors.dark.background : "#fff",
-                                           }]}>
-                                    {
-                                        isRunningInExpoGo ?
+                    <View style={styles.badgeContainer}>
 
-                                            <Image
-                                                style={styles.adventureItemImage}
-                                                source={{
-                                                    uri: item.imageUrl,
-                                                }}
-                                                resizeMode={'cover'}
-                                            />
-                                            :
-                                            <FastImage
-                                                style={styles.adventureItemImage}
-                                                source={{
-                                                    uri: item.imageUrl,
-                                                    cache: FastImage.cacheControl.web,
-                                                    priority: FastImage.priority.normal,
-                                                }}
-                                                resizeMode={FastImage.resizeMode.cover}
-                                            />
-                                    }
+                        {
+                            isLoading &&
 
-                                </Pressable>
-                            </Animated.View>
-                        )))
+                            <View style={styles.loaderContainer}>
+                                <ActivityIndicator size='small' color={Colors.primaryColor}/>
+                            </View>
+                        }
 
 
-                    }
-                </View>
-            </ScrollView>
-        </SafeAreaView>
+                        {
+                            data?.pages[0]?.data?.result.map(((item) => (
+                                <Animated.View key={item.id} entering={FadeInDown} exiting={FadeOutDown}
+                                               layout={Layout.easing(Easing.bounce).delay(20)}>
+                                    <Pressable onPress={() => goToAdventure(item)}
+                                               style={[styles.adventureItem, {
+                                                   backgroundColor: theme == 'dark' ? Colors.dark.background : "#fff",
+                                               }]}>
+                                        {
+                                            isRunningInExpoGo ?
+
+                                                <Image
+                                                    style={styles.adventureItemImage}
+                                                    source={{
+                                                        uri: item.imageUrl,
+                                                    }}
+                                                    resizeMode={'cover'}
+                                                />
+                                                :
+                                                <FastImage
+                                                    style={styles.adventureItemImage}
+                                                    source={{
+                                                        uri: item.imageUrl,
+                                                        cache: FastImage.cacheControl.web,
+                                                        priority: FastImage.priority.normal,
+                                                    }}
+                                                    resizeMode={FastImage.resizeMode.cover}
+                                                />
+                                        }
+
+                                    </Pressable>
+                                </Animated.View>
+                            )))
+
+
+                        }
+                    </View>
+                </ScrollView>
+
+
+            </SafeAreaView>
+
+            <Portal>
+                <BottomSheet
+                    handleIndicatorStyle={Platform.OS == 'android' && {display: 'none'}}
+                    ref={bottomSheetRef}
+                    index={0}
+                    snapPoints={snapPoints}
+                    keyboardBehavior="interactive"
+                    backdropComponent={renderBackdrop}
+                    style={{
+                        paddingHorizontal: pixelSizeHorizontal(20)
+                    }}
+                >
+
+
+                    <View style={styles.sheetHead}>
+
+
+                        <Text style={styles.sheetTitle}>
+                            Update phone number
+                        </Text>
+                        {Platform.OS == 'android' && <TouchableOpacity onPress={handleClosePress}
+                                                                       style={[styles.dismiss, {
+                                                                           backgroundColor: theme == 'light' ? "#f8f8f8" : Colors.dark.background
+                                                                       }]}>
+                            <Ionicons name="close-sharp" size={20} color={textColor}/>
+                        </TouchableOpacity>}
+                    </View>
+
+                    <View style={styles.sheetContainer}>
+
+                        <PhoneInputText
+                            error={errors.phoneNumber}
+
+                            label="Phone number"
+                            onChangeText={(text) => {
+                                handleChange('phoneNumber')(text);
+                                //setPhoneNumber(text)
+                            }}
+
+                            value={values.phoneNumber}
+                            errorMessage=''
+                            placeholder="Phone number"/>
+
+
+                        <RectButton style={{marginTop: 30, width: widthPixel(200)}} onPress={() => handleSubmit()}>
+                            {
+                                loading ? <ActivityIndicator size="small" color={"#fff"}/> :
+
+                                    <Text style={styles.buttonText}>
+                                        Proceed
+
+                                    </Text>
+                            }
+                        </RectButton>
+                    </View>
+                </BottomSheet>
+            </Portal>
+        </>
     );
 };
 
@@ -346,7 +471,7 @@ const styles = StyleSheet.create({
     safeArea: {
         width: '100%',
         flex: 1,
-        alignItems:'center',
+        alignItems: 'center',
         backgroundColor: "#FEF1F1",
         paddingBottom: Platform.OS === 'ios' ? -40 : 0
     },
@@ -591,6 +716,44 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center'
     },
+
+    sheetHead: {
+        // paddingHorizontal: pixelSizeHorizontal(20),
+        height: 60,
+        width: '100%',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'row'
+    }
+    ,
+    sheetTitle: {
+        fontSize: fontPixel(18),
+        fontFamily: Fonts.quickSandBold,
+        color: Colors.light.text
+    },
+    sheetContainer: {
+        marginTop: 20,
+        justifyContent: 'center',
+        width: '100%',
+        alignItems: 'center',
+    },
+    buttonText: {
+        position: 'absolute',
+        fontSize: fontPixel(16),
+        color: "#fff",
+        fontFamily: Fonts.quickSandBold
+    },
+    dismiss: {
+        position: 'absolute',
+        right: 10,
+        borderRadius: 30,
+        height: 30,
+        width: 30,
+        alignItems: 'center',
+        justifyContent: 'center',
+
+    },
+
 
 })
 

@@ -359,6 +359,8 @@ export const userSettings = async (userdata: any) => {
     ])
 
 }
+
+
 export const requestPhoneVerification = async (userdata: any) => {
 
 
@@ -548,6 +550,68 @@ export const referralDashboard = {
     }
 }
 
+
+export const userNFTs = {
+
+    NFTs: async ({pageParam = 1}: { pageParam?: number }) => {
+        let Token = await SecureStore.getItemAsync('Gateway-Token');
+        // console.log(Token)
+        let timeoutId: NodeJS.Timeout
+        const myHeaders = {
+            'Authorization': `Bearer ${Token}`
+        }
+
+        const requestOptions = {
+            method: 'GET',
+            headers: myHeaders,
+        };
+
+        return Promise.race([
+            fetch(`${BASE_URL}/nft/me?pageSize=10&pageNumber=${pageParam}`, requestOptions)
+                .then(response => response.json()),
+            new Promise((resolve, reject) => {
+                timeoutId = setTimeout(() => reject(new Error('Timeout')), 15000)
+
+            }).then(() => {
+                clearTimeout(timeoutId)
+            })
+
+        ])
+    }
+}
+
+export const userLeaderboards = {
+
+    leaderboard: async ({pageParam = 1}: { pageParam?: number }) => {
+        let Token = await SecureStore.getItemAsync('Gateway-Token');
+        // console.log(Token)
+        let timeoutId: NodeJS.Timeout
+        const myHeaders = {
+            'Authorization': `Bearer ${Token}`
+        }
+
+        const requestOptions = {
+            method: 'GET',
+            headers: myHeaders,
+        };
+
+        return Promise.race([
+            fetch(`${BASE_URL}/point/leaderboard/top?pageSize=10&pageNumber=${pageParam}`, requestOptions)
+                .then(response => response.json()),
+            new Promise((resolve, reject) => {
+                timeoutId = setTimeout(() => reject(new Error('Timeout')), 15000)
+
+            }).then(() => {
+                clearTimeout(timeoutId)
+            })
+
+        ])
+    }
+}
+
+
+
+
 export const getUserDashboard = async () => {
 
     let Token = await SecureStore.getItemAsync('Gateway-Token');
@@ -579,6 +643,42 @@ export const getUserDashboard = async () => {
 
     ])
 }
+
+
+export const getUserRank = async () => {
+
+    let Token = await SecureStore.getItemAsync('Gateway-Token');
+
+    const myHeaders = {
+
+        'Authorization': `Bearer ${Token}`
+    }
+    let timeoutId: NodeJS.Timeout
+
+
+    const requestOptions = {
+        method: 'GET',
+        headers: myHeaders,
+
+    };
+
+
+    return Promise.race([
+        fetch(`${BASE_URL}/point/rank`, requestOptions)
+            .then(response => response.json()),
+        new Promise((resolve, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+            //  clearTimeout(timeoutId)
+        }).then(() => {
+            clearTimeout(timeoutId)
+        })
+
+    ])
+}
+
+
+
 export const uploadToCloudinary = async ({body, resource_type}: { body: any, resource_type: string }) => {
 
     const myHeaders = new Headers();
@@ -823,6 +923,37 @@ export const getReferralLeaderboard = async () => {
 
     return Promise.race([
         fetch(`${BASE_URL}/referral/leaderboard`, requestOptions)
+            .then(response => response.json()),
+        new Promise((resolve, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+            //  clearTimeout(timeoutId)
+        }).then(() => {
+            clearTimeout(timeoutId)
+        })
+
+    ])
+}
+export const getPointsLeaderboard = async () => {
+
+    let Token = await SecureStore.getItemAsync('Gateway-Token');
+
+    const myHeaders = {
+
+        'Authorization': `Bearer ${Token}`
+    }
+    let timeoutId: NodeJS.Timeout
+
+
+    const requestOptions = {
+        method: 'GET',
+        headers: myHeaders,
+
+    };
+
+
+    return Promise.race([
+        fetch(`${BASE_URL}/point/leaderboard/bottom?pageSize=10`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)

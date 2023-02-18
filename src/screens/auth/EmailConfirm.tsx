@@ -14,12 +14,14 @@ import * as yup from "yup";
 import {useFormik} from "formik";
 import {AuthStackScreenProps} from "../../../types";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
-import {confirmEmail, requestCode} from "../../action/action";
+import {confirmEmail, getUser, requestCode} from "../../action/action";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
 import {Simulate} from "react-dom/test-utils";
 import contextMenu = Simulate.contextMenu;
-import {setResponse, unSetResponse} from "../../app/slices/userSlice";
+import {setAuthenticated, setResponse, unSetResponse, updateUserInfo} from "../../app/slices/userSlice";
 import Toast from "../../components/Toast";
+import * as SecureStore from "expo-secure-store";
+import * as Haptics from "expo-haptics";
 
 
 const height = Dimensions.get('window').height
@@ -40,14 +42,32 @@ const EmailConfirm = ({route, navigation}: AuthStackScreenProps<'EmailConfirm'>)
     const {responseMessage, responseType, responseState} = user
 
 
+
+    const {isLoading: loadingUser, mutate:fetchUser} = useMutation(['user-data'], getUser, {
+        onSuccess: (data) => {
+            if (data.success) {
+
+                dispatch(updateUserInfo(data.data))
+                dispatch(setAuthenticated({
+                    isAuthenticated: true
+                }))
+
+            }
+        },
+    })
+
+
     const {mutate: resendCodeNow, isLoading: sending} = useMutation(['requestCode'], requestCode, {
         onSuccess: (data) => {
+
             if (data.success) {
                 dispatch(setResponse({
                     responseMessage: data.message,
                     responseState: true,
                     responseType: 'success',
                 }))
+
+
             } else {
                 dispatch(setResponse({
                     responseMessage: data.message,
@@ -61,15 +81,20 @@ const EmailConfirm = ({route, navigation}: AuthStackScreenProps<'EmailConfirm'>)
         }
     })
     const {mutate, isLoading} = useMutation(['confirmEmail'], confirmEmail, {
-        onSuccess: (data) => {
+        onSuccess: async (data) => {
+
             if (data.success) {
                 dispatch(setResponse({
                     responseMessage: data.message,
                     responseState: true,
                     responseType: 'success',
                 }))
-                navigation.navigate('LoginNow')
+                 SecureStore.setItemAsync('Gateway-Token', data.data.token).then(() => {
+                    fetchUser()
+                })
+
             } else {
+                await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
                 dispatch(setResponse({
                     responseMessage: data.message,
                     responseState: true,
@@ -151,10 +176,18 @@ const EmailConfirm = ({route, navigation}: AuthStackScreenProps<'EmailConfirm'>)
 
         <>
 
-            <Toast message={responseMessage} state={responseState} type={responseType}/>
-
             <SafeAreaView style={styles.safeArea}>
 
+                <Toast message={responseMessage} state={responseState} type={responseType}/>
+
+                {
+                    loadingUser &&
+                    <ActivityIndicator size="large" color={Colors.primaryColor}
+                                       style={[StyleSheet.absoluteFill, {
+                                           zIndex: 1,
+                                           backgroundColor: 'rgba(0,0,0,0.1)'
+                                       }]}/>
+                }
                 <KeyboardAwareScrollView scrollEnabled
                                          style={{
                                              width: '100%',
