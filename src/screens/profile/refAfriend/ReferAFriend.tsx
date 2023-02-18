@@ -110,7 +110,9 @@ const ReferAFriend = () => {
                 <View style={styles.copyBoxy}>
                     <View style={styles.copyItem}>
 
-                        <Text style={styles.copyValue}>
+                        <Text style={[styles.copyValue,{
+                            color: textColor
+                        }]}>
                             {truncateString(`https://www.gatewayapp.co/auth/sign-up?ref=@${userData?.username}`, 25)}
                         </Text>
                     </View>

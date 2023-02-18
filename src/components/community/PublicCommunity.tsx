@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 
 import Colors from "../../constants/Colors";
-import {Ionicons} from "@expo/vector-icons";
+import {Ionicons, MaterialIcons} from "@expo/vector-icons";
 
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
 import {RectButton} from "../RectButton";
@@ -36,6 +36,7 @@ import {setResponse} from "../../app/slices/userSlice";
 import {isWhatPercentOf, truncate, useRefreshOnFocus} from "../../helpers";
 import Constants from "expo-constants";
 import {useNavigation} from "@react-navigation/native";
+import {IF} from "../../helpers/ConditionJsx";
 
 
 interface cardProps {
@@ -46,42 +47,48 @@ interface cardProps {
         description: string,
         totalUsersJoined: string,
         memberLimit: string,
+        userAlreadyRequest: boolean,
         currentUserJoined: boolean,
         name: string,
+        visibility: string,
         id: string,
         displayPhoto: string,
         remainingSlots: string,
         accessNFTBadgeAmount: string,
         badgeId: string,
+        communityFollowers: [],
         owner: {
 
             id: string
             fullName: string
         }
     },
+
     joinModal: (badgeId: string, accessNFTBadgeAmount: string, communityId: string) => void
 }
 
 const isRunningInExpoGo = Constants.appOwnership === 'expo'
 
-const PublicCommunityCard = ({theme, loadingBadge, item, joinModal}: cardProps) => {
+const PublicCommunityCard = ({theme, loadingBadge, item, joinModal, followers}: cardProps) => {
     const user = useAppSelector(state => state.user)
     const {userData} = user
 
-    console.log(item)
-    const {isLoading, data} = useQuery(['getCommunityFollowers'], () => getCommunityFollowers(item.id))
+
+    // const {isLoading, data} = useQuery(['getCommunityFollowers'], () => getCommunityFollowers(item.id))
+
 
     const navigation = useNavigation()
     const open = () => {
-        if(item?.owner?.id == userData.id){
+
+        if (item?.owner?.id == userData.id) {
             navigation.navigate('ViewCommunity', {
                 id: item.id
             })
-        }else
-        if (item.currentUserJoined) {
+        } else if (item.currentUserJoined) {
             navigation.navigate('ViewCommunity', {
                 id: item.id
             })
+
         } else {
             joinModal(item.badgeId, item.accessNFTBadgeAmount, item.id)
         }
@@ -97,22 +104,22 @@ const PublicCommunityCard = ({theme, loadingBadge, item, joinModal}: cardProps) 
     const circum = radius * 2 * Math.PI;
     const svgProgress = 100 - 80;
     return (
-        <Pressable onPress={open} style={[styles.communityCard, {
+        <Pressable onPress={open} disabled={item?.userAlreadyRequest && !item.currentUserJoined } style={[styles.communityCard, {
             backgroundColor
         }]}>
 
             <View style={styles.topCard}>
                 <View style={styles.imageWrap}>
 
-                            <FastImage
-                                style={styles.avatar}
-                                source={{
-                                    uri: item?.displayPhoto,
-                                    cache: FastImage.cacheControl.web,
-                                    priority: FastImage.priority.normal,
-                                }}
-                                resizeMode={FastImage.resizeMode.cover}
-                            />
+                    <FastImage
+                        style={styles.avatar}
+                        source={{
+                            uri: item?.displayPhoto,
+                            cache: FastImage.cacheControl.web,
+                            priority: FastImage.priority.normal,
+                        }}
+                        resizeMode={FastImage.resizeMode.cover}
+                    />
 
                 </View>
 
@@ -158,9 +165,9 @@ const PublicCommunityCard = ({theme, loadingBadge, item, joinModal}: cardProps) 
                 }]}>
                     <View style={styles.imageOverlap}>
                         {
-                            !isLoading && data?.data?.result.length > 0
+                            item.communityFollowers?.length > 0
                             &&
-                            data?.data?.result.slice(0, 4).map((({id, follower}) => (
+                            item.communityFollowers?.slice(0, 4).map((({id, follower}) => (
                                 <View key={id} style={styles.avatarWrap}>
                                     {isRunningInExpoGo ?
 
@@ -190,7 +197,7 @@ const PublicCommunityCard = ({theme, loadingBadge, item, joinModal}: cardProps) 
                             <Text style={[styles.learnText, {
                                 fontSize: fontPixel(10)
                             }]}>
-                                +{data?.data?.result.length}
+                                +{item.communityFollowers?.length}
                             </Text>
                         </View>
 
@@ -218,54 +225,139 @@ const PublicCommunityCard = ({theme, loadingBadge, item, joinModal}: cardProps) 
 
                 </View>
             </View>
-            {
-                item?.owner?.id == userData.id &&
-
-                <RectButton
-                    onPress={open} style={{
-                    width: 150
-                }}>
-                    <Text style={styles.buttonText}>
-
-                        Open
-                    </Text>
-
-                </RectButton>
-            }
 
 
-            {
-                item.currentUserJoined &&
+            <IF condition={item.visibility == 'PRIVATE'}>
 
-                <RectButton
-                    onPress={open} style={{
-                    width: 150
-                }}>
-                    <Text style={styles.buttonText}>
+  {
+                    item?.owner?.id == userData.id &&
 
-                        Open
-                    </Text>
+                    <RectButton
+                        onPress={open}
+                        style={{
+                            width: 150
+                        }}>
+                        <Text style={styles.buttonText}>
 
-                </RectButton>
-            }
-            {
-                !item.currentUserJoined && item?.owner?.id !== userData.id &&
+                            Open
+                        </Text>
 
-                <RectButton disabled={loadingBadge}
-                            onPress={open} style={{
-                    width: 150
-                }}>
-                    {
-                        loadingBadge ? <ActivityIndicator size='small' color={"#fff"}/>
-                            :
+                    </RectButton>
+                }
+                {
+                    item?.owner?.id !== userData.id &&  item.currentUserJoined &&
 
-                            <Text style={styles.buttonText}>
+                    <RectButton
+                        onPress={open}
+                        style={{
+                            width: 150
+                        }}>
+                        <Text style={styles.buttonText}>
 
-                                Join
-                            </Text>
-                    }
-                </RectButton>
-            }
+                            Open
+                        </Text>
+
+                    </RectButton>
+                }
+
+
+ {
+                    item?.userAlreadyRequest && !item.currentUserJoined &&
+
+                    <RectButton
+                        disabled
+                        style={{
+                            width: 150,
+                            opacity:0.7
+                        }}>
+                        <Text style={styles.buttonText}>
+
+                            Requested
+                        </Text>
+
+                    </RectButton>
+                }
+
+
+
+                {
+                    !item.currentUserJoined  &&    !item?.userAlreadyRequest  && item?.owner?.id !== userData.id &&
+
+                    <RectButton
+                        onPress={open}
+                        style={{
+                            width: 150
+                        }}>
+                        {
+                            loadingBadge ? <ActivityIndicator size='small' color={"#fff"}/>
+                                :
+                                <>
+
+                                    <MaterialIcons name="lock" size={14} color="#fff"/>
+                                    <Text style={[styles.buttonText, {
+                                        marginLeft: 5,
+                                    }]}>
+                                        Request to join
+
+                                    </Text>
+                                </>
+                        }
+                    </RectButton>
+                }
+
+            </IF>
+            <IF condition={item.visibility !== 'PRIVATE'}>
+
+
+                {
+                    item?.owner?.id == userData.id &&
+
+                    <RectButton
+                        onPress={open} style={{
+                        width: 150
+                    }}>
+                        <Text style={styles.buttonText}>
+
+                            Open
+                        </Text>
+
+                    </RectButton>
+                }
+
+
+                {
+                    item.currentUserJoined &&
+
+                    <RectButton
+                        onPress={open} style={{
+                        width: 150
+                    }}>
+                        <Text style={styles.buttonText}>
+
+                            Open
+                        </Text>
+
+                    </RectButton>
+                }
+                {
+                    !item.currentUserJoined && item?.owner?.id !== userData.id &&
+
+                    <RectButton disabled={loadingBadge}
+                                onPress={open} style={{
+                        width: 150
+                    }}>
+                        {
+                            loadingBadge ? <ActivityIndicator size='small' color={"#fff"}/>
+                                :
+
+                                <Text style={styles.buttonText}>
+
+                                    Join
+                                </Text>
+                        }
+                    </RectButton>
+                }
+            </IF>
         </Pressable>
     )
 }
@@ -332,6 +424,9 @@ const PublicCommunity = ({theme}: props) => {
                 }
 
                 return lastPage;
+            },
+            onSuccess: (data) => {
+                // console.log(data.pages[0].data)
             },
             getPreviousPageParam: (firstPage, allPages) => firstPage.prevCursor,
         })
@@ -601,7 +696,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
     },
     imageOverlap: {
-        marginLeft: 10,
+
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'flex-start',
@@ -619,7 +714,7 @@ const styles = StyleSheet.create({
         marginLeft: -5
     },
     buttonText: {
-        position: 'absolute',
+
         fontSize: fontPixel(14),
         color: "#fff",
         fontFamily: Fonts.quickSandBold
@@ -659,7 +754,7 @@ const styles = StyleSheet.create({
 
     dripImage: {
 
-        resizeMode: 'center',
+        resizeMode: 'contain',
         width: "100%",
         height: "100%",
     },

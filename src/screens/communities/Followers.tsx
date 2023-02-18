@@ -117,7 +117,6 @@ const Followers = ({navigation, route}: RootStackScreenProps<'Followers'>) => {
         refetch: getFollowers
     } = useQuery(['CommunityFollowers'], () => getCommunityFollowers(id), {})
 
-    //console.log(followers?.data?.result)
 
     const renderItem = useCallback(
         ({item}) => (

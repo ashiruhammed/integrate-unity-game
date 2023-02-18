@@ -51,7 +51,8 @@ interface ReferralProps {
     }
 }
 
-const ReferralItem = ({item}: ReferralProps) => {
+const ReferralItem = ({item,theme}: ReferralProps) => {
+    const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
     return (
         <Animated.View key={item.id} entering={FadeInDown}
                        exiting={FadeOutDown} layout={Layout.easing(Easing.bounce).delay(20)}
@@ -65,7 +66,7 @@ const ReferralItem = ({item}: ReferralProps) => {
 
             <View style={styles.transactionCardBody}>
                 <Text style={[styles.transactionCardTitle, {
-                    color: Colors.light.text
+                    color: textColor
                 }]}>
                     {item.amount} points
                 </Text>
@@ -229,7 +230,7 @@ const MyReferrals = ({navigation}: RootStackScreenProps<'MyReferrals'>) => {
                     </Text>
                 </View>
             </>
-        ), [])
+        ), [data])
 
     return (
         <>
@@ -447,7 +448,7 @@ const styles = StyleSheet.create({
         color: "#666666"
     },
     transactionCardTitle: {
-        fontSize: fontPixel(14),
+        fontSize: fontPixel(12),
         fontFamily: Fonts.quicksandSemiBold,
 
     },

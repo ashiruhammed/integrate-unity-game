@@ -11,7 +11,7 @@ import HorizontalLine from "../../components/HorizontalLine";
 import MedalIcon from "../../assets/images/svg/MedalIcon";
 import StarIcon from "../../assets/images/svg/StarIcon";
 import {RootStackScreenProps} from "../../../types";
-import Animated, {Easing, FadeInDown, FadeOutDown, Layout} from "react-native-reanimated";
+import Animated, {Easing, FadeInDown, FadeInUp, FadeOutDown, Layout} from "react-native-reanimated";
 import {useAppSelector} from "../../app/hooks";
 import {useQuery} from "@tanstack/react-query";
 import {getBadges, getUserBadges} from "../../action/action";
@@ -21,13 +21,14 @@ interface props {
 
 
     imageUrl: string
-    amount: string
+    amount: string,
+    id: string,
 }
 
-const BadgeItem = ({amount, imageUrl}: props) => {
+const BadgeItem = ({amount,id, imageUrl}: props) => {
     return (
 
-        <Animated.View key={"badgeItem"} entering={FadeInDown} exiting={FadeOutDown} layout={Layout.easing(Easing.bounce).delay(20)}
+        <Animated.View key={id} entering={FadeInUp.springify()} exiting={FadeOutDown} layout={Layout.easing(Easing.bounce).delay(20)}
                        style={styles.badgeImageWrap}>
             <View style={styles.badgeImageContainer}>
                 <Image
@@ -89,7 +90,8 @@ const Badges = ({navigation}: RootStackScreenProps<'Badges'>) => {
                     !isLoading &&
                     <>
 
-                        <View style={styles.streakView}>
+                        <Animated.View key={userDashboard?.currentDayStreak} entering={FadeInDown.springify()}
+                                       exiting={FadeOutDown} layout={Layout.easing(Easing.ease).delay(20)} style={styles.streakView}>
                             <View style={styles.streak}>
                                 <Image source={require('../../assets/images/streakimage.png')}
                                        style={styles.streakImage}/>
@@ -100,7 +102,7 @@ const Badges = ({navigation}: RootStackScreenProps<'Badges'>) => {
                                     </Text>
                                 </View>
                             </View>
-                        </View>
+                        </Animated.View>
 
                         <View
                             style={[styles.buttonsWrap, {borderBottomColor: theme == 'light' ? Colors.borderColor : '#313131'}]}>
@@ -138,12 +140,12 @@ const Badges = ({navigation}: RootStackScreenProps<'Badges'>) => {
                         <View style={styles.badgeContainer}>
                             {
                                 !isLoading && badges && badges?.data?.length > 0 &&
-                                badges?.data?.slice(0, 10)?.map((({
+                                badges?.data?.slice(0, 12)?.map((({
                                                                       id,
                                                                       amount,
                                                                       imageUrl
                                                                   }: { id: string, amount: string, imageUrl: string }) => (
-                                    <BadgeItem key={id} amount={amount} imageUrl={imageUrl}/>
+                                    <BadgeItem id={id} key={id} amount={amount} imageUrl={imageUrl}/>
                                 )))
                             }
 
