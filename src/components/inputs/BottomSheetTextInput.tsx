@@ -6,6 +6,7 @@ import {fontPixel, heightPixel} from "../../helpers/normalize";
 import {Ionicons} from "@expo/vector-icons";
 import {Fonts} from "../../constants/Fonts";
 import Animated, {Easing, FadeInDown, FadeInUp, FadeOutDown, Layout} from "react-native-reanimated";
+import {useAppSelector} from "../../app/hooks";
 
 
 interface Props extends TextInputProps {
@@ -58,7 +59,8 @@ const BottomSheetTextInput: FC<Props> = ({
                                              ...props
                                          }) => {
 
-
+    const dataSlice = useAppSelector(state => state.data)
+    const {theme, adventure} = dataSlice
     let validationColor, validationLabelColor;
 
     validationColor = !touched ? Colors.border : error ? Colors.errorRed : focus ? Colors.primaryColor : Colors.border

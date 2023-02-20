@@ -493,6 +493,7 @@ const PrivateCommunity = ({theme}:CardProps) => {
             </Modal>
 
         <FlatList
+
             data={data?.pages[0]?.data?.result.filter((community: { visibility: string; }) => community.visibility === 'PRIVATE').slice(0,8)}
             onMomentumScrollEnd={updateCurrentSlideIndex}
             keyExtractor={(item, index) => item.id + index}

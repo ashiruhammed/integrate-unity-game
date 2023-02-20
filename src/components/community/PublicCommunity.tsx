@@ -567,7 +567,8 @@ const PublicCommunity = ({theme}: props) => {
                 !isLoading && data && data?.pages[0]?.data?.result.length > 0 &&
 
                 <FlatList
-                    data={data?.pages[0]?.data?.result?.slice(0, 8)}
+                   // data={data?.pages[0]?.data?.result?.slice(0, 8)}
+                    data={data?.pages[0]?.data?.result.filter((community: { visibility: string; }) => community.visibility !== 'PRIVATE').slice(0,8)}
                     onMomentumScrollEnd={updateCurrentSlideIndex}
                     keyExtractor={keyExtractor}
                     horizontal

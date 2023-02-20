@@ -378,8 +378,17 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
                                 <ActivityIndicator size='small' color={Colors.primaryColor}/>
                             </View>
                         }
+<View style={styles.titleWrap}>
 
 
+                        <Text style={[styles.learnMore,{
+                            width:'70%',
+                            lineHeight:heightPixel(22),
+                            color: textColor
+                        }]}>
+                            Explore story adventures below and earn rewards
+                        </Text>
+</View>
                         {
                             data?.pages[0]?.data?.result.map(((item) => (
                                 <Animated.View key={item.id} entering={FadeInDown} exiting={FadeOutDown}
@@ -424,6 +433,9 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
 
             <Portal>
                 <BottomSheet
+                    backgroundStyle={{
+                        backgroundColor,
+                    }}
                     handleIndicatorStyle={Platform.OS == 'android' && {display: 'none'}}
                     ref={bottomSheetRef}
                     index={0}
@@ -486,6 +498,9 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
 
 
                     <BottomSheetModal
+                        backgroundStyle={{
+                            backgroundColor,
+                        }}
                         backdropComponent={renderBackdrop}
                         ref={bottomSheetModalRef}
                         index={1}
@@ -659,7 +674,9 @@ const styles = StyleSheet.create({
 
         alignItems: 'flex-start',
     },
-
+    titleWrap:{
+      width:'100%'
+    },
     badgeContainer: {
         width: '100%',
         alignItems: 'center',

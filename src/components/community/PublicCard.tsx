@@ -209,8 +209,24 @@ const CardPublicCommunity = ({theme, loadingBadge, item, joinModal}: cardProps) 
 
             <IF condition={item.visibility  == 'PRIVATE'}>
 
+
                 {
-                    item?.owner?.id == userData.id ||  item.currentUserJoined &&
+                    item?.owner?.id == userData.id &&
+
+                    <RectButton
+                        onPress={open}
+                        style={{
+                            width: 150
+                        }}>
+                        <Text style={styles.buttonText}>
+
+                            Open
+                        </Text>
+
+                    </RectButton>
+                }
+                {
+                    item?.owner?.id !== userData.id &&  item.currentUserJoined &&
 
                     <RectButton
                         onPress={open}
@@ -225,8 +241,9 @@ const CardPublicCommunity = ({theme, loadingBadge, item, joinModal}: cardProps) 
                     </RectButton>
                 }
 
- {
-     item?.userAlreadyRequest && !item.currentUserJoined &&
+
+                {
+                    item?.userAlreadyRequest && !item.currentUserJoined &&
 
                     <RectButton
                         disabled
@@ -241,6 +258,7 @@ const CardPublicCommunity = ({theme, loadingBadge, item, joinModal}: cardProps) 
 
                     </RectButton>
                 }
+
 
 
 

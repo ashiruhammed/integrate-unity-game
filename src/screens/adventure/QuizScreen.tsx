@@ -53,6 +53,7 @@ import * as yup from "yup";
 import {
     BottomSheetDefaultBackdropProps
 } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
+import * as Haptics from "expo-haptics";
 
 
 
@@ -186,18 +187,20 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
         }
     })
 
-console.log(missionData)
+
 
     const {data:task,mutate:getTask,isLoading:gettingTask} = useMutation(['getModuleTask'],getModuleTask,{
-        onSuccess:(data)=>{
+        onSuccess: (data)=>{
 
 //console.log("Fetching... task")
 
             if(data.success){
                 handleSnapPress(1)
             }else {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
               //  console.log("++++/+/++++/+/+THIS MEANS NO TASK HERE++++++++++")
                 setBadgeModalVisible(true)
+
             }
         }
     })
@@ -217,12 +220,12 @@ console.log(missionData)
 
     const {mutate: submitTaskNow, isLoading: submittingTask} = useMutation(['submitTask'], submitTask, {
         onSuccess: (data) => {
-//console.log(data)
+
             if (data.success) {
                 handleClosePressForm()
                 handleClosePress()
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
               setBadgeModalVisible(true)
-
             } else {
                 dispatch(setResponse({
                     responseMessage: data.message,
@@ -769,7 +772,7 @@ console.log(missionData)
                                 fontFamily: Fonts.quickSandBold,
                                 lineHeight: heightPixel(20)
                             }}>
-                                link
+                                Visit link
                             </Text>
                         </Pressable>
 

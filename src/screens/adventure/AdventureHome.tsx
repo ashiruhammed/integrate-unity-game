@@ -125,12 +125,18 @@ const MissionCard = ({
                          currentIndex,
                          setCurrentIndex,
                          index,
-                         lessons,
-                         loadingLessons
+
                      }: moduleProps) => {
 
+    const [moduleId, setModuleId] = useState('');
+    const {isLoading: loadingLessons, data: lessons, mutate: fetchLessons} = useMutation(['getLessonsByModule'],
+        getLessonsByModule, {
+
+        })
+
     return (
-        <Animated.View key={"MissionCard"} entering={FadeInLeft} exiting={FadeOutLeft}
+
+        <Animated.View key={index} entering={FadeInLeft} exiting={FadeOutLeft}
                        layout={Layout.easing(Easing.bounce).delay(20)} style={styles.missionCard}>
             <>
                 <View style={styles.missionCardHead}>
@@ -138,6 +144,7 @@ const MissionCard = ({
 
                     <TouchableOpacity activeOpacity={0.8} onPress={() => {
                         setCurrentIndex(index === currentIndex ? null : index);
+                        fetchLessons(index)
                     }} style={styles.missionCardLeft}>
 
 
@@ -160,13 +167,17 @@ const MissionCard = ({
                  {/*   <TouchableOpacity activeOpacity={0.8}>
                         <Feather name="play-circle" size={28} color={Colors.primaryColor}/>
                     </TouchableOpacity>*/}
+
+                    <Entypo name="chevron-right" style={{
+                        transform:[{rotate: index === currentIndex ?'90deg' : '0deg'}]
+                    }} size={14} color={"#fff"} />
                 </View>
                 {index === currentIndex && (
 
 
                     !loadingLessons && lessons &&
-                    lessons.length > 0 &&
-                    lessons.map((({name, id}) => (
+                    lessons.data.result.length > 0 &&
+                    lessons.data.result.map((({name, id}) => (
                         <Animated.View key={id} entering={FadeInDown} exiting={FadeOutDown}
                                        layout={Layout.easing(Easing.bounce).delay(20)} style={styles.subCategoriesList}>
                             <Text style={{
@@ -904,7 +915,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         flexDirection: "row",
         height: 40,
-        marginTop: 20,
+
     },
 })
 

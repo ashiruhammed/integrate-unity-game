@@ -41,6 +41,7 @@ import {
 import * as WebBrowser from "expo-web-browser";
 import {useFormik} from "formik";
 import * as yup from "yup";
+import * as Haptics from "expo-haptics";
 
 
 const _handlePressButtonAsync = async (url: string) => {
@@ -115,6 +116,7 @@ const VideoScreen = ({navigation, route}: RootStackScreenProps<'VideoScreen'>) =
                 handleSnapPress(1)
             } else {
                // console.log("+++++++++++THIS MEANS NO TASK HERE++++++++++")
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
                 setBadgeModalVisible(true)
             }
         }
@@ -140,6 +142,7 @@ const VideoScreen = ({navigation, route}: RootStackScreenProps<'VideoScreen'>) =
             if (data.success) {
                 handleClosePressForm()
                 handleClosePress()
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
                 setBadgeModalVisible(true)
 
             } else {
@@ -459,16 +462,14 @@ const VideoScreen = ({navigation, route}: RootStackScreenProps<'VideoScreen'>) =
                         &&
 
                         <View style={[styles.videoContainer, {
-                            height: heightPixel(400),
+                            minHeight: heightPixel(400),
                         }]}>
+
                             <Video
                                 ref={video}
-
                                 style={styles.video}
                                 source={{
-                                    //lesson?.data?.video?.url
                                     uri: lesson?.data?.video?.url,
-                                    //uri: 'http://res.cloudinary.com/dj0rcdagd/video/upload/v1674510206/Mission_1_1_qnzkvm.mp4',
                                 }}
                                 useNativeControls
                                 resizeMode="contain"
@@ -729,11 +730,11 @@ const styles = StyleSheet.create({
     videoContainer: {
 
         width: '100%',
-
         alignItems: 'center',
         justifyContent: 'center',
     },
     video: {
+        alignSelf: 'center',
         width: '100%',
         height: '100%',
         alignItems: 'center',

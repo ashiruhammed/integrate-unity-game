@@ -166,12 +166,12 @@ const LeaveReview = ({navigation,route}: RootStackScreenProps<'LeaveReview'>) =>
                     </View>
 
 
-                    <Text style={[styles.question, {}]}>
+                    <Text style={[styles.question, {color: textColor}]}>
                         How was
                         your Mission?
                     </Text>
 
-                    <Text style={[styles.starNumber, {}]}>
+                    <Text style={[styles.starNumber, {color: textColor}]}>
                         {star} Star
                     </Text>
 
