@@ -93,6 +93,7 @@ const AllBadges = () => {
 
     const backgroundColor = theme == 'light' ? "#fff" : Colors.dark.background
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
+    const lightText = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
 
 
     const {

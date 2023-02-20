@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import {SafeAreaView} from "react-native-safe-area-context";
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
-import {Ionicons, Octicons} from "@expo/vector-icons";
+import {AntDesign, Ionicons, Octicons} from "@expo/vector-icons";
 import Svg, {Circle} from "react-native-svg";
 import Colors from "../../constants/Colors";
 import FruitIcon from "../../assets/images/svg/FruitIcon";
@@ -31,7 +31,7 @@ import {RootTabScreenProps} from "../../../types";
 import {useRefreshOnFocus} from "../../helpers";
 import Toast from "../../components/Toast";
 import {RectButton} from "../../components/RectButton";
-import BottomSheet, {BottomSheetBackdrop} from "@gorhom/bottom-sheet";
+import BottomSheet, {BottomSheetBackdrop, BottomSheetModal, BottomSheetModalProvider} from "@gorhom/bottom-sheet";
 import {
     BottomSheetDefaultBackdropProps
 } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
@@ -97,7 +97,7 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
 
     const backgroundColor = theme == 'light' ? "#FEF1F1" : "#141414"
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
-
+    const lightText = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
 
     // ref
     const bottomSheetRef = useRef<BottomSheet>(null);
@@ -121,8 +121,21 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
     );
 
 
+    const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
-    const {isLoading: loading, mutate: requestCodeNow} = useMutation(['requestPhoneVerification'],requestPhoneVerification,{
+    // variables
+    const modalSnapPoints = useMemo(() => ['1%', '25%'], []);
+
+    // callbacks
+    const handlePresentModalPress = useCallback(() => {
+        bottomSheetModalRef.current?.present();
+    }, []);
+
+
+    const {
+        isLoading: loading,
+        mutate: requestCodeNow
+    } = useMutation(['requestPhoneVerification'], requestPhoneVerification, {
         onSuccess: (data) => {
             if (data.success) {
                 dispatch(setResponse({
@@ -144,7 +157,6 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
             queryClient.invalidateQueries(['requestPhoneVerification']);
         }
     })
-
 
 
     const {
@@ -189,7 +201,6 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
     })
 
 
-
     const {
         isLoading,
         data,
@@ -213,7 +224,6 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
             },
             getPreviousPageParam: (firstPage, allPages) => firstPage.prevCursor,
         })
-
 
 
     const goToAdventure = (adventure: {}) => {
@@ -331,6 +341,12 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
                             </View>
                             <WarmIcon/>
                         </View>
+
+                        <Text onPress={handlePresentModalPress} style={[styles.learnMore, {
+                            color: lightText
+                        }]}>
+                            Learn more <AntDesign name="questioncircle" size={14} color={lightText}/>
+                        </Text>
                     </View>
 
 
@@ -423,7 +439,9 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
                     <View style={styles.sheetHead}>
 
 
-                        <Text style={styles.sheetTitle}>
+                        <Text style={[styles.sheetTitle,{
+                            color: textColor
+                        }]}>
                             Update phone number
                         </Text>
                         {Platform.OS == 'android' && <TouchableOpacity onPress={handleClosePress}
@@ -462,6 +480,46 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
                         </RectButton>
                     </View>
                 </BottomSheet>
+
+
+                <BottomSheetModalProvider>
+
+
+                    <BottomSheetModal
+                        backdropComponent={renderBackdrop}
+                        ref={bottomSheetModalRef}
+                        index={1}
+                        snapPoints={modalSnapPoints}
+                        handleIndicatorStyle={Platform.OS == 'android' && {display: 'none'}}
+                    >
+                        <View style={styles.contentContainer}>
+                        <View style={[styles.sheetHead,{
+                            height: 40,
+                        }]}>
+
+
+                            <Text style={[styles.sheetTitle,{
+                                fontSize: fontPixel(14),
+                                color: Colors.primaryColor
+                            }]}>
+                       Growth bar
+                            </Text>
+                            {Platform.OS == 'android' && <TouchableOpacity onPress={handleClosePress}
+                                                                           style={[styles.dismiss, {
+                                                                               backgroundColor: theme == 'light' ? "#f8f8f8" : Colors.dark.background
+                                                                           }]}>
+                                <Ionicons name="close-sharp" size={20} color={textColor}/>
+                            </TouchableOpacity>}
+                        </View>
+
+                            <Text style={[styles.learnMoreText, {
+                                color: textColor
+                            }]}>This bar represents your growth from an egg to the ladybug, it fills up based on your
+                                activities on the app 🎉</Text>
+                        </View>
+                    </BottomSheetModal>
+
+                </BottomSheetModalProvider>
             </Portal>
         </>
     );
@@ -716,7 +774,19 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center'
     },
-
+    contentContainer: {
+        paddingHorizontal: pixelSizeHorizontal(20),
+        width: '100%',
+        flex:0.8,
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    learnMoreText: {
+        textAlign:"center",
+        lineHeight: heightPixel(24),
+        fontSize: fontPixel(16),
+        fontFamily: Fonts.quicksandMedium
+    },
     sheetHead: {
         // paddingHorizontal: pixelSizeHorizontal(20),
         height: 60,
@@ -753,7 +823,10 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
 
     },
-
+    learnMore: {
+        fontSize: fontPixel(14),
+        fontFamily: Fonts.quicksandMedium
+    }
 
 })
 

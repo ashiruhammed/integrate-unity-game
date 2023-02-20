@@ -238,6 +238,7 @@ const FullPhoneNumber = ({
                             <RNTextInput
 
                                 {...props}
+                                keyboardAppearance={theme}
                                 keyboardType={"phone-pad"}
                                 placeholder={placeholder}
                                 onChangeText={inputTextChange}

@@ -1,6 +1,6 @@
-import React from 'react';
+import React, {useCallback} from 'react';
 
-import {Text, View, StyleSheet, Platform, Image} from 'react-native';
+import {Text, View, StyleSheet, Platform, Image, ActivityIndicator} from 'react-native';
 import {SafeAreaView} from "react-native-safe-area-context";
 import NavBar from "../../../components/layout/NavBar";
 import {fontPixel, heightPixel, pixelSizeHorizontal, widthPixel} from "../../../helpers/normalize";
@@ -12,6 +12,8 @@ import Animated, {Easing, FadeInDown, FadeOutDown, Layout} from 'react-native-re
 import {useAppSelector} from "../../../app/hooks";
 import {useInfiniteQuery} from "@tanstack/react-query";
 import {userNFTs} from "../../../action/action";
+import { FlashList } from '@shopify/flash-list';
+import { useRefreshOnFocus } from '../../../helpers';
 
 
 
@@ -24,7 +26,21 @@ interface badgeProps {
         "title": string,
         amount: string,
         worthInPoints: string,
-        id: string
+        "metadata":  {
+    "copies": null,
+        "description": "Blue badge NFT",
+        "expires_at": null,
+        "extra": null,
+        "issued_at": null,
+        "media": "https://res.cloudinary.com/dj0rcdagd/image/upload/v1673288411/blue-badge_aavnfr.svg",
+        "media_hash": "f8a2e23e150bf7e1227d6969efdedc0029ef01772234708057d78bb9c4aef473",
+        "reference": null,
+        "reference_hash": null,
+        "starts_at": null,
+        "title": "Blue badge - 63",
+        "updated_at": null,
+},
+
     }
 }
 
@@ -36,35 +52,35 @@ const BadgeItem = ({
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
 
     return (
-        <Animated.View key={"badgeItem"} entering={FadeInDown} exiting={FadeOutDown} layout={Layout.easing(Easing.bounce).delay(20)}
+        <Animated.View key={item.metadata.media_hash} entering={FadeInDown} exiting={FadeOutDown} layout={Layout.easing(Easing.bounce).delay(20)}
                                style={[styles.badgeItem,{
                                    backgroundColor,
                                    borderBottomColor: theme == 'light' ? Colors.borderColor : '#313131',
                                }]}>
                     <View style={styles.badgeImageWrap}>
                         <Image
-                            source={{uri: 'https://res.cloudinary.com/dijyr3tlg/image/upload/v1672951469/gateway/Group_151_cret7t.png'}}
+                            source={{uri:item?.metadata?.media}}
                             style={styles.badgeImage}/>
 
-                        <View style={styles.streakScore}>
+                      {/*  <View style={styles.streakScore}>
                             <Text style={[styles.streakText]}>
                                 x1
                             </Text>
-                        </View>
+                        </View>*/}
                     </View>
 
                     <View style={styles.badgeItemBody}>
                         <Text style={[styles.badgeTitle,{
                             color:textColor
                         }]}>
-                            Blue Badge
+                            {item.metadata.title}
                         </Text>
                         <Text style={styles.badgeSubText}>
-                            used to get exclusive access to top communities
+                            {item.metadata.description}
                         </Text>
 
 
-                        <View style={styles.progressBarContainer}>
+                       {/* <View style={styles.progressBarContainer}>
 
                             <View style={styles.progressBar}>
                                 <View style={styles.Bar}/>
@@ -75,7 +91,7 @@ const BadgeItem = ({
                             }]}>
                                 1/100
                             </Text>
-                        </View>
+                        </View>*/}
 
                     </View>
                 </Animated.View>
@@ -115,27 +131,58 @@ const NFTs = () => {
             },
             getPreviousPageParam: (firstPage, allPages) => firstPage.prevCursor,
         })
-//console.log(data?.pages[0])
+//console.log(data?.pages[0]?.data.result)
     const loadMore = () => {
         if (hasNextPage) {
             fetchNextPage();
         }
     };
 
+        const keyExtractor = useCallback((item: { token_id: any; }) => item.token_id, [],);
+
+    const renderItem = useCallback(({item}) => (
+        <BadgeItem theme={theme} item={item}/>
+    ), [])
+    useRefreshOnFocus(refetch)
+
+
     return (
         <SafeAreaView style={[styles.safeArea,{
             backgroundColor
         }]}>
             <NavBar title={"NFT's"}/>
-            <View
-                style={[styles.scrollView,{
+
+  <View
+                style={[styles.scrollView, {
                     backgroundColor
                 }]}
             >
+                {isLoading && <ActivityIndicator size="small" color={Colors.primaryColor}/>}
+
+                {
+                    !isLoading && data &&
+
+                    <FlashList
 
 
-
+                        estimatedItemSize={200}
+                        refreshing={isLoading}
+                        onRefresh={refetch}
+                        scrollEnabled
+                        showsVerticalScrollIndicator={false}
+                        data={data?.pages[0]?.data?.result}
+                        renderItem={renderItem}
+                        onEndReached={loadMore}
+                        keyExtractor={keyExtractor}
+                        onEndReachedThreshold={0.3}
+                        ListFooterComponent={isFetchingNextPage ?
+                            <ActivityIndicator size="small" color={Colors.primaryColor}/> : null}
+                    />
+                }
             </View>
+
+
+
         </SafeAreaView>
     );
 };
@@ -152,11 +199,11 @@ const styles = StyleSheet.create({
         //  backgroundColor: Colors.background,
         backgroundColor: "#fff",
         width: '100%',
-        alignItems: 'center'
+        paddingHorizontal: pixelSizeHorizontal(20)
     },
     badgeItem: {
 
-        width: '90%',
+        width: '100%',
         alignItems: 'center',
         flexDirection: 'row',
         justifyContent: 'flex-start',

@@ -91,7 +91,7 @@ const AdvancedTextInput: FC<Props> = ({
 
                         {...props}
                         placeholder={placeholder}
-
+                        keyboardAppearance={theme}
                         placeholderTextColor={"#9CA3AF"}
                         style={[styles.input, {
                             width: "80%",

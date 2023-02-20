@@ -113,7 +113,7 @@ const TextAreaInput: FC<Props> = ({
 
                 <RNTextInput
                     multiline
-
+                    keyboardAppearance={theme}
                     {...props}
                     placeholder={placeholder}
                     placeholderTextColor="#6D6D6D"

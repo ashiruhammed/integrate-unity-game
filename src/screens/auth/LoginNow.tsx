@@ -27,7 +27,6 @@ import HorizontalLine from "../../components/HorizontalLine";
 import {LoginButton, AccessToken, AuthenticationToken} from 'react-native-fbsdk-next';
 
 
-
 WebBrowser.maybeCompleteAuthSession();
 
 const formSchema = yup.object().shape({
@@ -73,28 +72,21 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
     });
 
 
-
-
-
-
-
     useEffect(() => {
-
 
 
         if (googleResponse?.type === "success") {
 
 
+            const {access_token, id_token, code} = googleResponse.params;
+            //console.log(code)
 
-            const {access_token,id_token,code}  = googleResponse.params;
-                //console.log(code)
-
-               // console.log(id_token)
-           // setAccessToken(access_token)
+            // console.log(id_token)
+            // setAccessToken(access_token)
             const body = JSON.stringify({
                 "grantType": "access_token",
-                "tokens": {  access_token}
-              //  "referralCode": "gate"
+                "tokens": {access_token}
+                //  "referralCode": "gate"
             })
 
             googleAuthLogin(body)
@@ -103,14 +95,12 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
     }, [googleResponse]);
 
 
-
     const signupNow = () => {
         navigation.navigate('RegisterScreen')
     }
 
 
-
-    const {isLoading: loadingUser, mutate:fetchUser} = useMutation(['user-data'], getUser, {
+    const {isLoading: loadingUser, mutate: fetchUser} = useMutation(['user-data'], getUser, {
         onSuccess: (data) => {
             if (data.success) {
 
@@ -124,7 +114,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
     })
 
 
-     const {mutate:appleOAuth, isLoading:appleAuthenticating} = useMutation(['userAppleOAuth'], userAppleOAuth, {
+    const {mutate: appleOAuth, isLoading: appleAuthenticating} = useMutation(['userAppleOAuth'], userAppleOAuth, {
 
         onSuccess: async (data) => {
 
@@ -137,12 +127,12 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
 
 
             } else {
-                    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
-                    dispatch(setResponse({
-                        responseMessage: data.message,
-                        responseState: true,
-                        responseType: 'error',
-                    }))
+                await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
+                dispatch(setResponse({
+                    responseMessage: data.message,
+                    responseState: true,
+                    responseType: 'error',
+                }))
 
 
             }
@@ -164,7 +154,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
     })
 
 
-     const {mutate:FBOAuth, isLoading:fbAuthenticating} = useMutation(['userFBOAuth'], userFBOAuth, {
+    const {mutate: FBOAuth, isLoading: fbAuthenticating} = useMutation(['userFBOAuth'], userFBOAuth, {
 
         onSuccess: async (data) => {
 
@@ -177,12 +167,12 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
 
 
             } else {
-                    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
-                    dispatch(setResponse({
-                        responseMessage: data.message,
-                        responseState: true,
-                        responseType: 'error',
-                    }))
+                await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
+                dispatch(setResponse({
+                    responseMessage: data.message,
+                    responseState: true,
+                    responseType: 'error',
+                }))
 
 
             }
@@ -204,8 +194,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
     })
 
 
-
-    const {mutate:googleAuthLogin, isLoading:googleAuthenticating} = useMutation(['userGoogleAuth'], userGoogleAuth, {
+    const {mutate: googleAuthLogin, isLoading: googleAuthenticating} = useMutation(['userGoogleAuth'], userGoogleAuth, {
 
         onSuccess: async (data) => {
 //console.log(data)
@@ -217,19 +206,18 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                 })
 
 
-            }  else {
-                    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
-                    dispatch(setResponse({
-                        responseMessage: data.message,
-                        responseState: true,
-                        responseType: 'error',
-                    }))
+            } else {
+                await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
+                dispatch(setResponse({
+                    responseMessage: data.message,
+                    responseState: true,
+                    responseType: 'error',
+                }))
 
-                }
-                /*  navigation.navigate('EmailConfirm', {
-                      email:contentEmail
-                  })*/
-
+            }
+            /*  navigation.navigate('EmailConfirm', {
+                  email:contentEmail
+              })*/
 
 
         },
@@ -252,52 +240,52 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
 
     const {mutate, isLoading} = useMutation(['login-user'], loginUser, {
 
-            onSuccess: async (data) => {
+        onSuccess: async (data) => {
 
-                if (data.success) {
+            if (data.success) {
 
 
-                    SecureStore.setItemAsync('Gateway-Token', data.data.token).then(() => {
-                        fetchUser()
+                SecureStore.setItemAsync('Gateway-Token', data.data.token).then(() => {
+                    fetchUser()
+                })
+
+
+            } else {
+                if (data.message == 'Your email is not verified, kindly verify your email to continue.') {
+                    navigation.navigate('EmailConfirm', {
+                        email: contentEmail
                     })
-
-
                 } else {
-                    if (data.message == 'Your email is not verified, kindly verify your email to continue.') {
-                        navigation.navigate('EmailConfirm', {
-                            email: contentEmail
-                        })
-                    } else {
-                        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
-                        dispatch(setResponse({
-                            responseMessage: data.message,
-                            responseState: true,
-                            responseType: 'error',
-                        }))
-
-                    }
-                    /*  navigation.navigate('EmailConfirm', {
-                          email:contentEmail
-                      })*/
-
+                    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
+                    dispatch(setResponse({
+                        responseMessage: data.message,
+                        responseState: true,
+                        responseType: 'error',
+                    }))
 
                 }
-            },
-
-            onError: (err) => {
-                dispatch(setResponse({
-                    responseMessage: err.message,
-                    responseState: true,
-                    responseType: 'error',
-                }))
+                /*  navigation.navigate('EmailConfirm', {
+                      email:contentEmail
+                  })*/
 
 
-            },
-            onSettled: () => {
-                queryClient.invalidateQueries(['login-user']);
             }
+        },
 
-        })
+        onError: (err) => {
+            dispatch(setResponse({
+                responseMessage: err.message,
+                responseState: true,
+                responseType: 'error',
+            }))
+
+
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries(['login-user']);
+        }
+
+    })
 
 
     const {
@@ -319,7 +307,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
         },
         onSubmit: (values) => {
             const {email, password} = values;
-            const body = JSON.stringify({email:email.toLowerCase(), password})
+            const body = JSON.stringify({email: email.toLowerCase(), password})
             mutate(body)
 
         }
@@ -348,73 +336,71 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
     }, [responseState, responseMessage])
 
 
-
-
     return (
-<>
+        <>
 
-        <SafeAreaView style={styles.safeArea}>
+            <SafeAreaView style={styles.safeArea}>
 
-             {
-                googleAuthenticating &&
-                <ActivityIndicator size="large" color={Colors.primaryColor}
-                                   style={[StyleSheet.absoluteFill, {
-                                       zIndex: 1,
-                                       backgroundColor: 'rgba(0,0,0,0.1)'
-                                   }]}/>
-            }
-            {
-                appleAuthenticating &&
-                <ActivityIndicator size="large" color={Colors.primaryColor}
-                                   style={[StyleSheet.absoluteFill, {
-                                       zIndex: 1,
-                                       backgroundColor: 'rgba(0,0,0,0.1)'
-                                   }]}/>
-            }
-            {
-            fbAuthenticating &&
-                <ActivityIndicator size="large" color={Colors.primaryColor}
-                                   style={[StyleSheet.absoluteFill, {
-                                       zIndex: 1,
-                                       backgroundColor: 'rgba(0,0,0,0.1)'
-                                   }]}/>
-            }
-            {
-                loadingUser &&
-                <ActivityIndicator size="large" color={Colors.primaryColor}
-                                   style={[StyleSheet.absoluteFill, {
-                                       zIndex: 1,
-                                       backgroundColor: 'rgba(0,0,0,0.1)'
-                                   }]}/>
-            }
+                {
+                    googleAuthenticating &&
+                    <ActivityIndicator size="large" color={Colors.primaryColor}
+                                       style={[StyleSheet.absoluteFill, {
+                                           zIndex: 1,
+                                           backgroundColor: 'rgba(0,0,0,0.1)'
+                                       }]}/>
+                }
+                {
+                    appleAuthenticating &&
+                    <ActivityIndicator size="large" color={Colors.primaryColor}
+                                       style={[StyleSheet.absoluteFill, {
+                                           zIndex: 1,
+                                           backgroundColor: 'rgba(0,0,0,0.1)'
+                                       }]}/>
+                }
+                {
+                    fbAuthenticating &&
+                    <ActivityIndicator size="large" color={Colors.primaryColor}
+                                       style={[StyleSheet.absoluteFill, {
+                                           zIndex: 1,
+                                           backgroundColor: 'rgba(0,0,0,0.1)'
+                                       }]}/>
+                }
+                {
+                    loadingUser &&
+                    <ActivityIndicator size="large" color={Colors.primaryColor}
+                                       style={[StyleSheet.absoluteFill, {
+                                           zIndex: 1,
+                                           backgroundColor: 'rgba(0,0,0,0.1)'
+                                       }]}/>
+                }
 
-            <KeyboardAwareScrollView scrollEnabled
-                                     style={{
-                                         width: '100%',
-                                     }}
-                                     showsVerticalScrollIndicator={false}
-                                     showsHorizontalScrollIndicator={false}
-                                     contentContainerStyle={
-                                         styles.container
-                                     }>
+                <KeyboardAwareScrollView scrollEnabled
+                                         style={{
+                                             width: '100%',
+                                         }}
+                                         showsVerticalScrollIndicator={false}
+                                         showsHorizontalScrollIndicator={false}
+                                         contentContainerStyle={
+                                             styles.container
+                                         }>
 
-                <View
-                               style={styles.topWithLogo}>
+                    <View
+                        style={styles.topWithLogo}>
 
-                    <View style={styles.imageWrap}>
+                        <View style={styles.imageWrap}>
 
 
-                        <Image source={require('../../assets/images/iconBee.png')} style={[
-                            styles.image,
-                            {resizeMode: 'contain'}
-                        ]}/>
+                            <Image source={require('../../assets/images/iconBee.png')} style={[
+                                styles.image,
+                                {resizeMode: 'contain'}
+                            ]}/>
+                        </View>
                     </View>
-                </View>
 
-                <Toast message={responseMessage} state={responseState} type={responseType}/>
+                    <Toast message={responseMessage} state={responseState} type={responseType}/>
 
-                <View style={styles.authContainer}>
-                   {/* <View style={styles.topBar}>
+                    <View style={styles.authContainer}>
+                        {/* <View style={styles.topBar}>
                         <TouchableOpacity onPress={goBack} style={styles.backBtn}>
 
 
@@ -426,184 +412,188 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                     </View>*/}
 
 
-                    <View style={styles.titleContainer}>
-                        <Text style={styles.titleText}>
-                            Sign in
-                        </Text>
-                    </View>
+                        <View style={styles.titleContainer}>
+                            <Text style={styles.titleText}>
+                                Sign in
+                            </Text>
+                        </View>
 
 
-                    <TouchableOpacity   onPress={async () => await googleAuth()} activeOpacity={0.6} style={[styles.buttonSignUp,{
-                        borderWidth:1,
-                        borderColor:Colors.borderColor,
-                        marginVertical:pixelSizeVertical(10),
-                    }]}>
+                        <TouchableOpacity onPress={async () => await googleAuth()} activeOpacity={0.6}
+                                          style={[styles.buttonSignUp, {
+                                              borderWidth: 1,
+                                              borderColor: Colors.light.text,
+                                              marginVertical: pixelSizeVertical(10),
+                                          }]}>
 
-                        <GoogleIcon/>
-                        <Text style={[ {
-                            fontFamily:Fonts.quicksandSemiBold,
-                            fontSize:fontPixel(14),
-                            color: Colors.light.text,
+                            <GoogleIcon/>
+                            <Text style={[{
+                                fontFamily: Fonts.quickSandBold,
+                                fontSize: fontPixel(16),
+                                color: Colors.light.text,
+                            }]}>
+                                Continue with Google
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={[styles.buttonSignUp, {
+                            marginBottom: 10
                         }]}>
-                            Continue with Google
-                        </Text>
-                    </TouchableOpacity>
-                    <View style={{
-                        marginVertical:pixelSizeVertical(10)
-                    }}>
-                    <LoginButton
 
-                        onLoginFinished={
-                            (error, result) => {
-                                if (error) {
-                                    console.log("login has error: " + result.error);
-                                } else if (result.isCancelled) {
-                                    console.log("login is cancelled.");
-                                } else {
+                            <LoginButton
 
-                                    AccessToken.getCurrentAccessToken().then(
-                                        (data) => {
-                                           // console.log(data.accessToken.toString())
-                                            const body = JSON.stringify({
-                                                access_token: data.accessToken.toString(),
+                                style={styles.fbButtonSignUp}
 
-                                                "referralCode" : "",
-                                            })
-                                            FBOAuth(body)
+                                onLoginFinished={
+                                    (error, result) => {
+                                        if (error) {
+                                            console.log("login has error: " + result.error);
+                                        } else if (result.isCancelled) {
+                                            console.log("login is cancelled.");
+                                        } else {
+
+                                            AccessToken.getCurrentAccessToken().then(
+                                                (data) => {
+                                                    // console.log(data.accessToken.toString())
+                                                    const body = JSON.stringify({
+                                                        access_token: data.accessToken.toString(),
+                                                    })
+                                                    FBOAuth(body)
+                                                }
+                                            )
                                         }
-                                    )
-                                }
-                            }
-                        }
-
-                        onLogoutFinished={() => console.log("logout.")}/>
-                    </View>
-
-                  {
-                        Platform.OS == 'ios' &&
-
-                        <AppleAuthentication.AppleAuthenticationButton
-                            buttonType={AppleAuthentication.AppleAuthenticationButtonType.CONTINUE}
-                            buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.WHITE_OUTLINE}
-                            cornerRadius={5}
-                            style={styles.buttonSignUp}
-                            onPress={async () => {
-                                try {
-                                    const credential = await AppleAuthentication.signInAsync({
-                                        requestedScopes: [
-                                            AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-                                            AppleAuthentication.AppleAuthenticationScope.EMAIL,
-                                        ],
-                                    });
-
-                                    const body = JSON.stringify({
-                                        access_token: credential.identityToken,
-                                        full_name: `${credential.fullName?.familyName} ${credential.fullName?.givenName}`,
-                                        source: "mobile",
-                                        "referralCode" : "",
-                                    })
-                                    appleOAuth(body)
-
-                                    // signed in
-                                } catch (e) {
-                                    if (e.code === 'ERR_CANCELED') {
-                                        // handle that the user canceled the sign-in flow
-                                    } else {
-                                        // handle other errors
                                     }
                                 }
-                            }}
-                        />
-                    }
 
-                    <HorizontalLine margin/>
-                    <TextInput
-
-                        placeholder="Email address"
-                        keyboardType={"email-address"}
-                        touched={touched.email}
-                        error={touched.email && errors.email}
-                        onFocus={() => setFocusEmail(true)}
-                        onChangeText={(e) => {
-                            handleChange('email')(e);
-                            setContentEmail(e);
-                        }}
-                        onBlur={(e) => {
-                            handleBlur('email')(e);
-                            setFocusEmail(false);
-                        }}
-                        defaultValue={contentEmail}
-                        focus={focusEmail}
-                        value={values.email}
-                        label="Email"/>
-
-
-                    <TextInput
-
-                        password
-                        action={() => setTogglePass(!togglePass)}
-                        passState={togglePass}
-                        secureTextEntry={togglePass}
-                        placeholder="Password"
-                        keyboardType="default"
-                        touched={touched.password}
-                        error={touched.password && errors.password}
-                        onFocus={() => setFocusPassword(true)}
-                        onChangeText={(e) => {
-                            handleChange('password')(e);
-                            setContentPassword(e);
-
-                        }}
-                        onBlur={(e) => {
-                            handleBlur('password')(e);
-                            setFocusPassword(false);
-                        }}
-                        defaultValue={contentPassword}
-                        focus={focusPassword}
-                        value={values.password}
-                        label="Password"/>
-
-                    <View style={[styles.terms, {
-                        marginTop: errors.password ? 10 : 0
-                    }]}>
-                        <TouchableOpacity onPress={forgotPassword}>
-                            <Text style={styles.forgotPass}>Forgot password? <Text style={{
-                                color: Colors.primaryColor
-                            }}>Recover here</Text></Text>
+                                onLogoutFinished={() => console.log("logout.")}/>
                         </TouchableOpacity>
-                    </View>
 
-
-                    <RectButton disabled={isLoading || !isValid || googleAuthenticating} style={{
-
-                        width: widthPixel(200)
-                    }} onPress={() => handleSubmit()}>
                         {
-                            isLoading || googleAuthenticating ? <ActivityIndicator size='small' color="#fff"/>
-                                :
+                            Platform.OS == 'ios' &&
 
-                                <Text style={styles.buttonText}>
-                                    Sign In
+                            <AppleAuthentication.AppleAuthenticationButton
 
-                                </Text>
+                                buttonType={AppleAuthentication.AppleAuthenticationButtonType.CONTINUE}
+                                buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.WHITE_OUTLINE}
+                                cornerRadius={5}
+
+                                style={styles.buttonSignUp}
+                                onPress={async () => {
+                                    try {
+                                        const credential = await AppleAuthentication.signInAsync({
+                                            requestedScopes: [
+                                                AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+                                                AppleAuthentication.AppleAuthenticationScope.EMAIL,
+                                            ],
+                                        });
+
+                                        const body = JSON.stringify({
+                                            access_token: credential.identityToken,
+                                            full_name: `${credential.fullName?.familyName} ${credential.fullName?.givenName}`,
+                                            source: "mobile",
+                                            "referralCode": "",
+                                        })
+                                        appleOAuth(body)
+
+                                        // signed in
+                                    } catch (e) {
+                                        if (e.code === 'ERR_CANCELED') {
+                                            // handle that the user canceled the sign-in flow
+                                        } else {
+                                            // handle other errors
+                                        }
+                                    }
+                                }}
+                            />
                         }
-                    </RectButton>
+
+                        <HorizontalLine margin/>
+                        <TextInput
+
+                            placeholder="Email address"
+                            keyboardType={"email-address"}
+                            touched={touched.email}
+                            error={touched.email && errors.email}
+                            onFocus={() => setFocusEmail(true)}
+                            onChangeText={(e) => {
+                                handleChange('email')(e);
+                                setContentEmail(e);
+                            }}
+                            onBlur={(e) => {
+                                handleBlur('email')(e);
+                                setFocusEmail(false);
+                            }}
+                            defaultValue={contentEmail}
+                            focus={focusEmail}
+                            value={values.email}
+                            label="Email"/>
 
 
-                    <TouchableOpacity style={styles.signUpBtn}>
+                        <TextInput
 
-                        <Text onPress={signupNow} style={styles.alreadyHaveAcc}>
-                            No account yet? <Text style={{
-                            color: Colors.primaryColor
-                        }}>Get one here</Text>
-                        </Text>
+                            password
+                            action={() => setTogglePass(!togglePass)}
+                            passState={togglePass}
+                            secureTextEntry={togglePass}
+                            placeholder="Password"
+                            keyboardType="default"
+                            touched={touched.password}
+                            error={touched.password && errors.password}
+                            onFocus={() => setFocusPassword(true)}
+                            onChangeText={(e) => {
+                                handleChange('password')(e);
+                                setContentPassword(e);
 
-                    </TouchableOpacity>
+                            }}
+                            onBlur={(e) => {
+                                handleBlur('password')(e);
+                                setFocusPassword(false);
+                            }}
+                            defaultValue={contentPassword}
+                            focus={focusPassword}
+                            value={values.password}
+                            label="Password"/>
 
-                </View>
-            </KeyboardAwareScrollView>
-        </SafeAreaView>
-</>
+                        <View style={[styles.terms, {
+                            marginTop: errors.password ? 10 : 0
+                        }]}>
+                            <TouchableOpacity onPress={forgotPassword}>
+                                <Text style={styles.forgotPass}>Forgot password? <Text style={{
+                                    color: Colors.primaryColor
+                                }}>Recover here</Text></Text>
+                            </TouchableOpacity>
+                        </View>
+
+
+                        <RectButton disabled={isLoading || !isValid || googleAuthenticating} style={{
+
+                            width: widthPixel(200)
+                        }} onPress={() => handleSubmit()}>
+                            {
+                                isLoading || googleAuthenticating ? <ActivityIndicator size='small' color="#fff"/>
+                                    :
+
+                                    <Text style={styles.buttonText}>
+                                        Sign In
+
+                                    </Text>
+                            }
+                        </RectButton>
+
+
+                        <TouchableOpacity style={styles.signUpBtn}>
+
+                            <Text onPress={signupNow} style={styles.alreadyHaveAcc}>
+                                No account yet? <Text style={{
+                                color: Colors.primaryColor
+                            }}>Get one here</Text>
+                            </Text>
+
+                        </TouchableOpacity>
+
+                    </View>
+                </KeyboardAwareScrollView>
+            </SafeAreaView>
+        </>
     );
 };
 
@@ -619,7 +609,7 @@ const styles = StyleSheet.create({
     },
     container: {
         width: '100%',
-alignItems:'center'
+        alignItems: 'center'
 
         //  backgroundColor: "#FFFFFF",
     },
@@ -628,8 +618,8 @@ alignItems:'center'
         width: '100%',
         //   flex:0.15,
         height: 100,
-position:'relative',
-        zIndex:-10
+        position: 'relative',
+        zIndex: -10
     },
     authContainer: {
         zIndex: 1,
@@ -739,13 +729,24 @@ position:'relative',
         fontFamily: Fonts.quickSandBold
     },
     buttonSignUp: {
-        flexDirection:'row',
+
+        flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-evenly',
-        borderRadius: 10,
-        width: widthPixel(292),
+        borderRadius: 5,
+        width: '90%',
 
         height: heightPixel(56)
+    },
+    fbButtonSignUp: {
+
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+
+        width: '100%',
+
+        height: '100%'
     },
 })
 

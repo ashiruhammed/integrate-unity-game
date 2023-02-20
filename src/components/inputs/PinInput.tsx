@@ -1,6 +1,7 @@
 import React, {useRef, useState} from 'react';
 
 import {Text, TextStyle, View, StyleSheet,ViewProps, ViewStyle, I18nManager, TextInput} from 'react-native';
+import {useAppSelector} from "../../app/hooks";
 
 
 const styles = StyleSheet.create({
@@ -108,7 +109,8 @@ const PinInput = ({password, codeLength,
     const ref = useRef(null);
     const inputRef = useRef(null);
 
-
+    const dataSlice = useAppSelector(state => state.data)
+    const {theme} = dataSlice
 
 
 
@@ -238,7 +240,7 @@ const PinInput = ({password, codeLength,
             }
         </View>
             <TextInput
-
+                keyboardAppearance={theme}
                 disableFullscreenUI={disableFullscreenUI}
                 value={value}
                 ref={inputRef}

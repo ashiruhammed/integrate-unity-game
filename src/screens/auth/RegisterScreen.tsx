@@ -473,20 +473,20 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
 
                             <GoogleIcon/>
                             <Text style={[{
-                                fontFamily: Fonts.quicksandSemiBold,
-                                fontSize: fontPixel(14),
+                                fontFamily: Fonts.quickSandBold,
+                                fontSize: fontPixel(16),
                                 color: Colors.light.text,
                             }]}>
                                 Sign up with Google
                             </Text>
                         </TouchableOpacity>
-                        <View style={{
-                            marginVertical: pixelSizeVertical(10)
-                        }}>
+                        <TouchableOpacity style={[styles.buttonSignUp, {
+                            marginBottom: 10
+                        }]}>
 
 
                             <LoginButton
-
+style={styles.fbButtonSignUp}
                                 onLoginFinished={
                                     (error, result) => {
                                         if (error) {
@@ -508,7 +508,7 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
                                     }
                                 }
                                 onLogoutFinished={() => console.log("logout.")}/>
-                        </View>
+                        </TouchableOpacity>
 
                         {
                             Platform.OS == 'ios' &&
@@ -911,13 +911,24 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.quickSandBold
     },
     buttonSignUp: {
+
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-evenly',
-        borderRadius: 10,
-        width: widthPixel(292),
+        borderRadius: 5,
+        width: '90%',
 
         height: heightPixel(56)
+    },
+    fbButtonSignUp: {
+
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+
+        width: '100%',
+
+        height: '100%'
     },
 
 })
