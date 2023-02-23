@@ -55,7 +55,7 @@ import {
 } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
 import * as Haptics from "expo-haptics";
 
-
+import VideoPlayer from 'react-native-media-console';
 
 
 const _handlePressButtonAsync = async (url:string) => {
@@ -337,10 +337,7 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
         setSelectedAnswer('')
     }
 
-    const closeModal = () => {
-        setModalVisible(false)
 
-    }
 
     const prevQuestion = () => {
 
@@ -417,7 +414,7 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
         <>
 
             <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
-                <StatusBar style={theme == 'light' ? 'dark' : 'light'}/>
+                <StatusBar style={theme == 'light' ? 'dark' : 'light'} />
                 <Toast message={responseMessage} state={responseState} type={responseType}/>
                 {
                     submitting &&

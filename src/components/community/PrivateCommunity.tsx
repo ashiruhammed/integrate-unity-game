@@ -554,7 +554,7 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: 5,
-        backgroundColor: "#ccc"
+
     },
     cardTitle: {
         fontFamily: Fonts.quickSandBold,

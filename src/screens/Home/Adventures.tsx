@@ -91,7 +91,9 @@ const dataSlice = useAppSelector(state => state.data)
 
                         </View>
 
-                        <View style={styles.modalBody}>
+                        <View style={[styles.modalBody,{
+                            backgroundColor
+                        }]}>
                             <View style={styles.dripImageWrap}>
                                 <Image
                                     source={{uri:adventure?.badge?.imageUrl}}
@@ -188,7 +190,9 @@ const dataSlice = useAppSelector(state => state.data)
                 }}
             >
                 <View style={styles.backDrop}>
-                    <View style={styles.modalContainer}>
+                    <View style={[styles.modalContainer,{
+                        backgroundColor
+                    }]}>
 
                         <View style={styles.sheetHead}>
 
@@ -199,7 +203,9 @@ const dataSlice = useAppSelector(state => state.data)
 
                         </View>
 
-                        <View style={styles.modalBody}>
+                        <View style={[styles.modalBody,{
+                            backgroundColor
+                        }]}>
                             <View style={styles.dripImageWrap}>
                                 <Image
                                     source={{uri: 'https://res.cloudinary.com/dijyr3tlg/image/upload/v1673304924/drip_znhu2i.png'}}
@@ -209,7 +215,9 @@ const dataSlice = useAppSelector(state => state.data)
 
                             <View style={styles.textWrap}>
 
-                                <Text style={styles.learnText}>
+                                <Text style={[styles.learnText,{
+                                    color: textColor
+                                }]}>
                                     {adventure?.name}
                                 </Text>
                             </View>
@@ -220,12 +228,14 @@ const dataSlice = useAppSelector(state => state.data)
                                         <AdventuresIcon/>
                                         <Text style={[styles.learnText, {
                                             marginLeft: 5,
+                                            color: textColor,
                                             fontFamily: Fonts.quickSandBold
                                         }]}>{adventure?._count?.modules}</Text>
                                     </View>
 
                                     <Text style={[styles.missionText, {
-                                        fontSize: fontPixel(14)
+                                        fontSize: fontPixel(14),
+                                        color: textColor
                                     }]}>
                                         Missions
                                     </Text>
@@ -240,13 +250,14 @@ const dataSlice = useAppSelector(state => state.data)
                                                    style={styles.clock}/>
                                         </View>
                                         <Text style={[styles.learnText, {
-
+                                            color: textColor,
                                             fontFamily: Fonts.quickSandBold
                                         }]}>5</Text>
                                     </View>
 
                                     <Text style={[styles.missionText, {
-                                        fontSize: fontPixel(14)
+                                        fontSize: fontPixel(14),
+                                        color: textColor
                                     }]}>
                                         Minutes
                                     </Text>
@@ -342,7 +353,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 20,
-        backgroundColor: '#fff',
+
         paddingHorizontal: pixelSizeHorizontal(20),
         height: heightPixel(385)
     },

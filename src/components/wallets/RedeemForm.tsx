@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 
 import {Text, View, StyleSheet, ActivityIndicator, TouchableOpacity} from 'react-native';
 import {useFormik} from "formik";
@@ -13,6 +13,8 @@ import Colors from "../../constants/Colors";
 import {MaterialCommunityIcons} from "@expo/vector-icons";
 import {useAppSelector} from "../../app/hooks";
 import textInput from "../inputs/TextInput";
+import * as SecureStore from "expo-secure-store";
+import {currencyFormatter} from "../../helpers";
 
 
 const formSchema = yup.object().shape({
@@ -29,12 +31,16 @@ interface props {
     nearBalance: string,
 }
 
+
+
+
 const RedeemForm = ({isLoading, redeemNow, pointBalance,nearBalance}: props) => {
 
 
     const {isLoading: loadingRates, data} = useQuery(['getUserPointsExchangeRate'], getUserPointsExchangeRate)
 
     const [points, setPoints] = useState('');
+
 
     const [convertedPoints, setConvertedPoints] = useState('');
 
@@ -44,6 +50,8 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance,nearBalance}: props) => 
 
     const lightTextColor = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
+
+   // https://pro-api.coinmarketcap.com/v2/tools/price-conversion?CMC_PRO_API_KEY=c8d06b53-dfbe-4de8-9e0d-62fdb128cf8a&amount=300&symbol=Near
 
     const {
         resetForm,
@@ -78,6 +86,7 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance,nearBalance}: props) => 
     });
 
 
+
     const maxAmount = () => {
         setPoints(pointBalance)
         setFieldValue('points', pointBalance)
@@ -85,6 +94,7 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance,nearBalance}: props) => 
     return (
         <View style={styles.sheetContainer}>
             <AdvancedTextInput
+
                 placeholder="0.00"
                 label={"Amount"}
                 keyboardType={"number-pad"}
@@ -113,7 +123,7 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance,nearBalance}: props) => 
 
                 placeholder="0.00"
                 label={"Amount"}
-                defaultValue={`${data?.data[0].value * +points}`}
+                defaultValue={ data ? `${data?.data[0]?.value * +points}` : 0}
                 keyboardType={"number-pad"}
 
                 balanceText={`${nearBalance} Near`}
@@ -140,10 +150,12 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance,nearBalance}: props) => 
                         <Text style={[styles.label,{
                            color: textColor
                         }]}>
-                            1 Points = {data?.data[0].value} {data?.data[0].token}
+                            1 Points = {data?.data[0]?.value} {data?.data[0]?.token}
                         </Text>
                 }
             </View>
+
+
 
             <TouchableOpacity disabled={isLoading || !isValid} style={[styles.redeemButton, {
                 backgroundColor: isValid ? Colors.primaryColor : Colors.border

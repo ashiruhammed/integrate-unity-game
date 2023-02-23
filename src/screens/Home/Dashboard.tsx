@@ -14,7 +14,6 @@ import {
 import {SafeAreaView} from "react-native-safe-area-context";
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
 import {AntDesign, Ionicons, Octicons} from "@expo/vector-icons";
-import Svg, {Circle} from "react-native-svg";
 import Colors from "../../constants/Colors";
 import FruitIcon from "../../assets/images/svg/FruitIcon";
 import WarmIcon from "../../assets/images/svg/WarmIcon";
@@ -39,6 +38,7 @@ import {Portal} from "@gorhom/portal";
 import PhoneInputText from "../../components/inputs/PhoneInputText";
 import {useFormik} from "formik";
 import * as yup from "yup";
+import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 
 
 const formSchema = yup.object().shape({
@@ -63,27 +63,7 @@ interface props {
     badgeId: string
 }
 
-const BadgeItem = ({badge}: props) => {
-    return (
 
-        <Animated.View key={badge.title} entering={FadeInDown} exiting={FadeOutDown}
-                       layout={Layout.easing(Easing.bounce).delay(20)} style={styles.badgeImageWrap}>
-            <Image
-                source={{uri: 'https://res.cloudinary.com/dijyr3tlg/image/upload/v1672951469/gateway/Group_151_cret7t.png'}}
-                style={styles.badgeImage}/>
-
-            <View style={styles.badgeStreakScore}>
-                <Text style={styles.badgeStreakText}>
-                    x1
-                </Text>
-            </View>
-        </Animated.View>
-
-
-    )
-}
-
-const isRunningInExpoGo = Constants.appOwnership === 'expo'
 const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
 
     const dispatch = useAppDispatch()
@@ -92,6 +72,8 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
     const {userData, responseState, responseType, responseMessage} = user
     const dataSlice = useAppSelector(state => state.data)
     const {theme} = dataSlice
+
+    const [phoneNumber, setPhoneNumber] = useState('');
 
     const [refreshing, setRefreshing] = useState(false);
 
@@ -102,7 +84,7 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
     // ref
     const bottomSheetRef = useRef<BottomSheet>(null);
     // variables
-    const snapPoints = useMemo(() => ['1%', '55%'], []);
+    const snapPoints = useMemo(() => ['1%', '65%'], []);
     const handleClosePress = () => {
         bottomSheetRef.current?.close()
     }
@@ -130,6 +112,9 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
     const handlePresentModalPress = useCallback(() => {
         bottomSheetModalRef.current?.present();
     }, []);
+    const handleClosetModal= useCallback(() => {
+        bottomSheetModalRef.current?.close();
+    }, []);
 
 
     const {
@@ -144,7 +129,9 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
                     responseType: 'success',
                 }))
                 handleClosePress()
-                navigation.navigate('ConfirmPhonenumber')
+                navigation.navigate('ConfirmPhonenumber', {
+                    phone: phoneNumber
+                })
             } else {
                 dispatch(setResponse({
                     responseMessage: data.message,
@@ -186,6 +173,7 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
 
 
             })
+
             requestCodeNow(body)
         }
     });
@@ -242,7 +230,7 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
     const verifyPhoneNumber = () => {
         if (user?.userData?.phone) {
             const body = JSON.stringify({
-                email: userData?.phone,
+                phone: userData?.phone,
             })
             requestCodeNow(body)
 
@@ -290,16 +278,6 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
                                        layout={Layout.easing(Easing.bounce).delay(20)} style={styles.userImage}>
 
                             <View style={styles.profileImage}>
-                                {
-                                    isRunningInExpoGo ?
-                                        <Image
-                                            style={styles.Image}
-                                            source={{
-                                                uri: !user.userData?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : user.userData?.avatar,
-
-                                            }}
-                                        />
-                                        :
 
                                         <FastImage
                                             style={styles.Image}
@@ -311,7 +289,7 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
                                             }}
                                             resizeMode={FastImage.resizeMode.cover}
                                         />
-                                }
+
 
                             </View>
 
@@ -378,36 +356,33 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
                                 <ActivityIndicator size='small' color={Colors.primaryColor}/>
                             </View>
                         }
-<View style={styles.titleWrap}>
-
-
-                        <Text style={[styles.learnMore,{
-                            width:'70%',
-                            lineHeight:heightPixel(22),
-                            color: textColor
-                        }]}>
-                            Explore story adventures below and earn rewards
-                        </Text>
-</View>
                         {
-                            data?.pages[0]?.data?.result.map(((item) => (
+                            !isLoading &&
+
+                            <View style={styles.titleWrap}>
+
+
+                            <Text style={[styles.learnMore, {
+                                width: '70%',
+                                lineHeight: heightPixel(22),
+                                color: textColor
+                            }]}>
+                                Explore story adventures below and earn rewards
+                            </Text>
+                        </View>
+                        }
+                        {
+                            !loading && data &&
+                            data?.pages[0]?.data?.result.slice(0,12).map(((item) => (
                                 <Animated.View key={item.id} entering={FadeInDown} exiting={FadeOutDown}
                                                layout={Layout.easing(Easing.bounce).delay(20)}>
                                     <Pressable onPress={() => goToAdventure(item)}
                                                style={[styles.adventureItem, {
                                                    backgroundColor: theme == 'dark' ? Colors.dark.background : "#fff",
                                                }]}>
-                                        {
-                                            isRunningInExpoGo ?
 
-                                                <Image
-                                                    style={styles.adventureItemImage}
-                                                    source={{
-                                                        uri: item.imageUrl,
-                                                    }}
-                                                    resizeMode={'cover'}
-                                                />
-                                                :
+
+
                                                 <FastImage
                                                     style={styles.adventureItemImage}
                                                     source={{
@@ -417,7 +392,7 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
                                                     }}
                                                     resizeMode={FastImage.resizeMode.cover}
                                                 />
-                                        }
+
 
                                     </Pressable>
                                 </Animated.View>
@@ -434,7 +409,7 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
             <Portal>
                 <BottomSheet
                     backgroundStyle={{
-                        backgroundColor,
+                        backgroundColor: theme == 'light' ? "#fff" : Colors.dark.background,
                     }}
                     handleIndicatorStyle={Platform.OS == 'android' && {display: 'none'}}
                     ref={bottomSheetRef}
@@ -451,7 +426,7 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
                     <View style={styles.sheetHead}>
 
 
-                        <Text style={[styles.sheetTitle,{
+                        <Text style={[styles.sheetTitle, {
                             color: textColor
                         }]}>
                             Update phone number
@@ -464,7 +439,17 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
                         </TouchableOpacity>}
                     </View>
 
-                    <View style={styles.sheetContainer}>
+
+                    <KeyboardAwareScrollView scrollEnabled
+                                             style={{
+                                                 width: '100%',
+
+                                             }}
+                                             showsVerticalScrollIndicator={false}
+                                             showsHorizontalScrollIndicator={false}
+                                             contentContainerStyle={
+                                                 styles.sheetContainer
+                                             }>
 
                         <PhoneInputText
                             error={errors.phoneNumber}
@@ -472,7 +457,7 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
                             label="Phone number"
                             onChangeText={(text) => {
                                 handleChange('phoneNumber')(text);
-                                //setPhoneNumber(text)
+                                setPhoneNumber(text)
                             }}
 
                             value={values.phoneNumber}
@@ -490,7 +475,7 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
                                     </Text>
                             }
                         </RectButton>
-                    </View>
+                    </KeyboardAwareScrollView>
                 </BottomSheet>
 
 
@@ -498,6 +483,7 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
 
 
                     <BottomSheetModal
+
                         backgroundStyle={{
                             backgroundColor,
                         }}
@@ -505,27 +491,27 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
                         ref={bottomSheetModalRef}
                         index={1}
                         snapPoints={modalSnapPoints}
-                        handleIndicatorStyle={Platform.OS == 'android' && {display: 'none'}}
+                        handleIndicatorStyle={[{ backgroundColor:theme == 'light' ? "#333" : "#eee" },Platform.OS == 'android' && {display: 'none',}]}
                     >
                         <View style={styles.contentContainer}>
-                        <View style={[styles.sheetHead,{
-                            height: 40,
-                        }]}>
-
-
-                            <Text style={[styles.sheetTitle,{
-                                fontSize: fontPixel(14),
-                                color: Colors.primaryColor
+                            <View style={[styles.sheetHead, {
+                                height: 40,
                             }]}>
-                       Growth bar
-                            </Text>
-                            {Platform.OS == 'android' && <TouchableOpacity onPress={handleClosePress}
-                                                                           style={[styles.dismiss, {
-                                                                               backgroundColor: theme == 'light' ? "#f8f8f8" : Colors.dark.background
-                                                                           }]}>
-                                <Ionicons name="close-sharp" size={20} color={textColor}/>
-                            </TouchableOpacity>}
-                        </View>
+
+
+                                <Text style={[styles.sheetTitle, {
+                                    fontSize: fontPixel(14),
+                                    color: Colors.primaryColor
+                                }]}>
+                                    Growth bar
+                                </Text>
+                                {Platform.OS == 'android' && <TouchableOpacity onPress={handleClosetModal}
+                                                                               style={[styles.dismiss, {
+                                                                                   backgroundColor: theme == 'light' ? "#f8f8f8" : Colors.dark.background
+                                                                               }]}>
+                                    <Ionicons name="close-sharp" size={20} color={textColor}/>
+                                </TouchableOpacity>}
+                            </View>
 
                             <Text style={[styles.learnMoreText, {
                                 color: textColor
@@ -674,8 +660,8 @@ const styles = StyleSheet.create({
 
         alignItems: 'flex-start',
     },
-    titleWrap:{
-      width:'100%'
+    titleWrap: {
+        width: '100%'
     },
     badgeContainer: {
         width: '100%',
@@ -794,12 +780,12 @@ const styles = StyleSheet.create({
     contentContainer: {
         paddingHorizontal: pixelSizeHorizontal(20),
         width: '100%',
-        flex:0.8,
+        flex: 0.8,
         justifyContent: 'center',
         alignItems: 'center'
     },
     learnMoreText: {
-        textAlign:"center",
+        textAlign: "center",
         lineHeight: heightPixel(24),
         fontSize: fontPixel(16),
         fontFamily: Fonts.quicksandMedium

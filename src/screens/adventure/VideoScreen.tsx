@@ -42,6 +42,8 @@ import * as WebBrowser from "expo-web-browser";
 import {useFormik} from "formik";
 import * as yup from "yup";
 import * as Haptics from "expo-haptics";
+import {StatusBar} from "expo-status-bar";
+import VideoPlayer from "react-native-media-console";
 
 
 const _handlePressButtonAsync = async (url: string) => {
@@ -71,7 +73,7 @@ const VideoScreen = ({navigation, route}: RootStackScreenProps<'VideoScreen'>) =
     const [status, setStatus] = React.useState({});
     const [playing, setPlaying] = useState(false);
     const [terms, setTerms] = useState(false);
-
+    const [fullScreen, setFullScreen] = useState(false);
 
     const sheetRef = useRef<BottomSheet>(null);
     // variables
@@ -115,13 +117,12 @@ const VideoScreen = ({navigation, route}: RootStackScreenProps<'VideoScreen'>) =
             if (data.success) {
                 handleSnapPress(1)
             } else {
-               // console.log("+++++++++++THIS MEANS NO TASK HERE++++++++++")
+                // console.log("+++++++++++THIS MEANS NO TASK HERE++++++++++")
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
                 setBadgeModalVisible(true)
             }
         }
     })
-
 
 
     //  const {isLoading, data: lesson, refetch} = useQuery(['lesson'], () => getLesson(lessonId))
@@ -168,25 +169,23 @@ const VideoScreen = ({navigation, route}: RootStackScreenProps<'VideoScreen'>) =
         isLoading: loadingMission
     } = useMutation(['getNextMission'], getNextAdventure, {
         onSuccess: (data) => {
-           // console.log("ADVENTURE NEXT")
-           // console.log(data)
+            // console.log("ADVENTURE NEXT")
+            // console.log(data)
             if (data.success) {
 
                 if (data.data.hasNextLesson) {
-                   // console.log("===========GOING TO NEXT LESSON========")
+                    // console.log("===========GOING TO NEXT LESSON========")
                     mutate(data.data.nextLessonId)
-                } else if(!data.data.isLastModuleLesson){
-                   // console.log("--------THIS IS GOING TO NEXT MODULE---------")
+                } else if (!data.data.isLastModuleLesson) {
+                    // console.log("--------THIS IS GOING TO NEXT MODULE---------")
                     mutate(data.data.nextLessonId)
-                }
-                else if (data.data.isLastAdventureModule) {
-                   // console.log("********THIS MEAN ADVENTURE IS COMPLETED********")
+                } else if (data.data.isLastAdventureModule) {
+                    // console.log("********THIS MEAN ADVENTURE IS COMPLETED********")
                     getTask(lesson?.data?.moduleId)
-                }else if(data.data.isLastAdventureModule == false){
-                      //  console.log("GO TO NEXT MODULE")
-                        navigation.navigate('AdventureHome')
-                    }
-
+                } else if (data.data.isLastAdventureModule == false) {
+                    //  console.log("GO TO NEXT MODULE")
+                    navigation.navigate('AdventureHome')
+                }
 
 
             } else {
@@ -252,7 +251,7 @@ const VideoScreen = ({navigation, route}: RootStackScreenProps<'VideoScreen'>) =
     }, [lessonId]);
 
 
-   //
+    //
     const nextMission = async () => {
 
         if (quiz?.success) {
@@ -275,7 +274,7 @@ const VideoScreen = ({navigation, route}: RootStackScreenProps<'VideoScreen'>) =
     const giveReview = () => {
         setBadgeModalVisible(false)
         navigation.navigate('LeaveReview', {
-            adventureId:adventure?.id
+            adventureId: adventure?.id
         })
     }
 
@@ -386,6 +385,7 @@ const VideoScreen = ({navigation, route}: RootStackScreenProps<'VideoScreen'>) =
             </Modal>
 
             <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
+                <StatusBar style={theme == 'light' ? 'dark' : "dark"}/>
                 <View style={[styles.navBar, {
                     paddingHorizontal: pixelSizeHorizontal(20)
                 }]}>
@@ -411,36 +411,36 @@ const VideoScreen = ({navigation, route}: RootStackScreenProps<'VideoScreen'>) =
                 }
 
 
-                <ScrollView
-                    style={{width: '100%',}} contentContainerStyle={styles.scrollView} scrollEnabled
-                    showsVerticalScrollIndicator={false}>
+                {
+                    gettingTask && <ActivityIndicator size="large" color={Colors.primaryColor}
+                                                      style={[StyleSheet.absoluteFill, {
+                                                          zIndex: 10,
+                                                          backgroundColor: '#fff'
+                                                      }]}/>
+                }
 
-                    {
-                        gettingTask && <ActivityIndicator size="large" color={Colors.primaryColor}
-                                                          style={[StyleSheet.absoluteFill, {
-                                                              zIndex: 10,
-                                                              backgroundColor: '#fff'
-                                                          }]}/>
-                    }
-
-                    <View style={styles.topDetails}>
-                        <Text style={[styles.title, {
+                <View style={styles.topDetails}>
+                    <Text style={[styles.title, {
+                        color: textColor
+                    }]}>
+                        {lesson?.data?.name}
+                    </Text>
+                    <View style={styles.cardTopLeft}>
+                        <FontAwesome5 name="gift" size={16} color={Colors.success}/>
+                        <Text style={[styles.cardTopLeftText, {
                             color: textColor
                         }]}>
-                            {lesson?.data?.name}
+                            {adventure?.rewardPoint} Reward Points
                         </Text>
-                        <View style={styles.cardTopLeft}>
-                            <FontAwesome5 name="gift" size={16} color={Colors.success}/>
-                            <Text style={[styles.cardTopLeftText,{
-                                color: textColor
-                            }]}>
-                                {adventure?.rewardPoint} Reward Points
-                            </Text>
-                        </View>
                     </View>
+                </View>
 
-                    {
-                        !lesson?.data?.video?.url &&
+                {
+                    !lesson?.data?.video?.url &&
+                    <ScrollView
+                        style={{width: '100%',}} contentContainerStyle={styles.scrollView} scrollEnabled
+                        showsVerticalScrollIndicator={false}>
+
                         <View style={[styles.videoContainer, {
 
                             paddingHorizontal: pixelSizeHorizontal(15)
@@ -454,34 +454,35 @@ const VideoScreen = ({navigation, route}: RootStackScreenProps<'VideoScreen'>) =
                             </Text>
 
                         </View>
-                    }
+                    </ScrollView>
+                }
 
 
-                    {
-                        lesson?.data?.video?.url
-                        &&
+                {
+                    lesson?.data?.video?.url
+                    &&
 
-                        <View style={[styles.videoContainer, {
-                            minHeight: heightPixel(400),
-                        }]}>
+                    <View style={[styles.videoContainer, {
+                        flex: 1,
+                    }]}>
+                        <VideoPlayer
+                            isFullscreen
+                            toggleResizeModeOnFullscreen
+                            onEnterFullscreen={() => setFullScreen(true)}
+                            fullscreen={fullScreen}
+                            fullscreenAutorotate
+                            fullscreenOrientation='all'
 
-                            <Video
-                                ref={video}
-                                style={styles.video}
-                                source={{
-                                    uri: lesson?.data?.video?.url,
-                                }}
-                                useNativeControls
-                                resizeMode="contain"
+                            containerStyle={styles.video}
+                            videoRef={video}
+                            source={{uri: lesson?.data?.video?.url}}
+                            navigator={navigation}
+                            showDuration
 
-                                isLooping
-                                onPlaybackStatusUpdate={status => setStatus(() => status)}
-                            />
-                        </View>
-                    }
-
-
-                </ScrollView>
+                            seekColor={Colors.primaryColor}
+                        />
+                    </View>
+                }
 
 
                 <RectButton onPress={nextMission} style={{
@@ -719,9 +720,10 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.quickSandBold
     },
     topDetails: {
+
         paddingHorizontal: pixelSizeHorizontal(15),
         width: '100%',
-        height: heightPixel(100)
+        height: heightPixel(80)
     },
     title: {
         fontFamily: Fonts.quickSandBold,
@@ -731,12 +733,11 @@ const styles = StyleSheet.create({
 
         width: '100%',
         alignItems: 'center',
-        justifyContent: 'center',
     },
     video: {
         alignSelf: 'center',
         width: '100%',
-        height: '100%',
+        maxHeight: '90%',
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -908,14 +909,14 @@ const styles = StyleSheet.create({
         width: '100%',
         alignItems: 'flex-start',
     },
- cardTopLeft: {
-        marginTop:10,
-        flexDirection:'row',
+    cardTopLeft: {
+        marginTop: 10,
+        flexDirection: 'row',
         alignItems: 'flex-start',
 
     },
     cardTopLeftText: {
-        marginLeft:5,
+        marginLeft: 5,
         fontSize: fontPixel(14),
         fontFamily: Fonts.quicksandMedium
     },

@@ -381,6 +381,13 @@ const PublicCommunity = ({theme}: props) => {
     const [communityId, setCommunityId] = useState('');
     const [requiredBadges, setRequiredBadges] = useState('');
 
+
+
+    const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
+
+
+    const backgroundColor = theme == 'light' ? Colors.light.background : Colors.dark.background
+
     const {
         isLoading: loadingBadge,
         data: badge,
@@ -494,14 +501,16 @@ const PublicCommunity = ({theme}: props) => {
                 animationType="slide"
                 transparent={true}
                 visible={modalVisible}
-
+style={{backgroundColor}}
                 onRequestClose={() => {
                     Alert.alert("Modal has been closed.");
                     setModalVisible(false);
                 }}
             >
                 <View style={styles.backDrop}>
-                    <View style={styles.modalContainer}>
+                    <View style={[styles.modalContainer,{
+backgroundColor
+                    }]}>
 
                         <View style={styles.sheetHead}>
 
@@ -512,9 +521,13 @@ const PublicCommunity = ({theme}: props) => {
 
                         </View>
 
-                        <View style={styles.modalBody}>
+                        <View style={[styles.modalBody,{
+                            backgroundColor
+                        }]}>
 
-                            <Text style={styles.missionText}>
+                            <Text style={[styles.missionText,{
+                                color: textColor
+                            }]}>
                                 Requirements
                             </Text>
                             <View style={styles.dripImageWrap}>
@@ -525,12 +538,15 @@ const PublicCommunity = ({theme}: props) => {
 
 
                             <View style={styles.textWrap}>
-                                <Text style={styles.missionText}>
+                                <Text style={[styles.missionText,{
+                                    color: textColor
+                                }]}>
                                     {badge?.data?.title}
                                 </Text>
 
                                 <Text style={[styles.learnText, {
-                                    textAlign: 'center'
+                                    textAlign: 'center',
+                                    color: textColor
                                 }]}>
                                     <Text style={{
                                         color: Colors.errorRed

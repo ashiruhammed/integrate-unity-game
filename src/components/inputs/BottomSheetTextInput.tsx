@@ -61,10 +61,15 @@ const BottomSheetTextInput: FC<Props> = ({
 
     const dataSlice = useAppSelector(state => state.data)
     const {theme, adventure} = dataSlice
-    let validationColor, validationLabelColor;
+    let validationColor, validationLabelColor,validationLabelDarkColor;
 
     validationColor = !touched ? Colors.border : error ? Colors.errorRed : focus ? Colors.primaryColor : Colors.border
     validationLabelColor = !touched ? Colors.light.text : error ? Colors.errorRed : focus ? Colors.primaryColor : Colors.light.text
+
+
+
+    validationLabelColor = !touched ? Colors.light.text : focus ? Colors.light.text : error ? Colors.errorRed : Colors.light.text
+    validationLabelDarkColor = !touched ? Colors.dark.text : focus ? Colors.dark.text : error ? Colors.errorRed : Colors.dark.text
 
     return (
         <View style={[styles.inputWrap, {
@@ -74,7 +79,10 @@ const BottomSheetTextInput: FC<Props> = ({
             {
                 label && <View style={styles.labelWrap}>
                     <Text style={[
-                        {color: labelColor ? Colors.primaryColor : validationLabelColor},
+                        {
+                            color: theme == 'light' ? validationLabelColor : validationLabelDarkColor
+
+                        },
                         styles.label]}>
                         {label}
                     </Text>
@@ -125,7 +133,7 @@ const BottomSheetTextInput: FC<Props> = ({
                     placeholderTextColor={"#9CA3AF"}
                     style={[styles.input, {
                         width: password || leftIcon || rightIcon || icon ? '90%' : '100%',
-                        color: '#131313',
+                        color: theme == 'light' ? '#131313' : '#fff',
 
                     }]}/>
 

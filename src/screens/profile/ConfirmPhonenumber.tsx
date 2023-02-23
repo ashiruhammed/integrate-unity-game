@@ -27,8 +27,9 @@ const formSchema = yup.object().shape({
 });
 
 
-const ConfirmPhonenumber = ({navigation}: RootStackScreenProps<'ConfirmPhonenumber'>) => {
+const ConfirmPhonenumber = ({navigation, route}: RootStackScreenProps<'ConfirmPhonenumber'>) => {
 
+    const {phone} = route.params
     const dispatch = useAppDispatch()
     const queryClient = useQueryClient();
     const user = useAppSelector(state => state.user)
@@ -133,7 +134,7 @@ const ConfirmPhonenumber = ({navigation}: RootStackScreenProps<'ConfirmPhonenumb
 
     const resend = () => {
         const body = JSON.stringify({
-            email: userData?.phone,
+            phone: !userData?.phone ? phone : userData?.phone,
         })
         resendCodeNow(body)
         setCounter(10)
@@ -182,8 +183,10 @@ const ConfirmPhonenumber = ({navigation}: RootStackScreenProps<'ConfirmPhonenumb
                         height: heightPixel(80),
                         justifyContent: 'flex-start'
                     }]}>
-                        <Text style={styles.label}>
-                            Enter the 6-digit code sent to you at {userData?.phone}
+                        <Text style={[styles.label,{
+                            color:textColor
+                        }]}>
+                            Enter the 6-digit code sent to you at {!userData?.phone ? phone : userData?.phone}
                         </Text>
                     </View>
                     <PinInput value={values.phoneOtpCode}
@@ -222,7 +225,9 @@ const ConfirmPhonenumber = ({navigation}: RootStackScreenProps<'ConfirmPhonenumb
 
                               restrictToNumbers={false}/>
                     <View style={styles.resendMessage}>
-                        <Text style={styles.resendMessageTxt}>
+                        <Text style={[styles.resendMessageTxt,{
+                            color:textColor
+                        }]}>
                             I haven’t received a code <Text disabled={counter !== 0} onPress={resend} style={{
                             fontFamily: Fonts.quickSandBold
                         }}>Resend </Text>

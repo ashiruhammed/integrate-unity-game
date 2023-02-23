@@ -48,6 +48,7 @@ import GroupSettings from "../screens/communities/GroupSettings";
 import LeaveCommunity from "../screens/communities/LeaveCommunity";
 import CommentOnPost from "../screens/communities/components/CommentOnPost";
 import RequestsScreen from "../screens/communities/RequestsScreen";
+import VideoTest from "../screens/VideoTest";
 
 export default function Navigation({colorScheme}: { colorScheme: ColorSchemeName }) {
   const data = useAppSelector(state => state.data)
@@ -110,6 +111,7 @@ function RootNavigator() {
                         <Stack.Screen name="ViewCommunity" component={ViewCommunity}/>
                         <Stack.Screen name="GroupSettings" component={GroupSettings}/>
                         <Stack.Screen name="LeaveCommunity" component={LeaveCommunity}/>
+
 
                         <Stack.Screen name="PostScreen" options={{
                         animation:'slide_from_right'

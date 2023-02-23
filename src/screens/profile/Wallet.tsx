@@ -37,7 +37,7 @@ import {
     withdrawFromWallet
 } from "../../action/action";
 import {setResponse, unSetResponse, updateUserInfo} from "../../app/slices/userSlice";
-import {useRefreshOnFocus} from "../../helpers";
+import {currencyFormatter, useRefreshOnFocus} from "../../helpers";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
 import * as SecureStore from "expo-secure-store";
 import Toast from "../../components/Toast";
@@ -58,7 +58,7 @@ const formSchema = yup.object().shape({
 interface props {
     item: {
         id: string,
-        balance: string,
+        balance: number,
         amount: string,
         "name": string,
         "logo": string,
@@ -75,6 +75,7 @@ interface props {
 
 const WalletItem = ({item,textColor,lightTextColor,openSheet,openRedeem}: props) => {
     const {width} = useWindowDimensions()
+
     return (
         <>
 
@@ -90,7 +91,9 @@ const WalletItem = ({item,textColor,lightTextColor,openSheet,openRedeem}: props)
                 <Text style={[styles.walletBalance,{
                     color: textColor
                 }]}>
-                    {item.balance}
+
+                   {/* {parseFloat(String(item?.balance)).toFixed(8)}*/}
+                    {item?.balance}
                 </Text>
 
                 <Text style={styles.walletName}>
@@ -124,6 +127,29 @@ const WalletItem = ({item,textColor,lightTextColor,openSheet,openRedeem}: props)
     )
 }
 
+
+
+
+export const getConversion = async (symbol:string,amount:string) => {
+    let timeoutId: NodeJS.Timeout
+    const requestOptions = {
+        method: 'GET',
+    };
+
+    return Promise.race([
+        fetch(`https://pro-api.coinmarketcap.com/v2/tools/price-conversion?CMC_PRO_API_KEY=c8d06b53-dfbe-4de8-9e0d-62fdb128cf8a&amount=${amount}&symbol=${symbol}`, requestOptions)
+            .then(response => response.json()),
+        new Promise((resolve, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+            //  clearTimeout(timeoutId)
+        }).then(() => {
+            clearTimeout(timeoutId)
+        })
+
+    ])
+}
+
 const Wallet = () => {
 
     const dispatch = useAppDispatch()
@@ -139,13 +165,16 @@ const Wallet = () => {
     const backgroundColor = theme == 'light' ? "#fff" : Colors.dark.background
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
 
+    const [amount, setAmount] = useState('');
+    const [USDPrice, setUSDPrice] = useState('');
+
     const lightTextColor = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
     // ref
     const bottomSheetRef = useRef<BottomSheet>(null);
     const redeemSheetRef = useRef<BottomSheet>(null);
 
     // variables
-    const snapPoints = useMemo(() => ['1%', '55%'], []);
+    const snapPoints = useMemo(() => ['1%', '60%'], []);
 
     const openSheet = () => {
         bottomSheetRef.current?.snapToIndex(1)
@@ -166,7 +195,7 @@ const Wallet = () => {
     }
 
 
-    const {isLoading: loadingWallets, data, isRefetching, refetch} = useQuery(['getUserWallets'], getUserWallets, {
+    const {isLoading: loadingWallets, data,isSuccess, isRefetching, refetch} = useQuery(['getUserWallets'], getUserWallets, {
 
         onSuccess: (data) => {
             if (data.success) {
@@ -194,7 +223,7 @@ const Wallet = () => {
 
 
     useEffect(() => {
-        if (!loadingPoints && !loadingWallets) {
+        if (!loadingPoints && !loadingWallets && data.success && isSuccess) {
             setWalletData([
                 ...data?.data,
                 {
@@ -206,7 +235,7 @@ const Wallet = () => {
         }
     }, [data, points]);
 
-//console.log(walletData)
+
 
     const {mutate, isLoading} = useMutation(['withdrawFromWallet'], withdrawFromWallet,
 
@@ -368,6 +397,7 @@ refetch()
                 "token": "near",
                 recipient: walletAddress,
                 amount,
+
             })
             mutate(body)
 
@@ -405,6 +435,17 @@ refetch()
             clearTimeout(time)
         };
     }, [responseState, responseMessage])
+
+
+    useEffect(() => {
+        getConversion('Near',amount).then((res)=>{
+            if(res.status.error_code == '0'){
+                setUSDPrice(res.data[0].quote?.USD?.price.toFixed(2))
+            }
+
+        })
+    }, [amount]);
+
 
     return (
 
@@ -519,7 +560,7 @@ refetch()
 
                     <View style={styles.transactions}>
                         {
-                            !loadingTransactions && transactions && transactions.data.length > 0 &&
+                            !loadingTransactions && transactions && transactions?.data?.length > 0 &&
                             transactions.data.map((({hash,amount,network,type,createdAt}) =>(
                                 <Animated.View layout={Layout.easing(Easing.bounce).delay(20)}
                                                entering={FadeInDown} exiting={FadeOutDown}
@@ -585,12 +626,16 @@ refetch()
 
 
             <BottomSheet
-                handleIndicatorStyle={Platform.OS == 'android' && {display: 'none'}}
+                handleIndicatorStyle={[{  backgroundColor: theme == 'light' ? "#121212" : '#cccccc'},Platform.OS == 'android' && {display: 'none'}]}
                 ref={bottomSheetRef}
                 index={0}
                 snapPoints={snapPoints}
                 keyboardBehavior="interactive"
                 backdropComponent={renderBackdrop}
+                backgroundStyle={{
+                    backgroundColor,
+                }}
+
                 style={{
                     paddingHorizontal: pixelSizeHorizontal(20)
                 }}
@@ -600,7 +645,9 @@ refetch()
                 <View style={styles.sheetHead}>
 
 
-                    <Text style={styles.sheetTitle}>
+                    <Text style={[styles.sheetTitle,{
+                        color: textColor
+                    }]}>
                         Near Withdrawal
                     </Text>
                     {Platform.OS == 'android' && <TouchableOpacity onPress={handleClosePress}
@@ -615,13 +662,15 @@ refetch()
                     <BottomSheetTextInput
                         placeholder="Enter Amount"
                         label={"Amount"}
-                        keyboardType={"number-pad"}
+                        keyboardType={"decimal-pad"}
                         touched={touched.amount}
                         error={touched.amount && errors.amount}
 
                         onChangeText={(e) => {
                             handleChange('amount')(e);
+                            setAmount(e)
                         }}
+                        defaultValue={amount}
                         onBlur={(e) => {
                             handleBlur('amount')(e);
 
@@ -645,7 +694,25 @@ refetch()
                         }}
                         value={values.walletAddress}
                     />
+  {
+                USDPrice !== '' &&
+            <View style={styles.conversionRate}>
+                <Text style={[styles.label,{
+                    color: textColor
+                }]}>
+                    USD conversion:
+                </Text>
 
+                {
+                        <Text style={[styles.label,{
+                           color: textColor
+                        }]}>
+                            {amount} Near = {currencyFormatter('en-US','USD').format(+USDPrice)}
+                        </Text>
+                }
+
+            </View>
+            }
 
                     <RectButton style={{marginTop: 30, width: widthPixel(200)}} onPress={() => handleSubmit()}>
                         {
@@ -863,8 +930,27 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         flexDirection: 'row'
-    }
-    ,
+    },
+    conversionRate: {
+        flexDirection: "row",
+        width: '100%',
+        height: 40,
+        alignItems: 'center',
+        justifyContent: 'space-between'
+    },
+    label:{
+        fontFamily:Fonts.quicksandMedium,
+        fontSize:fontPixel(14)
+    },
+    redeemButton: {
+        marginTop: 30,
+        width: '100%',
+        height: 50,
+        justifyContent: 'center',
+        borderRadius: 10,
+        alignItems: 'center',
+
+    },
     sheetTitle: {
         fontSize: fontPixel(18),
         fontFamily: Fonts.quickSandBold,

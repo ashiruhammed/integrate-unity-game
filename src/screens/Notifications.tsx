@@ -3,7 +3,7 @@ import React, {useCallback} from 'react';
 import {Text, View, StyleSheet, Platform, TouchableOpacity, Image, ActivityIndicator} from 'react-native';
 import {SafeAreaView} from "react-native-safe-area-context";
 import NavBar from "../components/layout/NavBar";
-import {fontPixel, heightPixel, pixelSizeHorizontal} from "../helpers/normalize";
+import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical} from "../helpers/normalize";
 import {Fonts} from "../constants/Fonts";
 import Colors from "../constants/Colors";
 import {useAppSelector} from "../app/hooks";
@@ -11,6 +11,8 @@ import Animated, {Easing, FadeInDown, FadeOutDown, Layout} from "react-native-re
 import {useInfiniteQuery} from "@tanstack/react-query";
 import {userNotifications} from "../action/action";
 import {FlashList} from "@shopify/flash-list";
+import dayjs from "dayjs";
+import {useRefreshOnFocus} from "../helpers";
 
 interface props {
     theme: 'light' | 'dark',
@@ -24,32 +26,43 @@ interface props {
         "createdAt": string,
         "updatedAt": string,
         "deletedAt": null
-    }
+    },
+    avatar:string
 }
 
-const NotificationCard = ({item, theme}: props) => {
+
+var relativeTime = require('dayjs/plugin/relativeTime')
+dayjs.extend(relativeTime)
+
+
+
+const NotificationCard = ({item, theme,avatar}: props) => {
     const lightTextColor = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tint
 
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
     return (
         <Animated.View key={item.id} layout={Layout.easing(Easing.bounce).delay(30)}
                        entering={FadeInDown.springify()} exiting={FadeOutDown} style={styles.notificationCard}>
-            <View
-                style={styles.roundImage}>
+
+            <View style={styles.roundImage}>
                 <Image style={styles.userAvatar}
-                       source={{uri: 'https://res.cloudinary.com/dijyr3tlg/image/upload/v1672965354/gateway/Group_121_1_bburna.png'}}/>
+                       source={{uri:!avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : avatar}}/>
 
             </View>
 
             <View style={styles.notificationBody}>
-                <Text style={styles.notificationBodyText}>
+                <Text style={[styles.notificationBodyText,{
+                    color: textColor
+                }]}>
                     <Text style={{
                         color: textColor,
                         fontFamily: Fonts.quicksandSemiBold,
-                    }}> {item.title}</Text> {item.description}
+                    }}>{item.title}</Text> {item.description}
                 </Text>
-                <Text style={styles.time}>
-                    Just Now
+                <Text style={[styles.time,{
+                    color: lightTextColor
+                }]}>
+                    { dayjs(item.createdAt).fromNow() }
                 </Text>
             </View>
         </Animated.View>
@@ -63,7 +76,8 @@ const Notifications = () => {
     const backgroundColor = theme == 'light' ? "#fff" : Colors.dark.background
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
 
-
+    const user = useAppSelector(state => state.user)
+    const {userData} = user
     const {
         isLoading,
         data: notifications,
@@ -95,7 +109,7 @@ const Notifications = () => {
     };
     const renderItem = useCallback(
         ({item}) => (
-            <NotificationCard theme={theme} item={item}/>
+            <NotificationCard avatar={userData?.avatar} theme={theme} item={item}/>
         ),
         [],
     );
@@ -103,7 +117,7 @@ const Notifications = () => {
 
     const keyExtractor = useCallback((item: { id: any; }) => item.id, [],);
 
-
+useRefreshOnFocus(refetch)
     return (
         <SafeAreaView style={[styles.safeArea, {
             backgroundColor
@@ -160,15 +174,16 @@ const styles = StyleSheet.create({
         //  backgroundColor: Colors.background,
         backgroundColor: "#fff",
         width: '100%',
-        alignItems: 'center',
+
         paddingHorizontal: pixelSizeHorizontal(20)
     },
     notificationCard: {
         width: '100%',
+        marginVertical:pixelSizeVertical(10),
         height: heightPixel(80),
         flexDirection: 'row',
         justifyContent: 'flex-start',
-        alignItems: 'center',
+        alignItems: 'flex-start',
 
     },
     roundImage: {
@@ -191,9 +206,11 @@ const styles = StyleSheet.create({
         marginLeft: 10,
         alignItems: 'flex-start',
         justifyContent: 'center',
-        height: '80%'
+
     },
     notificationBodyText: {
+
+        lineHeight:heightPixel(22),
         fontFamily: Fonts.quicksandRegular,
         color: Colors.light.text,
         fontSize: fontPixel(14)

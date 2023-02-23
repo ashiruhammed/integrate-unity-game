@@ -365,31 +365,7 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
                     <View style={styles.imageCanvas}>
 
                         <Pressable onPress={pickImage} style={styles.userImage}>
-                            {/*     <Svg height="100%" width="100%" viewBox="0 0 100 100">
-                            <Circle
 
-                                cx="50"
-                                cy="50"
-                                r="45"
-                                strokeLinejoin={'bevel'}
-                                strokeLinecap={'round'}
-                                strokeDasharray={10}
-                                strokeWidth="4"
-                                fill="none"
-                                stroke={Colors.primaryColor}
-                            />
-                        </Svg>*/}
-
-                            {
-                                isRunningInExpoGo ?
-                                    <Image
-                                        style={styles.Image}
-                                        source={{
-                                            uri: !user.userData?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : user.userData?.avatar,
-
-                                        }}
-                                    />
-                                    :
 
                                     <FastImage
                                         style={styles.Image}
@@ -401,7 +377,6 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
                                         }}
                                         resizeMode={FastImage.resizeMode.cover}
                                     />
-                            }
 
                             <View style={styles.profileImage}>
 

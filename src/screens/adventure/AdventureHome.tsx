@@ -93,6 +93,8 @@ const AboutCard = ({title, message}: cardProps) => {
 
 
 const ReviewCard = ({text, userName, updatedAt, rating}: reviewProps) => {
+const arr =  new Array(rating).fill(rating)
+
     return (
         <Animated.View key={text} entering={FadeInLeft} exiting={FadeOutLeft}
                        layout={Layout.easing(Easing.bounce).delay(20)} style={styles.reviewCard}>
@@ -101,9 +103,14 @@ const ReviewCard = ({text, userName, updatedAt, rating}: reviewProps) => {
                     {userName}
                 </Text>
                 <View style={styles.stars}>
-                    <Octicons name="star-fill" size={14} color={"#EDBA13"}/>
-                    <Octicons name="star-fill" size={14} color={"#fff"}/>
-                    <Octicons name="star-fill" size={14} color={"#fff"}/>
+                    {
+                    arr.map((value, index, array)=>(
+                        <Octicons key={index} name="star-fill" size={14} color={"#EDBA13"}/>
+                    ))
+                }
+
+                   {/* <Octicons name="star-fill" size={14} color={"#fff"}/>
+                    <Octicons name="star-fill" size={14} color={"#fff"}/>*/}
                 </View>
             </View>
             <Text style={styles.reviewBodyText}>

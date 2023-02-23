@@ -24,7 +24,7 @@ import Animated, {
 } from "react-native-reanimated";
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
 import {Fonts} from "../../constants/Fonts";
-import {useAppSelector} from "../../app/hooks";
+import {useAppDispatch, useAppSelector} from "../../app/hooks";
 import Colors from "../../constants/Colors";
 import {StatusBar} from "expo-status-bar";
 import HorizontalLine from "../../components/HorizontalLine";
@@ -208,7 +208,7 @@ const CommentCard = ({theme, item,likeComment}: cardProps) => {
 const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => {
 
     const {postId, communityId,post} = route.params
-
+const dispatch = useAppDispatch()
     const offset = useSharedValue(0);
     const [toggleMenu, setToggleMenu] = useState(false);
     const user = useAppSelector(state => state.user)
@@ -233,7 +233,21 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
 
     const {mutate,data:likedData} = useMutation(['likeAPost'], likeAPost, {
         onSuccess: (data) => {
-            refetch()
+            if(data.success){
+                refetch()
+                dispatch(setResponse({
+                    responseMessage: data.message,
+                    responseState: true,
+                    responseType: 'success',
+                }))
+            }else{
+                dispatch(setResponse({
+                    responseMessage: data.message,
+                    responseState: true,
+                    responseType: 'error',
+                }))
+            }
+
         }
     })
 
@@ -297,8 +311,10 @@ isFetching,
 }
                 </>
         ),
-        [theme,loadingComments],
+        [theme,loadingComments,likeComment],
     );
+
+
 
     const commentOnPost = () => {
         navigation.navigate('CommentOnPost', {
@@ -306,7 +322,6 @@ isFetching,
             post: data?.data
         })
     }
-
     const renderHeaderItem = useCallback(
         ({}) => (
             <Animated.View key={data?.data.id} entering={FadeIn} exiting={FadeOut}
@@ -417,7 +432,7 @@ isFetching,
                                       style={styles.actionButton}>
 
                         {
-                            !data?.data?.liked ?  <AntDesign name="like2" size={20} color={"#838383"}/>
+                            !post?.liked ?  <AntDesign name="like2" size={20} color={"#838383"}/>
                                 :
                                 <AntDesign name="like1" size={20} color={Colors.primaryColor} />
                         }
@@ -438,6 +453,10 @@ isFetching,
         ),
         [data,theme,post],
     );
+
+
+
+
     const renderFooterItem = useCallback(
         ({}) => (
             <View style={styles.replyInputContainer}>
@@ -469,6 +488,10 @@ isFetching,
         ),
         [content],
     );
+
+
+
+
     const keyExtractor = useCallback((item: { id: any; }) => item.id, [],);
 
     const menuToggle = () => {

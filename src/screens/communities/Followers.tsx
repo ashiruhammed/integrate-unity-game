@@ -3,8 +3,8 @@ import React, {useCallback, useRef, useState} from 'react';
 import {Text, View, StyleSheet, TouchableOpacity, Animated as MyAnimated, Image, ActivityIndicator} from 'react-native';
 import {SafeAreaView} from "react-native-safe-area-context";
 import Animated, {
-    Easing,
-    FadeInRight,
+    Easing, FadeInDown,
+    FadeInRight, FadeOutDown,
     FadeOutRight,
     Layout,
     SlideInRight,
@@ -46,7 +46,8 @@ const FollowerCard = ({theme,item}:cardProps) =>{
     const borderColor = theme == 'light' ? Colors.borderColor : '#313131'
         const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
     return(
-        <View style={[styles.followersCard,{
+        <Animated.View key={item.follower.username} layout={Layout.easing(Easing.bounce).delay(30)}
+                       entering={FadeInDown.springify()} exiting={FadeOutDown} style={[styles.followersCard,{
             borderBottomColor: borderColor
         }]}>
             <View style={styles.avatar}>
@@ -77,7 +78,7 @@ const FollowerCard = ({theme,item}:cardProps) =>{
                     </Text>
                 </View>
             </View>
-        </View>
+        </Animated.View>
     )
 }
 

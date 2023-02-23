@@ -62,13 +62,12 @@ const BottomSheetInput: FC<Props> = ({
 
     const dataSlice = useAppSelector(state => state.data)
     const {theme} = dataSlice
-    let validationColor, validationLabelColor,validationDarkColor,validationLabelDarkColor;
+    let validationColor, validationLabelColor, validationDarkColor, validationLabelDarkColor;
 
     validationColor = !touched ? Colors.border : focus ? Colors.light.text : error ? Colors.errorRed : Colors.light.text
 
 
     validationDarkColor = !touched ? Colors.dark.borderColor : focus ? "#eee" : error ? Colors.errorRed : Colors.light.text
-
 
 
     validationLabelColor = !touched ? Colors.light.text : focus ? Colors.light.text : error ? Colors.errorRed : Colors.light.text
@@ -83,7 +82,7 @@ const BottomSheetInput: FC<Props> = ({
                 label && <View style={styles.labelWrap}>
                     <Text style={[
                         {
-                            color: theme == 'light'? validationLabelColor : validationLabelDarkColor
+                            color: theme == 'light' ? validationLabelColor : validationLabelDarkColor
 
                         },
                         styles.label]}>
@@ -106,7 +105,7 @@ const BottomSheetInput: FC<Props> = ({
 
             <View style={[styles.inputContainer, {
                 borderRadius: borderRadius ? borderRadius : 10,
-                borderColor:theme == 'light' ? validationColor : validationDarkColor,
+                borderColor: theme == 'light' ? validationColor : validationDarkColor,
                 backgroundColor: inputBg ? inputBg : 'transparent',
                 height: inputHeight ? inputHeight : heightPixel(56),
             }]}>
@@ -132,11 +131,11 @@ const BottomSheetInput: FC<Props> = ({
 
                     {...props}
                     placeholder={placeholder}
-keyboardAppearance={theme}
+                    keyboardAppearance={theme}
                     placeholderTextColor={"#9CA3AF"}
                     style={[styles.input, {
                         width: password || leftIcon || rightIcon || icon ? '90%' : '100%',
-                        color: theme == 'light' ?'#131313' : '#fff',
+                        color: theme == 'light' ? '#131313' : '#fff',
 
                     }]}/>
 

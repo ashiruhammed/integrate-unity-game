@@ -1,6 +1,16 @@
-import React from 'react';
+import React, {useState} from 'react';
 
-import {Text, View, StyleSheet, ScrollView, Platform, TouchableOpacity, Image, ImageBackground} from 'react-native';
+import {
+    Text,
+    View,
+    StyleSheet,
+    ScrollView,
+    Platform,
+    TouchableOpacity,
+    Image,
+    ImageBackground,
+    RefreshControl
+} from 'react-native';
 import {SafeAreaView} from "react-native-safe-area-context";
 import {EvilIcons, Ionicons, MaterialCommunityIcons, Octicons} from "@expo/vector-icons";
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
@@ -23,13 +33,20 @@ import * as SecureStore from "expo-secure-store";
 import {cleanData} from "../../app/slices/dataSlice";
 
 
-
+const wait = (timeout: number) => {
+    return new Promise((resolve) => {
+        setTimeout(resolve, timeout);
+    });
+};
 
 const isRunningInExpoGo = Constants.appOwnership === 'expo'
+
 const Profile = ({navigation}: RootTabScreenProps<'Profile'>) => {
+
+    const [refreshing, setRefreshing] = useState(false);
     const dispatch = useAppDispatch()
     const user = useAppSelector(state => state.user)
-    const {userData,userDashboard} = user
+    const {userData, userDashboard} = user
 
     const dataSlice = useAppSelector(state => state.data)
     const {theme} = dataSlice
@@ -48,11 +65,9 @@ const Profile = ({navigation}: RootTabScreenProps<'Profile'>) => {
     })
 
 
-    const openNotifications = ()=>{
+    const openNotifications = () => {
         navigation.navigate('Notifications')
     }
-
-
 
 
     const {isLoading: loadingUser, isRefetching, refetch} = useQuery(['getUserDashboard'], getUserDashboard, {
@@ -66,34 +81,51 @@ const Profile = ({navigation}: RootTabScreenProps<'Profile'>) => {
         },
     })
 
-useRefreshOnFocus(refetch)
+    const {refetch: fetchUser} = useQuery(['user-data'], getUser, {
+        onSuccess: (data) => {
+            if (data.success) {
+
+                dispatch(updateUserInfo(data.data))
+
+            }
+        },
+    })
+
+    useRefreshOnFocus(refetch)
     const openScreen = (screen: 'EditProfile' | 'Wallet' | 'Leaderboard' | 'Badges' | 'Settings' | 'MyReferrals') => {
         navigation.navigate(screen)
     }
 
 
-    const logout =  () => {
+    const logout = () => {
 
         queryClient.invalidateQueries()
-             SecureStore.setItemAsync('Gateway-Token', '')
-             queryCache.clear()
-            //await queryClient.removeQueries()
+        SecureStore.setItemAsync('Gateway-Token', '')
+        queryCache.clear()
+        //await queryClient.removeQueries()
 
-            dispatch(logoutUser())
-            dispatch(cleanData())
+        dispatch(logoutUser())
+        dispatch(cleanData())
 
-
-
-
-        // setLoggingOut(false)
     }
 
+    const refresh = () => {
+        setRefreshing(true)
+        refetch()
+        fetchUser()
+
+        wait(2000).then(() => setRefreshing(false));
+    }
+
+
     return (
-        <SafeAreaView style={[styles.safeArea,{
+        <SafeAreaView style={[styles.safeArea, {
             backgroundColor
         }]}>
             <ScrollView
-                style={{width: '100%',}} contentContainerStyle={[styles.scrollView,{
+                refreshControl={<RefreshControl tintColor={Colors.primaryColor}
+                                                refreshing={refreshing} onRefresh={refresh}/>}
+                style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {
                 backgroundColor
             }]} scrollEnabled
                 showsVerticalScrollIndicator={false}>
@@ -110,7 +142,7 @@ useRefreshOnFocus(refetch)
                         <View style={styles.rightButton}>
                             <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}
                                               style={styles.roundTopBtn}>
-                                <View style={styles.dot}/>
+                                {/*<View style={styles.dot}/>*/}
                                 <Octicons name="bell-fill" size={22} color={"#fff"}/>
                             </TouchableOpacity>
 
@@ -143,7 +175,7 @@ useRefreshOnFocus(refetch)
                                     <Image
                                         style={styles.Image}
                                         source={{
-                                            uri: !user.userData?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' :  user.userData?.avatar,
+                                            uri: !user.userData?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : user.userData?.avatar,
 
                                         }}
                                     />
@@ -152,7 +184,7 @@ useRefreshOnFocus(refetch)
                                     <FastImage
                                         style={styles.Image}
                                         source={{
-                                            uri: !user.userData?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' :  user.userData?.avatar,
+                                            uri: !user.userData?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : user.userData?.avatar,
 
                                             cache: FastImage.cacheControl.web,
                                             priority: FastImage.priority.normal,
@@ -167,7 +199,7 @@ useRefreshOnFocus(refetch)
 
 
                 <View style={styles.fullNameWrap}>
-                    <Text style={[styles.fullName,{
+                    <Text style={[styles.fullName, {
                         color: textColor
                     }]}>
                         {userData.fullName}
@@ -187,12 +219,12 @@ useRefreshOnFocus(refetch)
                     <View style={styles.topBoard}>
 
                         <View style={styles.boardWrap}>
-                            <Text style={[styles.boardText,{
-                                color:textColor,
+                            <Text style={[styles.boardText, {
+                                color: textColor,
                             }]}>
                                 Total points
                             </Text>
-                            <View style={[styles.board,{
+                            <View style={[styles.board, {
                                 backgroundColor
                             }]}>
                                 <View style={styles.boardIcon}>
@@ -201,7 +233,7 @@ useRefreshOnFocus(refetch)
                                 <View style={styles.numberWrap}>
 
                                     <Text style={[styles.boardText, {
-                                        color:textColor,
+                                        color: textColor,
                                         fontSize: fontPixel(24),
                                     }]}>
                                         {userDashboard?.totalAccruedPoint}
@@ -211,12 +243,12 @@ useRefreshOnFocus(refetch)
                         </View>
 
                         <View style={styles.boardWrap}>
-                            <Text style={[styles.boardText,{
-                                color:textColor,
+                            <Text style={[styles.boardText, {
+                                color: textColor,
                             }]}>
                                 Daily Streaks
                             </Text>
-                            <View style={[styles.board,{
+                            <View style={[styles.board, {
                                 backgroundColor
                             }]}>
                                 <View style={styles.boardIcon}>
@@ -228,7 +260,7 @@ useRefreshOnFocus(refetch)
                                 <View style={styles.numberWrap}>
 
                                     <Text style={[styles.boardText, {
-                                        color:textColor,
+                                        color: textColor,
                                         fontSize: fontPixel(24),
                                     }]}>
                                         {userDashboard?.currentDayStreak}
@@ -240,12 +272,12 @@ useRefreshOnFocus(refetch)
                     </View>
                     <View style={styles.topBoard}>
                         <View style={styles.boardWrap}>
-                            <Text style={[styles.boardText,{
-                                color:textColor,
+                            <Text style={[styles.boardText, {
+                                color: textColor,
                             }]}>
                                 Adventures Completed
                             </Text>
-                            <View style={[styles.board,{
+                            <View style={[styles.board, {
                                 backgroundColor
                             }]}>
                                 <View style={styles.boardIcon}>
@@ -255,7 +287,7 @@ useRefreshOnFocus(refetch)
                                 <View style={styles.numberWrap}>
 
                                     <Text style={[styles.boardText, {
-                                        color:textColor,
+                                        color: textColor,
                                         fontSize: fontPixel(24),
                                     }]}>
                                         {userDashboard?.completedAdventures}
@@ -266,12 +298,12 @@ useRefreshOnFocus(refetch)
                         </View>
 
                         <View style={styles.boardWrap}>
-                            <Text style={[styles.boardText,{
-                                color:textColor,
+                            <Text style={[styles.boardText, {
+                                color: textColor,
                             }]}>
                                 Obtained Badges
                             </Text>
-                            <View style={[styles.board,{
+                            <View style={[styles.board, {
                                 backgroundColor,
                                 shadowColor: theme == 'light' ? "#212121" : '#000',
                             }]}>
@@ -283,7 +315,7 @@ useRefreshOnFocus(refetch)
                                 <View style={styles.numberWrap}>
 
                                     <Text style={[styles.boardText, {
-                                        color:textColor,
+                                        color: textColor,
                                         fontSize: fontPixel(24),
                                     }]}>
                                         {userDashboard?.totalBadges}
@@ -309,8 +341,8 @@ useRefreshOnFocus(refetch)
                         </View>
 
                         <View style={styles.profileButtonBody}>
-                            <Text style={[styles.profileButtonText,{
-                                color:textColor,
+                            <Text style={[styles.profileButtonText, {
+                                color: textColor,
                             }]}>
                                 Edit Profile
                             </Text>
@@ -330,8 +362,8 @@ useRefreshOnFocus(refetch)
                         </View>
 
                         <View style={styles.profileButtonBody}>
-                            <Text style={[styles.profileButtonText,{
-                                color:textColor,
+                            <Text style={[styles.profileButtonText, {
+                                color: textColor,
                             }]}>
                                 Wallet
                             </Text>
@@ -351,8 +383,8 @@ useRefreshOnFocus(refetch)
                         </View>
 
                         <View style={styles.profileButtonBody}>
-                            <Text style={[styles.profileButtonText,{
-                                color:textColor,
+                            <Text style={[styles.profileButtonText, {
+                                color: textColor,
                             }]}>
                                 Leaderboard
                             </Text>
@@ -373,8 +405,8 @@ useRefreshOnFocus(refetch)
                         </View>
 
                         <View style={styles.profileButtonBody}>
-                            <Text style={[styles.profileButtonText,{
-                                color:textColor,
+                            <Text style={[styles.profileButtonText, {
+                                color: textColor,
                             }]}>
                                 My Badges
                             </Text>
@@ -396,8 +428,8 @@ useRefreshOnFocus(refetch)
                         </View>
 
                         <View style={styles.profileButtonBody}>
-                            <Text style={[styles.profileButtonText,{
-                                color:textColor,
+                            <Text style={[styles.profileButtonText, {
+                                color: textColor,
                             }]}>
                                 Settings
                             </Text>
@@ -419,8 +451,8 @@ useRefreshOnFocus(refetch)
                         </View>
 
                         <View style={styles.profileButtonBody}>
-                            <Text style={[styles.profileButtonText,{
-                                color:textColor,
+                            <Text style={[styles.profileButtonText, {
+                                color: textColor,
                             }]}>
                                 My Referrals
                             </Text>
@@ -481,9 +513,9 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         borderRadius: 120,
         // borderWidth:5,
-         borderStyle:'dashed',
-      //  borderColor:Colors.primaryColor,
-       //  backgroundColor:Colors.primaryColor,
+        borderStyle: 'dashed',
+        //  borderColor:Colors.primaryColor,
+        //  backgroundColor:Colors.primaryColor,
         position: 'absolute',
         bottom: -30
     },
@@ -491,14 +523,14 @@ const styles = StyleSheet.create({
         width: 110,
         height: 110,
         borderRadius: 120,
-       // backgroundColor: Colors.primaryColor,
+        // backgroundColor: Colors.primaryColor,
         position: 'absolute',
     },
-    Image:{
+    Image: {
         borderRadius: 120,
         width: "100%",
-        height:  "100%",
-        resizeMode:'cover'
+        height: "100%",
+        resizeMode: 'cover'
     },
     fullNameWrap: {
         marginTop: 30,
@@ -677,8 +709,8 @@ const styles = StyleSheet.create({
         top: 5,
         zIndex: 1,
         right: 10,
-        borderWidth:2,
-        borderColor:"#7C0E87",
+        borderWidth: 2,
+        borderColor: "#7C0E87",
         backgroundColor: Colors.errorRed,
         borderRadius: 15,
     }

@@ -20,15 +20,17 @@ import {Fonts} from "../../constants/Fonts";
 import {FontAwesome, Ionicons} from "@expo/vector-icons";
 import {RootStackScreenProps} from "../../../types";
 import {useInfiniteQuery, useQuery} from "@tanstack/react-query";
-import {generateReferralHistory, referralDashboard} from "../../action/action";
+import {generateReferralHistory, getUser, referralDashboard} from "../../action/action";
 import Animated, {Easing, FadeInDown, FadeOutDown, Layout} from "react-native-reanimated";
 import dayjs from "dayjs";
-import {useAppSelector} from "../../app/hooks";
+import {useAppDispatch, useAppSelector} from "../../app/hooks";
 import {FlashList} from "@shopify/flash-list";
 import BottomSheet, {BottomSheetBackdrop, BottomSheetView} from "@gorhom/bottom-sheet";
 import {
     BottomSheetDefaultBackdropProps
 } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
+import {updateUserInfo} from "../../app/slices/userSlice";
+import {useRefreshOnFocus} from "../../helpers";
 
 
 interface ReferralProps {
@@ -86,7 +88,7 @@ const ReferralItem = ({item,theme}: ReferralProps) => {
 }
 
 const MyReferrals = ({navigation}: RootStackScreenProps<'MyReferrals'>) => {
-
+    const dispatch = useAppDispatch()
     const dataSlice = useAppSelector(state => state.data)
     const user = useAppSelector(state => state.user)
     const {theme} = dataSlice
@@ -107,6 +109,18 @@ const MyReferrals = ({navigation}: RootStackScreenProps<'MyReferrals'>) => {
     }, []);
 
 
+
+    const { refetch:fetchUser,} = useQuery(['user-data'], getUser, {
+        onSuccess: (data) => {
+            if (data.success) {
+
+                dispatch(updateUserInfo(data.data))
+
+            }
+        },
+    })
+
+
     const renderBackdrop = useCallback(
         (props: JSX.IntrinsicAttributes & BottomSheetDefaultBackdropProps) => (
             <BottomSheetBackdrop
@@ -121,7 +135,7 @@ const MyReferrals = ({navigation}: RootStackScreenProps<'MyReferrals'>) => {
         []
     );
     const referAFriend = () => {
-        if (userData.username) {
+        if (userData?.username) {
             navigation.navigate('ReferAFriend')
         } else {
             handleSnapPress(1)
@@ -231,6 +245,8 @@ const MyReferrals = ({navigation}: RootStackScreenProps<'MyReferrals'>) => {
                 </View>
             </>
         ), [data])
+
+    useRefreshOnFocus(fetchUser)
 
     return (
         <>

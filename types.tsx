@@ -32,7 +32,9 @@ export type RootStackParamList = {
     Modal: undefined;
     OnBoardingScreen: undefined;
     CreateCommunity: undefined;
-    ConfirmPhonenumber: undefined;
+    ConfirmPhonenumber: {
+        phone:string
+    }
     ViewCommunity: {
         id: string
     };
