@@ -13,6 +13,7 @@ import {userNotifications} from "../action/action";
 import {FlashList} from "@shopify/flash-list";
 import dayjs from "dayjs";
 import {useRefreshOnFocus} from "../helpers";
+import FastImage from "react-native-fast-image";
 
 interface props {
     theme: 'light' | 'dark',
@@ -45,8 +46,15 @@ const NotificationCard = ({item, theme,avatar}: props) => {
                        entering={FadeInDown.springify()} exiting={FadeOutDown} style={styles.notificationCard}>
 
             <View style={styles.roundImage}>
-                <Image style={styles.userAvatar}
-                       source={{uri:!avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : avatar}}/>
+                <FastImage
+                    style={styles.userAvatar}
+                    source={{
+                        uri: !avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : avatar,
+                        cache: FastImage.cacheControl.web,
+                        priority: FastImage.priority.normal,
+                    }}
+                    resizeMode={FastImage.resizeMode.cover}
+                />
 
             </View>
 

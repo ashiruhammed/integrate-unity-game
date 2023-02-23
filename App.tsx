@@ -33,6 +33,7 @@ import {
     notificationListener,
 } from './notification';
 import { Settings } from 'react-native-fbsdk-next'
+import {BASE_URL} from "./src/action/action";
 Settings.initializeSDK();
 Settings.setAppID('533333598894233');
 enableScreens()
@@ -94,18 +95,47 @@ export default function App() {
 
 
 
-
-    useEffect(() => {
+ /*   useEffect(  () => {
         //console.log('storage', fcmToken, 'newly generated', generatedToken);
-    }, [fcmToken, generatedToken]);
 
+
+    }, [fcmToken, generatedToken]);
+*/
     useEffect(() => {
         const fetchToken = async () => {
             const token = await getFcmToken();
+            const BearerToken = await SecureStore.getItemAsync('Gateway-Token');
             if (token) {
                 setGeneratedToken(token);
+               let timeoutId: NodeJS.Timeout
+               const body = JSON.stringify({
+                   pushNotificationToken:token ,
+               })
+               const myHeaders = {
+                   'Content-Type': 'application/json',
+                   'Authorization': `Bearer ${BearerToken}`
+               }
+               const requestOptions = {
+                   method: 'POST',
+                   headers: myHeaders,
+                   body: body,
+               };
+               const promise = Promise.race([
+                   fetch(`${BASE_URL}/preferences/update`, requestOptions)
+                       .then(response => response.json()),
+                   new Promise((resolve, reject) => {
+                       //  clearTimeout(timeoutId)
+                       timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+                   }).then(() => {
+                       clearTimeout(timeoutId)
+                   })
+
+               ])
+
+
             }
         };
+
         const fetchTokenByLocal = async () => {
             await getFcmTokenFromLocalStorage();
         };

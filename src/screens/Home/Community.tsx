@@ -113,7 +113,7 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
     }, []);
 
 
-    
+
     const {
         isLoading,
         data,
@@ -171,9 +171,11 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
     );
 
     const createCommunity = () => {
-        handleClosePressMore()
-        handleClosePress()
-        navigation.navigate('CreateCommunity')
+        if(terms) {
+            handleClosePressMore()
+            handleClosePress()
+            navigation.navigate('CreateCommunity')
+        }
     }
 
     useRefreshOnFocus(refetch)
@@ -200,9 +202,9 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
             id:communityId
         })
     }
-    
+
     const joinModal = () => {
-      
+
     }
     useEffect(() => {
         // console.log(user)

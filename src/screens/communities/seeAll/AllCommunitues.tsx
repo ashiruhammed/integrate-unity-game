@@ -1,4 +1,4 @@
-import React, {SetStateAction, useCallback, useState} from 'react';
+import React, {SetStateAction, useCallback, useMemo, useRef, useState} from 'react';
 
 import {
     Text,
@@ -14,7 +14,7 @@ import {
 import {SafeAreaView} from "react-native-safe-area-context";
 import NavBar from "../../../components/layout/NavBar";
 import SearchValue from "../../../components/inputs/SearchInput";
-import {Ionicons, MaterialIcons} from "@expo/vector-icons";
+import {Entypo, Ionicons, MaterialIcons} from "@expo/vector-icons";
 import SegmentedControl from "../../../components/SegmentContol";
 import Colors from "../../../constants/Colors";
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../../helpers/normalize";
@@ -24,20 +24,87 @@ import {SmallRectButton} from "../../../components/buttons/SmallRectButton";
 import {useInfiniteQuery, useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {
     followACommunity,
-    getBadge,
+    getBadge, getFollowedCommunities,
     getMyCommunities,
     getPublicCommunities,
     getSingleBadge
 } from "../../../action/action";
 import CardPublicCommunity from "../../../components/community/PublicCard";
-import {setResponse} from "../../../app/slices/userSlice";
+import {setResponse, unSetResponse} from "../../../app/slices/userSlice";
 import {useAppDispatch, useAppSelector} from "../../../app/hooks";
 import {FlashList} from "@shopify/flash-list";
 import {IF} from "../../../helpers/ConditionJsx";
+import FollowedCommunities from "./FollowedCommunities";
+import {RootStackScreenProps} from "../../../../types";
+import BottomSheet, {BottomSheetBackdrop, BottomSheetView} from "@gorhom/bottom-sheet";
+import Checkbox from "expo-checkbox";
+import {
+    BottomSheetDefaultBackdropProps
+} from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
+import FastImage from "react-native-fast-image";
 
 
 const {width} = Dimensions.get('window')
-const AllCommunities = () => {
+
+
+interface CardProps {
+    theme:'light'|'dark'
+    item:{
+        community: {
+            name: string,
+            displayPhoto: string,
+            id: string,
+        }
+    },
+    seeCommunity:(id:string) =>void,
+    leaveCommunity:(id:string) =>void,
+}
+const CardFollowedCommunity = ({theme,item,seeCommunity,leaveCommunity}:CardProps) => {
+    const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
+
+  return(
+        <TouchableOpacity activeOpacity={0.8} onPress={() => seeCommunity(item.community.id)}
+                                                  style={[styles.myCommunityCard, {
+                                                      backgroundColor: theme == 'dark' ? '#141414' : "#fff"
+                                                  }]}>
+
+                                    <View style={styles.communityLogo}>
+                                        <FastImage
+                                            style={styles.communityLogoImag}
+                                            source={{
+                                                uri: item?.community.displayPhoto,
+                                                cache: FastImage.cacheControl.web,
+                                                priority: FastImage.priority.normal,
+                                            }}
+                                            resizeMode={FastImage.resizeMode.cover}
+                                        />
+
+                                    </View>
+
+                                    <View style={styles.bodyCard}>
+                                        <Text style={[styles.cardTitle, {
+                                            color: textColor
+                                        }]}>
+                                            {item?.community.name}
+                                        </Text>
+                                        <Text style={[styles.cardTitleSub, {
+                                            color: textColor
+                                        }]}>
+                                            {item.totalUsersJoined} Members
+                                        </Text>
+                                    </View>
+
+                                    <SmallRectButton onPress={()=>leaveCommunity(item.community.id)} style={{}}>
+                                        <Text style={styles.buttonText}>
+                                            Leave
+
+                                        </Text>
+                                    </SmallRectButton>
+
+                                </TouchableOpacity>
+  )
+}
+const AllCommunities = ({navigation}:RootStackScreenProps<'AllCommunities'>) => {
 
     const dispatch = useAppDispatch()
     const queryClient = useQueryClient()
@@ -45,7 +112,7 @@ const AllCommunities = () => {
     const dataSlice = useAppSelector(state => state.data)
     const {theme} = dataSlice
     const {responseState, responseType, responseMessage} = user
-
+    const [terms, setTerms] = useState(false);
     const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
     const [modalVisible, setModalVisible] = useState(false);
@@ -58,6 +125,8 @@ const AllCommunities = () => {
     }, [tabIndex]);
     const scrollX = new Animated.Value(0)
     let position = Animated.divide(scrollX, width)
+
+    const [searchValue, setSearchValue] = useState('');
 
 
     const backgroundColor = theme == 'light' ? Colors.light.background : Colors.dark.background
@@ -85,6 +154,82 @@ const AllCommunities = () => {
             queryClient.invalidateQueries(['getSingleBadge'])
         }
     })
+
+
+
+    const sheetRef = useRef<BottomSheet>(null);
+
+    const sheetRefMore = useRef<BottomSheet>(null);
+
+
+    // variables
+    const snapPoints = useMemo(() => ["1%", "70%"], []);
+    const handleSnapPress = useCallback((index: number) => {
+        sheetRef.current?.snapToIndex(index);
+    }, []);
+    const handleClosePress = useCallback(() => {
+        sheetRef.current?.close();
+    }, []);
+
+
+    // variables
+    const snapPointsMore = useMemo(() => ["1%", "80%"], []);
+    const handleSnapPressMore = useCallback((index: number) => {
+        handleClosePress()
+        sheetRefMore.current?.snapToIndex(index);
+    }, []);
+    const handleClosePressMore = useCallback(() => {
+        sheetRefMore.current?.close();
+    }, []);
+
+
+    const createCommunity = () => {
+        if(terms) {
+            handleClosePressMore()
+            handleClosePress()
+            navigation.navigate('CreateCommunity')
+        }
+    }
+
+    // renders
+    const renderBackdrop = useCallback(
+        (props: JSX.IntrinsicAttributes & BottomSheetDefaultBackdropProps) => (
+            <BottomSheetBackdrop
+                style={{
+                    backgroundColor: 'rgba(25,25,25,0.34)'
+                }}
+                {...props}
+                disappearsOnIndex={0}
+                appearsOnIndex={1}
+            />
+        ),
+        []
+    );
+
+
+
+    const {
+        isLoading:loadingFollowedCommunities,
+        data:followedCommunities,
+        hasNextPage:hasNextComPage,
+        fetchNextPage,
+        refetch:refetchCommunities,
+
+        isRefetching:isFetchingCommunities
+    } = useInfiniteQuery([`getFollowedCommunities`], ({pageParam = 1}) => getFollowedCommunities.communities(pageParam),
+        {
+            networkMode: 'online',
+            getNextPageParam: lastPage => {
+                if (lastPage.next !== null) {
+                    return lastPage.next;
+                }
+
+                return lastPage;
+            },
+            getPreviousPageParam: (firstPage, allPages) => firstPage.prevCursor,
+        })
+
+
 
 
     const {
@@ -152,6 +297,18 @@ const AllCommunities = () => {
         }
     };
 
+    const leaveCommunity = (communityId:string) => {
+
+        navigation.navigate('LeaveCommunity',{
+            id:communityId
+        })
+    }
+    const seeCommunity = (id: string) => {
+        dispatch(unSetResponse())
+        navigation.navigate('ViewCommunity', {
+            id
+        })
+    }
     const joinModal = useCallback(async (badgeId: string, accessNFTBadgeAmount: string, communityId: string) => {
         await setBadgeId(badgeId)
         setRequiredBadges(accessNFTBadgeAmount)
@@ -168,6 +325,10 @@ const AllCommunities = () => {
     const renderItem = useCallback(({item}) => (
         <CardPublicCommunity loadingBadge={loadingBadge} joinModal={joinModal} theme={theme} item={item}/>
     ), [loadingBadge,theme,tabIndex])
+
+    const renderItemFollowed = useCallback(({item}) => (
+        <CardFollowedCommunity leaveCommunity={leaveCommunity} seeCommunity={seeCommunity}  theme={theme} item={item}/>
+    ), [theme,tabIndex])
 
 
     const updateCurrentSlideIndex = (e: { nativeEvent: { contentOffset: { x: any; }; }; }) => {
@@ -190,11 +351,33 @@ const AllCommunities = () => {
         setModalVisible(false)
     }
 
+    let filterCommunity: readonly any[] | null | undefined = []
+    let filterFollowedCommunity: readonly any[] | null | undefined = []
 
-    const [searchValue, setSearchValue] = useState('');
+if(tabIndex == 0){
+
+
+    if (!isLoading && data && data?.pages[0]?.data) {
+        filterCommunity = data?.pages[0]?.data?.result?.filter((community: { name: string | string[]; }) =>
+            community?.name?.includes(searchValue.trim())
+        )
+    }
+}
+if(tabIndex == 1){
+
+
+    if (!isLoading && data && data?.pages[0]?.data) {
+        filterFollowedCommunity = followedCommunities?.pages[0]?.data?.result?.filter((community: { community:{name: string | string[]; }}) =>
+            community?.community.name?.includes(searchValue.trim())
+
+        )
+    }
+}
 
 
     return (
+
+        <>
         <SafeAreaView style={[styles.safeArea, {
             backgroundColor
         }]}>
@@ -273,7 +456,7 @@ const AllCommunities = () => {
             <View style={styles.searchWrap}>
 
                 <SearchValue isWidth={"80%"} placeholder={'Search for all types of Communities'}
-                             value={searchValue}/>
+                             value={searchValue}  onChangeText={(e) => setSearchValue(e)}/>
 
                 <View style={[styles.searchTangible, {
                     borderColor
@@ -283,7 +466,7 @@ const AllCommunities = () => {
             </View>
 
             <View  style={styles.segmentWrap}>
-                <SegmentedControl tabs={["All Communities", "My Communities"]}
+                <SegmentedControl tabs={["All Communities", "Followed communities", "My Communities"]}
                                   currentIndex={tabIndex}
                                   onChange={handleTabsChange}
                                   segmentedControlBackgroundColor={backgroundColor}
@@ -293,26 +476,30 @@ const AllCommunities = () => {
                                   paddingVertical={pixelSizeVertical(8)}/>
             </View>
 
-            <View style={styles.ActivityCardTop}>
+
                 {
                     tabIndex == 0
                     &&
+                    <View style={styles.ActivityCardTop}>
                     <Text style={[styles.listTitle, {
                         color: textColor
                     }]}>
                         Public Communities
                     </Text>
+                    </View>
                 }
                 {
                     tabIndex == 1
                     &&
+                    <View style={styles.ActivityCardTop}>
                     <Text style={[styles.listTitle, {
                         color: textColor
                     }]}>
                         My Communities
                     </Text>
+                    </View>
                 }
-            </View>
+
 
             {
                 isLoading && <ActivityIndicator size='small' color={Colors.primaryColor}/>
@@ -333,21 +520,12 @@ const AllCommunities = () => {
 
                         <FlatList
 
-                            ListHeaderComponent={renderHeaderItem}
-
-                            ListHeaderComponentStyle={{
-
-                                alignItems: 'center',
-                                width: '100%'
-                            }
-                            }
-
 
                             refreshing={isLoading}
                             onRefresh={refetch}
                             scrollEnabled
                             showsVerticalScrollIndicator={false}
-                            data={data?.pages[0]?.data?.result?.slice(0, 8)}
+                            data={filterCommunity}
                             renderItem={renderItem}
                             onEndReached={loadMore}
                             keyExtractor={keyExtractor}
@@ -361,7 +539,7 @@ const AllCommunities = () => {
                 </View>
             </IF>
             <IF condition={tabIndex == 1}>
-                <View style={styles.listWrap}>
+    <View style={styles.listWrap}>
 
 
 
@@ -378,6 +556,51 @@ const AllCommunities = () => {
                                 width: '100%'
                             }
                             }
+
+                            refreshing={loadingFollowedCommunities}
+                            onRefresh={refetchCommunities}
+                            scrollEnabled
+                            showsVerticalScrollIndicator={false}
+                            data={filterFollowedCommunity}
+                            renderItem={renderItemFollowed}
+
+                            keyExtractor={keyExtractor}
+                            onEndReachedThreshold={0.3}
+                            ListFooterComponent={loading ?
+                                <ActivityIndicator size="small" color={Colors.primaryColor}/> : null}
+                        />
+                    }
+
+
+                </View>
+            </IF>
+            <IF condition={tabIndex == 2}>
+                <View style={styles.listWrap}>
+
+
+
+                    <View style={styles.startCommunity}>
+                        <Text style={[styles.TextTitle, {
+                            color: textColor
+                        }]}>
+                            Create your own Community
+                        </Text>
+                        <RectButton onPress={()=>handleSnapPress(1)} style={{
+                            width: 190
+                        }} >
+                            <Text style={styles.buttonText}>
+                                Create Community
+                            </Text>
+                        </RectButton>
+
+
+                    </View>
+                    {
+
+
+
+                        <FlatList
+
 
                             refreshing={isLoading}
                             onRefresh={refetch}
@@ -399,6 +622,248 @@ const AllCommunities = () => {
 
 
         </SafeAreaView>
+
+
+
+
+            <BottomSheet
+                index={0}
+
+
+                backdropComponent={renderBackdrop}
+                ref={sheetRef}
+                snapPoints={snapPoints}
+                style={{
+                    paddingHorizontal: pixelSizeHorizontal(20)
+                }}
+                backgroundStyle={{
+                    backgroundColor,
+                }}
+                handleIndicatorStyle={[{
+                    backgroundColor: theme == 'light' ? "#121212" : '#cccccc'
+                }, Platform.OS == 'android' && {display: 'none'}]}
+            >
+                <BottomSheetView style={styles.sheetContainer}>
+                    <View style={styles.popSheetHead}>
+
+                        <Text style={[styles.sheetTitle, {
+                            color: textColor
+                        }]}>
+                            Create a Community Group
+                        </Text>
+
+                        {
+                            Platform.OS == 'android' &&
+                            <TouchableOpacity activeOpacity={0.8} onPress={() => handleClosePress()}
+                                              style={styles.dismiss}>
+                                <Ionicons name="ios-close" size={24} color="black"/>
+                            </TouchableOpacity>
+                        }
+                    </View>
+
+                    <View style={styles.sheetBody}>
+                        <Text style={[styles.bodyText, {
+                            color: textColor
+                        }]}>
+                            The Community page allows gateway learners
+                            to find the best communities to join and learn
+                            with their tribe. All learners are in various
+                            locations worldwide with every individual
+                            having unique interests. Communities connect
+                            them together!
+                        </Text>
+                        <Text style={[styles.bodyText, {
+                            color: textColor
+                        }]}>
+                            Do you want to start a community for your
+                            group, country or specific topic to make
+                            learning more fun & engaging for gateway
+                            learners? To ensure the safety of our learners,
+                            we have curated a list of requirements and
+                            guidelines to create a community page on the
+                            gateway.
+
+                        </Text>
+
+                        <Text onPress={() => handleSnapPressMore(1)} style={[styles.bodyText, {
+                            color: "#1579E4",
+                            fontFamily: Fonts.quicksandMedium,
+                            textDecorationLine: "underline"
+                        }]}>
+                            See requirements and guidelines here.
+                        </Text>
+                    </View>
+
+
+                    <TouchableOpacity activeOpacity={0.9} onPress={() => setTerms(!terms)} style={styles.terms}>
+                        <View style={styles.checkboxContainer}>
+
+
+                            <Checkbox
+                                // style={styles.checkbox}
+                                value={terms}
+                                onValueChange={(value) => setTerms(value)}
+                                color={terms ? Colors.primaryColor : undefined}
+                            />
+                        </View>
+
+
+                        <View style={styles.termsText}>
+                            <Text style={{
+                                color: textColor,
+                                fontFamily: Fonts.quicksandRegular,
+                                lineHeight: heightPixel(20)
+                            }}>
+                                By creating an account, you agree to the terms of
+                                use and privacy policy.
+                            </Text>
+                        </View>
+                    </TouchableOpacity>
+
+                    <RectButton onPress={createCommunity} style={{
+                        width: 200
+                    }}>
+                        <Text style={{
+                            position: 'absolute',
+                            fontSize: fontPixel(16),
+                            color: "#fff",
+                            fontFamily: Fonts.quickSandBold
+                        }}>
+                            Continue
+
+                        </Text>
+
+                    </RectButton>
+
+                </BottomSheetView>
+            </BottomSheet>
+
+
+            <BottomSheet
+                index={0}
+
+                backdropComponent={renderBackdrop}
+                ref={sheetRefMore}
+                snapPoints={snapPointsMore}
+                style={{
+                    paddingHorizontal: pixelSizeHorizontal(20)
+                }}
+                backgroundStyle={{
+                    backgroundColor,
+                }}
+                handleIndicatorStyle={[{
+                    backgroundColor: theme == 'light' ? "#121212" : '#cccccc'
+                }, Platform.OS == 'android' && {display: 'none'}]}
+            >
+                <BottomSheetView style={styles.sheetContainer}>
+                    <View style={styles.popSheetHead}>
+
+                        <Text style={[styles.sheetTitle, {
+                            color: textColor
+                        }]}>
+                            Requirements and Guidelines
+                        </Text>
+
+                        {
+                            Platform.OS == 'android' &&
+
+                            <TouchableOpacity activeOpacity={0.8} onPress={() => handleClosePressMore()}
+                                              style={styles.dismiss}>
+                                <Ionicons name="ios-close" size={24} color="black"/>
+                            </TouchableOpacity>
+                        }
+
+
+                    </View>
+
+                    <View style={styles.sheetBody}>
+
+
+                        <View style={styles.list}>
+                            <Entypo name="dot-single" size={20} color="black"/>
+                            <Text style={[styles.bodyText, {
+                                color: textColor
+                            }]}>
+                                Existing communities built primarily for
+                                education with more than 1000 members
+                                can create a community page.
+                            </Text>
+                        </View>
+                        <View style={styles.list}>
+                            <Entypo name="dot-single" size={20} color="black"/>
+                            <Text style={[styles.bodyText, {
+                                color: textColor
+                            }]}>
+                                Your account should be at least 3 months
+                                old, with constant user activities.
+                            </Text>
+                        </View>
+                        <View style={styles.list}>
+                            <Entypo name="dot-single" size={20} color="black"/>
+                            <Text style={[styles.bodyText, {
+                                color: textColor
+                            }]}>
+                                If you do not have an existing community
+                                and will like to create a new one on
+                                gateway.
+                            </Text>
+                        </View>
+                        <View style={styles.list}>
+                            <Entypo name="dot-single" size={20} color="black"/>
+                            <Text style={[styles.bodyText, {
+                                color: textColor
+                            }]}>
+                                The community topic should reflect and
+                                further discussions around adventures on
+                                gateway.
+                            </Text>
+                        </View>
+                        <View style={styles.list}>
+                            <Entypo name="dot-single" size={20} color="black"/>
+                            <Text style={[styles.bodyText, {
+                                color: textColor
+                            }]}>
+                                Product-centric communities cannot create
+                                a community page except if they have
+                                been featured in one of gateway
+                                adventures.
+                            </Text>
+                        </View>
+                        <View style={styles.list}>
+                            <Entypo name="dot-single" size={20} color="black"/>
+                            <Text style={[styles.bodyText, {
+                                color: textColor
+                            }]}>
+                                Product advertising in communities is not
+                                allowed and will be deleted except if they
+                                have been featured in one of gateway
+                                adventures.
+
+                            </Text>
+                        </View>
+                    </View>
+
+
+                    <RectButton onPress={createCommunity} style={{
+                        width: 200
+                    }}>
+                        <Text style={{
+                            position: 'absolute',
+                            fontSize: fontPixel(16),
+                            color: "#fff",
+                            fontFamily: Fonts.quickSandBold
+                        }}>
+                            Ok, i understand
+
+                        </Text>
+
+                    </RectButton>
+
+                </BottomSheetView>
+            </BottomSheet>
+
+
+            </>
     );
 };
 
@@ -445,45 +910,9 @@ const styles = StyleSheet.create({
         borderRadius: 10,
 
     },
-    myCommunityCard: {
-        width: '90%',
-        height: heightPixel(80),
-        shadowColor: "#212121",
-        alignItems: 'center',
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginHorizontal: pixelSizeHorizontal(10),
-        marginVertical: pixelSizeVertical(5),
-        borderRadius: 10,
-        padding: 15,
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.12,
-        shadowRadius: 7.22,
-        backgroundColor: '#fff',
-        elevation: 3,
-    },
-    communityLogo: {
-        height: 50,
-        width: 50,
-        borderRadius: 5,
-        backgroundColor: "blue"
-    },
-    bodyCard: {
 
-        marginLeft: 10,
-        width: '60%',
-        height: '100%',
-        alignItems: 'flex-start',
-        justifyContent: 'space-evenly',
-    },
-    cardTitle: {
-        fontFamily: Fonts.quickSandBold,
-        color: Colors.light.text,
-        fontSize: fontPixel(16)
-    },
+
+
     cardTitleSub: {
         fontFamily: Fonts.quicksandRegular,
         color: Colors.light.text,
@@ -603,6 +1032,132 @@ const styles = StyleSheet.create({
         fontSize: fontPixel(16),
         color: Colors.light.text,
         fontFamily: Fonts.quickSandBold
+    },
+
+
+
+    myCommunityCard: {
+        width: '100%',
+        height: heightPixel(80),
+        shadowColor: "#212121",
+        alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginHorizontal: pixelSizeHorizontal(10),
+        marginVertical: pixelSizeVertical(5),
+        borderRadius: 10,
+        padding: 15,
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.12,
+        shadowRadius: 7.22,
+
+        elevation: 3,
+    },
+    communityLogo: {
+        height: 50,
+        width: 50,
+        borderRadius: 5,
+        backgroundColor: "blue"
+    },
+    communityLogoImag: {
+        height: '100%',
+        width: '100%',
+        borderRadius: 5,
+        resizeMode: 'cover'
+    },
+    bodyCard: {
+
+        marginLeft: 10,
+        width: '60%',
+        height: '100%',
+        alignItems: 'flex-start',
+        justifyContent: 'space-evenly',
+    },
+    cardTitle: {
+        fontFamily: Fonts.quickSandBold,
+        color: Colors.light.text,
+        fontSize: fontPixel(16)
+    },
+    startCommunity: {
+        width: '100%',
+        height: heightPixel(100),
+        borderRadius: 10,
+        borderColor: Colors.borderColor,
+        borderWidth: 1,
+        borderStyle: 'dashed',
+
+        alignItems: 'center',
+        justifyContent: 'space-evenly'
+    },
+    TextTitle: {
+
+        fontSize: fontPixel(16),
+        color: Colors.light.text,
+        fontFamily: Fonts.quickSandBold
+    },
+
+    sheetContainer: {
+        width: '100%',
+        alignItems: 'center',
+        // paddingHorizontal: pixelSizeHorizontal(20)
+    },
+    sheetBody: {
+        width: '100%',
+
+    },
+    bodyText: {
+        marginVertical: pixelSizeVertical(5),
+        textAlign: 'justify',
+        fontFamily: Fonts.quicksandRegular,
+        fontSize: fontPixel(14),
+        color: Colors.light.text
+    },
+    terms: {
+        width: '100%',
+        height: heightPixel(100),
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+
+        flexDirection: 'row'
+    },
+    checkboxContainer: {
+        height: '90%',
+        width: '10%',
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    termsText: {
+        height: '100%',
+        width: '90%',
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    list: {
+
+        // flexWrap:'wrap',
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        alignItems: 'flex-start',
+        width: '90%',
+
+        marginVertical: pixelSizeVertical(10)
+    },
+    sheetTitle: {
+        //width: '70%',
+        textAlign: 'center',
+        fontSize: fontPixel(18),
+        fontFamily: Fonts.quickSandBold,
+        color: "#000000"
+    },
+    popSheetHead: {
+        height: 50,
+        width: '100%',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexDirection: 'row'
     },
 })
 

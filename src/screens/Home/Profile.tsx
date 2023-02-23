@@ -170,16 +170,6 @@ const Profile = ({navigation}: RootTabScreenProps<'Profile'>) => {
                         <View style={styles.profileImage}>
 
 
-                            {
-                                isRunningInExpoGo ?
-                                    <Image
-                                        style={styles.Image}
-                                        source={{
-                                            uri: !user.userData?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : user.userData?.avatar,
-
-                                        }}
-                                    />
-                                    :
 
                                     <FastImage
                                         style={styles.Image}
@@ -191,7 +181,7 @@ const Profile = ({navigation}: RootTabScreenProps<'Profile'>) => {
                                         }}
                                         resizeMode={FastImage.resizeMode.cover}
                                     />
-                            }
+
 
                         </View>
                     </View>

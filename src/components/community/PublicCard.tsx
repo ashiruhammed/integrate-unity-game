@@ -81,17 +81,7 @@ const CardPublicCommunity = ({theme, loadingBadge, item, joinModal}: cardProps) 
 
             <View style={styles.topCard}>
                 <View style={styles.imageWrap}>
-                    {
-                        isRunningInExpoGo ?
 
-                            <Image
-                                style={styles.avatar}
-                                source={{
-                                    uri: item?.displayPhoto,
-                                }}
-                                resizeMode={'cover'}
-                            />
-                            :
                             <FastImage
                                 style={styles.avatar}
                                 source={{
@@ -101,7 +91,6 @@ const CardPublicCommunity = ({theme, loadingBadge, item, joinModal}: cardProps) 
                                 }}
                                 resizeMode={FastImage.resizeMode.cover}
                             />
-                    }
                 </View>
 
                 <Text style={[styles.cardTitle, {

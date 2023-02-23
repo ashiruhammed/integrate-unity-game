@@ -74,16 +74,7 @@ const TopBar = ({message,title}:props) => {
                 <TouchableOpacity onPress={openProfile} activeOpacity={0.6}
                                   style={styles.roundTopBtn}>
 
-                    {
-                        isRunningInExpoGo ?
-                            <Image
-                                style={styles.userAvatar}
-                                source={{
-                                    uri: !user.userData?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' :  user.userData?.avatar,
 
-                                }}
-                            />
-                            :
 
                             <FastImage
                                 style={styles.userAvatar}
@@ -95,7 +86,7 @@ const TopBar = ({message,title}:props) => {
                                 }}
                                 resizeMode={FastImage.resizeMode.cover}
                             />
-                    }
+
 
                 </TouchableOpacity>
             </View>

@@ -1,5 +1,5 @@
 //const BASE_URL = "https://gateway-api.onrender.com"
-const BASE_URL = "https://gateway-backend.onrender.com"
+export const BASE_URL = "https://gateway-backend.onrender.com"
 import * as SecureStore from 'expo-secure-store';
 
 

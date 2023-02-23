@@ -57,9 +57,9 @@ const NavBar = ({title,noBell,clearBtn,clearAction}:props) => {
 
                     <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}
                                       style={styles.roundTopBtn}>
-                        <View style={[styles.dot,{
+                      {/*  <View style={[styles.dot,{
                             borderColor: theme =='light' ?"#fff":Colors.dark.background,
-                        }]}/>
+                        }]}/>*/}
                         <Octicons name="bell-fill" size={20} color={ theme =='light' ? "#1F2937" : '#fff' }/>
                     </TouchableOpacity>
                 }
