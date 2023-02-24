@@ -88,8 +88,8 @@ const Settings = () => {
 
 
     const SWITCH_TRACK_COLOR = {
-        true: theme == 'light' ? "#fff" : Colors.dark.background,
-        false: theme == 'light' ? "#fff" : "#1B2531",
+        true: theme == 'light' ? "#f9f9f9" : Colors.dark.background,
+        false: theme == 'light' ? "#ccc" : "#1B2531",
 
     };
 
@@ -230,8 +230,9 @@ const Settings = () => {
                                 marginRight: 15,
                                 borderColor: theme == 'light' ? "#DEE5ED" : Colors.lightBlue,
                                 borderWidth: 1,
-                                backgroundColor: "#fff"
+                                backgroundColor: theme == 'light' ? "#f9f9f9" : Colors.dark.background
                             }}
+
                             trackColor={SWITCH_TRACK_COLOR}
                             thumbColor={theme == 'dark' ? Colors.lightBlue : "#DEE5ED"}
                             ios_backgroundColor={"#fff"}
@@ -259,7 +260,7 @@ const Settings = () => {
                                 marginRight: 15,
                                 borderColor: !soundEffect ? "#DEE5ED" : Colors.lightBlue,
                                 borderWidth: 1,
-                                backgroundColor: "#fff"
+                                backgroundColor: theme == 'light' ? "#fff" : Colors.dark.background
                             }}
                             trackColor={SWITCH_TRACK_COLOR}
                             thumbColor={soundEffect ? Colors.lightBlue : "#DEE5ED"}
@@ -327,7 +328,7 @@ const Settings = () => {
                                 marginRight: 15,
                                 borderColor: !rewardNotifications ? "#DEE5ED" : Colors.lightBlue,
                                 borderWidth: 1,
-                                backgroundColor: "#fff"
+                                backgroundColor: theme == 'light' ? "#fff" : Colors.dark.background
                             }}
                             trackColor={SWITCH_TRACK_COLOR}
                             thumbColor={rewardNotifications ? Colors.lightBlue : "#DEE5ED"}
@@ -356,7 +357,7 @@ const Settings = () => {
                                 marginRight: 15,
                                 borderColor: !systemPrompt ? "#DEE5ED" : Colors.lightBlue,
                                 borderWidth: 1,
-                                backgroundColor: "#fff"
+                                backgroundColor: theme == 'light' ? "#fff" : Colors.dark.background
                             }}
                             trackColor={SWITCH_TRACK_COLOR}
                             thumbColor={systemPrompt ? Colors.lightBlue : "#DEE5ED"}

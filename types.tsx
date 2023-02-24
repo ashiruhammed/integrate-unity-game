@@ -20,6 +20,7 @@ declare global {
 
 export type RootStackParamList = {
     auth: NavigatorScreenParams<AuthStackParamList> | undefined;
+    SeeCommunity: NavigatorScreenParams<CommunityStackParamList> | undefined;
     Dashboard: NavigatorScreenParams<RootTabParamList> | undefined;
     EditProfile: undefined;
     Wallet: undefined;
@@ -35,9 +36,7 @@ export type RootStackParamList = {
     ConfirmPhonenumber: {
         phone:string
     }
-    ViewCommunity: {
-        id: string
-    };
+
     AdventureHome: undefined;
     VideoScreen: {
         lessonId?: string,
@@ -53,10 +52,11 @@ export type RootStackParamList = {
     AllBadges: undefined;
     NFTs: undefined;
     Notifications: undefined;
-    MakeAPost: {
-        id: string,
 
-    };
+    LeaveReview: {
+        adventureId: string
+    }
+
     PostScreen: {
         postId: string,
         communityId: string,
@@ -81,28 +81,13 @@ export type RootStackParamList = {
             },
         }
     }
-    Followers: {
-        id: string
-    }
-    RequestsScreen: {
-        id: string
-    }
-    LeaveReview: {
-        adventureId: string
-    }
-    CommunityInfo: {
-        id: string
-    }
-    GroupSettings: {
-        id: string
-    }
 
+      MakeAPost: {
+        id: string,
+
+    };
     LeaveCommunity: {
         id: string
-    }
-    CommentOnPost: {
-        id: string,
-        post: {}
     }
     NotFound: undefined;
 };
@@ -122,9 +107,42 @@ export type AuthStackParamList = {
 
     LoginNow: undefined;
     ForgotPassword: undefined;
+
+
+
 };
 
+export type CommunityStackParamList = {
+    CommunityInfo: {
+        id: string
+    }
+    GroupSettings: {
+        id: string
+    }
+
+
+    CommentOnPost: {
+        id: string,
+        post: {}
+    },
+
+    ViewCommunity:undefined
+
+    Followers: {
+        id: string
+    }
+    RequestsScreen: {
+        id: string
+    }
+};
+
+
 export type AuthStackScreenProps<Screen extends keyof AuthStackParamList> = NativeStackScreenProps<AuthStackParamList, Screen>;
+
+
+export type CommunityStackScreenProps<Screen extends keyof CommunityStackParamList> = NativeStackScreenProps<CommunityStackParamList, Screen>;
+
+
 
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> = NativeStackScreenProps<RootStackParamList,
     Screen>;

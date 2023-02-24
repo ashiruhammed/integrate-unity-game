@@ -8,7 +8,7 @@ import {
     FlatList,
     Animated as MyAnimated,
     useWindowDimensions,
-    TouchableOpacity, ScrollView, ActivityIndicator
+    TouchableOpacity, ScrollView, ActivityIndicator, Keyboard
 } from 'react-native';
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 import NavBar from "../../components/layout/NavBar";
@@ -180,7 +180,13 @@ const Wallet = () => {
         bottomSheetRef.current?.snapToIndex(1)
     }
     const handleClosePress = () => {
-        bottomSheetRef.current?.close()
+        Keyboard.dismiss()
+        if(Platform.OS == 'android') {
+            bottomSheetRef.current?.snapToIndex(0)
+        }else{
+            bottomSheetRef.current?.close()
+        }
+
     }
 
 
@@ -191,7 +197,13 @@ const Wallet = () => {
         redeemSheetRef.current?.snapToIndex(1)
     }
     const handleClosePressRedeem = () => {
-        redeemSheetRef.current?.close()
+        Keyboard.dismiss()
+        if(Platform.OS == 'android') {
+            redeemSheetRef.current?.snapToIndex(0)
+        }else{
+            redeemSheetRef.current?.close()
+        }
+
     }
 
 

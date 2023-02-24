@@ -49,15 +49,18 @@ const Drawer = ({menuToggle, communityId}: props) => {
 
     const openScreen = (screen: 'Followers' | 'CommunityInfo' | 'GroupSettings' | 'RequestsScreen') => {
         menuToggle()
-        navigation.navigate(screen, {
-            id: communityId
+        navigation.navigate('SeeCommunity', {
+            screen:'LeaveCommunity',
+            params:{id:communityId}
         })
     }
     const leaveCommunity = () => {
         menuToggle()
-      navigation.navigate('LeaveCommunity',{
-          id:communityId
-      })
+
+        navigation.navigate('SeeCommunity', {
+            screen:'LeaveCommunity',
+            params:{id:communityId}
+        })
     }
 
     return (
@@ -73,7 +76,7 @@ const Drawer = ({menuToggle, communityId}: props) => {
                            exiting={SlideOutRight} style={[styles.menu,{
                 backgroundColor
             }]}>
-                <TouchableOpacity activeOpacity={0.8} onPress={menuToggle}
+                <TouchableOpacity activeOpacity={0.8} onPress={()=>navigation.openDrawer()}
                                   style={styles.dismiss}>
                     <Ionicons name="ios-close" size={24} color="black"/>
                 </TouchableOpacity>
@@ -160,7 +163,7 @@ const styles = StyleSheet.create({
         alignItems: 'flex-end',
         height: fullHeight,
         position: 'absolute',
-        zIndex: 10,
+        zIndex: 100,
     },
     backdrop: {
         position: 'absolute',

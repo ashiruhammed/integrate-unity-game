@@ -43,6 +43,7 @@ import {useInfiniteQuery, useQuery} from "@tanstack/react-query";
 import {getFollowedCommunities, getMyCommunities, getPublicCommunities} from "../../action/action";
 import {useRefreshOnFocus} from "../../helpers";
 import CardPublicCommunity from "../../components/community/PublicCard";
+import {setCurrentCommunityId} from "../../app/slices/dataSlice";
 
 
 const wait = (timeout: number) => {
@@ -113,7 +114,6 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
     }, []);
 
 
-
     const {
         isLoading,
         data,
@@ -171,7 +171,7 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
     );
 
     const createCommunity = () => {
-        if(terms) {
+        if (terms) {
             handleClosePressMore()
             handleClosePress()
             navigation.navigate('CreateCommunity')
@@ -181,10 +181,21 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
     useRefreshOnFocus(refetch)
 
 
-    const seeCommunity = (id: string) => {
+    const seeCommunity = (id: string, ownerId: string, visibility: string, displayPhoto: string) => {
         dispatch(unSetResponse())
-        navigation.navigate('ViewCommunity', {
-            id
+        dispatch(setCurrentCommunityId({
+            id: id,
+            currentCommunity: {
+                ownerId: ownerId,
+                visibility: visibility,
+                displayPhoto: displayPhoto
+            }
+        }))
+
+
+        navigation.navigate('SeeCommunity', {
+            screen: 'ViewCommunity',
+            //params:{id:item.id}
         })
     }
 
@@ -196,11 +207,13 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
     }
 
 
-    const leaveCommunity = (communityId:string) => {
+    const leaveCommunity = (communityId: string) => {
 
-        navigation.navigate('LeaveCommunity',{
-            id:communityId
+        navigation.navigate('LeaveCommunity', {
+            id: communityId
         })
+
+
     }
 
     const joinModal = () => {
@@ -221,7 +234,7 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
         };
     }, [responseState, responseMessage])
 
-useRefreshOnFocus(fetchMyCommunity)
+    useRefreshOnFocus(fetchMyCommunity)
     return (
         <>
 
@@ -258,120 +271,134 @@ useRefreshOnFocus(fetchMyCommunity)
                                           textColor={"#888888"}
                                           paddingVertical={pixelSizeVertical(8)}/>
                     </View>
-                    <IF condition={tabIndex == 0}>
-                        <View style={styles.ActivityCardTop}>
-                            <Text style={[styles.listTitle, {
-                                color: textColor
-                            }]}>
-                                Public Communities
-                            </Text>
-                            <TouchableOpacity onPress={seeAllPublic
-                            } activeOpacity={0.7} style={styles.seeAll}>
-                                <Text style={[styles.tintText, {
-                                    color: textColor
-                                }]}>See all</Text>
 
-                            </TouchableOpacity>
-                        </View>
-                        <View style={styles.cardContainer}>
-                            <PublicCommunity theme={theme}/>
+                    {
+                        !isLoading &&
+                        <>
 
-                        </View>
-
-                        <View style={styles.ActivityCardTop}>
-                            <Text style={[styles.listTitle, {
-                                color: textColor
-                            }]}>
-                                Private Communities
-                            </Text>
-                            <TouchableOpacity onPress={seeAllPublic
-                            } activeOpacity={0.7} style={styles.seeAll}>
-                                <Text style={[styles.tintText, {
-                                    color: textColor
-                                }]}>See all</Text>
-
-                            </TouchableOpacity>
-                        </View>
-
-
-                        <View style={styles.cardContainer}>
-                            <PrivateCommunity theme={theme}/>
-
-                        </View>
-
-                    </IF>
-
-                    <IF condition={tabIndex == 1}>
-
-
-                        {
-                            isLoading && <ActivityIndicator size='small' color={Colors.primaryColor}/>
-                        }
-                        {
-                            !isLoading && data?.pages[0]?.data?.result.map((({id, community, totalUsersJoined}) => (
-                                <TouchableOpacity key={id} activeOpacity={0.8} onPress={() => seeCommunity(community?.id)}
-                                                  style={[styles.myCommunityCard, {
-                                                      backgroundColor: theme == 'dark' ? '#141414' : "#fff"
-                                                  }]}>
-
-                                    <View style={styles.communityLogo}>
-                                        <Image source={{uri: community?.displayPhoto}} style={styles.communityLogoImag}/>
-                                    </View>
-
-                                    <View style={styles.bodyCard}>
-                                        <Text style={[styles.cardTitle, {
+                            <IF condition={tabIndex == 0}>
+                                <View style={styles.ActivityCardTop}>
+                                    <Text style={[styles.listTitle, {
+                                        color: textColor
+                                    }]}>
+                                        Public Communities
+                                    </Text>
+                                    <TouchableOpacity onPress={seeAllPublic
+                                    } activeOpacity={0.7} style={styles.seeAll}>
+                                        <Text style={[styles.tintText, {
                                             color: textColor
-                                        }]}>
-                                            {community?.name}
-                                        </Text>
-                                        <Text style={[styles.cardTitleSub, {
-                                            color: textColor
-                                        }]}>
-                                            {totalUsersJoined} Members
-                                        </Text>
-                                    </View>
+                                        }]}>See all</Text>
 
-                                    <SmallRectButton onPress={()=>leaveCommunity(id)} style={{}}>
+                                    </TouchableOpacity>
+                                </View>
+                                <View style={styles.cardContainer}>
+                                    <PublicCommunity theme={theme}/>
+
+                                </View>
+
+                                <View style={styles.ActivityCardTop}>
+                                    <Text style={[styles.listTitle, {
+                                        color: textColor
+                                    }]}>
+                                        Private Communities
+                                    </Text>
+                                    <TouchableOpacity onPress={seeAllPublic
+                                    } activeOpacity={0.7} style={styles.seeAll}>
+                                        <Text style={[styles.tintText, {
+                                            color: textColor
+                                        }]}>See all</Text>
+
+                                    </TouchableOpacity>
+                                </View>
+
+
+                                <View style={styles.cardContainer}>
+                                    <PrivateCommunity theme={theme}/>
+
+                                </View>
+
+                            </IF>
+
+                            <IF condition={tabIndex == 1}>
+
+
+                                {
+                                    isLoading && <ActivityIndicator size='small' color={Colors.primaryColor}/>
+                                }
+                                {
+                                    !isLoading && data?.pages[0]?.data?.result.map((({
+                                                                                         id,
+                                                                                         community,
+                                                                                         totalUsersJoined
+                                                                                     }) => (
+                                        <TouchableOpacity key={id} activeOpacity={0.8}
+                                                          onPress={() => seeCommunity(community?.id, community.ownerId, community.visibility, community.displayPhoto)}
+                                                          style={[styles.myCommunityCard, {
+                                                              backgroundColor: theme == 'dark' ? '#141414' : "#fff"
+                                                          }]}>
+
+                                            <View style={styles.communityLogo}>
+                                                <Image source={{uri: community?.displayPhoto}}
+                                                       style={styles.communityLogoImag}/>
+                                            </View>
+
+                                            <View style={styles.bodyCard}>
+                                                <Text style={[styles.cardTitle, {
+                                                    color: textColor
+                                                }]}>
+                                                    {community?.name}
+                                                </Text>
+                                                <Text style={[styles.cardTitleSub, {
+                                                    color: textColor
+                                                }]}>
+                                                    {totalUsersJoined} Members
+                                                </Text>
+                                            </View>
+
+                                            <SmallRectButton onPress={() => leaveCommunity(id)} style={{}}>
+                                                <Text style={styles.buttonText}>
+                                                    Leave
+
+                                                </Text>
+                                            </SmallRectButton>
+
+                                        </TouchableOpacity>
+                                    )))
+                                }
+
+
+                            </IF>
+
+
+                            <IF condition={tabIndex == 2}>
+
+                                <View style={styles.startCommunity}>
+                                    <Text style={[styles.TextTitle, {
+                                        color: textColor
+                                    }]}>
+                                        Create your own Community
+                                    </Text>
+                                    <RectButton style={{
+                                        width: 190
+                                    }} onPress={() => handleSnapPress(1)}>
                                         <Text style={styles.buttonText}>
-                                            Leave
-
+                                            Create Community
                                         </Text>
-                                    </SmallRectButton>
-
-                                </TouchableOpacity>
-                            )))
-                        }
+                                    </RectButton>
 
 
-                    </IF>
+                                </View>
+                                {
+                                    allMyCommunities?.data?.result.map((item) => (
+                                        <CardPublicCommunity key={item.id} joinModal={joinModal} theme={theme}
+                                                             item={item}/>
+                                    ))
+                                }
 
+                            </IF>
 
-                    <IF condition={tabIndex == 2}>
-
-                        <View style={styles.startCommunity}>
-                            <Text style={[styles.TextTitle, {
-                                color: textColor
-                            }]}>
-                                Create your own Community
-                            </Text>
-                            <RectButton style={{
-                                width: 190
-                            }} onPress={() => handleSnapPress(1)}>
-                                <Text style={styles.buttonText}>
-                                    Create Community
-                                </Text>
-                            </RectButton>
-
-
-                        </View>
-                        {
-                            allMyCommunities?.data?.result.map((item) =>(
-                                <CardPublicCommunity key={item.id}  joinModal={joinModal} theme={theme} item={item}/>
-                            ))
-                        }
-
-                    </IF>
-
+                        </>
+                    }
                 </ScrollView>
             </SafeAreaView>
 
@@ -747,8 +774,8 @@ const styles = StyleSheet.create({
     },
     bodyCard: {
 
-        marginLeft: 10,
-        width: '60%',
+        marginLeft: 5,
+        width: '55%',
         height: '100%',
         alignItems: 'flex-start',
         justifyContent: 'space-evenly',
@@ -756,7 +783,7 @@ const styles = StyleSheet.create({
     cardTitle: {
         fontFamily: Fonts.quickSandBold,
         color: Colors.light.text,
-        fontSize: fontPixel(16)
+        fontSize: fontPixel(14)
     },
     cardTitleSub: {
         fontFamily: Fonts.quicksandRegular,

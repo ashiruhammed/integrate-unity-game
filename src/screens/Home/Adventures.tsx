@@ -45,7 +45,6 @@ const dataSlice = useAppSelector(state => state.data)
 
 
 
-
     const backgroundColor = theme == 'light' ? Colors.light.background : Colors.dark.background
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
 

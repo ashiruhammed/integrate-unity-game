@@ -36,6 +36,7 @@ import {useAppDispatch, useAppSelector} from "../../app/hooks";
 import {useNavigation} from "@react-navigation/native";
 import {setResponse} from "../../app/slices/userSlice";
 import CardPublicCommunity from "./PublicCard";
+import {setCurrentCommunityId} from "../../app/slices/dataSlice";
 
 
 
@@ -51,6 +52,8 @@ interface cardProps {
         userAlreadyRequest: boolean,
         name: string,
         id: string,
+        visibility:string,
+        ownerId: string,
         displayPhoto: string,
         remainingSlots: string,
         accessNFTBadgeAmount: string,
@@ -63,29 +66,27 @@ interface cardProps {
     },
     loadingBadge?:boolean,
     joinModal: (badgeId: string, accessNFTBadgeAmount: string, communityId: string) => void
-
+    viewTheCommunity:(id:string,ownerId:string,visibility:string,displayPhoto:string)=>void
 }
 
 
 const isRunningInExpoGo = Constants.appOwnership === 'expo'
-const CommunityCard = ({theme,item,loadingBadge,joinModal}: cardProps) => {
+const CommunityCard = ({theme,item,loadingBadge,joinModal,viewTheCommunity}: cardProps) => {
 
     const user = useAppSelector(state => state.user)
     const {userData} = user
-    const navigation = useNavigation()
+
 
     const {isLoading, data} = useQuery(['getCommunityFollowers'], () => getCommunityFollowers(item.id))
 
     const open = () => {
         if(item?.owner?.id == userData.id){
-            navigation.navigate('ViewCommunity', {
-                id: item.id
-            })
+
+
+            viewTheCommunity(item.id,item.ownerId,item.visibility,item.displayPhoto)
         }else
         if (item.currentUserJoined) {
-            navigation.navigate('ViewCommunity', {
-                id: item.id
-            })
+            viewTheCommunity(item.id,item.ownerId,item.visibility,item.displayPhoto)
         } else {
             joinModal(item.badgeId, item.accessNFTBadgeAmount, item.id)
         }
@@ -320,7 +321,7 @@ const PrivateCommunity = ({theme}:CardProps) => {
     const queryClient = useQueryClient();
     const scrollX = new Animated.Value(0)
     let position = Animated.divide(scrollX, width)
-
+    const navigation = useNavigation()
     const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
     const [modalVisible, setModalVisible] = useState(false);
     const [badgeId, setBadgeId] = useState('');
@@ -342,7 +343,20 @@ const PrivateCommunity = ({theme}:CardProps) => {
     })
 
 
-
+    const viewTheCommunity = (id: string, ownerId: string, visibility: string, displayPhoto: string) => {
+        dispatch(setCurrentCommunityId({
+            id,
+            currentCommunity: {
+                ownerId: ownerId,
+                visibility: visibility,
+                displayPhoto: displayPhoto
+            }
+        }))
+        navigation.navigate('SeeCommunity', {
+            screen: 'ViewCommunity',
+            //params:{id:item.id}
+        })
+    }
 
     //implementing infinite scroll here
     const {
@@ -417,7 +431,7 @@ const PrivateCommunity = ({theme}:CardProps) => {
 
 
     const renderItem = useCallback(({item}) => (
-        <CommunityCard joinModal={joinModal} loadingBadge={loadingBadge}  theme={theme} item={item}/>
+        <CommunityCard viewTheCommunity={viewTheCommunity} joinModal={joinModal} loadingBadge={loadingBadge}  theme={theme} item={item}/>
     ), [loadingBadge,theme])
 
     return (

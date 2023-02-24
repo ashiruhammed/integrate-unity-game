@@ -149,8 +149,9 @@ const ForgotPassword = ({navigation}: AuthStackScreenProps<'ForgotPassword'>) =>
 
     return (
         <>
-            <Toast message={responseMessage} state={responseState} type={responseType}/>
+
             <SafeAreaView style={styles.safeArea}>
+                <Toast message={responseMessage} state={responseState} type={responseType}/>
 
                 <KeyboardAwareScrollView scrollEnabled
                                          style={{

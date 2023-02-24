@@ -122,6 +122,7 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
         mutate: requestCodeNow
     } = useMutation(['requestPhoneVerification'], requestPhoneVerification, {
         onSuccess: (data) => {
+
             if (data.success) {
                 dispatch(setResponse({
                     responseMessage: data.message,
@@ -450,7 +451,7 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
                                              contentContainerStyle={
                                                  styles.sheetContainer
                                              }>
-
+                        <View style={styles.authContainer}>
                         <PhoneInputText
                             error={errors.phoneNumber}
 
@@ -475,6 +476,7 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
                                     </Text>
                             }
                         </RectButton>
+                        </View>
                     </KeyboardAwareScrollView>
                 </BottomSheet>
 
@@ -668,7 +670,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         flexDirection: 'row',
         flexWrap: 'wrap',
-        justifyContent: 'space-between',
+        justifyContent: 'space-around',
         marginTop: 30,
 
         paddingHorizontal: pixelSizeHorizontal(20)
@@ -770,8 +772,8 @@ const styles = StyleSheet.create({
 
     },
     chevronGreen: {
-        width: widthPixel(25),
-        height: heightPixel(25),
+        width: 25,
+        height: 25,
         backgroundColor: "#fff",
         borderRadius: 45,
         alignItems: 'center',
@@ -805,10 +807,16 @@ const styles = StyleSheet.create({
         color: Colors.light.text
     },
     sheetContainer: {
-        marginTop: 20,
-        justifyContent: 'center',
+        marginTop: 10,
+
         width: '100%',
         alignItems: 'center',
+    },
+    authContainer:{
+
+        width: '100%',
+        alignItems: 'center',
+        height:heightPixel(400)
     },
     buttonText: {
         position: 'absolute',

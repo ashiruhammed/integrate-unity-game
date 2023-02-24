@@ -858,7 +858,7 @@ const styles = StyleSheet.create({
 
     reviewTitle: {
         color: "#fff",
-        fontSize: fontPixel(18),
+        fontSize: fontPixel(14),
         fontFamily: Fonts.quickSandBold
     },
     reviewCard: {

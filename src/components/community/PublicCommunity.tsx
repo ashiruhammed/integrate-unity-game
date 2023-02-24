@@ -37,6 +37,7 @@ import {isWhatPercentOf, truncate, useRefreshOnFocus} from "../../helpers";
 import Constants from "expo-constants";
 import {useNavigation} from "@react-navigation/native";
 import {IF} from "../../helpers/ConditionJsx";
+import {setCurrentCommunityId} from "../../app/slices/dataSlice";
 
 
 interface cardProps {
@@ -51,43 +52,43 @@ interface cardProps {
         currentUserJoined: boolean,
         name: string,
         visibility: string,
+        ownerId: string,
         id: string,
         displayPhoto: string,
         remainingSlots: string,
         accessNFTBadgeAmount: string,
         badgeId: string,
         communityFollowers: [],
+
         owner: {
 
             id: string
             fullName: string
         }
     },
-
+    viewTheCommunity:(id:string,ownerId:string,visibility:string,displayPhoto:string)=>void
     joinModal: (badgeId: string, accessNFTBadgeAmount: string, communityId: string) => void
 }
 
 const isRunningInExpoGo = Constants.appOwnership === 'expo'
 
-const PublicCommunityCard = ({theme, loadingBadge, item, joinModal, followers}: cardProps) => {
+const PublicCommunityCard = ({theme, loadingBadge, item, joinModal,viewTheCommunity}: cardProps) => {
     const user = useAppSelector(state => state.user)
     const {userData} = user
-
+    const dispatch = useAppDispatch()
 
     // const {isLoading, data} = useQuery(['getCommunityFollowers'], () => getCommunityFollowers(item.id))
 
 
-    const navigation = useNavigation()
+
     const open = () => {
 
         if (item?.owner?.id == userData.id) {
-            navigation.navigate('ViewCommunity', {
-                id: item.id
-            })
+
+            viewTheCommunity(item.id,item.ownerId,item.visibility,item.displayPhoto)
         } else if (item.currentUserJoined) {
-            navigation.navigate('ViewCommunity', {
-                id: item.id
-            })
+
+            viewTheCommunity(item.id,item.ownerId,item.visibility,item.displayPhoto)
 
         } else {
             joinModal(item.badgeId, item.accessNFTBadgeAmount, item.id)
@@ -104,9 +105,10 @@ const PublicCommunityCard = ({theme, loadingBadge, item, joinModal, followers}: 
     const circum = radius * 2 * Math.PI;
     const svgProgress = 100 - 80;
     return (
-        <Pressable onPress={open} disabled={item?.userAlreadyRequest && !item.currentUserJoined } style={[styles.communityCard, {
-            backgroundColor
-        }]}>
+        <Pressable onPress={open} disabled={item?.userAlreadyRequest && !item.currentUserJoined}
+                   style={[styles.communityCard, {
+                       backgroundColor
+                   }]}>
 
             <View style={styles.topCard}>
                 <View style={styles.imageWrap}>
@@ -169,26 +171,17 @@ const PublicCommunityCard = ({theme, loadingBadge, item, joinModal, followers}: 
                             &&
                             item.communityFollowers?.slice(0, 4).map((({id, follower}) => (
                                 <View key={id} style={styles.avatarWrap}>
-                                    {isRunningInExpoGo ?
 
-                                        <Image
-                                            style={styles.avatar}
-                                            source={{
-                                                uri: !follower?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : follower?.avatar,
-                                            }}
-                                            resizeMode={'cover'}
-                                        />
-                                        :
-                                        <FastImage
-                                            style={styles.avatar}
-                                            source={{
-                                                uri: !follower?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : follower?.avatar,
-                                                cache: FastImage.cacheControl.web,
-                                                priority: FastImage.priority.normal,
-                                            }}
-                                            resizeMode={FastImage.resizeMode.cover}
-                                        />
-                                    }
+                                    <FastImage
+                                        style={styles.avatar}
+                                        source={{
+                                            uri: !follower?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : follower?.avatar,
+                                            cache: FastImage.cacheControl.web,
+                                            priority: FastImage.priority.normal,
+                                        }}
+                                        resizeMode={FastImage.resizeMode.cover}
+                                    />
+
                                 </View>
                             )))
                         }
@@ -229,7 +222,7 @@ const PublicCommunityCard = ({theme, loadingBadge, item, joinModal, followers}: 
 
             <IF condition={item.visibility == 'PRIVATE'}>
 
-  {
+                {
                     item?.owner?.id == userData.id &&
 
                     <RectButton
@@ -245,7 +238,7 @@ const PublicCommunityCard = ({theme, loadingBadge, item, joinModal, followers}: 
                     </RectButton>
                 }
                 {
-                    item?.owner?.id !== userData.id &&  item.currentUserJoined &&
+                    item?.owner?.id !== userData.id && item.currentUserJoined &&
 
                     <RectButton
                         onPress={open}
@@ -261,14 +254,14 @@ const PublicCommunityCard = ({theme, loadingBadge, item, joinModal, followers}: 
                 }
 
 
- {
+                {
                     item?.userAlreadyRequest && !item.currentUserJoined &&
 
                     <RectButton
                         disabled
                         style={{
                             width: 150,
-                            opacity:0.7
+                            opacity: 0.7
                         }}>
                         <Text style={styles.buttonText}>
 
@@ -279,9 +272,8 @@ const PublicCommunityCard = ({theme, loadingBadge, item, joinModal, followers}: 
                 }
 
 
-
                 {
-                    !item.currentUserJoined  &&    !item?.userAlreadyRequest  && item?.owner?.id !== userData.id &&
+                    !item.currentUserJoined && !item?.userAlreadyRequest && item?.owner?.id !== userData.id &&
 
                     <RectButton
                         onPress={open}
@@ -381,8 +373,7 @@ const PublicCommunity = ({theme}: props) => {
     const [communityId, setCommunityId] = useState('');
     const [requiredBadges, setRequiredBadges] = useState('');
 
-
-
+    const navigation = useNavigation()
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
 
 
@@ -403,6 +394,20 @@ const PublicCommunity = ({theme}: props) => {
         }
     })
 
+    const viewTheCommunity = (id: string, ownerId: string, visibility: string, displayPhoto: string) => {
+        dispatch(setCurrentCommunityId({
+            id,
+            currentCommunity: {
+                ownerId: ownerId,
+                visibility: visibility,
+                displayPhoto: displayPhoto
+            }
+        }))
+        navigation.navigate('SeeCommunity', {
+            screen: 'ViewCommunity',
+            //params:{id:item.id}
+        })
+    }
 
     const updateCurrentSlideIndex = (e: { nativeEvent: { contentOffset: { x: any; }; }; }) => {
         const contentOffsetX = e.nativeEvent.contentOffset.x;
@@ -481,7 +486,7 @@ const PublicCommunity = ({theme}: props) => {
     const keyExtractor = useCallback((item: { id: any; }) => item.id, [],);
 
     const renderItem = useCallback(({item}) => (
-        <PublicCommunityCard loadingBadge={loadingBadge} joinModal={joinModal} theme={theme} item={item}/>
+        <PublicCommunityCard viewTheCommunity={viewTheCommunity} loadingBadge={loadingBadge} joinModal={joinModal} theme={theme} item={item}/>
     ), [loadingBadge, theme])
 
     const loadMore = () => {
@@ -501,15 +506,15 @@ const PublicCommunity = ({theme}: props) => {
                 animationType="slide"
                 transparent={true}
                 visible={modalVisible}
-style={{backgroundColor}}
+                style={{backgroundColor}}
                 onRequestClose={() => {
                     Alert.alert("Modal has been closed.");
                     setModalVisible(false);
                 }}
             >
                 <View style={styles.backDrop}>
-                    <View style={[styles.modalContainer,{
-backgroundColor
+                    <View style={[styles.modalContainer, {
+                        backgroundColor
                     }]}>
 
                         <View style={styles.sheetHead}>
@@ -521,11 +526,11 @@ backgroundColor
 
                         </View>
 
-                        <View style={[styles.modalBody,{
+                        <View style={[styles.modalBody, {
                             backgroundColor
                         }]}>
 
-                            <Text style={[styles.missionText,{
+                            <Text style={[styles.missionText, {
                                 color: textColor
                             }]}>
                                 Requirements
@@ -538,7 +543,7 @@ backgroundColor
 
 
                             <View style={styles.textWrap}>
-                                <Text style={[styles.missionText,{
+                                <Text style={[styles.missionText, {
                                     color: textColor
                                 }]}>
                                     {badge?.data?.title}
@@ -583,8 +588,8 @@ backgroundColor
                 !isLoading && data && data?.pages[0]?.data?.result.length > 0 &&
 
                 <FlatList
-                   // data={data?.pages[0]?.data?.result?.slice(0, 8)}
-                    data={data?.pages[0]?.data?.result.filter((community: { visibility: string; }) => community.visibility !== 'PRIVATE').slice(0,8)}
+                    // data={data?.pages[0]?.data?.result?.slice(0, 8)}
+                    data={data?.pages[0]?.data?.result.filter((community: { visibility: string; }) => community.visibility !== 'PRIVATE').slice(0, 8)}
                     onMomentumScrollEnd={updateCurrentSlideIndex}
                     keyExtractor={keyExtractor}
                     horizontal

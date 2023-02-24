@@ -161,7 +161,8 @@ const PasswordChange = ({route, navigation}: AuthStackScreenProps<'PasswordChang
 
 
             <SafeAreaView style={styles.safeArea}>
-                <Toast message={responseMessage} state={responseState} type={responseType}/>
+
+
                 <KeyboardAwareScrollView scrollEnabled
                                          style={{
                                              width: '100%',
@@ -182,6 +183,9 @@ const PasswordChange = ({route, navigation}: AuthStackScreenProps<'PasswordChang
                             ]}/>
                         </View>
                     </View>
+
+
+                    <Toast message={responseMessage} state={responseState} type={responseType}/>
 
                     <View style={styles.authContainer}>
                         <View style={styles.topBar}>
@@ -324,7 +328,7 @@ const styles = StyleSheet.create({
     },
     container: {
         width: '100%',
-
+alignItems:'center',
 
         //  backgroundColor: "#FFFFFF",
     },

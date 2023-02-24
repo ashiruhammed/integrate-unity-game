@@ -1,6 +1,16 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import * as yup from 'yup';
-import {Text, View, StyleSheet, Dimensions, TouchableOpacity, Image, ActivityIndicator, Platform} from 'react-native';
+import {
+    Text,
+    View,
+    StyleSheet,
+    Dimensions,
+    TouchableOpacity,
+    Image,
+    ActivityIndicator,
+    Platform,
+    Button, Alert
+} from 'react-native';
 import {AuthStackScreenProps} from "../../../types";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
@@ -25,6 +35,7 @@ import * as AppleAuthentication from 'expo-apple-authentication';
 import GoogleIcon from "../../components/GoogleIcon";
 import HorizontalLine from "../../components/HorizontalLine";
 import {LoginButton, AccessToken, AuthenticationToken} from 'react-native-fbsdk-next';
+import Recaptcha, {RecaptchaHandles} from 'react-native-recaptcha-that-works';
 
 
 WebBrowser.maybeCompleteAuthSession();
@@ -39,9 +50,10 @@ const formSchema = yup.object().shape({
 
 const height = Dimensions.get('window').height
 
+
 const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
 
-
+    const recaptcha = useRef();
     const dispatch = useAppDispatch()
     const queryClient = useQueryClient();
     const user = useAppSelector(state => state.user)
@@ -55,9 +67,34 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
     const [contentEmail, setContentEmail] = useState<string>('');
     const [togglePass, setTogglePass] = useState(true)
 
+    const [captchaToken, setCaptchaToken] = useState('1');
+
     const [focusPassword, setFocusPassword] = useState<boolean>(false);
     const [contentPassword, setContentPassword] = useState<string>('');
 
+    const [token, setToken] = useState('');
+
+    const $recaptcha = useRef<RecaptchaHandles>(null);
+
+    const handleOpenPress = useCallback(() => {
+        $recaptcha.current?.open();
+    }, []);
+
+    const handleClosePress = useCallback(() => {
+        $recaptcha.current?.close();
+    }, []);
+
+    const size = 'normal';
+
+
+    const onVerify = token => {
+        setCaptchaToken(token)
+        console.log('success!', token);
+    }
+
+    const onExpire = () => {
+        console.warn('expired!');
+    }
 
     const [_, googleResponse, googleAuth] = Google.useAuthRequest({
 
@@ -127,6 +164,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
 
 
             } else {
+                setToken('')
                 await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
                 dispatch(setResponse({
                     responseMessage: data.message,
@@ -167,6 +205,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
 
 
             } else {
+                setToken('')
                 await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
                 dispatch(setResponse({
                     responseMessage: data.message,
@@ -207,6 +246,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
 
 
             } else {
+                setToken('')
                 await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
                 dispatch(setResponse({
                     responseMessage: data.message,
@@ -244,7 +284,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
 
             if (data.success) {
 
-
+                setToken('')
                 SecureStore.setItemAsync('Gateway-Token', data.data.token).then(() => {
                     fetchUser()
                 })
@@ -256,6 +296,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                         email: contentEmail
                     })
                 } else {
+                    setToken('')
                     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
                     dispatch(setResponse({
                         responseMessage: data.message,
@@ -307,11 +348,18 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
         },
         onSubmit: (values) => {
             const {email, password} = values;
-            const body = JSON.stringify({email: email.toLowerCase(), password})
-            mutate(body)
-
+            const body = JSON.stringify({email: email.toLowerCase(), captchaToken, password})
+            //mutate(body)
+$recaptcha.current.open()
         }
     });
+
+    useEffect(()=>{
+        if(token !== '') {
+            const body = JSON.stringify({email: values.email.toLowerCase(), captchaToken:token, password:values.password})
+            mutate(body)
+        }
+    },[token])
     const forgotPassword = () => {
         navigation.navigate('ForgotPassword')
     }
@@ -338,8 +386,42 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
 
     return (
         <>
+            {/* <Recaptcha
+                ref={recaptcha}
+                siteKey="6Les7rgjAAAAACAihGpA2LD4k-jx7Wjtl68Y8whF"
+                baseUrl="https://api.gatewayapp.co"
+                onVerify={onVerify}
+                onExpire={onExpire}
+                size={'compact'}
 
+            />*/}
             <SafeAreaView style={styles.safeArea}>
+                <Recaptcha
+                    ref={$recaptcha}
+                    lang="eng"
+                    headerComponent={
+                        <Button title="Close modal" onPress={handleClosePress}/>
+                    }
+                    footerComponent={<Text>Footer here</Text>}
+                    siteKey="6Les7rgjAAAAACAihGpA2LD4k-jx7Wjtl68Y8whF"
+                    baseUrl="https://api.gatewayapp.co"
+                    size={'invisible'}
+                    theme="light"
+                    // onLoad={() => Alert.alert('onLoad event')}
+                    // onClose={() => Alert.alert('onClose event')}
+                   /* onError={(err) => {
+                        Alert.alert('onError event');
+                        console.warn(err);
+                    }}*/
+                    //  onExpire={() => Alert.alert('onExpire event')}
+                    onVerify={(token) => {
+                        // Alert.alert('onVerify event');
+                        setToken(token);
+                    }}
+                    hideBadge={false}
+                    enterprise={false}
+
+                />
 
                 {
                     googleAuthenticating &&
@@ -567,7 +649,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                         <RectButton disabled={isLoading || !isValid || googleAuthenticating} style={{
 
                             width: widthPixel(200)
-                        }} onPress={() => handleSubmit()}>
+                        }} onPress={()=>handleSubmit()}>
                             {
                                 isLoading || googleAuthenticating ? <ActivityIndicator size='small' color="#fff"/>
                                     :
@@ -582,7 +664,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
 
                         <TouchableOpacity style={styles.signUpBtn}>
 
-                            <Text onPress={signupNow} style={styles.alreadyHaveAcc}>
+                            <Text onPress={signupNow} onPress={handleOpenPress} style={styles.alreadyHaveAcc}>
                                 No account yet? <Text style={{
                                 color: Colors.primaryColor
                             }}>Get one here</Text>

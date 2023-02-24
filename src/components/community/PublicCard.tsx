@@ -31,6 +31,7 @@ interface cardProps {
         name: string,
         id: string,
         visibility:string,
+        ownerId:string,
         displayPhoto: string,
         remainingSlots: string,
         accessNFTBadgeAmount: string,
@@ -41,9 +42,10 @@ interface cardProps {
             fullName: string
         }
     },
+    viewTheCommunity:(id:string,ownerId:string,visibility:string,displayPhoto:string)=>void
     joinModal: (badgeId: string, accessNFTBadgeAmount: string, communityId: string) => void
 }
-const CardPublicCommunity = ({theme, loadingBadge, item, joinModal}: cardProps) => {
+const CardPublicCommunity = ({theme, loadingBadge, item, joinModal,viewTheCommunity}: cardProps) => {
     const user = useAppSelector(state => state.user)
     const {userData} = user
 
@@ -52,14 +54,10 @@ const CardPublicCommunity = ({theme, loadingBadge, item, joinModal}: cardProps) 
     const navigation = useNavigation()
     const open = () => {
         if(item?.owner?.id == userData.id){
-            navigation.navigate('ViewCommunity', {
-                id: item.id
-            })
+            viewTheCommunity(item.id,item.ownerId,item.visibility,item.displayPhoto)
         }else
         if (item.currentUserJoined) {
-            navigation.navigate('ViewCommunity', {
-                id: item.id
-            })
+            viewTheCommunity(item.id,item.ownerId,item.visibility,item.displayPhoto)
         } else {
             joinModal(item.badgeId, item.accessNFTBadgeAmount, item.id)
         }

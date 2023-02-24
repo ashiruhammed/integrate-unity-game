@@ -37,13 +37,13 @@ const CommunityInfo = ({navigation, route}: RootStackScreenProps<'CommunityInfo'
 
     const user = useAppSelector(state => state.user)
     const {responseState, responseType, responseMessage} = user
-    const {id} = route.params
+
 
     const offset = useSharedValue(0);
     const [toggleMenu, setToggleMenu] = useState(false);
 
     const dataSlice = useAppSelector(state => state.data)
-    const {theme} = dataSlice
+    const {theme,currentCommunityId} = dataSlice
     const backgroundColor = theme == 'light' ? "#fff" : Colors.dark.background
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
 
@@ -57,29 +57,23 @@ const CommunityInfo = ({navigation, route}: RootStackScreenProps<'CommunityInfo'
         extrapolate: "clamp"
     });
 
-    const {isLoading, data, refetch} = useQuery(['getCommunityInfo'], () => getCommunityInfo(id), {})
+    const {isLoading, data, refetch} = useQuery(['getCommunityInfo'], () => getCommunityInfo(currentCommunityId), {})
     const {
         isLoading: loading,
         data: followers,
         refetch: getFollowers
-    } = useQuery(['CommunityFollowers'], () => getCommunityFollowers(id), {})
+    } = useQuery(['CommunityFollowers'], () => getCommunityFollowers(currentCommunityId), {})
 
     const goBack = () => {
         navigation.goBack()
     }
 
     const menuToggle = () => {
-        offset.value = Math.random()
-        setToggleMenu(!toggleMenu)
+     navigation.toggleDrawer()
     }
 
     return (
         <>
-            {
-                toggleMenu &&
-
-                <Drawer menuToggle={menuToggle} communityId={id}/>
-            }
 
             <SafeAreaView style={[styles.safeArea, {
                 backgroundColor

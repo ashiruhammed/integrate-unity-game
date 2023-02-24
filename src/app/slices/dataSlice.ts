@@ -4,8 +4,8 @@ import {array} from "yup";
 
 
 interface SubmissionProps {
- "questionId":string,
-    "optionIds":string[]
+    "questionId": string,
+    "optionIds": string[]
 
 }
 
@@ -13,15 +13,21 @@ interface SubmissionProps {
 export interface DataState {
     theme: "light" | "dark",
 
-    "submissions":SubmissionProps [
+    "submissions": SubmissionProps [
 
-    ]
-    adventure:{},
+        ]
+    currentCommunityId: string,
+    currentCommunity: {
+        ownerId: string,
+        displayPhoto:string,
+         visibility: "PUBLIC"|"PRIVATE"
+    },
+    adventure: {},
     missionId: string,
     missionName: string,
     missions: string,
 
-    modules:[]
+    modules: []
 
 }
 
@@ -29,16 +35,20 @@ const initialState: DataState = {
     theme: 'light',
 
     submissions: [
-      //  { questionId:'', optionIds:[""]}
-       
-    ],
-    adventure:{
+        //  { questionId:'', optionIds:[""]}
 
+    ],
+    currentCommunityId: '',
+    currentCommunity: {
+        ownerId:'',
+        visibility: 'PUBLIC',
+        displayPhoto: ''
     },
+    adventure: {},
     missionId: '',
     missionName: '',
     missions: '',
-    modules:[]
+    modules: []
 
 }
 
@@ -56,15 +66,21 @@ export const dataSlice = createSlice({
 
 
         },
+        setCurrentCommunityId: (state, action) => {
+            state.currentCommunityId = action.payload.id
+            state.currentCommunity = action.payload.currentCommunity
+
+
+        },
         UPDATE_SUBMISSIONS: (state, action) => {
 
-                let idx = state.submissions.findIndex((game: { questionId: string }) => game.questionId === action.payload.questionId);
+            let idx = state.submissions.findIndex((game: { questionId: string }) => game.questionId === action.payload.questionId);
 
-                if (idx >= 0) {
-                    state.submissions[idx] = action.payload;
-                }
+            if (idx >= 0) {
+                state.submissions[idx] = action.payload;
+            }
 
-              //  console.log(idx)
+            //  console.log(idx)
 
         },
         updateSubmissions: (state, action) => {
@@ -73,15 +89,15 @@ export const dataSlice = createSlice({
             const newData = state.submissions.findIndex((game: { questionId: string }) => game.questionId === action.payload.questionId)
 //console.log(state.submissions[newData])
 
-if (newData >= 0) {
-   state.submissions[newData] = action.payload;
+            if (newData >= 0) {
+                state.submissions[newData] = action.payload;
 
-  // state.submissions = [...state.submissions, {...action.payload}]
-}else{
-    state.submissions = [...state.submissions, {...action.payload}]
-}
+                // state.submissions = [...state.submissions, {...action.payload}]
+            } else {
+                state.submissions = [...state.submissions, {...action.payload}]
+            }
 
-        //    state.submissions = [...state.submissions, {...action.payload}]
+            //    state.submissions = [...state.submissions, {...action.payload}]
 
 
             //console.log(action.payload.questionId)
@@ -96,7 +112,7 @@ if (newData >= 0) {
 
 // Action creators are generated for each case reducer function
 export const {
-    toggleTheme,
+    toggleTheme,setCurrentCommunityId,
     cleanData,
     setAdventure,
     UPDATE_SUBMISSIONS,

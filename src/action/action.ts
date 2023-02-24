@@ -1,7 +1,9 @@
 //const BASE_URL = "https://gateway-api.onrender.com"
-export const BASE_URL = "https://gateway-backend.onrender.com"
+//export const BASE_URL = "https://gateway-backend.onrender.com"
+//export const BASE_URL = "https://api.gatewayapp.co"
 import * as SecureStore from 'expo-secure-store';
-
+import {BASE_URL, ACCESS_TOKEN} from "@env";
+//const access_token = 'JGFyZ29uMmlkJHY9MTkkbT00MDk2LHQ9MyxwPTEkWnJjNEVDR05JTEYzU3B2WUJLZVBZdyRtdnNacUl6VVg3SG1UV2gvdjhQZXZGUXJOa1hWYUFHRkVKV3dCd0NobDBV'
 
 interface signupProps {
     "email": string,
@@ -14,11 +16,11 @@ interface signupProps {
 export const loginUser = async (userData: {}) => {
     //let Token = await SecureStore.getItemAsync('token');
     // await setHeaderToken(Token)
-    /*  const response = await request.get(
-          `/`,
-      );*/
+
     const myHeaders = {
         'Content-Type': 'application/json',
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
     }
     let timeoutId: NodeJS.Timeout
 
@@ -56,6 +58,8 @@ export const userAppleOAuth = async (userData: {}) => {
 
     const myHeaders = {
         'Content-Type': 'application/json',
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
     }
     let timeoutId: NodeJS.Timeout
 
@@ -91,6 +95,8 @@ export const userGoogleAuth = async (userData: {}) => {
       );*/
     const myHeaders = {
         'Content-Type': 'application/json',
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
     }
     let timeoutId: NodeJS.Timeout
 
@@ -123,6 +129,8 @@ export const userFBOAuth = async (userData: any) => {
 
     const myHeaders = {
         'Content-Type': 'application/json',
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
     }
     let timeoutId: NodeJS.Timeout
 
@@ -154,7 +162,8 @@ export const userFBOAuth = async (userData: any) => {
 export const createAccount = async (userdata: signupProps) => {
     const myHeaders = {
         'Content-Type': 'application/json',
-
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
     }
     let timeoutId: NodeJS.Timeout
 
@@ -183,7 +192,8 @@ export const createAccount = async (userdata: signupProps) => {
 export const requestCode = async (userdata: signupProps) => {
     const myHeaders = {
         'Content-Type': 'application/json',
-
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
     }
     let timeoutId: NodeJS.Timeout
 
@@ -210,7 +220,8 @@ export const requestCode = async (userdata: signupProps) => {
 export const reqPasswordResetCode = async (userdata: signupProps) => {
     const myHeaders = {
         'Content-Type': 'application/json',
-
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
     }
     let timeoutId: NodeJS.Timeout
 
@@ -239,7 +250,8 @@ export const reqPasswordResetCode = async (userdata: signupProps) => {
 export const confirmEmail = async (userdata: signupProps) => {
     const myHeaders = {
         'Content-Type': 'application/json',
-
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
     }
     let timeoutId: NodeJS.Timeout
 
@@ -272,7 +284,9 @@ export const verifyPhone = async (userdata: any) => {
 
     const myHeaders = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${Token}`
+        'Authorization': `Bearer ${Token}`,
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
     }
     let timeoutId: NodeJS.Timeout
 
@@ -303,7 +317,9 @@ export const getUserSettings = async () => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
-        'Authorization': `Bearer ${Token}`
+        'Authorization': `Bearer ${Token}`,
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
     }
     let timeoutId: NodeJS.Timeout
 
@@ -335,7 +351,9 @@ export const userSettings = async (userdata: any) => {
 
     const myHeaders = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${Token}`
+        'Authorization': `Bearer ${Token}`,
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
     }
     let timeoutId: NodeJS.Timeout
 
@@ -368,7 +386,9 @@ export const requestPhoneVerification = async (userdata: any) => {
 
     const myHeaders = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${Token}`
+        'Authorization': `Bearer ${Token}`,
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
     }
     let timeoutId: NodeJS.Timeout
 
@@ -397,7 +417,8 @@ export const requestPhoneVerification = async (userdata: any) => {
 export const passwordReset = async (userdata: signupProps) => {
     const myHeaders = {
         'Content-Type': 'application/json',
-
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
     }
     let timeoutId: NodeJS.Timeout
 
@@ -429,7 +450,9 @@ export const getUser = async () => {
 
     const myHeaders = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${Token}`
+        'Authorization': `Bearer ${Token}`,
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
     }
     let timeoutId: NodeJS.Timeout
 
@@ -461,7 +484,9 @@ export const updateUserImage = async (imageUrl: any) => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
     const myHeaders = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${Token}`
+        'Authorization': `Bearer ${Token}`,
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
     }
     let timeoutId: NodeJS.Timeout
 
@@ -499,7 +524,9 @@ export const userNotifications = {
         let timeoutId: NodeJS.Timeout
         const myHeaders = {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${Token}`
+            'Authorization': `Bearer ${Token}`,
+            'x-access-token': ACCESS_TOKEN,
+            'x-client-type': 'web',
         }
 
         const requestOptions = {
@@ -528,7 +555,9 @@ export const referralDashboard = {
         let timeoutId: NodeJS.Timeout
         const myHeaders = {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${Token}`
+            'Authorization': `Bearer ${Token}`,
+            'x-access-token': ACCESS_TOKEN,
+            'x-client-type': 'web',
         }
 
         const requestOptions = {
@@ -558,7 +587,9 @@ export const userNFTs = {
         // console.log(Token)
         let timeoutId: NodeJS.Timeout
         const myHeaders = {
-            'Authorization': `Bearer ${Token}`
+            'Authorization': `Bearer ${Token}`,
+            'x-access-token': ACCESS_TOKEN,
+            'x-client-type': 'web',
         }
 
         const requestOptions = {
@@ -587,7 +618,9 @@ export const userLeaderboards = {
         // console.log(Token)
         let timeoutId: NodeJS.Timeout
         const myHeaders = {
-            'Authorization': `Bearer ${Token}`
+            'Authorization': `Bearer ${Token}`,
+            'x-access-token': ACCESS_TOKEN,
+            'x-client-type': 'web',
         }
 
         const requestOptions = {
@@ -618,7 +651,9 @@ export const getUserDashboard = async () => {
 
     const myHeaders = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${Token}`
+        'Authorization': `Bearer ${Token}`,
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
     }
     let timeoutId: NodeJS.Timeout
 
@@ -650,7 +685,8 @@ export const getUserRank = async () => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
-
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
         'Authorization': `Bearer ${Token}`
     }
     let timeoutId: NodeJS.Timeout
@@ -718,7 +754,9 @@ export const updateCompleteProfile = async (body: {}) => {
 
     const myHeaders = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${Token}`
+        'Authorization': `Bearer ${Token}`,
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
     }
     let timeoutId: NodeJS.Timeout
 
@@ -751,7 +789,9 @@ export const getUserWallets = async () => {
 
     const myHeaders = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${Token}`
+        'Authorization': `Bearer ${Token}`,
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
     }
     let timeoutId: NodeJS.Timeout
 
@@ -782,7 +822,9 @@ export const getUserTransaction = async () => {
 
     const myHeaders = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${Token}`
+        'Authorization': `Bearer ${Token}`,
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
     }
     let timeoutId: NodeJS.Timeout
 
@@ -813,7 +855,9 @@ export const getUserPoints = async () => {
 
     const myHeaders = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${Token}`
+        'Authorization': `Bearer ${Token}`,
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
     }
     let timeoutId: NodeJS.Timeout
 
@@ -843,6 +887,8 @@ export const getUserPointsExchangeRate = async () => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${Token}`
     }
@@ -875,6 +921,8 @@ export const redeemPoints = async (body: {}) => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
         "Content-Type": "application/json",
         'Authorization': `Bearer ${Token}`
     }
@@ -908,7 +956,8 @@ export const getReferralLeaderboard = async () => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
-
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
         'Authorization': `Bearer ${Token}`
     }
     let timeoutId: NodeJS.Timeout
@@ -939,7 +988,8 @@ export const getPointsLeaderboard = async () => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
-
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
         'Authorization': `Bearer ${Token}`
     }
     let timeoutId: NodeJS.Timeout
@@ -972,6 +1022,8 @@ export const generateReferralCode = async () => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
         'Authorization': `Bearer ${Token}`
     }
     let timeoutId: NodeJS.Timeout
@@ -1004,6 +1056,8 @@ export const generateReferralHistory = async () => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
         'Authorization': `Bearer ${Token}`
     }
     let timeoutId: NodeJS.Timeout
@@ -1038,6 +1092,8 @@ export const referralPoints = {
 
         let Token = await SecureStore.getItemAsync('Ports-Token');
         const myHeaders = {
+            'x-access-token': ACCESS_TOKEN,
+            'x-client-type': 'web',
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${Token}`
         }
@@ -1072,6 +1128,8 @@ export const withdrawFromWallet = async (body: {}) => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
         "Content-Type": "application/json",
         'Authorization': `Bearer ${Token}`
     }
@@ -1103,6 +1161,8 @@ export const leaveAReview = async (body: {}) => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
         "Content-Type": "application/json",
         'Authorization': `Bearer ${Token}`
     }
@@ -1136,7 +1196,8 @@ export const getUserCompletedAdventure = async () => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
-
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
         'Authorization': `Bearer ${Token}`
     }
     let timeoutId: NodeJS.Timeout
@@ -1171,7 +1232,8 @@ export const getAllAdventure = {
         let Token = await SecureStore.getItemAsync('Gateway-Token');
 
         const myHeaders = {
-
+            'x-access-token': ACCESS_TOKEN,
+            'x-client-type': 'web',
             'Authorization': `Bearer ${Token}`
         }
         let timeoutId: NodeJS.Timeout
@@ -1206,7 +1268,8 @@ export const getEnrolledAdventure = {
         let Token = await SecureStore.getItemAsync('Gateway-Token');
 
         const myHeaders = {
-
+            'x-access-token': ACCESS_TOKEN,
+            'x-client-type': 'web',
             'Authorization': `Bearer ${Token}`
         }
         let timeoutId: NodeJS.Timeout
@@ -1239,7 +1302,8 @@ export const getInProgressAdventure = {
         let Token = await SecureStore.getItemAsync('Gateway-Token');
 
         const myHeaders = {
-
+            'x-access-token': ACCESS_TOKEN,
+            'x-client-type': 'web',
             'Authorization': `Bearer ${Token}`
         }
         let timeoutId: NodeJS.Timeout
@@ -1273,7 +1337,9 @@ export const getAdventure = async (id: string) => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
-        'Authorization': `Bearer ${Token}`
+        'Authorization': `Bearer ${Token}`,
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
     }
     let timeoutId: NodeJS.Timeout
 
@@ -1303,7 +1369,9 @@ export const getAdventureReviews = async (id: string) => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
-        'Authorization': `Bearer ${Token}`
+        'Authorization': `Bearer ${Token}`,
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
     }
     let timeoutId: NodeJS.Timeout
 
@@ -1333,7 +1401,9 @@ export const getModuleByAdventure = async (id: string) => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
-        'Authorization': `Bearer ${Token}`
+        'Authorization': `Bearer ${Token}`,
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
     }
     let timeoutId: NodeJS.Timeout
 
@@ -1365,6 +1435,8 @@ export const getLessonsByModule = async (id: string) => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
         'Authorization': `Bearer ${Token}`
     }
     let timeoutId: NodeJS.Timeout
@@ -1397,6 +1469,8 @@ export const getLesson = async (id: string) => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
         'Authorization': `Bearer ${Token}`
     }
     let timeoutId: NodeJS.Timeout
@@ -1427,6 +1501,8 @@ export const getQuizByLesson = async (id: string) => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
         'Authorization': `Bearer ${Token}`
     }
     let timeoutId: NodeJS.Timeout
@@ -1458,6 +1534,8 @@ export const getBadges = async () => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
         'Authorization': `Bearer ${Token}`
     }
     let timeoutId: NodeJS.Timeout
@@ -1488,6 +1566,8 @@ export const getUserBadges = async () => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
         'Authorization': `Bearer ${Token}`
     }
     let timeoutId: NodeJS.Timeout
@@ -1523,7 +1603,8 @@ export const getAllBadges =
             let Token = await SecureStore.getItemAsync('Gateway-Token');
 
             const myHeaders = {
-
+                'x-access-token': ACCESS_TOKEN,
+                'x-client-type': 'web',
                 'Authorization': `Bearer ${Token}`
             }
             let timeoutId: NodeJS.Timeout
@@ -1559,6 +1640,8 @@ export const getFollowedCommunities = {
         let Token = await SecureStore.getItemAsync('Gateway-Token');
 
         const myHeaders = {
+            'x-access-token': ACCESS_TOKEN,
+            'x-client-type': 'web',
             'Authorization': `Bearer ${Token}`
         }
         let timeoutId: NodeJS.Timeout
@@ -1591,6 +1674,8 @@ export const getMyCommunities = {
         let Token = await SecureStore.getItemAsync('Gateway-Token');
 
         const myHeaders = {
+            'x-access-token': ACCESS_TOKEN,
+            'x-client-type': 'web',
             'Authorization': `Bearer ${Token}`
         }
         let timeoutId: NodeJS.Timeout
@@ -1625,6 +1710,8 @@ export const getPublicCommunities = {
         let Token = await SecureStore.getItemAsync('Gateway-Token');
 
         const myHeaders = {
+            'x-access-token': ACCESS_TOKEN,
+            'x-client-type': 'web',
             'Authorization': `Bearer ${Token}`
         }
         let timeoutId: NodeJS.Timeout
@@ -1657,6 +1744,8 @@ export const getPrivateCommunities = {
         let Token = await SecureStore.getItemAsync('Gateway-Token');
 
         const myHeaders = {
+            'x-access-token': ACCESS_TOKEN,
+            'x-client-type': 'web',
             'Authorization': `Bearer ${Token}`
         }
         let timeoutId: NodeJS.Timeout
@@ -1688,6 +1777,8 @@ export const getCommunityPosts = {
         let Token = await SecureStore.getItemAsync('Gateway-Token');
 
         const myHeaders = {
+            'x-access-token': ACCESS_TOKEN,
+            'x-client-type': 'web',
             'Authorization': `Bearer ${Token}`
         }
         let timeoutId: NodeJS.Timeout
@@ -1720,6 +1811,8 @@ export const getPostComments = {
         let Token = await SecureStore.getItemAsync('Gateway-Token');
 
         const myHeaders = {
+            'x-access-token': ACCESS_TOKEN,
+            'x-client-type': 'web',
             'Authorization': `Bearer ${Token}`
         }
         let timeoutId: NodeJS.Timeout
@@ -1752,6 +1845,8 @@ export const commentOnAPost = async (body: any) => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${Token}`
     }
@@ -1785,6 +1880,8 @@ export const likeAComment = async (id: string) => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
         'Authorization': `Bearer ${Token}`
     }
     let timeoutId: NodeJS.Timeout
@@ -1815,6 +1912,8 @@ export const likeAPost = async (id: string) => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
         'Authorization': `Bearer ${Token}`
     }
     let timeoutId: NodeJS.Timeout
@@ -1847,6 +1946,8 @@ export const getPostLike = async (id: string) => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
         'Authorization': `Bearer ${Token}`
     }
     let timeoutId: NodeJS.Timeout
@@ -1877,6 +1978,8 @@ export const postToCommunity = async ({body}: { body: any }) => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${Token}`
     }
@@ -1910,6 +2013,8 @@ export const getCommunityPost = async (id: string) => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
         'Authorization': `Bearer ${Token}`
     }
     let timeoutId: NodeJS.Timeout
@@ -1942,6 +2047,8 @@ export const getCommunityFollowers = async (id: string) => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${Token}`
     }
@@ -1975,6 +2082,8 @@ export const communityRequests = async (id: string) => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
         'Authorization': `Bearer ${Token}`
     }
     let timeoutId: NodeJS.Timeout
@@ -2007,6 +2116,8 @@ export const getCommunityInfo = async (id?: string | any) => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${Token}`
     }
@@ -2038,6 +2149,8 @@ export const unFollowCommunity = async (id?: string | any) => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
         'Authorization': `Bearer ${Token}`
     }
     let timeoutId: NodeJS.Timeout
@@ -2070,6 +2183,8 @@ export const approveCommunityRequest = async (id?: string | any) => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
         'Authorization': `Bearer ${Token}`
     }
     let timeoutId: NodeJS.Timeout
@@ -2100,6 +2215,8 @@ export const declineCommunityRequest = async (id?: string | any) => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
         'Authorization': `Bearer ${Token}`
     }
     let timeoutId: NodeJS.Timeout
@@ -2132,6 +2249,8 @@ export const allAvailableBadges = async () => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
         'Authorization': `Bearer ${Token}`
     }
     let timeoutId: NodeJS.Timeout
@@ -2162,6 +2281,8 @@ export const getSingleBadge = async (id: string) => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
         'Authorization': `Bearer ${Token}`
     }
     let timeoutId: NodeJS.Timeout
@@ -2192,6 +2313,8 @@ export const getSingleBadge = async (id: string) => {
 export const getModuleTask = async (id: string) => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
     const myHeaders = {
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
         'Authorization': `Bearer ${Token}`
     }
     let timeoutId: NodeJS.Timeout
@@ -2224,6 +2347,8 @@ export const submitTask = async ({id, body}: { id: string, body: any }) => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${Token}`
     }
@@ -2255,7 +2380,8 @@ export const followACommunity = async ({id}: { id: string }) => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
-
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
         'Authorization': `Bearer ${Token}`
     }
     let timeoutId: NodeJS.Timeout
@@ -2286,7 +2412,9 @@ export const createCommunity = async (body) => {
 
     const myHeaders = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${Token}`
+        'Authorization': `Bearer ${Token}`,
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
     }
     let timeoutId: NodeJS.Timeout
 
@@ -2319,7 +2447,9 @@ export const submitQuizAnswers = async ({body, id}: { id: string, body: string, 
 
     const myHeaders = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${Token}`
+        'Authorization': `Bearer ${Token}`,
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
     }
     let timeoutId: NodeJS.Timeout
 
@@ -2351,7 +2481,9 @@ export const startAdventure = async (id: string) => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
-        'Authorization': `Bearer ${Token}`
+        'Authorization': `Bearer ${Token}`,
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
     }
     let timeoutId: NodeJS.Timeout
 
@@ -2381,7 +2513,9 @@ export const updateVideoWatchCount = async (id: string) => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
-        'Authorization': `Bearer ${Token}`
+        'Authorization': `Bearer ${Token}`,
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
     }
     let timeoutId: NodeJS.Timeout
 
@@ -2411,7 +2545,9 @@ export const getNextAdventure = async (id: string) => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
-        'Authorization': `Bearer ${Token}`
+        'Authorization': `Bearer ${Token}`,
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
     }
     let timeoutId: NodeJS.Timeout
 
@@ -2444,7 +2580,9 @@ export const changePassword = async (body: {}) => {
 
     const myHeaders = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${Token}`
+        'Authorization': `Bearer ${Token}`,
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
     }
     let timeoutId: NodeJS.Timeout
 

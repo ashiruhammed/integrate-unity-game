@@ -11,17 +11,17 @@ import NavBar from "../../components/layout/NavBar";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {unFollowCommunity} from "../../action/action";
 import {setResponse} from "../../app/slices/userSlice";
-import {RootStackScreenProps} from "../../../types";
+import {CommunityStackScreenProps, RootStackScreenProps} from "../../../types";
 import {RectButton} from "../../components/RectButton";
 
 const LeaveCommunity = ({navigation, route}: RootStackScreenProps<'LeaveCommunity'>) => {
-    const {id} = route.params
+
 
     const queryClient = useQueryClient();
     const dispatch = useAppDispatch()
 
     const dataSlice = useAppSelector(state => state.data)
-    const {theme} = dataSlice
+    const {theme,currentCommunityId} = dataSlice
     const backgroundColor = theme == 'light' ? "#fff" : Colors.dark.background
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
     const [reasonText, setReasonText] = useState('');
@@ -70,7 +70,7 @@ const LeaveCommunity = ({navigation, route}: RootStackScreenProps<'LeaveCommunit
 
 
     const leaveCommunity = () => {
-        unfollow(id)
+        unfollow(currentCommunityId)
     }
 
     const setReason = (value: string) => {

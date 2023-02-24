@@ -42,69 +42,76 @@ import {
     BottomSheetDefaultBackdropProps
 } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
 import FastImage from "react-native-fast-image";
+import {setCurrentCommunityId} from "../../../app/slices/dataSlice";
 
 
 const {width} = Dimensions.get('window')
 
 
 interface CardProps {
-    theme:'light'|'dark'
-    item:{
+    theme: 'light' | 'dark'
+    item: {
         community: {
             name: string,
             displayPhoto: string,
+            visibility: string,
+            ownerId: string,
             id: string,
         }
     },
-    seeCommunity:(id:string) =>void,
-    leaveCommunity:(id:string) =>void,
+
+    leaveCommunity: (id: string) => void,
+    seeCommunity: (id: string, ownerId: string, visibility: string, displayPhoto: string) => void
 }
-const CardFollowedCommunity = ({theme,item,seeCommunity,leaveCommunity}:CardProps) => {
+
+const CardFollowedCommunity = ({theme, item, seeCommunity, leaveCommunity}: CardProps) => {
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
 
-  return(
-        <TouchableOpacity activeOpacity={0.8} onPress={() => seeCommunity(item.community.id)}
-                                                  style={[styles.myCommunityCard, {
-                                                      backgroundColor: theme == 'dark' ? '#141414' : "#fff"
-                                                  }]}>
+    return (
+        <TouchableOpacity activeOpacity={0.8}
+                          onPress={() => seeCommunity(item.community.id, item.community.ownerId, item.community.visibility,
+                              item.community.displayPhoto,)}
+                          style={[styles.myCommunityCard, {
+                              backgroundColor: theme == 'dark' ? '#141414' : "#fff"
+                          }]}>
 
-                                    <View style={styles.communityLogo}>
-                                        <FastImage
-                                            style={styles.communityLogoImag}
-                                            source={{
-                                                uri: item?.community.displayPhoto,
-                                                cache: FastImage.cacheControl.web,
-                                                priority: FastImage.priority.normal,
-                                            }}
-                                            resizeMode={FastImage.resizeMode.cover}
-                                        />
+            <View style={styles.communityLogo}>
+                <FastImage
+                    style={styles.communityLogoImag}
+                    source={{
+                        uri: item?.community.displayPhoto,
+                        cache: FastImage.cacheControl.web,
+                        priority: FastImage.priority.normal,
+                    }}
+                    resizeMode={FastImage.resizeMode.cover}
+                />
 
-                                    </View>
+            </View>
 
-                                    <View style={styles.bodyCard}>
-                                        <Text style={[styles.cardTitle, {
-                                            color: textColor
-                                        }]}>
-                                            {item?.community.name}
-                                        </Text>
-                                        <Text style={[styles.cardTitleSub, {
-                                            color: textColor
-                                        }]}>
-                                            {item.totalUsersJoined} Members
-                                        </Text>
-                                    </View>
+            <View style={styles.bodyCard}>
+                <Text style={[styles.cardTitle, {
+                    color: textColor
+                }]}>
+                    {item?.community.name}
+                </Text>
+                <Text style={[styles.cardTitleSub, {
+                    color: textColor
+                }]}>
+                    {item.totalUsersJoined} Members
+                </Text>
+            </View>
 
-                                    <SmallRectButton onPress={()=>leaveCommunity(item.community.id)} style={{}}>
-                                        <Text style={styles.buttonText}>
-                                            Leave
+            <SmallRectButton onPress={() => leaveCommunity(item.community.id)} style={{}}>
+                <Text style={styles.buttonText}>
+                    Leave
 
-                                        </Text>
-                                    </SmallRectButton>
+                </Text>
+            </SmallRectButton>
 
-                                </TouchableOpacity>
-  )
+        </TouchableOpacity>
+    )
 }
-const AllCommunities = ({navigation}:RootStackScreenProps<'AllCommunities'>) => {
+const AllCommunities = ({navigation}: RootStackScreenProps<'AllCommunities'>) => {
 
     const dispatch = useAppDispatch()
     const queryClient = useQueryClient()
@@ -156,7 +163,6 @@ const AllCommunities = ({navigation}:RootStackScreenProps<'AllCommunities'>) => 
     })
 
 
-
     const sheetRef = useRef<BottomSheet>(null);
 
     const sheetRefMore = useRef<BottomSheet>(null);
@@ -184,7 +190,7 @@ const AllCommunities = ({navigation}:RootStackScreenProps<'AllCommunities'>) => 
 
 
     const createCommunity = () => {
-        if(terms) {
+        if (terms) {
             handleClosePressMore()
             handleClosePress()
             navigation.navigate('CreateCommunity')
@@ -207,15 +213,14 @@ const AllCommunities = ({navigation}:RootStackScreenProps<'AllCommunities'>) => 
     );
 
 
-
     const {
-        isLoading:loadingFollowedCommunities,
-        data:followedCommunities,
-        hasNextPage:hasNextComPage,
+        isLoading: loadingFollowedCommunities,
+        data: followedCommunities,
+        hasNextPage: hasNextComPage,
         fetchNextPage,
-        refetch:refetchCommunities,
+        refetch: refetchCommunities,
 
-        isRefetching:isFetchingCommunities
+        isRefetching: isFetchingCommunities
     } = useInfiniteQuery([`getFollowedCommunities`], ({pageParam = 1}) => getFollowedCommunities.communities(pageParam),
         {
             networkMode: 'online',
@@ -228,8 +233,6 @@ const AllCommunities = ({navigation}:RootStackScreenProps<'AllCommunities'>) => 
             },
             getPreviousPageParam: (firstPage, allPages) => firstPage.prevCursor,
         })
-
-
 
 
     const {
@@ -297,10 +300,10 @@ const AllCommunities = ({navigation}:RootStackScreenProps<'AllCommunities'>) => 
         }
     };
 
-    const leaveCommunity = (communityId:string) => {
+    const leaveCommunity = (communityId: string) => {
 
-        navigation.navigate('LeaveCommunity',{
-            id:communityId
+        navigation.navigate('LeaveCommunity', {
+            id: communityId
         })
     }
     const seeCommunity = (id: string) => {
@@ -320,15 +323,33 @@ const AllCommunities = ({navigation}:RootStackScreenProps<'AllCommunities'>) => 
         follow({id: communityId})
     }
 
+    const viewTheCommunity = (id: string, ownerId: string, visibility: string, displayPhoto: string) => {
+        dispatch(setCurrentCommunityId({
+            id,
+            currentCommunity: {
+                ownerId: ownerId,
+                visibility: visibility,
+                displayPhoto: displayPhoto
+            }
+        }))
+        navigation.navigate('SeeCommunity', {
+            screen: 'ViewCommunity',
+            //params:{id:item.id}
+        })
+    }
+
+
     const keyExtractor = useCallback((item: { id: any; }) => item.id, [],);
 
     const renderItem = useCallback(({item}) => (
-        <CardPublicCommunity loadingBadge={loadingBadge} joinModal={joinModal} theme={theme} item={item}/>
-    ), [loadingBadge,theme,tabIndex])
+        <CardPublicCommunity viewTheCommunity={viewTheCommunity} loadingBadge={loadingBadge} joinModal={joinModal}
+                             theme={theme} item={item}/>
+    ), [loadingBadge, theme, tabIndex])
 
     const renderItemFollowed = useCallback(({item}) => (
-        <CardFollowedCommunity leaveCommunity={leaveCommunity} seeCommunity={seeCommunity}  theme={theme} item={item}/>
-    ), [theme,tabIndex])
+        <CardFollowedCommunity leaveCommunity={leaveCommunity} seeCommunity={viewTheCommunity} theme={theme}
+                               item={item}/>
+    ), [theme, tabIndex])
 
 
     const updateCurrentSlideIndex = (e: { nativeEvent: { contentOffset: { x: any; }; }; }) => {
@@ -354,168 +375,162 @@ const AllCommunities = ({navigation}:RootStackScreenProps<'AllCommunities'>) => 
     let filterCommunity: readonly any[] | null | undefined = []
     let filterFollowedCommunity: readonly any[] | null | undefined = []
 
-if(tabIndex == 0){
+    if (tabIndex == 0) {
 
 
-    if (!isLoading && data && data?.pages[0]?.data) {
-        filterCommunity = data?.pages[0]?.data?.result?.filter((community: { name: string | string[]; }) =>
-            community?.name?.includes(searchValue.trim())
-        )
+        if (!isLoading && data && data?.pages[0]?.data) {
+            filterCommunity = data?.pages[0]?.data?.result?.filter((community: { name: string | string[]; }) =>
+                community?.name?.includes(searchValue.trim())
+            )
+        }
     }
-}
-if(tabIndex == 1){
+    if (tabIndex == 1) {
 
 
-    if (!isLoading && data && data?.pages[0]?.data) {
-        filterFollowedCommunity = followedCommunities?.pages[0]?.data?.result?.filter((community: { community:{name: string | string[]; }}) =>
-            community?.community.name?.includes(searchValue.trim())
-
-        )
+        if (!isLoading && data && data?.pages[0]?.data) {
+            filterFollowedCommunity = followedCommunities?.pages[0]?.data?.result?.filter((community: { community: { name: string | string[]; } }) =>
+                community?.community.name?.includes(searchValue.trim())
+            )
+        }
     }
-}
 
 
     return (
 
         <>
-        <SafeAreaView style={[styles.safeArea, {
-            backgroundColor
-        }]}>
+            <SafeAreaView style={[styles.safeArea, {
+                backgroundColor
+            }]}>
 
 
-            <Modal
+                <Modal
 
-                animationType="slide"
-                transparent={true}
-                visible={modalVisible}
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalVisible}
 
-                onRequestClose={() => {
-                    Alert.alert("Modal has been closed.");
-                    setModalVisible(false);
-                }}
-            >
-                <View style={styles.backDrop}>
-                    <View style={styles.modalContainer}>
+                    onRequestClose={() => {
+                        Alert.alert("Modal has been closed.");
+                        setModalVisible(false);
+                    }}
+                >
+                    <View style={styles.backDrop}>
+                        <View style={styles.modalContainer}>
 
-                        <View style={styles.sheetHead}>
+                            <View style={styles.sheetHead}>
 
-                            <TouchableOpacity activeOpacity={0.8} onPress={closeModal}
-                                              style={styles.dismiss}>
-                                <Ionicons name="ios-close" size={24} color="#929292"/>
-                            </TouchableOpacity>
+                                <TouchableOpacity activeOpacity={0.8} onPress={closeModal}
+                                                  style={styles.dismiss}>
+                                    <Ionicons name="ios-close" size={24} color="#929292"/>
+                                </TouchableOpacity>
 
-                        </View>
-
-                        <View style={styles.modalBody}>
-
-                            <Text style={styles.missionText}>
-                                Requirements
-                            </Text>
-                            <View style={styles.dripImageWrap}>
-                                <Image
-                                    source={{uri: badge?.data?.imageUrl}}
-                                    style={styles.dripImage}/>
                             </View>
 
+                            <View style={styles.modalBody}>
 
-                            <View style={styles.textWrap}>
                                 <Text style={styles.missionText}>
-                                    {badge?.data?.title}
+                                    Requirements
                                 </Text>
+                                <View style={styles.dripImageWrap}>
+                                    <Image
+                                        source={{uri: badge?.data?.imageUrl}}
+                                        style={styles.dripImage}/>
+                                </View>
 
-                                <Text style={[styles.learnText, {
-                                    textAlign: 'center'
-                                }]}>
-                                    <Text style={{
-                                        color: Colors.errorRed
-                                    }}>Note:</Text> x{requiredBadges} amount of badge will
-                                    be deducted from your account
-                                </Text>
+
+                                <View style={styles.textWrap}>
+                                    <Text style={styles.missionText}>
+                                        {badge?.data?.title}
+                                    </Text>
+
+                                    <Text style={[styles.learnText, {
+                                        textAlign: 'center'
+                                    }]}>
+                                        <Text style={{
+                                            color: Colors.errorRed
+                                        }}>Note:</Text> x{requiredBadges} amount of badge will
+                                        be deducted from your account
+                                    </Text>
+                                </View>
+
                             </View>
 
+
+                            <RectButton onPress={followCommunityNow} style={{
+                                width: 220,
+                            }}>
+                                {
+                                    following ? <ActivityIndicator size='small' color={"#fff"}/> :
+
+                                        <Text style={styles.buttonText}>
+                                            Use {badge?.data?.title}
+                                        </Text>
+                                }
+                            </RectButton>
+
                         </View>
+                    </View>
+                </Modal>
+                <NavBar title={"Community"}/>
 
+                <View style={styles.searchWrap}>
 
-                        <RectButton onPress={followCommunityNow} style={{
-                            width: 220,
-                        }}>
-                            {
-                                following ? <ActivityIndicator size='small' color={"#fff"}/> :
+                    <SearchValue isWidth={"80%"} placeholder={'Search for all types of Communities'}
+                                 value={searchValue} onChangeText={(e) => setSearchValue(e)}/>
 
-                                    <Text style={styles.buttonText}>
-                                        Use {badge?.data?.title}
-                                    </Text>
-                            }
-                        </RectButton>
-
+                    <View style={[styles.searchTangible, {
+                        borderColor
+                    }]}>
+                        <Ionicons name="md-search-outline" size={20} color="#666666"/>
                     </View>
                 </View>
-            </Modal>
-            <NavBar title={"Community"}/>
 
-            <View style={styles.searchWrap}>
-
-                <SearchValue isWidth={"80%"} placeholder={'Search for all types of Communities'}
-                             value={searchValue}  onChangeText={(e) => setSearchValue(e)}/>
-
-                <View style={[styles.searchTangible, {
-                    borderColor
-                }]}>
-                    <Ionicons name="md-search-outline" size={20} color="#666666"/>
+                <View style={styles.segmentWrap}>
+                    <SegmentedControl tabs={["All Communities", "Followed communities", "My Communities"]}
+                                      currentIndex={tabIndex}
+                                      onChange={handleTabsChange}
+                                      segmentedControlBackgroundColor={backgroundColor}
+                                      activeSegmentBackgroundColor={Colors.primaryColor}
+                                      activeTextColor={"#fff"}
+                                      textColor={"#888888"}
+                                      paddingVertical={pixelSizeVertical(8)}/>
                 </View>
-            </View>
-
-            <View  style={styles.segmentWrap}>
-                <SegmentedControl tabs={["All Communities", "Followed communities", "My Communities"]}
-                                  currentIndex={tabIndex}
-                                  onChange={handleTabsChange}
-                                  segmentedControlBackgroundColor={backgroundColor}
-                                  activeSegmentBackgroundColor={Colors.primaryColor}
-                                  activeTextColor={"#fff"}
-                                  textColor={"#888888"}
-                                  paddingVertical={pixelSizeVertical(8)}/>
-            </View>
 
 
                 {
                     tabIndex == 0
                     &&
                     <View style={styles.ActivityCardTop}>
-                    <Text style={[styles.listTitle, {
-                        color: textColor
-                    }]}>
-                        Public Communities
-                    </Text>
+                        <Text style={[styles.listTitle, {
+                            color: textColor
+                        }]}>
+                            Public Communities
+                        </Text>
                     </View>
                 }
                 {
                     tabIndex == 1
                     &&
                     <View style={styles.ActivityCardTop}>
-                    <Text style={[styles.listTitle, {
-                        color: textColor
-                    }]}>
-                        My Communities
-                    </Text>
+                        <Text style={[styles.listTitle, {
+                            color: textColor
+                        }]}>
+                            My Communities
+                        </Text>
                     </View>
                 }
 
 
-            {
-                isLoading && <ActivityIndicator size='small' color={Colors.primaryColor}/>
-            }
-            {
-                loading && <ActivityIndicator size='small' color={Colors.primaryColor}/>
-            }
+                {
+                    isLoading && <ActivityIndicator size='small' color={Colors.primaryColor}/>
+                }
+                {
+                    loading && <ActivityIndicator size='small' color={Colors.primaryColor}/>
+                }
 
-            <IF condition={tabIndex == 0}>
-                <View style={styles.listWrap}>
-                    {/*    */}
-
-
-
-
-
+                <IF condition={tabIndex == 0}>
+                    <View style={styles.listWrap}>
+                        {/*    */}
 
 
                         <FlatList
@@ -535,95 +550,87 @@ if(tabIndex == 1){
                         />
 
 
-
-                </View>
-            </IF>
-            <IF condition={tabIndex == 1}>
-    <View style={styles.listWrap}>
-
+                    </View>
+                </IF>
+                <IF condition={tabIndex == 1}>
+                    <View style={styles.listWrap}>
 
 
-
-                    {
-
+                        {
 
 
-                        <FlatList
-                            ListHeaderComponent={renderHeaderItem}
-                            ListHeaderComponentStyle={{
+                            <FlatList
+                                ListHeaderComponent={renderHeaderItem}
+                                ListHeaderComponentStyle={{
 
-                                alignItems: 'center',
-                                width: '100%'
-                            }
-                            }
+                                    alignItems: 'center',
+                                    width: '100%'
+                                }
+                                }
 
-                            refreshing={loadingFollowedCommunities}
-                            onRefresh={refetchCommunities}
-                            scrollEnabled
-                            showsVerticalScrollIndicator={false}
-                            data={filterFollowedCommunity}
-                            renderItem={renderItemFollowed}
+                                refreshing={loadingFollowedCommunities}
+                                onRefresh={refetchCommunities}
+                                scrollEnabled
+                                showsVerticalScrollIndicator={false}
+                                data={filterFollowedCommunity}
+                                renderItem={renderItemFollowed}
 
-                            keyExtractor={keyExtractor}
-                            onEndReachedThreshold={0.3}
-                            ListFooterComponent={loading ?
-                                <ActivityIndicator size="small" color={Colors.primaryColor}/> : null}
-                        />
-                    }
-
-
-                </View>
-            </IF>
-            <IF condition={tabIndex == 2}>
-                <View style={styles.listWrap}>
-
-
-
-                    <View style={styles.startCommunity}>
-                        <Text style={[styles.TextTitle, {
-                            color: textColor
-                        }]}>
-                            Create your own Community
-                        </Text>
-                        <RectButton onPress={()=>handleSnapPress(1)} style={{
-                            width: 190
-                        }} >
-                            <Text style={styles.buttonText}>
-                                Create Community
-                            </Text>
-                        </RectButton>
+                                keyExtractor={keyExtractor}
+                                onEndReachedThreshold={0.3}
+                                ListFooterComponent={loading ?
+                                    <ActivityIndicator size="small" color={Colors.primaryColor}/> : null}
+                            />
+                        }
 
 
                     </View>
-                    {
+                </IF>
+                <IF condition={tabIndex == 2}>
+                    <View style={styles.listWrap}>
 
 
-
-                        <FlatList
-
-
-                            refreshing={isLoading}
-                            onRefresh={refetch}
-                            scrollEnabled
-                            showsVerticalScrollIndicator={false}
-                            data={allMyCommunities?.pages[0]?.data?.result}
-                            renderItem={renderItem}
-                            onEndReached={loadMore}
-                            keyExtractor={keyExtractor}
-                            onEndReachedThreshold={0.3}
-                            ListFooterComponent={loading ?
-                                <ActivityIndicator size="small" color={Colors.primaryColor}/> : null}
-                        />
-                    }
+                        <View style={styles.startCommunity}>
+                            <Text style={[styles.TextTitle, {
+                                color: textColor
+                            }]}>
+                                Create your own Community
+                            </Text>
+                            <RectButton onPress={() => handleSnapPress(1)} style={{
+                                width: 190
+                            }}>
+                                <Text style={styles.buttonText}>
+                                    Create Community
+                                </Text>
+                            </RectButton>
 
 
-                </View>
-            </IF>
+                        </View>
+                        {
 
 
-        </SafeAreaView>
+                            <FlatList
 
 
+                                refreshing={isLoading}
+                                onRefresh={refetch}
+                                scrollEnabled
+                                showsVerticalScrollIndicator={false}
+                                data={allMyCommunities?.pages[0]?.data?.result}
+                                renderItem={renderItem}
+                                onEndReached={loadMore}
+                                keyExtractor={keyExtractor}
+                                onEndReachedThreshold={0.3}
+                                ListFooterComponent={loading ?
+                                    <ActivityIndicator size="small" color={Colors.primaryColor}/> : null}
+                            />
+                        }
+
+
+                    </View>
+                </IF>
+
+
+            </SafeAreaView>
 
 
             <BottomSheet
@@ -863,7 +870,7 @@ if(tabIndex == 1){
             </BottomSheet>
 
 
-            </>
+        </>
     );
 };
 
@@ -910,7 +917,6 @@ const styles = StyleSheet.create({
         borderRadius: 10,
 
     },
-
 
 
     cardTitleSub: {
@@ -980,11 +986,11 @@ const styles = StyleSheet.create({
     },
 
     dismiss: {
-        right: -30,
+
         backgroundColor: "#fff",
         borderRadius: 30,
-        height: 45,
-        width: 45,
+        height: 35,
+        width: 35,
         alignItems: 'center',
         justifyContent: 'center',
         shadowOffset: {
@@ -1033,7 +1039,6 @@ const styles = StyleSheet.create({
         color: Colors.light.text,
         fontFamily: Fonts.quickSandBold
     },
-
 
 
     myCommunityCard: {

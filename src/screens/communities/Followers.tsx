@@ -14,7 +14,7 @@ import {StatusBar} from "expo-status-bar";
 import {AntDesign, Ionicons, SimpleLineIcons} from "@expo/vector-icons";
 import {useAppSelector} from "../../app/hooks";
 import Colors from "../../constants/Colors";
-import {RootStackScreenProps} from "../../../types";
+import {CommunityStackScreenProps, RootStackScreenProps} from "../../../types";
 import Drawer from "./components/Drawer";
 import {useQuery} from "@tanstack/react-query";
 import {getCommunityFollowers, getCommunityInfo} from "../../action/action";
@@ -83,17 +83,17 @@ const FollowerCard = ({theme,item}:cardProps) =>{
 }
 
 
-const Followers = ({navigation, route}: RootStackScreenProps<'Followers'>) => {
+const Followers = ({navigation, route}: CommunityStackScreenProps<'Followers'>) => {
 
     const user = useAppSelector(state => state.user)
     const {responseState, responseType, responseMessage} = user
-    const {id} = route.params
+
 
     const offset = useSharedValue(0);
     const [toggleMenu, setToggleMenu] = useState(false);
 
     const dataSlice = useAppSelector(state => state.data)
-    const {theme} = dataSlice
+    const {theme,currentCommunityId} = dataSlice
     const backgroundColor = theme == 'light' ? "#fff" : Colors.dark.background
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
 
@@ -111,12 +111,12 @@ const Followers = ({navigation, route}: RootStackScreenProps<'Followers'>) => {
         navigation.goBack()
     }
 
-    const {isLoading, data, refetch} = useQuery(['getCommunityInfo'], () => getCommunityInfo(id), {})
+    const {isLoading, data, refetch} = useQuery(['getCommunityInfo'], () => getCommunityInfo(currentCommunityId), {})
     const {
         isLoading: loading,
         data: followers,
         refetch: getFollowers
-    } = useQuery(['CommunityFollowers'], () => getCommunityFollowers(id), {})
+    } = useQuery(['CommunityFollowers'], () => getCommunityFollowers(currentCommunityId), {})
 
 
     const renderItem = useCallback(
@@ -126,8 +126,7 @@ const Followers = ({navigation, route}: RootStackScreenProps<'Followers'>) => {
         [],
     );
     const menuToggle = () => {
-        offset.value = Math.random()
-        setToggleMenu(!toggleMenu)
+       navigation.openDrawer()
     }
 
     useRefreshOnFocus(getFollowers)
@@ -161,11 +160,7 @@ const Followers = ({navigation, route}: RootStackScreenProps<'Followers'>) => {
 
         <>
 
-            {
-                toggleMenu &&
 
-                <Drawer menuToggle={menuToggle} communityId={id}/>
-            }
 
             <SafeAreaView style={[styles.safeArea, {
                 backgroundColor

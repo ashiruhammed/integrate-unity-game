@@ -23,7 +23,7 @@ import {
 } from "../../action/action";
 import {useRefreshOnFocus} from "../../helpers";
 import {AntDesign, SimpleLineIcons} from "@expo/vector-icons";
-import {RootStackScreenProps} from "../../../types";
+import {CommunityStackScreenProps, RootStackScreenProps} from "../../../types";
 import {fontPixel, heightPixel, pixelSizeHorizontal, widthPixel} from "../../helpers/normalize";
 import {Fonts} from "../../constants/Fonts";
 import Drawer from "./components/Drawer";
@@ -95,14 +95,14 @@ const RequestCard = ({item, theme, selectUser}: props) => {
         </Animated.View>
     )
 }
-const RequestsScreen = ({navigation, route}: RootStackScreenProps<'RequestsScreen'>) => {
+const RequestsScreen = ({navigation, route}: CommunityStackScreenProps<'RequestsScreen'>) => {
 
 
     const dispatch = useAppDispatch()
     const queryClient = useQueryClient();
     const user = useAppSelector(state => state.user)
     const {responseState, responseType, responseMessage} = user
-    const {id} = route.params
+
 
     const [requestModalVisible, setRequestModalVisible] = useState(false);
     const animation = useRef(null);
@@ -113,19 +113,20 @@ const RequestsScreen = ({navigation, route}: RootStackScreenProps<'RequestsScree
     const [toggleMenu, setToggleMenu] = useState(false);
 
     const dataSlice = useAppSelector(state => state.data)
-    const {theme} = dataSlice
+    const {theme,currentCommunityId} = dataSlice
     const backgroundColor = theme == 'light' ? "#fff" : Colors.dark.background
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
 
     const lightTextColor = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
     const borderColor = theme == 'light' ? Colors.borderColor : '#313131'
 
-    const {isLoading, data, refetch} = useQuery(['getCommunityInfo'], () => getCommunityInfo(id), {})
+
+    const {isLoading, data, refetch} = useQuery(['getCommunityInfo'], () => getCommunityInfo(currentCommunityId), {})
     const {
         isLoading: loading,
         data: requests,
         refetch: getRequests
-    } = useQuery(['communityRequests'], () => communityRequests(id), {})
+    } = useQuery(['communityRequests'], () => communityRequests(currentCommunityId), {})
 
 
     const {mutate: approve, isLoading: approving} = useMutation(['approveCommunityRequest'], approveCommunityRequest, {
@@ -152,6 +153,8 @@ const RequestsScreen = ({navigation, route}: RootStackScreenProps<'RequestsScree
             queryClient.invalidateQueries(['approveCommunityRequest'])
         }
     })
+
+
     const {mutate: reject, isLoading: rejecting} = useMutation(['declineCommunityRequest'], declineCommunityRequest, {
         onSuccess: (data) => {
 
@@ -198,8 +201,7 @@ setRequestId(id)
         [theme],
     );
     const menuToggle = () => {
-        offset.value = Math.random()
-        setToggleMenu(!toggleMenu)
+     navigation.openDrawer()
     }
 
     useRefreshOnFocus(getRequests)
@@ -238,11 +240,6 @@ setRequestId(id)
     return (
         <>
 
-            {
-                toggleMenu &&
-
-                <Drawer menuToggle={menuToggle} communityId={id}/>
-            }
 
 
             <Modal

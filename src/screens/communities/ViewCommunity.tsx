@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {memo, useCallback, useEffect, useRef, useState} from 'react';
 
 import {
     Text,
@@ -12,7 +12,7 @@ import {
     ActivityIndicator, Pressable,
 
 } from 'react-native';
-import {RootStackScreenProps} from "../../../types";
+import {CommunityStackScreenProps, RootStackScreenProps} from "../../../types";
 import NavBar from "../../components/layout/NavBar";
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 import {SafeAreaView} from "react-native-safe-area-context";
@@ -250,8 +250,8 @@ const H_MIN_HEIGHT = 52;
 const H_SCROLL_DISTANCE = H_MAX_HEIGHT - H_MIN_HEIGHT;
 
 
-const ViewCommunity = ({navigation, route}: RootStackScreenProps<'ViewCommunity'>) => {
-    const {id} = route.params
+const ViewCommunity = ({navigation, route}: CommunityStackScreenProps<'ViewCommunity'>) => {
+
     const [toggleMenu, setToggleMenu] = useState(false);
     const user = useAppSelector(state => state.user)
     const {responseState, responseType, responseMessage} = user
@@ -262,7 +262,7 @@ const ViewCommunity = ({navigation, route}: RootStackScreenProps<'ViewCommunity'
 
 
     const dataSlice = useAppSelector(state => state.data)
-    const {theme} = dataSlice
+    const {theme,currentCommunityId} = dataSlice
     const backgroundColor = theme == 'light' ? "#EDEDED" : Colors.dark.background
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
     const lightTextColor = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
@@ -305,7 +305,7 @@ const ViewCommunity = ({navigation, route}: RootStackScreenProps<'ViewCommunity'
         },
     })
 
-    const {isLoading, data, refetch} = useQuery(['getCommunityInfo'], () => getCommunityInfo(id))
+    const {isLoading, data, refetch} = useQuery(['getCommunityInfo'], () => getCommunityInfo(currentCommunityId))
 
     const {
         isLoading: loadingPost,
@@ -316,7 +316,7 @@ const ViewCommunity = ({navigation, route}: RootStackScreenProps<'ViewCommunity'
         refetch: fetchPosts,
 
         isRefetching
-    } = useInfiniteQuery([`CommunityPosts`], ({pageParam = 1}) => getCommunityPosts.posts(pageParam, id),
+    } = useInfiniteQuery([`CommunityPosts`], ({pageParam = 1}) => getCommunityPosts.posts(pageParam, currentCommunityId),
         {
 
             getNextPageParam: lastPage => {
@@ -333,9 +333,10 @@ const ViewCommunity = ({navigation, route}: RootStackScreenProps<'ViewCommunity'
     const viewPost = (postId: string, post:any) => {
         navigation.navigate('PostScreen', {
             postId,
-            communityId: id,
+            communityId: currentCommunityId,
             post
         })
+
     }
 
 
@@ -361,7 +362,7 @@ const ViewCommunity = ({navigation, route}: RootStackScreenProps<'ViewCommunity'
                         </TouchableOpacity>
 
 
-                        <TouchableOpacity onPress={menuToggle} activeOpacity={0.8} style={styles.rightButton}>
+                        <TouchableOpacity onPress={()=>navigation.openDrawer()} activeOpacity={0.8} style={styles.rightButton}>
                             <SimpleLineIcons name="menu" size={24} color="#fff"/>
                         </TouchableOpacity>
                     </View>
@@ -419,16 +420,6 @@ const ViewCommunity = ({navigation, route}: RootStackScreenProps<'ViewCommunity'
 
                     <View style={styles.writePost}>
                         <View style={styles.userImage}>
-                            {
-                                isRunningInExpoGo ?
-                                    <Image
-                                        style={styles.userImagePhoto}
-                                        source={{
-                                            uri: !userInfo?.data?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : userInfo?.data?.avatar,
-
-                                        }}
-                                    />
-                                    :
 
                                     <FastImage
                                         style={styles.userImagePhoto}
@@ -440,7 +431,7 @@ const ViewCommunity = ({navigation, route}: RootStackScreenProps<'ViewCommunity'
                                         }}
                                         resizeMode={FastImage.resizeMode.cover}
                                     />
-                            }
+
                         </View>
                         <Pressable onPress={makePost} style={[styles.postInput, {
                             backgroundColor,
@@ -498,13 +489,13 @@ const ViewCommunity = ({navigation, route}: RootStackScreenProps<'ViewCommunity'
     useRefreshOnFocus(fetchPosts)
     const makePost = () => {
         navigation.navigate('MakeAPost', {
-            id
+            id:currentCommunityId
         })
     }
 
     useEffect(() => {
         refetch
-    }, [id])
+    }, [currentCommunityId])
     const menuToggle = () => {
         offset.value = Math.random()
         setToggleMenu(!toggleMenu)
@@ -895,4 +886,4 @@ const styles = StyleSheet.create({
     },
 })
 
-export default ViewCommunity;
+export default memo(ViewCommunity);
