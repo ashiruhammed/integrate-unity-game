@@ -29,7 +29,7 @@ import {useAppDispatch, useAppSelector} from "../../app/hooks";
 import {RootStackScreenProps} from "../../../types";
 import {Fonts} from "../../constants/Fonts";
 import Colors from "../../constants/Colors";
-import {Video} from "expo-av";
+
 import {clearSubmissions} from "../../app/slices/dataSlice";
 import {IF} from "../../helpers/ConditionJsx";
 import LottieView from "lottie-react-native";

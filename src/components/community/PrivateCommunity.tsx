@@ -277,7 +277,7 @@ const CommunityCard = ({theme,item,loadingBadge,joinModal,viewTheCommunity}: car
 
 
                 {
-                    !item.currentUserJoined  &&    !item?.userAlreadyRequest  && item?.owner?.id !== userData.id &&
+                    !item.currentUserJoined  && !item?.userAlreadyRequest  && item?.owner?.id !== userData.id &&
 
                     <RectButton
                         onPress={open}

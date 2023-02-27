@@ -426,34 +426,22 @@ $recaptcha.current.open()
                 {
                     googleAuthenticating &&
                     <ActivityIndicator size="large" color={Colors.primaryColor}
-                                       style={[StyleSheet.absoluteFill, {
-                                           zIndex: 1,
-                                           backgroundColor: 'rgba(0,0,0,0.1)'
-                                       }]}/>
+                                       style={[StyleSheet.absoluteFill, styles.loader]}/>
                 }
                 {
                     appleAuthenticating &&
                     <ActivityIndicator size="large" color={Colors.primaryColor}
-                                       style={[StyleSheet.absoluteFill, {
-                                           zIndex: 1,
-                                           backgroundColor: 'rgba(0,0,0,0.1)'
-                                       }]}/>
+                                       style={[StyleSheet.absoluteFill, styles.loader]}/>
                 }
                 {
                     fbAuthenticating &&
                     <ActivityIndicator size="large" color={Colors.primaryColor}
-                                       style={[StyleSheet.absoluteFill, {
-                                           zIndex: 1,
-                                           backgroundColor: 'rgba(0,0,0,0.1)'
-                                       }]}/>
+                                       style={[StyleSheet.absoluteFill, styles.loader]}/>
                 }
                 {
                     loadingUser &&
                     <ActivityIndicator size="large" color={Colors.primaryColor}
-                                       style={[StyleSheet.absoluteFill, {
-                                           zIndex: 1,
-                                           backgroundColor: 'rgba(0,0,0,0.1)'
-                                       }]}/>
+                                       style={[StyleSheet.absoluteFillObject, styles.loader]}/>
                 }
 
                 <KeyboardAwareScrollView scrollEnabled
@@ -664,7 +652,7 @@ $recaptcha.current.open()
 
                         <TouchableOpacity style={styles.signUpBtn}>
 
-                            <Text onPress={signupNow} onPress={handleOpenPress} style={styles.alreadyHaveAcc}>
+                            <Text onPress={signupNow} style={styles.alreadyHaveAcc}>
                                 No account yet? <Text style={{
                                 color: Colors.primaryColor
                             }}>Get one here</Text>
@@ -830,6 +818,10 @@ const styles = StyleSheet.create({
 
         height: '100%'
     },
+    loader:{
+        zIndex: 1,
+        backgroundColor: 'rgba(0,0,0,0.1)'
+    }
 })
 
 export default LoginNow;

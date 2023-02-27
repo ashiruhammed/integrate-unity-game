@@ -1,6 +1,6 @@
 import React, {useCallback, useState} from 'react';
 
-import {Text, View, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator} from 'react-native';
+import {Text, View, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Button} from 'react-native';
 import {SafeAreaView} from "react-native-safe-area-context";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
 import Colors from "../../constants/Colors";
@@ -70,6 +70,7 @@ const LeaveCommunity = ({navigation, route}: RootStackScreenProps<'LeaveCommunit
 
 
     const leaveCommunity = () => {
+        console.log('leaveCommunity')
         unfollow(currentCommunityId)
     }
 
@@ -119,6 +120,8 @@ const LeaveCommunity = ({navigation, route}: RootStackScreenProps<'LeaveCommunit
                       showsVerticalScrollIndicator={false}/>
             </View>
 
+
+
             <RectButton disabled={isLoading} style={styles.button} onPress={leaveCommunity}>
 
                 {
@@ -131,6 +134,9 @@ const LeaveCommunity = ({navigation, route}: RootStackScreenProps<'LeaveCommunit
                         </Text>
                 }
             </RectButton>
+
+
+
 
         </SafeAreaView>
     );

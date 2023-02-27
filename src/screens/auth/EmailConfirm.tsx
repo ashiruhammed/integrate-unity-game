@@ -4,7 +4,7 @@ import {Text, View, StyleSheet, TouchableOpacity, Dimensions, Image, ActivityInd
 import {SafeAreaView} from "react-native-safe-area-context";
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 import {AntDesign} from "@expo/vector-icons";
-import PhoneInput from "react-native-phone-number-input";
+
 import Colors from "../../constants/Colors";
 import {Fonts} from "../../constants/Fonts";
 import {fontPixel, heightPixel, pixelSizeHorizontal, widthPixel} from "../../helpers/normalize";
@@ -16,8 +16,7 @@ import {AuthStackScreenProps} from "../../../types";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {confirmEmail, getUser, requestCode} from "../../action/action";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
-import {Simulate} from "react-dom/test-utils";
-import contextMenu = Simulate.contextMenu;
+
 import {setAuthenticated, setResponse, unSetResponse, updateUserInfo} from "../../app/slices/userSlice";
 import Toast from "../../components/Toast";
 import * as SecureStore from "expo-secure-store";

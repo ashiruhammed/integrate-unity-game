@@ -45,7 +45,7 @@ import {api_key, upload_preset} from "../../constants";
 const formSchema = yup.object().shape({
     fullName: yup.string().min(2, 'Name is Too short').required('Name is required').trim('No white spaces'),
     userName: yup.string().min(2, 'User name is Too short').required('User Name is required').trim('No white spaces'),
-    phoneNumber: yup.string().required('Phone number is required').min(10, 'Please enter a valid phone number'),
+    phoneNumber: yup.string().min(10, 'Please enter a valid phone number').required('Phone number is required'),
     email: yup.string().email("Please enter a valid email address").required('Email is required'),
 
 });

@@ -131,6 +131,8 @@ const NFTs = () => {
             },
             getPreviousPageParam: (firstPage, allPages) => firstPage.prevCursor,
         })
+
+
 //console.log(data?.pages[0]?.data.result)
     const loadMore = () => {
         if (hasNextPage) {

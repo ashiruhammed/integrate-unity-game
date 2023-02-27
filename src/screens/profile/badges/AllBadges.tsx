@@ -12,6 +12,7 @@ import {useInfiniteQuery, useQuery} from "@tanstack/react-query";
 import {getAllAdventure, getAllBadges, getBadges} from "../../../action/action";
 import {FlashList} from "@shopify/flash-list";
 import {isWhatPercentOf, useRefreshOnFocus} from "../../../helpers";
+import badges from "../Badges";
 
 
 interface badgeProps {

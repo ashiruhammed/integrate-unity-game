@@ -35,7 +35,8 @@ interface ToastInterface {
     copy?: boolean,
     button?: React.ReactNode
 }
-
+const sadMascot = require('../assets/images/sadmascot.png')
+const happyMascot = require('../assets/images/happyBee.png')
 
 
 
@@ -72,7 +73,7 @@ const Toast = ({
 
                     <MotiView from={{
                         opacity: 0,
-                        translateY: -50,
+                        translateY: 150,
                     }}
                               transition={{
                                   //@ts-ignore
@@ -82,12 +83,12 @@ const Toast = ({
                               }}
                               animate={{
                                   opacity: 1,
-                                  translateY: 50,
+                                  translateY: -150,
 
                               }}
                               exit={{
                                   opacity: 0,
-                                  translateY: -50,
+                                  translateY: 150,
                               }}
 
                               style={[{
@@ -110,9 +111,9 @@ const Toast = ({
                                     {
                                         type == 'error' ?
 
-                                            <Image source={require('../assets/images/sadmascot.png')} style={styles.mascot}/>
+                                            <Image source={sadMascot} style={styles.mascot}/>
                                             :
-                                            <Image source={require('../assets/images/happyBee.png')} style={styles.mascot}/>
+                                            <Image source={happyMascot} style={styles.mascot}/>
                                     }
                                 </View>
                             </View>
@@ -153,6 +154,7 @@ const styles = StyleSheet.create({
 
     },
     toastWrap: {
+        bottom:20,
         width: '90%',
         position: 'absolute',
         zIndex: 100000,

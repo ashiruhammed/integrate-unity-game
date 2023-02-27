@@ -1065,7 +1065,7 @@ const styles = StyleSheet.create({
         height: 50,
         width: 50,
         borderRadius: 5,
-        backgroundColor: "blue"
+        backgroundColor:Colors.primaryColor
     },
     communityLogoImag: {
         height: '100%',

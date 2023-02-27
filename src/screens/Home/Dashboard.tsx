@@ -122,7 +122,7 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
         mutate: requestCodeNow
     } = useMutation(['requestPhoneVerification'], requestPhoneVerification, {
         onSuccess: (data) => {
-
+console.log(data)
             if (data.success) {
                 dispatch(setResponse({
                     responseMessage: data.message,
@@ -134,6 +134,7 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
                     phone: phoneNumber
                 })
             } else {
+                handleClosePress()
                 dispatch(setResponse({
                     responseMessage: data.message,
                     responseState: true,
