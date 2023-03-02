@@ -20,7 +20,14 @@ import WarmIcon from "../../assets/images/svg/WarmIcon";
 import {Fonts} from "../../constants/Fonts";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
 import {useInfiniteQuery, useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
-import {getAllAdventure, getBadges, getUser, requestPhoneVerification, verifyPhone} from "../../action/action";
+import {
+    getAllAdventure,
+    getBadges,
+    getUser,
+    requestPhoneVerification,
+    updatePhoneNumberVerify,
+    verifyPhone
+} from "../../action/action";
 import Animated, {Easing, FadeInDown, FadeInUp, FadeOutDown, Layout} from "react-native-reanimated";
 import {setResponse, unSetResponse, updateUserInfo} from "../../app/slices/userSlice";
 import FastImage from 'react-native-fast-image';
@@ -73,6 +80,7 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
     const dataSlice = useAppSelector(state => state.data)
     const {theme} = dataSlice
 
+    const [countryCode, setCountryCode] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
 
     const [refreshing, setRefreshing] = useState(false);
@@ -112,7 +120,7 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
     const handlePresentModalPress = useCallback(() => {
         bottomSheetModalRef.current?.present();
     }, []);
-    const handleClosetModal= useCallback(() => {
+    const handleClosetModal = useCallback(() => {
         bottomSheetModalRef.current?.close();
     }, []);
 
@@ -120,9 +128,9 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
     const {
         isLoading: loading,
         mutate: requestCodeNow
-    } = useMutation(['requestPhoneVerification'], requestPhoneVerification, {
+    } = useMutation(['updatePhoneNumberVerify'], updatePhoneNumberVerify, {
         onSuccess: (data) => {
-console.log(data)
+
             if (data.success) {
                 dispatch(setResponse({
                     responseMessage: data.message,
@@ -143,7 +151,7 @@ console.log(data)
             }
         },
         onSettled: () => {
-            queryClient.invalidateQueries(['requestPhoneVerification']);
+            queryClient.invalidateQueries(['updatePhoneNumberVerify']);
         }
     })
 
@@ -170,12 +178,11 @@ console.log(data)
             const {phoneNumber} = values;
 
             const body = JSON.stringify({
-
-                phoneNumber,
-
+                phone: phoneNumber,
+                countryCode
 
             })
-
+//console.log(body)
             requestCodeNow(body)
         }
     });
@@ -281,16 +288,16 @@ console.log(data)
 
                             <View style={styles.profileImage}>
 
-                                        <FastImage
-                                            style={styles.Image}
-                                            source={{
-                                                uri: !user.userData?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : user.userData?.avatar,
+                                <FastImage
+                                    style={styles.Image}
+                                    source={{
+                                        uri: !user.userData?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : user.userData?.avatar,
 
-                                                cache: FastImage.cacheControl.web,
-                                                priority: FastImage.priority.normal,
-                                            }}
-                                            resizeMode={FastImage.resizeMode.cover}
-                                        />
+                                        cache: FastImage.cacheControl.web,
+                                        priority: FastImage.priority.normal,
+                                    }}
+                                    resizeMode={FastImage.resizeMode.cover}
+                                />
 
 
                             </View>
@@ -364,18 +371,18 @@ console.log(data)
                             <View style={styles.titleWrap}>
 
 
-                            <Text style={[styles.learnMore, {
-                                width: '70%',
-                                lineHeight: heightPixel(22),
-                                color: textColor
-                            }]}>
-                                Explore story adventures below and earn rewards
-                            </Text>
-                        </View>
+                                <Text style={[styles.learnMore, {
+                                    width: '70%',
+                                    lineHeight: heightPixel(22),
+                                    color: textColor
+                                }]}>
+                                    Explore story adventures below and earn rewards
+                                </Text>
+                            </View>
                         }
                         {
                             !loading && data &&
-                            data?.pages[0]?.data?.result.slice(0,12).map(((item) => (
+                            data?.pages[0]?.data?.result.slice(0, 12).map(((item) => (
                                 <Animated.View key={item.id} entering={FadeInDown} exiting={FadeOutDown}
                                                layout={Layout.easing(Easing.bounce).delay(20)}>
                                     <Pressable onPress={() => goToAdventure(item)}
@@ -384,16 +391,15 @@ console.log(data)
                                                }]}>
 
 
-
-                                                <FastImage
-                                                    style={styles.adventureItemImage}
-                                                    source={{
-                                                        uri: item.imageUrl,
-                                                        cache: FastImage.cacheControl.web,
-                                                        priority: FastImage.priority.normal,
-                                                    }}
-                                                    resizeMode={FastImage.resizeMode.cover}
-                                                />
+                                        <FastImage
+                                            style={styles.adventureItemImage}
+                                            source={{
+                                                uri: item.imageUrl,
+                                                cache: FastImage.cacheControl.web,
+                                                priority: FastImage.priority.normal,
+                                            }}
+                                            resizeMode={FastImage.resizeMode.cover}
+                                        />
 
 
                                     </Pressable>
@@ -453,30 +459,34 @@ console.log(data)
                                                  styles.sheetContainer
                                              }>
                         <View style={styles.authContainer}>
-                        <PhoneInputText
-                            error={errors.phoneNumber}
+                            <PhoneInputText
+                                error={errors.phoneNumber}
 
-                            label="Phone number"
-                            onChangeText={(text) => {
-                                handleChange('phoneNumber')(text);
-                                setPhoneNumber(text)
-                            }}
+                                label="Phone number"
+                                onChangeText={(text) => {
+                                    handleChange('phoneNumber')(text);
+                                    setPhoneNumber(text)
 
-                            value={values.phoneNumber}
-                            errorMessage=''
-                            placeholder="Phone number"/>
+                                }}
+                                onChangePhoneNumber={(code) => {
+                                   setCountryCode(code)
+                                }}
+
+                                value={values.phoneNumber}
+                                errorMessage=''
+                                placeholder="Phone number"/>
 
 
-                        <RectButton style={{marginTop: 30, width: widthPixel(200)}} onPress={() => handleSubmit()}>
-                            {
-                                loading ? <ActivityIndicator size="small" color={"#fff"}/> :
+                            <RectButton style={{marginTop: 30, width: widthPixel(200)}} onPress={() => handleSubmit()}>
+                                {
+                                    loading ? <ActivityIndicator size="small" color={"#fff"}/> :
 
-                                    <Text style={styles.buttonText}>
-                                        Proceed
+                                        <Text style={styles.buttonText}>
+                                            Proceed
 
-                                    </Text>
-                            }
-                        </RectButton>
+                                        </Text>
+                                }
+                            </RectButton>
                         </View>
                     </KeyboardAwareScrollView>
                 </BottomSheet>
@@ -494,7 +504,7 @@ console.log(data)
                         ref={bottomSheetModalRef}
                         index={1}
                         snapPoints={modalSnapPoints}
-                        handleIndicatorStyle={[{ backgroundColor:theme == 'light' ? "#333" : "#eee" },Platform.OS == 'android' && {display: 'none',}]}
+                        handleIndicatorStyle={[{backgroundColor: theme == 'light' ? "#333" : "#eee"}, Platform.OS == 'android' && {display: 'none',}]}
                     >
                         <View style={styles.contentContainer}>
                             <View style={[styles.sheetHead, {
@@ -813,11 +823,11 @@ const styles = StyleSheet.create({
         width: '100%',
         alignItems: 'center',
     },
-    authContainer:{
+    authContainer: {
 
         width: '100%',
         alignItems: 'center',
-        height:heightPixel(400)
+        height: heightPixel(400)
     },
     buttonText: {
         position: 'absolute',

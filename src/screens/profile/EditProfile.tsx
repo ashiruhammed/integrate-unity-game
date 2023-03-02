@@ -406,7 +406,7 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
 
                     <View style={styles.selectAvatar}>
                         <Text style={[styles.joinedOn, {
-                            color: Colors.light.text
+                            color:textColor
                         }]}>
                             Change profile avatar
                         </Text>

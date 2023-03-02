@@ -66,7 +66,7 @@ const ReferAFriend = () => {
     useEffect(() => {
 
         let time: NodeJS.Timeout | undefined;
-        if (responseState || responseMessage) {
+        if (copied) {
 
             time = setTimeout(() => {
                 setCopied(false)
@@ -76,7 +76,7 @@ const ReferAFriend = () => {
         return () => {
             clearTimeout(time)
         };
-    }, [responseState, responseMessage])
+    }, [copied])
 
 
     return (

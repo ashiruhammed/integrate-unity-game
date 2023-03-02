@@ -171,10 +171,10 @@ const Followers = ({navigation, route}: CommunityStackScreenProps<'Followers'>) 
                 <View style={styles.flatlist}>
 
                     {
-                        loading && <ActivityIndicator size='small' color={Colors.primaryColor}/>
+                        loading && <ActivityIndicator size='small' color={Colors.primaryColor}
+                                                       style={[StyleSheet.absoluteFillObject, styles.loader]}/>
                     }
-                    {
-                        !loading && followers &&
+
 
 
                         <FlashList
@@ -196,7 +196,7 @@ const Followers = ({navigation, route}: CommunityStackScreenProps<'Followers'>) 
                             onEndReachedThreshold={0.3}
 
                         />
-                    }
+
                 </View>
 
             </SafeAreaView>
@@ -285,6 +285,10 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.quicksandSemiBold,
         fontSize: fontPixel(14)
     },
+    loader:{
+        zIndex: 1,
+        backgroundColor: 'rgba(0,0,0,0.1)'
+    }
 })
 
 export default Followers;

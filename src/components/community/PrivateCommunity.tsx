@@ -76,8 +76,7 @@ const CommunityCard = ({theme,item,loadingBadge,joinModal,viewTheCommunity}: car
     const user = useAppSelector(state => state.user)
     const {userData} = user
 
-
-    const {isLoading, data} = useQuery(['getCommunityFollowers'], () => getCommunityFollowers(item.id))
+   // const {isLoading, data} = useQuery(['getCommunityFollowers'], () => getCommunityFollowers(item.id))
 
     const open = () => {
         if(item?.owner?.id == userData.id){
@@ -574,7 +573,7 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.quickSandBold,
         color: "#000000",
         marginLeft: 8,
-        fontSize: fontPixel(16)
+        fontSize: fontPixel(14 )
     },
 
 

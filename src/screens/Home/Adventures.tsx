@@ -95,6 +95,7 @@ const dataSlice = useAppSelector(state => state.data)
                         }]}>
                             <View style={styles.dripImageWrap}>
                                 <Image
+
                                     source={{uri:adventure?.badge?.imageUrl}}
                                     style={styles.dripImage}/>
                             </View>

@@ -312,6 +312,42 @@ export const verifyPhone = async (userdata: any) => {
 }
 
 
+export const updatePhoneNumberVerify = async (userdata: any) => {
+
+
+    let Token = await SecureStore.getItemAsync('Gateway-Token');
+
+    const myHeaders = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${Token}`,
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
+    }
+    let timeoutId: NodeJS.Timeout
+
+    const requestOptions = {
+        method: 'PUT',
+        headers: myHeaders,
+        body: userdata,
+    };
+
+    return Promise.race([
+        fetch(`${BASE_URL}/user/phone/update`, requestOptions)
+            .then(response => response.json()),
+        new Promise((resolve, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+            //  clearTimeout(timeoutId)
+        }).then(() => {
+            clearTimeout(timeoutId)
+        })
+
+    ])
+
+}
+
+
+
 export const getUserSettings = async () => {
 
     let Token = await SecureStore.getItemAsync('Gateway-Token');

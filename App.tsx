@@ -1,4 +1,7 @@
 import {StatusBar} from 'expo-status-bar';
+import React, {useEffect, useRef, useState} from "react";
+import {PermissionsAndroid, TouchableOpacity, View,Text,StyleSheet} from 'react-native'
+
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import * as SecureStore from 'expo-secure-store';
 import useCachedResources from './src/hooks/useCachedResources';
@@ -7,9 +10,7 @@ import Navigation from './src/navigation';
 import {enableScreens} from "react-native-screens";
 import 'react-native-gesture-handler';
 import OnBoarding from "./src/screens/onboarding/OnBoarding";
-import {useEffect, useRef, useState} from "react";
-import * as Application from 'expo-application';
-import {PermissionsAndroid} from 'react-native'
+
 import {PersistQueryClientProvider} from "@tanstack/react-query-persist-client";
 import {
     QueryClient,
@@ -33,10 +34,36 @@ import {
     notificationListener,
 } from './notification';
 import { Settings } from 'react-native-fbsdk-next'
-import {BASE_URL} from "./src/action/action";
+import appsFlyer from 'react-native-appsflyer';
+import {BASE_URL,AppID} from "@env";
+import {logoutUser} from "./src/app/slices/userSlice";
+import {fontPixel, heightPixel} from "./src/helpers/normalize";
+import {Colors} from "react-native/Libraries/NewAppScreen";
+import {Fonts} from "./src/constants/Fonts";
+import ErrorBoundary from "react-native-error-boundary";
+
 Settings.initializeSDK();
-Settings.setAppID('533333598894233');
+Settings.setAppID(AppID);
 enableScreens()
+
+appsFlyer.initSdk(
+    {
+        devKey: 'ZQCnz6xc7VeXUpnbXj4cG5',
+        isDebug: false,
+        appId: 'id1669256052',
+        onInstallConversionDataListener:false, //Optional
+        onDeepLinkListener: true, //Optional
+        timeToWaitForATTUserAuthorization: 10 //for iOS 14.5
+    },
+    (result) => {
+      //  console.log(result);
+    },
+    (error) => {
+       // console.error(error);
+    }
+);
+
+
 
 Notifications.setNotificationHandler({
     handleNotification: async () => ({
@@ -72,6 +99,37 @@ const queryClient = new QueryClient({
     }),
 });
 
+
+
+const CustomFallback = (props: { error: Error, resetError: Function }) => (
+    <View
+              style={styles.errorBoundaryBackdrop}>
+
+        <View
+
+            style={styles.errorBoundaryContainer}>
+
+
+            <Text style={styles.errorTitle}>Opps! sorry something unexpected happened!</Text>
+
+            <Text style={styles.errorBody}>{props.error.toString()}</Text>
+
+            <View style={{
+                flexDirection: 'row',
+            }}>
+                <TouchableOpacity onPress={() => {
+                    props.resetError()
+                    queryClient.clear()
+                    store.dispatch(logoutUser())
+                }} style={styles.resetButton}>
+                    <Text style={styles.buttonText}>
+                        Restart app
+                    </Text>
+                </TouchableOpacity>
+            </View>
+        </View>
+    </View>
+)
 
 export default function App() {
     const isLoadingComplete = useCachedResources();
@@ -198,6 +256,7 @@ export default function App() {
         return null;
     } else {
         return (
+            <ErrorBoundary FallbackComponent={CustomFallback}>
             <SafeAreaProvider>
                 {
                     firstLaunch ?
@@ -232,6 +291,7 @@ export default function App() {
                 }
                 <StatusBar/>
             </SafeAreaProvider>
+            </ErrorBoundary>
         );
     }
 }
@@ -268,3 +328,53 @@ async function registerForPushNotificationsAsync() {
 
     return token;
 }
+
+
+
+
+const styles = StyleSheet.create({
+    errorBoundaryContainer: {
+        backgroundColor: "#fff",
+        width: '95%',
+        borderRadius: 20,
+        marginBottom: 50,
+        minHeight: heightPixel(240),
+        alignItems: 'flex-start',
+        justifyContent: 'space-between',
+        padding: 20,
+    },
+    errorTitle: {
+        fontSize: fontPixel(16),
+        color: Colors.errorRed,
+        fontFamily: Fonts.quickSandBold
+    },
+    errorBody: {
+        lineHeight: 18,
+        fontSize: fontPixel(14),
+        color: "#333",
+        fontFamily: Fonts.quicksandMedium
+    },
+    errorBoundaryBackdrop: {
+        padding: 10,
+        position: 'absolute',
+        height: '100%',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        width: '100%',
+        zIndex: 10,
+        backgroundColor: 'rgba(42,42,42,0.61)'
+    },
+    resetButton: {
+        width: '45%',
+        height: 50,
+        borderRadius: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: Colors.primary
+    },
+    buttonText: {
+        fontSize: fontPixel(16),
+        color: "#fff",
+        fontFamily: Fonts.quickSandBold
+    }
+})

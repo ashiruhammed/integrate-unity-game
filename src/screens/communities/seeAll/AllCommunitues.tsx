@@ -24,7 +24,7 @@ import {SmallRectButton} from "../../../components/buttons/SmallRectButton";
 import {useInfiniteQuery, useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {
     followACommunity,
-    getBadge, getFollowedCommunities,
+     getFollowedCommunities,
     getMyCommunities,
     getPublicCommunities,
     getSingleBadge

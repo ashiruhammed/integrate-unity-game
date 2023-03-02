@@ -2,7 +2,7 @@
   "expo": {
     "name": "Gateway",
     "slug": "gateway-mobile-app",
-    "version": "2.5.4",
+    "version": "2.5.6",
     "owner": "gateway-app",
     "orientation": "portrait",
     "jsEngine": "hermes",
@@ -46,7 +46,7 @@
       "userInterfaceStyle": "light",
       "googleServicesFile": "./GoogleService-Info.plist",
       "bundleIdentifier": "com.gatewaymobile.app",
-      "buildNumber": "32",
+      "buildNumber": "34",
       "usesIcloudStorage": true,
       "infoPlist": {
         "remote-notification": "Allow user to receive remote notification",
@@ -58,7 +58,7 @@
       }
     },
     "android": {
-      "versionCode": 32,
+      "versionCode": 34,
       "useNextNotificationsApi": true,
       "userInterfaceStyle": "light",
       "package": "com.gatewaymobile.app",

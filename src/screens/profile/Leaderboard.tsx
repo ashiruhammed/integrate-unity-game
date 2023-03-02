@@ -31,11 +31,13 @@ interface props {
         "username": string,
         "rank": number,
         "totalPointGained": number,
-        "lastReward": number
+        "lastReward": number,
+        avatar:''
     }
 }
 
 const LeaderboardCard = ({item, theme}: props) => {
+
     const backgroundColor = theme == 'light' ? "#fff" : Colors.dark.background
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
     return (
@@ -45,7 +47,7 @@ const LeaderboardCard = ({item, theme}: props) => {
             <View style={styles.leftCard}>
                 <View style={styles.listCardImage}>
                     <Image
-                        source={{uri: 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'}}
+                        source={{ uri: !item.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : item.avatar}}
                         style={styles.avatar}/>
 
                 </View>
@@ -122,19 +124,13 @@ const Leaderboard = ({}: RootStackScreenProps<'Leaderboard'>) => {
     ), [])
     const renderHeaderItem = useCallback(() => (
         <>
-            <View style={[styles.topDashboard]}>
+            <View style={[styles.topDashboard]} >
                 <Animated.View
                     key={data?.pages[0]?.data[1]?.username} entering={FadeInLeft.springify()}
                     exiting={FadeOutLeft} layout={Layout.easing(Easing.ease).delay(20)}
                     style={styles.leaderboardWrap}>
 
-                    <View style={[styles.leaderboard, {
-                        height: 80,
-                        width: 80,
-                        borderRadius: 120,
-                        borderWidth: 3,
-                        borderColor: "#F3D42D",
-                    }]}>
+                    <View style={[styles.leaderboard, styles.leaderboardOne]}>
                         <Image
                             source={{uri: 'https://res.cloudinary.com/dijyr3tlg/image/upload/v1672969187/gateway/Ellipse_107_y39fkd.png'}}
                             style={styles.streakImage}/>
@@ -393,6 +389,14 @@ const styles = StyleSheet.create({
 
         alignItems: 'center',
         justifyContent: 'center'
+    },
+    leaderboardOne: {
+
+        height: 80,
+        width: 80,
+        borderRadius: 120,
+        borderWidth: 3,
+        borderColor: "#F3D42D",
     },
     streakImage: {
         resizeMode: 'cover',

@@ -663,7 +663,7 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.quickSandBold,
         color: "#000000",
         marginLeft: 8,
-        fontSize: fontPixel(16)
+        fontSize: fontPixel(14)
     },
     bodyTextWrap: {
         width: '100%',
