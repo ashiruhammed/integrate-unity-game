@@ -135,6 +135,7 @@ const ConfirmPhonenumber = ({navigation, route}: RootStackScreenProps<'ConfirmPh
     const resend = () => {
         const body = JSON.stringify({
             phone: !userData?.phone ? phone : userData?.phone,
+            countryCode: userData?.countryCode,
         })
         resendCodeNow(body)
         setCounter(10)

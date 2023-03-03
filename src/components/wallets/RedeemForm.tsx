@@ -32,9 +32,7 @@ interface props {
 }
 
 
-
-
-const RedeemForm = ({isLoading, redeemNow, pointBalance,nearBalance}: props) => {
+const RedeemForm = ({isLoading, redeemNow, pointBalance, nearBalance}: props) => {
 
 
     const {isLoading: loadingRates, data} = useQuery(['getUserPointsExchangeRate'], getUserPointsExchangeRate)
@@ -51,7 +49,7 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance,nearBalance}: props) => 
     const lightTextColor = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
 
-   // https://pro-api.coinmarketcap.com/v2/tools/price-conversion?CMC_PRO_API_KEY=c8d06b53-dfbe-4de8-9e0d-62fdb128cf8a&amount=300&symbol=Near
+    // https://pro-api.coinmarketcap.com/v2/tools/price-conversion?CMC_PRO_API_KEY=c8d06b53-dfbe-4de8-9e0d-62fdb128cf8a&amount=300&symbol=Near
 
     const {
         resetForm,
@@ -85,6 +83,17 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance,nearBalance}: props) => 
         }
     });
 
+    let defaultPointsConvertValue = '0'
+    let pointsVal = '0'
+    useEffect(() => {
+        if (data && data?.success) {
+            pointsVal = `${data?.data[0]?.value} ${data?.data[0]?.token}`
+            defaultPointsConvertValue = `${data?.data[0]?.value * +points}`
+        } else {
+            defaultPointsConvertValue = '0'
+            pointsVal = '0'
+        }
+    }, [data]);
 
 
     const maxAmount = () => {
@@ -115,7 +124,8 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance,nearBalance}: props) => 
             />
 
             <View style={styles.exchangeView}>
-                <MaterialCommunityIcons name="swap-vertical-circle" size={45} color={ theme == 'light' ? "rgba(0, 0, 0, 0.8)" : "rgba(227,227,227,0.8)" }/>
+                <MaterialCommunityIcons name="swap-vertical-circle" size={45}
+                                        color={theme == 'light' ? "rgba(0, 0, 0, 0.8)" : "rgba(227,227,227,0.8)"}/>
             </View>
             <AdvancedTextInput
                 mainWallet
@@ -123,7 +133,7 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance,nearBalance}: props) => 
 
                 placeholder="0.00"
                 label={"Amount"}
-                defaultValue={ data ? `${data?.data[0]?.value * +points}` : 0}
+                defaultValue={defaultPointsConvertValue}
                 keyboardType={"number-pad"}
 
                 balanceText={`${nearBalance} Near`}
@@ -138,7 +148,7 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance,nearBalance}: props) => 
             />
 
             <View style={styles.conversionRate}>
-                <Text style={[styles.label,{
+                <Text style={[styles.label, {
                     color: textColor
                 }]}>
                     Redeem conversion rate:
@@ -147,14 +157,13 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance,nearBalance}: props) => 
                 {
                     loadingRates ? <ActivityIndicator size="small" color={Colors.primaryColor}/>
                         :
-                        <Text style={[styles.label,{
-                           color: textColor
+                        <Text style={[styles.label, {
+                            color: textColor
                         }]}>
-                            1 Points = {data?.data[0]?.value} {data?.data[0]?.token}
+                            1 Points = {pointsVal}
                         </Text>
                 }
             </View>
-
 
 
             <TouchableOpacity disabled={isLoading || !isValid} style={[styles.redeemButton, {
@@ -213,9 +222,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
 
     },
-    label:{
-        fontFamily:Fonts.quicksandMedium,
-        fontSize:fontPixel(14)
+    label: {
+        fontFamily: Fonts.quicksandMedium,
+        fontSize: fontPixel(14)
     }
 })
 

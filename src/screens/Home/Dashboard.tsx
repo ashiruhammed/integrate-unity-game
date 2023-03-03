@@ -237,9 +237,10 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
 
 
     const verifyPhoneNumber = () => {
-        if (user?.userData?.phone) {
+        if (userData?.phone) {
             const body = JSON.stringify({
                 phone: userData?.phone,
+                countryCode: userData?.countryCode,
             })
             requestCodeNow(body)
 
@@ -263,6 +264,7 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
             clearTimeout(time)
         };
     }, [responseState, responseMessage])
+
     useRefreshOnFocus(fetchUser)
 
     return (
@@ -461,16 +463,13 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
                         <View style={styles.authContainer}>
                             <PhoneInputText
                                 error={errors.phoneNumber}
-
                                 label="Phone number"
-                                onChangeText={(text) => {
+                                onChangeText={(text,code) => {
                                     handleChange('phoneNumber')(text);
                                     setPhoneNumber(text)
+                                    setCountryCode(code)
+                                }}
 
-                                }}
-                                onChangePhoneNumber={(code) => {
-                                   setCountryCode(code)
-                                }}
 
                                 value={values.phoneNumber}
                                 errorMessage=''

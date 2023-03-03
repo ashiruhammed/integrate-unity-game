@@ -590,13 +590,17 @@ style={styles.fbButtonSignUp}
                             label="Email Address"/>
 
                         <PhoneInputText
+                            onChangePhoneNumber={(code) => {
 
+                              //  setCountryCode(code)
+                            }}
                             error={errors.phoneNumber}
                             defaultValue={phoneNumber}
                             label="Phone number"
                             onChangeText={(text, code) => {
                                 handleChange('phoneNumber')(text);
                                 setCountryCode(code)
+
                             }}
                             value={values.phoneNumber}
                             errorMessage=''

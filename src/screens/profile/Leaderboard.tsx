@@ -260,7 +260,7 @@ const Leaderboard = ({}: RootStackScreenProps<'Leaderboard'>) => {
                     }
 
                     {
-                        !isLoading && data && data?.pages[0]?.data.length > 0 &&
+                        !isLoading && data && data?.pages[0]?.data?.length > 0 &&
 
                         <FlashList
                             estimatedItemSize={70}
@@ -269,7 +269,7 @@ const Leaderboard = ({}: RootStackScreenProps<'Leaderboard'>) => {
                             onRefresh={refetch}
                             scrollEnabled
                             showsVerticalScrollIndicator={false}
-                            data={data?.pages[0].data}
+                            data={data?.pages[0]?.data}
                             renderItem={renderItem}
                             onEndReached={loadMore}
                             keyExtractor={keyExtractor}

@@ -16,7 +16,7 @@ export interface UserState {
         "email": string,
         "phone": string,
         "avatar": string,
-
+        countryCode:string,
         "interests": [],
         "phoneNumberVerified": boolean
     },
@@ -57,6 +57,7 @@ const initialState: UserState = {
         email: "",
         phone: "",
         avatar: "",
+        countryCode: "",
         interests: [],
         phoneNumberVerified: false
     }

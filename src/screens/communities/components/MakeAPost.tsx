@@ -248,389 +248,391 @@ const MakeAPost = ({navigation, route}: RootStackScreenProps<'MakeAPost'>) => {
 
 
         if (!result.cancelled) {
-
+            /// console.log(result?.assets[0]?.fileSize)
             const isLessThan = isLessThanTheMB(result?.assets[0]?.fileSize, 8)
             if (!isLessThan) {
-                dispatch(setResponse({
-                    responseMessage: 'Image file too large, must be less than 4MB 🤨',
-                    responseState: true,
-                    responseType: 'error',
-                }))
-            } else {
-
-                setImage(result?.assets[0].uri);
-
-                // handleChange('photo')(result?.base64);
-
-            }
-        }
-    };
-
-    const selectVideo = async () => {
-
-        requestPermission()
-        // No permissions request is necessary for launching the image library
-        let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Videos,
-            allowsEditing: true,
-            // base64:true,
-
-            quality: 0,
-        });
-
-
-        if (!result.cancelled) {
-            const fileInfo = await getFileInfo(result.assets[0]?.uri)
-            const isLessThan = isLessThanTheMB(result.assets[0]?.fileSize, 8)
-            if (!isLessThan) {
-                dispatch(setResponse({
-                    responseMessage: 'Image file too large, must be less than 4MB 🤨',
-                    responseState: true,
-                    responseType: 'error',
-                }))
-            } else {
-
-                setVideo(result.assets[0].uri);
-
-
+                if (Platform.OS == 'ios') {
+                    dispatch(setResponse({
+                        responseMessage: 'Image file too large, must be less than 4MB 🤨',
+                        responseState: true,
+                        responseType: 'error',
+                    }))
+                }
             }
 
-
-        }
-    };
+            setImage(result?.assets[0].uri);
 
 
-    const {
-        resetForm,
-        handleChange, handleSubmit, handleBlur,
-        setFieldValue,
-        isSubmitting,
-        setSubmitting,
-        values,
-        errors,
-        touched,
-        isValid
-    } = useFormik({
-        validationSchema: formSchema,
-        initialValues: {
-            title: '',
-            "content": "",
-            "description": "",
 
+    }
+};
 
-        },
-        onSubmit: (values) => {
-            const {title, content} = values
-            const body = JSON.stringify({
-                title,
-                content,
-                "description": "",
-                thumbnailUrl: videoUrl !== '' ? videoUrl : mediaUrl,
-                "communityId": id
-            })
-            postBlog({body})
+const selectVideo = async () => {
 
-        }
+    requestPermission()
+    // No permissions request is necessary for launching the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+        allowsEditing: true,
+        // base64:true,
+
+        quality: 0,
     });
 
 
-    useEffect(() => {
-        if (!image) {
-            return;
-        } else if (image) {
-            (async () => {
+    if (!result.cancelled) {
+        const fileInfo = await getFileInfo(result.assets[0]?.uri)
+        const isLessThan = isLessThanTheMB(result.assets[0]?.fileSize, 8)
+        if (!isLessThan) {
+            dispatch(setResponse({
+                responseMessage: 'Image file too large, must be less than 4MB 🤨',
+                responseState: true,
+                responseType: 'error',
+            }))
+        } else {
 
-                const data = new FormData()
+            setVideo(result.assets[0].uri);
 
-                //data.append('photo', {uri: image, name: 'photo', type: `image/${type}`} as any)
-                /*  data.append('photo',{
-                      name: fileName,
-                      type: type,
-                      uri: Platform.OS === 'ios' ? image.replace('file://', '') : image,
-                  })*/
-                let type = await image?.substring(image.lastIndexOf(".") + 1);
-                let fileName = image.split('/').pop()
-
-                // data.append("file", image, "[PROXY]");
-                data.append("upload_preset", upload_preset);
-                data.append("api_key", api_key);
-                data.append('file', {uri: image, name: fileName, type: `image/${type}`} as any)
-
-
-                mutate({body: data, resource_type: 'image'})
-
-            })()
-        }
-    }, [image]);
-
-
-    useEffect(() => {
-        if (!video) {
-            return;
-        } else if (video) {
-            (async () => {
-
-                const data = new FormData()
-
-                //data.append('photo', {uri: image, name: 'photo', type: `image/${type}`} as any)
-                /*  data.append('photo',{
-                      name: fileName,
-                      type: type,
-                      uri: Platform.OS === 'ios' ? image.replace('file://', '') : image,
-                  })*/
-                let type = await video?.substring(video.lastIndexOf(".") + 1);
-                let fileName = video.split('/').pop()
-
-                //  data.append("file", video, "[PROXY]");
-                data.append("upload_preset", upload_preset);
-                data.append("api_key", api_key);
-                data.append('file', {uri: video, name: fileName, type: `video/${type}`} as any)
-
-
-                mutate({body: data, resource_type: 'video'})
-
-            })()
-        }
-    }, [video]);
-
-
-    useEffect(() => {
-        // console.log(user)
-        let time: NodeJS.Timeout | undefined;
-        if (responseState || responseMessage) {
-
-            time = setTimeout(() => {
-                dispatch(unSetResponse())
-            }, 3000)
 
         }
-        return () => {
-            clearTimeout(time)
-        };
-    }, [responseState, responseMessage])
 
 
-    return (
+    }
+};
 
-        <>
+
+const {
+    resetForm,
+    handleChange, handleSubmit, handleBlur,
+    setFieldValue,
+    isSubmitting,
+    setSubmitting,
+    values,
+    errors,
+    touched,
+    isValid
+} = useFormik({
+    validationSchema: formSchema,
+    initialValues: {
+        title: '',
+        "content": "",
+        "description": "",
 
 
-            <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
-                <Toast message={responseMessage} state={responseState} type={responseType}/>
-                <View style={styles.topBar}>
-                    <TouchableOpacity onPress={goBack}>
-                        <Text style={[styles.btnText, {
-                            color: textColor
-                        }]}>
-                            Cancel
-                        </Text>
-                    </TouchableOpacity>
+    },
+    onSubmit: (values) => {
+        const {title, content} = values
+        const body = JSON.stringify({
+            title,
+            content,
+            "description": "",
+            thumbnailUrl: videoUrl !== '' ? videoUrl : mediaUrl,
+            "communityId": id
+        })
+        postBlog({body})
 
-                    <TouchableOpacity onPress={() => handleSubmit()} disabled={!isValid || posting}
-                                      style={[styles.postBtn, {
-                                          backgroundColor: isValid ? Colors.primaryColor : borderColor,
-                                      }]}>
+    }
+});
 
-                        <Text style={styles.btnText}>
-                            Post
-                        </Text>
-                    </TouchableOpacity>
+
+useEffect(() => {
+    if (!image) {
+        return;
+    } else if (image) {
+        (async () => {
+
+            const data = new FormData()
+
+            //data.append('photo', {uri: image, name: 'photo', type: `image/${type}`} as any)
+            /*  data.append('photo',{
+                  name: fileName,
+                  type: type,
+                  uri: Platform.OS === 'ios' ? image.replace('file://', '') : image,
+              })*/
+            let type = await image?.substring(image.lastIndexOf(".") + 1);
+            let fileName = image.split('/').pop()
+
+            // data.append("file", image, "[PROXY]");
+            data.append("upload_preset", upload_preset);
+            data.append("api_key", api_key);
+            data.append('file', {uri: image, name: fileName, type: `image/${type}`} as any)
+
+
+            mutate({body: data, resource_type: 'image'})
+
+        })()
+    }
+}, [image]);
+
+
+useEffect(() => {
+    if (!video) {
+        return;
+    } else if (video) {
+        (async () => {
+
+            const data = new FormData()
+
+            //data.append('photo', {uri: image, name: 'photo', type: `image/${type}`} as any)
+            /*  data.append('photo',{
+                  name: fileName,
+                  type: type,
+                  uri: Platform.OS === 'ios' ? image.replace('file://', '') : image,
+              })*/
+            let type = await video?.substring(video.lastIndexOf(".") + 1);
+            let fileName = video.split('/').pop()
+
+            //  data.append("file", video, "[PROXY]");
+            data.append("upload_preset", upload_preset);
+            data.append("api_key", api_key);
+            data.append('file', {uri: video, name: fileName, type: `video/${type}`} as any)
+
+
+            mutate({body: data, resource_type: 'video'})
+
+        })()
+    }
+}, [video]);
+
+
+useEffect(() => {
+    // console.log(user)
+    let time: NodeJS.Timeout | undefined;
+    if (responseState || responseMessage) {
+
+        time = setTimeout(() => {
+            dispatch(unSetResponse())
+        }, 3000)
+
+    }
+    return () => {
+        clearTimeout(time)
+    };
+}, [responseState, responseMessage])
+
+
+return (
+
+    <>
+
+
+        <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
+            <Toast message={responseMessage} state={responseState} type={responseType}/>
+            <View style={styles.topBar}>
+                <TouchableOpacity onPress={goBack}>
+                    <Text style={[styles.btnText, {
+                        color: textColor
+                    }]}>
+                        Cancel
+                    </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={() => handleSubmit()} disabled={!isValid || posting}
+                                  style={[styles.postBtn, {
+                                      backgroundColor: isValid ? Colors.primaryColor : borderColor,
+                                  }]}>
+
+                    <Text style={styles.btnText}>
+                        Post
+                    </Text>
+                </TouchableOpacity>
+            </View>
+
+            {
+                posting &&
+
+                <ActivityIndicator color={Colors.primaryColor} size={"small"}
+                                   style={[StyleSheet.absoluteFillObject, {
+                                       backgroundColor: 'rgba(0,0,0,0.2)',
+                                       zIndex: 2,
+                                   }]}/>
+            }
+            <KeyboardAwareScrollView
+                style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {
+                backgroundColor
+            }]} scrollEnabled
+                showsVerticalScrollIndicator={false}>
+
+                <TextInput
+                    keyboardAppearance={theme}
+                    keyboardType={"default"}
+                    touched={touched.title}
+                    error={touched.title && errors.title}
+                    onFocus={() => setFocusTitle(true)}
+                    onChangeText={(e) => {
+                        handleChange('title')(e);
+                        setTitle(e);
+                    }}
+                    onBlur={(e) => {
+                        handleBlur('title')(e);
+                        setFocusTitle(false);
+                    }}
+                    defaultValue={title}
+                    focus={focusTitle}
+                    value={values.title}
+                    label="Title"/>
+
+                <View style={[styles.inputContainer, {}]}>
+
+                    <RNTextInput
+                        multiline
+
+                        onChangeText={(e) => {
+                            handleChange("content")(e)
+                        }}
+                        autoFocus={true}
+                        value={values.content}
+                        placeholder={'Write something...'}
+                        placeholderTextColor="#6D6D6D"
+                        style={[styles.input, {
+                            padding: 10,
+
+                            color: textColor,
+
+                        }]}/>
+
                 </View>
 
                 {
-                    posting &&
+                    isLoading &&
 
-                    <ActivityIndicator color={Colors.primaryColor} size={"small"}
-                                       style={[StyleSheet.absoluteFillObject, {
-                                           backgroundColor: 'rgba(0,0,0,0.2)',
-                                           zIndex: 2,
-                                       }]}/>
+                    <Animated.View key={"isLoading"} layout={Layout.easing(Easing.bounce).delay(30)}
+                                   entering={FadeIn} exiting={FadeOut} style={styles.mediaPreview}>
+                        <ActivityIndicator color={Colors.primaryColor} size='small'/>
+                    </Animated.View>
                 }
-                <KeyboardAwareScrollView
-                    style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {
-                    backgroundColor
-                }]} scrollEnabled
-                    showsVerticalScrollIndicator={false}>
-
-                    <TextInput
-                        keyboardAppearance={theme}
-                        keyboardType={"default"}
-                        touched={touched.title}
-                        error={touched.title && errors.title}
-                        onFocus={() => setFocusTitle(true)}
-                        onChangeText={(e) => {
-                            handleChange('title')(e);
-                            setTitle(e);
-                        }}
-                        onBlur={(e) => {
-                            handleBlur('title')(e);
-                            setFocusTitle(false);
-                        }}
-                        defaultValue={title}
-                        focus={focusTitle}
-                        value={values.title}
-                        label="Title"/>
-
-                    <View style={[styles.inputContainer, {}]}>
-
-                        <RNTextInput
-                            multiline
-
-                            onChangeText={(e) => {
-                                handleChange("content")(e)
-                            }}
-                            autoFocus={true}
-                            value={values.content}
-                            placeholder={'Write something...'}
-                            placeholderTextColor="#6D6D6D"
-                            style={[styles.input, {
-                                padding: 10,
-
-                                color: textColor,
-
-                            }]}/>
-
-                    </View>
-
-                    {
-                        isLoading &&
-
-                        <Animated.View key={"isLoading"} layout={Layout.easing(Easing.bounce).delay(30)}
-                                       entering={FadeIn} exiting={FadeOut} style={styles.mediaPreview}>
-                            <ActivityIndicator color={Colors.primaryColor} size='small'/>
-                        </Animated.View>
-                    }
-                    {
-                        !isLoading && mediaUrl !== '' &&
-                        <Animated.View key={mediaUrl} layout={Layout.easing(Easing.bounce).delay(30)}
-                                       entering={FadeIn} exiting={FadeOut} style={styles.mediaPreview}>
+                {
+                    !isLoading && mediaUrl !== '' &&
+                    <Animated.View key={mediaUrl} layout={Layout.easing(Easing.bounce).delay(30)}
+                                   entering={FadeIn} exiting={FadeOut} style={styles.mediaPreview}>
 
 
-                            <ImageBackground resizeMode='cover' source={{uri: mediaUrl}} style={{
-                                height: '100%',
-                                borderRadius: 20,
-                                width: '100%',
-                            }}/>
-
-                        </Animated.View>
-                    }
-
-                    {
-                        !isLoading && videoUrl !== '' &&
-
-                        <View style={styles.videoPreview}>
-                            <Video
-                                ref={videoRef}
-
-                                style={{
-                                    height: '100%',
-                                    borderRadius: 10,
-                                    width: '100%',
-                                }}
-                                videoStyle={{backgroundColor: '#fff'}}
-
-                                source={{
-                                    //lesson?.data?.video?.url
-                                    uri: videoUrl,
-
-                                }}
-                                useNativeControls
-                                resizeMode="contain"
-
-                                isLooping={false}
-                                onPlaybackStatusUpdate={status => setStatus(() => status)}
-                            />
-                        </View>
-                    }
-                    <HorizontalLine color={borderColor}/>
-
-                    <View style={styles.mediaPost}>
-                        <TouchableOpacity onPress={pickImage} style={styles.mediaButton}>
-                            <Ionicons name="ios-images" size={18} color={Colors.primaryColor}/>
-                            <Text style={styles.mediaButtonText}>
-                                Photo
-                            </Text>
-                        </TouchableOpacity>
-
-                        <View style={{
+                        <ImageBackground resizeMode='cover' source={{uri: mediaUrl}} style={{
                             height: '100%',
-                            width: 1,
-                            backgroundColor: borderColor,
-
+                            borderRadius: 20,
+                            width: '100%',
                         }}/>
-                        <TouchableOpacity onPress={selectVideo} style={styles.mediaButton}>
-                            <FontAwesome name="video-camera" size={18} color={Colors.success}/>
 
-                            <Text style={styles.mediaButtonText}>
-                                Video
-                            </Text>
-                        </TouchableOpacity>
+                    </Animated.View>
+                }
+
+                {
+                    !isLoading && videoUrl !== '' &&
+
+                    <View style={styles.videoPreview}>
+                        <Video
+                            ref={videoRef}
+
+                            style={{
+                                height: '100%',
+                                borderRadius: 10,
+                                width: '100%',
+                            }}
+                            videoStyle={{backgroundColor: '#fff'}}
+
+                            source={{
+                                //lesson?.data?.video?.url
+                                uri: videoUrl,
+
+                            }}
+                            useNativeControls
+                            resizeMode="contain"
+
+                            isLooping={false}
+                            onPlaybackStatusUpdate={status => setStatus(() => status)}
+                        />
                     </View>
-                </KeyboardAwareScrollView>
-            </SafeAreaView>
+                }
+                <HorizontalLine color={borderColor}/>
 
+                <View style={styles.mediaPost}>
+                    <TouchableOpacity onPress={pickImage} style={styles.mediaButton}>
+                        <Ionicons name="ios-images" size={18} color={Colors.primaryColor}/>
+                        <Text style={styles.mediaButtonText}>
+                            Photo
+                        </Text>
+                    </TouchableOpacity>
 
-            <BottomSheet
-                backgroundStyle={{
-                    backgroundColor,
-                }}
-                handleIndicatorStyle={{
-                    backgroundColor: theme == 'light' ? "#121212" : '#cccccc'
-                }}
-                index={0}
-                ref={sheetRef}
-                snapPoints={snapPoints}
-                backdropComponent={renderBackdrop}
-            >
-
-                <View style={styles.sheetHead}>
                     <View style={{
-                        width: '10%'
-                    }}/>
-                    <Text style={[styles.sheetTitle, {
-                        color: textColor
-                    }]}>
-                        You have unfinished post
-                    </Text>
-                    <View style={{
-                        width: '10%'
-                    }}/>
+                        height: '100%',
+                        width: 1,
+                        backgroundColor: borderColor,
 
+                    }}/>
+                    <TouchableOpacity onPress={selectVideo} style={styles.mediaButton}>
+                        <FontAwesome name="video-camera" size={18} color={Colors.success}/>
+
+                        <Text style={styles.mediaButtonText}>
+                            Video
+                        </Text>
+                    </TouchableOpacity>
                 </View>
+            </KeyboardAwareScrollView>
+        </SafeAreaView>
 
-                <BottomSheetView style={styles.optionBox}>
-                    <Pressable onPress={closeScreen} style={[styles.deleteBtn, {
-                        borderColor,
-                        borderWidth: 1,
+
+        <BottomSheet
+            backgroundStyle={{
+                backgroundColor,
+            }}
+            handleIndicatorStyle={{
+                backgroundColor: theme == 'light' ? "#121212" : '#cccccc'
+            }}
+            index={0}
+            ref={sheetRef}
+            snapPoints={snapPoints}
+            backdropComponent={renderBackdrop}
+        >
+
+            <View style={styles.sheetHead}>
+                <View style={{
+                    width: '10%'
+                }}/>
+                <Text style={[styles.sheetTitle, {
+                    color: textColor
+                }]}>
+                    You have unfinished post
+                </Text>
+                <View style={{
+                    width: '10%'
+                }}/>
+
+            </View>
+
+            <BottomSheetView style={styles.optionBox}>
+                <Pressable onPress={closeScreen} style={[styles.deleteBtn, {
+                    borderColor,
+                    borderWidth: 1,
+                }]}>
+                    <Ionicons name="md-trash-outline" size={24} color={Colors.primaryColor}/>
+                    <Text style={[styles.deleteBtnTxt, {
+                        color: textColor,
+                        marginLeft: 10,
                     }]}>
-                        <Ionicons name="md-trash-outline" size={24} color={Colors.primaryColor}/>
-                        <Text style={[styles.deleteBtnTxt, {
-                            color: textColor,
-                            marginLeft: 10,
-                        }]}>
-                            Delete
-                        </Text>
-                    </Pressable>
+                        Delete
+                    </Text>
+                </Pressable>
 
-                    <Pressable onPress={() => handleClosePress()} style={[styles.deleteBtn, {}]}>
+                <Pressable onPress={() => handleClosePress()} style={[styles.deleteBtn, {}]}>
 
-                        <Text style={[styles.deleteBtnTxt, {
-                            color: textColor,
-                            marginLeft: 10,
-                        }]}>
-                            Cancel
-                        </Text>
-                    </Pressable>
+                    <Text style={[styles.deleteBtnTxt, {
+                        color: textColor,
+                        marginLeft: 10,
+                    }]}>
+                        Cancel
+                    </Text>
+                </Pressable>
 
-                </BottomSheetView>
+            </BottomSheetView>
 
-            </BottomSheet>
+        </BottomSheet>
 
 
-        </>
-    )
-        ;
-};
+    </>
+)
+    ;
+}
+;
 
 const styles = StyleSheet.create({
     safeArea: {

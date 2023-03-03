@@ -207,6 +207,7 @@ const Wallet = () => {
     }
 
 
+
     const {isLoading: loadingWallets, data,isSuccess, isRefetching, refetch} = useQuery(['getUserWallets'], getUserWallets, {
 
         onSuccess: (data) => {
@@ -235,7 +236,7 @@ const Wallet = () => {
 
 
     useEffect(() => {
-        if (!loadingPoints && !loadingWallets && data.success && isSuccess) {
+        if (!loadingPoints && !loadingWallets && data?.success && isSuccess) {
             setWalletData([
                 ...data?.data,
                 {
@@ -573,7 +574,7 @@ refetch()
                     <View style={styles.transactions}>
                         {
                             !loadingTransactions && transactions && transactions?.data?.length > 0 &&
-                            transactions.data.map((({hash,amount,network,type,createdAt}) =>(
+                            transactions?.data.map((({hash,amount,network,type,createdAt}) =>(
                                 <Animated.View layout={Layout.easing(Easing.bounce).delay(20)}
                                                entering={FadeInDown} exiting={FadeOutDown}
                                                key={hash} style={styles.transactionCard}>

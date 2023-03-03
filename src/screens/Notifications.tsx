@@ -147,7 +147,7 @@ useRefreshOnFocus(refetch)
 
 
                 {
-                    !isLoading && notifications && notifications?.pages[0].data.result?.length > 0 &&
+                    !isLoading && notifications && notifications?.pages[0]?.data?.result?.length > 0 &&
 
                     <FlashList
                     estimatedItemSize={200}

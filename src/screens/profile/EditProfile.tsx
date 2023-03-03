@@ -240,18 +240,19 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
         if (!result.cancelled) {
             const fileInfo = await getFileInfo(result?.uri)
             const isLessThan = isLessThanTheMB(fileInfo?.size, 8)
-            if (!isLessThan) {
+
+            if (Platform.OS == 'ios' && !isLessThan) {
                 dispatch(setResponse({
                     responseMessage: 'Image file too large, must be less than 4MB 🤨',
                     responseState: true,
                     responseType: 'error',
                 }))
-            } else {
+            }
 
                 setImage(result?.uri);
 
 
-            }
+
         }
     };
 
@@ -412,6 +413,7 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
                         </Text>
 
                         <View style={styles.shapes}>
+
                             {/*
                         <ImageBackground resizeMethod="scale" resizeMode="stretch" source={require('../../assets/images/Polygon.png')}
                                          style={styles.Avatar}>
@@ -483,9 +485,10 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
                             error={errors.phoneNumber}
                             defaultValue={userData?.phone}
                             label="Phone number"
-                            onChangeText={(text) => {
+                            onChangeText={(text,code) => {
                                 handleChange('phoneNumber')(text);
                                 //setPhoneNumber(text)
+
                             }}
 
                             value={values.phoneNumber}

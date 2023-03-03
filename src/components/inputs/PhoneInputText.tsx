@@ -54,7 +54,7 @@ interface Props extends TextInputProps {
     rightAction?: () => void;
     value: string;
     action?: () => void;
-    onChangePhoneNumber: (code: string) => void;
+    onChangePhoneNumber?: (code: string) => void;
     passState?: boolean
     labelColor?: boolean
 
@@ -236,9 +236,7 @@ const FullPhoneNumber = ({
                             </View>
 
                             <RNTextInput
-
                                 {...props}
-                                onChange={ ()=>onChangePhoneNumber(code)}
                                 keyboardAppearance={theme}
                                 keyboardType={"phone-pad"}
                                 placeholder={placeholder}
