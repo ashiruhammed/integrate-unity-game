@@ -349,7 +349,7 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
                             <Text style={[styles.verifyText, {
                                 color: textColor
                             }]}>
-                                👋 Verify your phone number
+                                👋 Please Verify your phone number
                             </Text>
                             <TouchableOpacity activeOpacity={0.6} style={styles.chevronGreen}>
                                 <Ionicons name="warning-outline" size={14} color={Colors.primaryColor}/>
@@ -504,6 +504,7 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
                         index={1}
                         snapPoints={modalSnapPoints}
                         handleIndicatorStyle={[{backgroundColor: theme == 'light' ? "#333" : "#eee"}, Platform.OS == 'android' && {display: 'none',}]}
+
                     >
                         <View style={styles.contentContainer}>
                             <View style={[styles.sheetHead, {
@@ -847,7 +848,8 @@ const styles = StyleSheet.create({
     learnMore: {
         fontSize: fontPixel(14),
         fontFamily: Fonts.quicksandMedium
-    }
+    },
+
 
 })
 

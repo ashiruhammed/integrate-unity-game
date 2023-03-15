@@ -70,7 +70,7 @@ const LeaveCommunity = ({navigation, route}: RootStackScreenProps<'LeaveCommunit
 
 
     const leaveCommunity = () => {
-        console.log('leaveCommunity')
+
         unfollow(currentCommunityId)
     }
 

@@ -2,7 +2,7 @@
   "expo": {
     "name": "Gateway",
     "slug": "gateway-mobile-app",
-    "version": "2.5.8",
+    "version": "2.6.1",
     "owner": "gateway-app",
     "orientation": "portrait",
     "jsEngine": "hermes",
@@ -22,31 +22,34 @@
     },
     "updates": {
       "fallbackToCacheTimeout": 0,
-      "url": "https://u.expo.dev/fba1f675-6e30-4413-a03c-cf0b4bd62268"
+      "url": "https://u.expo.dev/aea0bd55-ea74-4e72-b6a3-ffea717a6428"
     },
     "assetBundlePatterns": [
       "**/*"
     ],
-    "plugins": ["expo-apple-authentication", [
-      "react-native-fbsdk-next",
-      {
-        "appID": "533333598894233",
-        "clientToken": "c5e29a3734574e41f5053406b81ca87f",
-        "displayName": "Gateway Block-Edu",
-        "scheme": "fb533333598894233",
-        "advertiserIDCollectionEnabled": false,
-        "autoLogAppEventsEnabled": false,
-        "isAutoInitEnabled": true,
-        "iosUserTrackingPermission": "This identifier will be used to deliver personalized ads to you."
-      }
-    ]],
+    "plugins": [
+      "expo-apple-authentication",
+      [
+        "react-native-fbsdk-next",
+        {
+          "appID": "533333598894233",
+          "clientToken": "c5e29a3734574e41f5053406b81ca87f",
+          "displayName": "Gateway Block-Edu",
+          "scheme": "fb533333598894233",
+          "advertiserIDCollectionEnabled": false,
+          "autoLogAppEventsEnabled": false,
+          "isAutoInitEnabled": true,
+          "iosUserTrackingPermission": "This identifier will be used to deliver personalized ads to you."
+        }
+      ]
+    ],
     "ios": {
       "supportsTablet": true,
       "icon": "./src/assets/images/app-icon.png",
       "userInterfaceStyle": "light",
       "googleServicesFile": "./GoogleService-Info.plist",
       "bundleIdentifier": "com.gatewaymobile.app",
-      "buildNumber": "36",
+      "buildNumber": "39",
       "usesIcloudStorage": true,
       "infoPlist": {
         "remote-notification": "Allow user to receive remote notification",
@@ -54,11 +57,20 @@
         "UIViewControllerBasedStatusBarAppearance": "No",
         "NSCameraUsageDescription": "This app uses the camera to let user put a photo in his profile page.",
         "NSPhotoLibraryUsageDescription": "This app needs to access the camera library so they can upload their profile image.",
-        "NSMicrophoneUsageDescription": "Allow Brace to access your microphone"
+        "NSMicrophoneUsageDescription": "Allow Brace to access your microphone",
+        "NSUserTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you.",
+        "SKAdNetworkItems": [
+          {
+            "SKAdNetworkIdentifier": "v9wttpbfk9.skadnetwork"
+          },
+          {
+            "SKAdNetworkIdentifier": "n38lu8286q.skadnetwork"
+          }
+        ]
       }
     },
     "android": {
-      "versionCode": 36,
+      "versionCode": 39,
       "useNextNotificationsApi": true,
       "userInterfaceStyle": "light",
       "package": "com.gatewaymobile.app",
@@ -73,7 +85,8 @@
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
         "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.RECORD_AUDIO",
+        "android.permission.INTERNET"
       ],
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/images/gateway-adaptive.png",
@@ -87,6 +100,7 @@
       "eas": {
         "projectId": "aea0bd55-ea74-4e72-b6a3-ffea717a6428"
       }
-    }
+    },
+    "runtimeVersion": "1.0.0"
   }
 }

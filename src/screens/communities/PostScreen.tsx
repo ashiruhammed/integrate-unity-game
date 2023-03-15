@@ -531,19 +531,19 @@ isFetching,
                 <View style={styles.navBar}>
                     <TouchableOpacity onPress={goBack} style={styles.goBack} activeOpacity={0.8}>
                         <AntDesign name="arrowleft" size={24} color={textColor}/>
-
+                    </TouchableOpacity>
                         <Text style={[styles.screenTitle, {
                             color: textColor
                         }]}>
                             {community.data.name}
                         </Text>
 
-                    </TouchableOpacity>
 
 
-                    <TouchableOpacity onPress={menuToggle} activeOpacity={0.8} style={styles.rightButton}>
+
+                 {/*   <TouchableOpacity onPress={menuToggle} activeOpacity={0.8} style={styles.rightButton}>
                         <SimpleLineIcons name="menu" size={24} color={textColor}/>
-                    </TouchableOpacity>
+                    </TouchableOpacity>*/}
                 </View>
                 {/*   <KeyboardAwareScrollView
                     automaticallyAdjustKeyboardInsets={true}
@@ -624,7 +624,7 @@ const styles = StyleSheet.create({
         width: '100%',
         height: heightPixel(60),
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-start',
         alignItems: 'center'
     },
     rightButton: {
@@ -635,7 +635,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     goBack: {
-        width: widthPixel(200),
+        width: widthPixel(30),
         alignItems: 'center',
         flexDirection: 'row',
         justifyContent: 'flex-start'
@@ -643,7 +643,7 @@ const styles = StyleSheet.create({
     screenTitle: {
         marginLeft: 15,
         fontFamily: Fonts.quickSandBold,
-        fontSize: fontPixel(18),
+        fontSize: fontPixel(16),
         color: "#333333",
     },
 

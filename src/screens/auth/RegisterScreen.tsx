@@ -197,7 +197,7 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
                     responseState: true,
                     responseType: 'error',
                 }))
-
+                console.log(err)
 
             },
             onSettled: () => {
@@ -249,7 +249,7 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
     const {mutate: googleAuthLogin, isLoading: googleAuthenticating} = useMutation(['userGoogleAuth'], userGoogleAuth, {
 
         onSuccess: async (data) => {
-//console.log(data)
+
             if (data.success) {
 
 
@@ -384,6 +384,7 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
 
 
             <SafeAreaView style={styles.safeArea}>
+                <Toast message={responseMessage} state={responseState} type={responseType}/>
                 {
                     googleAuthenticating &&
                     <ActivityIndicator size="large" color={Colors.primaryColor}
@@ -442,7 +443,7 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
                             ]}/>
                         </View>
                     </Animated.View>
-                    <Toast message={responseMessage} state={responseState} type={responseType}/>
+
                     <View style={styles.authContainer}>
 
 

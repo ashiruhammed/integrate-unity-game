@@ -350,16 +350,20 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
             const {email, password} = values;
             const body = JSON.stringify({email: email.toLowerCase(), captchaToken, password})
             //mutate(body)
-$recaptcha.current.open()
+            $recaptcha.current.open()
         }
     });
 
-    useEffect(()=>{
-        if(token !== '') {
-            const body = JSON.stringify({email: values.email.toLowerCase(), captchaToken:token, password:values.password})
+    useEffect(() => {
+        if (token !== '') {
+            const body = JSON.stringify({
+                email: values.email.toLowerCase(),
+                captchaToken: token,
+                password: values.password
+            })
             mutate(body)
         }
-    },[token])
+    }, [token])
     const forgotPassword = () => {
         navigation.navigate('ForgotPassword')
     }
@@ -409,10 +413,10 @@ $recaptcha.current.open()
                     theme="light"
                     // onLoad={() => Alert.alert('onLoad event')}
                     // onClose={() => Alert.alert('onClose event')}
-                   /* onError={(err) => {
-                        Alert.alert('onError event');
-                        console.warn(err);
-                    }}*/
+                    /* onError={(err) => {
+                         Alert.alert('onError event');
+                         console.warn(err);
+                     }}*/
                     //  onExpire={() => Alert.alert('onExpire event')}
                     onVerify={(token) => {
                         // Alert.alert('onVerify event');
@@ -637,7 +641,7 @@ $recaptcha.current.open()
                         <RectButton disabled={isLoading || !isValid || googleAuthenticating} style={{
 
                             width: widthPixel(200)
-                        }} onPress={()=>handleSubmit()}>
+                        }} onPress={() => handleSubmit()}>
                             {
                                 isLoading || googleAuthenticating ? <ActivityIndicator size='small' color="#fff"/>
                                     :
@@ -818,7 +822,7 @@ const styles = StyleSheet.create({
 
         height: '100%'
     },
-    loader:{
+    loader: {
         zIndex: 1,
         backgroundColor: 'rgba(0,0,0,0.1)'
     }

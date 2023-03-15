@@ -42,7 +42,7 @@ interface cardProps {
             fullName: string
         }
     },
-    viewTheCommunity:(id:string,ownerId:string,visibility:string,displayPhoto:string)=>void
+    viewTheCommunity: (id:string,ownerId:string,visibility:string,displayPhoto:string) =>void
     joinModal: (badgeId: string, accessNFTBadgeAmount: string, communityId: string) => void
 }
 const CardPublicCommunity = ({theme, loadingBadge, item, joinModal,viewTheCommunity}: cardProps) => {
@@ -54,9 +54,9 @@ const CardPublicCommunity = ({theme, loadingBadge, item, joinModal,viewTheCommun
     const navigation = useNavigation()
     const open = () => {
         if(item?.owner?.id == userData.id){
+
             viewTheCommunity(item.id,item.ownerId,item.visibility,item.displayPhoto)
-        }else
-        if (item.currentUserJoined) {
+        }else if (item.currentUserJoined) {
             viewTheCommunity(item.id,item.ownerId,item.visibility,item.displayPhoto)
         } else {
             joinModal(item.badgeId, item.accessNFTBadgeAmount, item.id)

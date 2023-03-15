@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 
-import {Text, View, StyleSheet, Platform, Switch, ActivityIndicator} from 'react-native';
+import {Text, View, StyleSheet, Platform, Switch, ActivityIndicator, TouchableOpacity} from 'react-native';
 import {SafeAreaView} from "react-native-safe-area-context";
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 import NavBar from "../../components/layout/NavBar";
@@ -20,6 +20,7 @@ import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {changePassword, getUserSettings} from "../../action/action";
 import Toast from "../../components/Toast";
 import {setResponse, unSetResponse} from "../../app/slices/userSlice";
+import {RootStackScreenProps} from "../../../types";
 
 
 const formSchema = yup.object().shape({
@@ -41,7 +42,7 @@ const formSchema = yup.object().shape({
 });
 
 
-const Settings = () => {
+const Settings = ({navigation}: RootStackScreenProps<'Settings'>) => {
 
     const dispatch = useAppDispatch()
     const queryClient = useQueryClient();
@@ -58,7 +59,7 @@ const Settings = () => {
         }
     } = user
 
-    const {data} = useQuery(['getUserSettings'],getUserSettings)
+    const {data} = useQuery(['getUserSettings'], getUserSettings)
 
     const [soundEffect, setSoundEffect] = useState(data?.data?.soundEffect);
     const [rewardNotifications, setRewardNotification] = useState(data?.data?.rewardNotification);
@@ -84,9 +85,6 @@ const Settings = () => {
     const [confirmPassword, setConfirmPassword] = useState<string>('');
 
 
-
-
-
     const SWITCH_TRACK_COLOR = {
         true: theme == 'light' ? "#f9f9f9" : Colors.dark.background,
         false: theme == 'light' ? "#ccc" : "#1B2531",
@@ -100,16 +98,19 @@ const Settings = () => {
           outputColorRange: ['red', 'blue'],
       });*/
 
+    const deleteAccount = () => {
+        navigation.navigate('DeleteAccount')
+    }
 
     const {mutate, isLoading} = useMutation(['changePassword'], changePassword, {
-        onSuccess:(data)=>{
-            if(data.success){
+        onSuccess: (data) => {
+            if (data.success) {
                 dispatch(setResponse({
                     responseMessage: data.message,
                     responseState: true,
                     responseType: 'success',
                 }))
-            }else{
+            } else {
                 dispatch(setResponse({
                     responseMessage: data.message,
                     responseState: true,
@@ -154,7 +155,6 @@ const Settings = () => {
     });
 
 
-
     useEffect(() => {
         // console.log(user)
         let time: NodeJS.Timeout | undefined;
@@ -171,309 +171,327 @@ const Settings = () => {
     }, [responseState, responseMessage])
 
 
-
-
     return (
-<>
+        <>
 
-        <Toast message={responseMessage} state={responseState} type={responseType}/>
-        <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
-            <KeyboardAwareScrollView
-                style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {
-                backgroundColor
-            }]} scrollEnabled
-                showsVerticalScrollIndicator={false}>
-                <NavBar title={"Settings"}/>
+            <Toast message={responseMessage} state={responseState} type={responseType}/>
+            <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
+                <KeyboardAwareScrollView
+                    style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {
+                    backgroundColor
+                }]} scrollEnabled
+                    showsVerticalScrollIndicator={false}>
+                    <NavBar title={"Settings"}/>
 
-                <View style={[styles.utilityWrap, {
-                    marginTop: 10,
-                }]}>
-                    <Text style={[styles.utilityTitle, {
-                        color: textColor
+                    <View style={[styles.utilityWrap, {
+                        marginTop: 10,
                     }]}>
-                        General
-                    </Text>
-                    <View style={styles.utilityRow}>
-                        <View style={styles.utilityRowBody}>
-                            <SimpleLineIcons name="globe" size={20} color={textColor}/>
-
-                            <Text style={[styles.utilityRowTitle, {
-                                color: textColor
-                            }]}>
-                                Language
-                            </Text>
-                        </View>
-
-                        <Text style={[styles.utilityRowTitle, {
-                            marginRight: 8,
+                        <Text style={[styles.utilityTitle, {
                             color: textColor
                         }]}>
-                            {data?.data?.language?.toUpperCase()}
+                            General
                         </Text>
+                        <View style={styles.utilityRow}>
+                            <View style={styles.utilityRowBody}>
+                                <SimpleLineIcons name="globe" size={20} color={textColor}/>
 
-                    </View>
-
-                    <View style={styles.utilityRow}>
-                        <View style={styles.utilityRowBody}>
-
-                            <MaterialCommunityIcons name="lightbulb-on-outline" size={20} color={textColor}/>
-                            <Text style={[styles.utilityRowTitle, {
-                                color: textColor,
-                                textTransform:'capitalize'
-                            }]}>
-                                {theme} Mode
-                            </Text>
-                        </View>
-
-                        <Switch
-                            style={{
-                                marginRight: 15,
-                                borderColor: theme == 'light' ? "#DEE5ED" : Colors.lightBlue,
-                                borderWidth: 1,
-                                backgroundColor: theme == 'light' ? "#f9f9f9" : Colors.dark.background
-                            }}
-
-                            trackColor={SWITCH_TRACK_COLOR}
-                            thumbColor={theme == 'dark' ? Colors.lightBlue : "#DEE5ED"}
-                            ios_backgroundColor={"#fff"}
-                            onValueChange={(toggled) => {
-                                switchTheme();
-                            }}
-                            value={theme == 'dark'}
-                        />
-
-                    </View>
-
-                    <View style={styles.utilityRow}>
-                        <View style={styles.utilityRowBody}>
-                            <AntDesign name="sound" size={20} color={textColor}/>
+                                <Text style={[styles.utilityRowTitle, {
+                                    color: textColor
+                                }]}>
+                                    Language
+                                </Text>
+                            </View>
 
                             <Text style={[styles.utilityRowTitle, {
+                                marginRight: 8,
                                 color: textColor
                             }]}>
-                                Sound Effects
+                                {data?.data?.language?.toUpperCase()}
                             </Text>
+
                         </View>
 
-                        <Switch
-                            style={{
-                                marginRight: 15,
-                                borderColor: !soundEffect ? "#DEE5ED" : Colors.lightBlue,
-                                borderWidth: 1,
-                                backgroundColor: theme == 'light' ? "#fff" : Colors.dark.background
-                            }}
-                            trackColor={SWITCH_TRACK_COLOR}
-                            thumbColor={soundEffect ? Colors.lightBlue : "#DEE5ED"}
-                            ios_backgroundColor={"#fff"}
-                            onValueChange={(toggled) => {
-                                setSoundEffect(toggled);
-                            }}
-                            value={soundEffect}
-                        />
-                    </View>
-                </View>
+                        <View style={styles.utilityRow}>
+                            <View style={styles.utilityRowBody}>
 
-                <HorizontalLine width={"90%"} margin color={theme == 'light' ? Colors.borderColor : '#313131'}/>
+                                <MaterialCommunityIcons name="lightbulb-on-outline" size={20} color={textColor}/>
+                                <Text style={[styles.utilityRowTitle, {
+                                    color: textColor,
+                                    textTransform: 'capitalize'
+                                }]}>
+                                    {theme} Mode
+                                </Text>
+                            </View>
 
+                            <Switch
+                                style={{
+                                    marginRight: 15,
+                                    borderColor: theme == 'light' ? "#DEE5ED" : Colors.lightBlue,
+                                    borderWidth: 1,
+                                    backgroundColor: theme == 'light' ? "#f9f9f9" : Colors.dark.background
+                                }}
 
-                <View style={styles.utilityWrap}>
-                    <Text style={[styles.utilityTitle, {
-                        color: textColor
-                    }]}>
-                        Notification Settings
-                    </Text>
-                    <View style={styles.utilityRow}>
-                        <View style={styles.utilityRowBody}>
+                                trackColor={SWITCH_TRACK_COLOR}
+                                thumbColor={theme == 'dark' ? Colors.lightBlue : "#DEE5ED"}
+                                ios_backgroundColor={"#fff"}
+                                onValueChange={(toggled) => {
+                                    switchTheme();
+                                }}
+                                value={theme == 'dark'}
+                            />
 
-                            <Ionicons name="md-compass-outline" size={20} color={textColor}/>
-                            <Text style={[styles.utilityRowTitle, {
-                                color: textColor
-                            }]}>
-                                Adventure Notifications
-                            </Text>
                         </View>
 
-                        <Switch
-                            style={{
-                                marginRight: 15,
-                                borderColor: !adventureNotifications ? "#DEE5ED" : Colors.lightBlue,
-                                borderWidth: 1,
-                                backgroundColor: theme == 'light' ? "#fff" : Colors.dark.background
-                            }}
-                            trackColor={SWITCH_TRACK_COLOR}
-                            thumbColor={adventureNotifications ? Colors.lightBlue : "#DEE5ED"}
-                            ios_backgroundColor={theme == 'light' ? "#fff" : "#1B2531"}
-                            onValueChange={(toggled) => {
-                                setAdventureNotification(toggled);
-                            }}
-                            value={adventureNotifications}
-                        />
+                        <View style={styles.utilityRow}>
+                            <View style={styles.utilityRowBody}>
+                                <AntDesign name="sound" size={20} color={textColor}/>
 
+                                <Text style={[styles.utilityRowTitle, {
+                                    color: textColor
+                                }]}>
+                                    Sound Effects
+                                </Text>
+                            </View>
 
-                    </View>
-
-                    <View style={styles.utilityRow}>
-                        <View style={styles.utilityRowBody}>
-                            <Ionicons name="md-trophy-outline" size={20} color={textColor}/>
-
-                            <Text style={[styles.utilityRowTitle, {
-                                color: textColor
-                            }]}>
-                                Reward Notifications
-                            </Text>
+                            <Switch
+                                style={{
+                                    marginRight: 15,
+                                    borderColor: !soundEffect ? "#DEE5ED" : Colors.lightBlue,
+                                    borderWidth: 1,
+                                    backgroundColor: theme == 'light' ? "#fff" : Colors.dark.background
+                                }}
+                                trackColor={SWITCH_TRACK_COLOR}
+                                thumbColor={soundEffect ? Colors.lightBlue : "#DEE5ED"}
+                                ios_backgroundColor={"#fff"}
+                                onValueChange={(toggled) => {
+                                    setSoundEffect(toggled);
+                                }}
+                                value={soundEffect}
+                            />
                         </View>
-
-                        <Switch
-                            style={{
-                                marginRight: 15,
-                                borderColor: !rewardNotifications ? "#DEE5ED" : Colors.lightBlue,
-                                borderWidth: 1,
-                                backgroundColor: theme == 'light' ? "#fff" : Colors.dark.background
-                            }}
-                            trackColor={SWITCH_TRACK_COLOR}
-                            thumbColor={rewardNotifications ? Colors.lightBlue : "#DEE5ED"}
-                            ios_backgroundColor={"#fff"}
-                            onValueChange={(toggled) => {
-                                setRewardNotification(toggled);
-                            }}
-                            value={rewardNotifications}
-                        />
-
                     </View>
 
-                    <View style={styles.utilityRow}>
-                        <View style={styles.utilityRowBody}>
-                            <AntDesign name="sound" size={20} color={textColor}/>
-
-                            <Text style={[styles.utilityRowTitle, {
-                                color: textColor
-                            }]}>
-                                System Prompts
-                            </Text>
-                        </View>
-
-                        <Switch
-                            style={{
-                                marginRight: 15,
-                                borderColor: !systemPrompt ? "#DEE5ED" : Colors.lightBlue,
-                                borderWidth: 1,
-                                backgroundColor: theme == 'light' ? "#fff" : Colors.dark.background
-                            }}
-                            trackColor={SWITCH_TRACK_COLOR}
-                            thumbColor={systemPrompt ? Colors.lightBlue : "#DEE5ED"}
-                            ios_backgroundColor={"#fff"}
-                            onValueChange={(toggled) => {
-                                setSystemPrompt(toggled);
-                            }}
-                            value={systemPrompt}
-                        />
-                    </View>
-                </View>
+                    <HorizontalLine width={"90%"} margin color={theme == 'light' ? Colors.borderColor : '#313131'}/>
 
 
-                <HorizontalLine width={"90%"} margin color={theme == 'light' ? Colors.borderColor : '#313131'}/>
-                <View style={styles.authContainer}>
-                    <Text style={[styles.utilityTitle, {
-                        marginBottom: 20,
-                        color: textColor
-                    }]}>
-                        Security Settings
-                    </Text>
-
-                    <TextInput
-                        password
-                        action={() => setTogglePass(!togglePass)}
-                        passState={togglePass}
-                        secureTextEntry={togglePass}
-                        placeholder="Enter Password"
-                        keyboardType="default"
-                        touched={touched.currentPassword}
-                        error={errors.currentPassword}
-                        onFocus={() => setFocusPassword(true)}
-                        onChangeText={(e) => {
-                            handleChange('currentPassword')(e);
-                            setContentPassword(e);
-                        }}
-                        onBlur={(e) => {
-                            handleBlur('currentPassword')(e);
-                            setFocusPassword(false);
-                        }}
-                        defaultValue={contentPassword}
-                        focus={focusPassword}
-                        value={values.currentPassword}
-                        label="Current Password"/>
-
-                    <TextInput
-                        password
-                        action={() => setToggleNewPass(!toggleNewPass)}
-                        passState={toggleNewPass}
-                        secureTextEntry={toggleNewPass}
-                        placeholder="Enter Password"
-                        keyboardType="default"
-                        touched={touched.newPassword}
-                        error={errors.newPassword}
-                        onFocus={() => setFocusNewPassword(true)}
-                        onChangeText={(e) => {
-                            handleChange('newPassword')(e);
-                            setNewPassword(e);
-                        }}
-                        onBlur={(e) => {
-                            handleBlur('newPassword')(e);
-                            setFocusNewPassword(false);
-                        }}
-                        defaultValue={newPassword}
-                        focus={focusNewPassword}
-                        value={values.newPassword}
-                        label="New password"/>
-
-
-                    <TextInput
-                        password
-                        action={() => setToggleCPass(!toggleCPass)}
-                        passState={toggleCPass}
-                        secureTextEntry={toggleCPass}
-                        placeholder="Enter Password"
-                        keyboardType="default"
-                        touched={touched.confirmPass}
-                        error={touched.confirmPass && errors.confirmPass}
-                        onFocus={() => setFocusNewPassword(true)}
-                        onChangeText={(e) => {
-                            handleChange('confirmPass')(e);
-                            setConfirmPassword(e);
-                        }}
-                        onBlur={(e) => {
-                            handleBlur('confirmPass')(e);
-                            setFocusConfirmPassword(false);
-                        }}
-                        defaultValue={confirmPassword}
-                        focus={focusConfirmPassword}
-                        value={values.confirmPass}
-                        label="Confirm password"/>
-
-                    <View style={styles.warningWrap}>
-                        <Ionicons name="ios-information-circle-outline" size={14} color="black"/>
-                        <Text style={[styles.warning, {
+                    <View style={styles.utilityWrap}>
+                        <Text style={[styles.utilityTitle, {
                             color: textColor
                         }]}>
-                            Both passwords have to match
+                            Notification Settings
                         </Text>
+                        <View style={styles.utilityRow}>
+                            <View style={styles.utilityRowBody}>
+
+                                <Ionicons name="md-compass-outline" size={20} color={textColor}/>
+                                <Text style={[styles.utilityRowTitle, {
+                                    color: textColor
+                                }]}>
+                                    Adventure Notifications
+                                </Text>
+                            </View>
+
+                            <Switch
+                                style={{
+                                    marginRight: 15,
+                                    borderColor: !adventureNotifications ? "#DEE5ED" : Colors.lightBlue,
+                                    borderWidth: 1,
+                                    backgroundColor: theme == 'light' ? "#fff" : Colors.dark.background
+                                }}
+                                trackColor={SWITCH_TRACK_COLOR}
+                                thumbColor={adventureNotifications ? Colors.lightBlue : "#DEE5ED"}
+                                ios_backgroundColor={theme == 'light' ? "#fff" : "#1B2531"}
+                                onValueChange={(toggled) => {
+                                    setAdventureNotification(toggled);
+                                }}
+                                value={adventureNotifications}
+                            />
+
+
+                        </View>
+
+                        <View style={styles.utilityRow}>
+                            <View style={styles.utilityRowBody}>
+                                <Ionicons name="md-trophy-outline" size={20} color={textColor}/>
+
+                                <Text style={[styles.utilityRowTitle, {
+                                    color: textColor
+                                }]}>
+                                    Reward Notifications
+                                </Text>
+                            </View>
+
+                            <Switch
+                                style={{
+                                    marginRight: 15,
+                                    borderColor: !rewardNotifications ? "#DEE5ED" : Colors.lightBlue,
+                                    borderWidth: 1,
+                                    backgroundColor: theme == 'light' ? "#fff" : Colors.dark.background
+                                }}
+                                trackColor={SWITCH_TRACK_COLOR}
+                                thumbColor={rewardNotifications ? Colors.lightBlue : "#DEE5ED"}
+                                ios_backgroundColor={"#fff"}
+                                onValueChange={(toggled) => {
+                                    setRewardNotification(toggled);
+                                }}
+                                value={rewardNotifications}
+                            />
+
+                        </View>
+
+                        <View style={styles.utilityRow}>
+                            <View style={styles.utilityRowBody}>
+                                <AntDesign name="sound" size={20} color={textColor}/>
+
+                                <Text style={[styles.utilityRowTitle, {
+                                    color: textColor
+                                }]}>
+                                    System Prompts
+                                </Text>
+                            </View>
+
+                            <Switch
+                                style={{
+                                    marginRight: 15,
+                                    borderColor: !systemPrompt ? "#DEE5ED" : Colors.lightBlue,
+                                    borderWidth: 1,
+                                    backgroundColor: theme == 'light' ? "#fff" : Colors.dark.background
+                                }}
+                                trackColor={SWITCH_TRACK_COLOR}
+                                thumbColor={systemPrompt ? Colors.lightBlue : "#DEE5ED"}
+                                ios_backgroundColor={"#fff"}
+                                onValueChange={(toggled) => {
+                                    setSystemPrompt(toggled);
+                                }}
+                                value={systemPrompt}
+                            />
+                        </View>
                     </View>
 
 
-                </View>
-                <RectButton style={styles.button} onPress={() => handleSubmit()}>
-                    {
-                        isLoading ? <ActivityIndicator size='small' color="#fff"/>
-                            :
-                            <Text style={styles.btnText}>
-                                Save Changes
+                    <HorizontalLine width={"90%"} margin color={theme == 'light' ? Colors.borderColor : '#313131'}/>
+                    <View style={styles.authContainer}>
+                        <Text style={[styles.utilityTitle, {
+                            marginBottom: 20,
+                            color: textColor
+                        }]}>
+                            Security Settings
+                        </Text>
 
+                        <TextInput
+                            password
+                            action={() => setTogglePass(!togglePass)}
+                            passState={togglePass}
+                            secureTextEntry={togglePass}
+                            placeholder="Enter Password"
+                            keyboardType="default"
+                            touched={touched.currentPassword}
+                            error={errors.currentPassword}
+                            onFocus={() => setFocusPassword(true)}
+                            onChangeText={(e) => {
+                                handleChange('currentPassword')(e);
+                                setContentPassword(e);
+                            }}
+                            onBlur={(e) => {
+                                handleBlur('currentPassword')(e);
+                                setFocusPassword(false);
+                            }}
+                            defaultValue={contentPassword}
+                            focus={focusPassword}
+                            value={values.currentPassword}
+                            label="Current Password"/>
+
+                        <TextInput
+                            password
+                            action={() => setToggleNewPass(!toggleNewPass)}
+                            passState={toggleNewPass}
+                            secureTextEntry={toggleNewPass}
+                            placeholder="Enter Password"
+                            keyboardType="default"
+                            touched={touched.newPassword}
+                            error={errors.newPassword}
+                            onFocus={() => setFocusNewPassword(true)}
+                            onChangeText={(e) => {
+                                handleChange('newPassword')(e);
+                                setNewPassword(e);
+                            }}
+                            onBlur={(e) => {
+                                handleBlur('newPassword')(e);
+                                setFocusNewPassword(false);
+                            }}
+                            defaultValue={newPassword}
+                            focus={focusNewPassword}
+                            value={values.newPassword}
+                            label="New password"/>
+
+
+                        <TextInput
+                            password
+                            action={() => setToggleCPass(!toggleCPass)}
+                            passState={toggleCPass}
+                            secureTextEntry={toggleCPass}
+                            placeholder="Enter Password"
+                            keyboardType="default"
+                            touched={touched.confirmPass}
+                            error={touched.confirmPass && errors.confirmPass}
+                            onFocus={() => setFocusNewPassword(true)}
+                            onChangeText={(e) => {
+                                handleChange('confirmPass')(e);
+                                setConfirmPassword(e);
+                            }}
+                            onBlur={(e) => {
+                                handleBlur('confirmPass')(e);
+                                setFocusConfirmPassword(false);
+                            }}
+                            defaultValue={confirmPassword}
+                            focus={focusConfirmPassword}
+                            value={values.confirmPass}
+                            label="Confirm password"/>
+
+                        <View style={styles.warningWrap}>
+                            <Ionicons name="ios-information-circle-outline" size={14} color="black"/>
+                            <Text style={[styles.warning, {
+                                color: textColor
+                            }]}>
+                                Both passwords have to match
                             </Text>
-                    }
-                </RectButton>
-            </KeyboardAwareScrollView>
-        </SafeAreaView>
-</>
+                        </View>
+
+
+                    </View>
+                    <RectButton style={styles.button} onPress={() => handleSubmit()}>
+                        {
+                            isLoading ? <ActivityIndicator size='small' color="#fff"/>
+                                :
+                                <Text style={styles.btnText}>
+                                    Save Changes
+
+                                </Text>
+                        }
+                    </RectButton>
+
+
+                    <HorizontalLine width={"90%"} margin color={theme == 'light' ? Colors.borderColor : '#313131'}/>
+                    <View style={styles.authContainer}>
+                        <Text style={[styles.utilityTitle, {
+                            marginBottom: 20,
+                            color: textColor
+                        }]}>
+                            Dangerous area
+                        </Text>
+
+                        <TouchableOpacity onPress={deleteAccount} style={styles.deleteButton}>
+                            <Ionicons name="md-trash-sharp" size={20} color="white"/>
+                            <Text style={[styles.utilityTitle, {
+                                color: "#fff",
+                                marginLeft: 5,
+                            }]}>Delete account</Text>
+                        </TouchableOpacity>
+
+                    </View>
+                </KeyboardAwareScrollView>
+            </SafeAreaView>
+        </>
     );
 };
 
@@ -552,6 +570,17 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.quicksandRegular,
 
         fontSize: fontPixel(12)
+    },
+    deleteButton: {
+        paddingHorizontal: pixelSizeHorizontal(15),
+        height: 50,
+        backgroundColor: Colors.errorRed,
+        borderRadius: 10,
+        width: '100%',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        marginBottom: 40,
     }
 })
 

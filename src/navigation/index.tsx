@@ -59,6 +59,7 @@ import {
 } from '@react-navigation/drawer';
 import {widthPixel} from "../helpers/normalize";
 import {Icon} from "react-native-elements";
+import DeleteAccount from "../screens/profile/DeleteAccount";
 
 const styles = StyleSheet.create({
     displayPhoto: {
@@ -276,6 +277,7 @@ function RootNavigator() {
                         animation: 'slide_from_right'
                     }}>
                         <Stack.Screen name="EditProfile" component={EditProfile}/>
+
                         <Stack.Screen name="Wallet" component={Wallet}/>
                         <Stack.Screen name="Leaderboard" component={Leaderboard}/>
                         <Stack.Screen name="Badges" component={Badges}/>
@@ -331,7 +333,7 @@ function RootNavigator() {
                         <Stack.Screen name="Notifications" options={{
                             animation: 'slide_from_bottom'
                         }} component={Notifications}/>
-
+                        <Stack.Screen name="DeleteAccount" component={DeleteAccount}/>
                         <Stack.Screen name="NFTs" component={NFTs}/>
                     </Stack.Group>
 

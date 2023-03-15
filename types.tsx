@@ -44,13 +44,14 @@ export type RootStackParamList = {
     };
     QuizScreen: {
         lessonId: string,
-        "nextModuleId"?: "f5ce3abf-8e61-4bd1-b992-9904a5219129",
+        "nextModuleId"?: string,
         "hasNextLesson"?: false,
         "isLastAdventureModule"?: true,
         "isLastModuleLesson"?: false,
     };
     AllBadges: undefined;
     NFTs: undefined;
+    DeleteAccount: undefined;
     Notifications: undefined;
 
     LeaveReview: {

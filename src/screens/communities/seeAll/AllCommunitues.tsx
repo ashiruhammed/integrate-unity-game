@@ -324,6 +324,7 @@ const AllCommunities = ({navigation}: RootStackScreenProps<'AllCommunities'>) =>
     }
 
     const viewTheCommunity = (id: string, ownerId: string, visibility: string, displayPhoto: string) => {
+
         dispatch(setCurrentCommunityId({
             id,
             currentCommunity: {

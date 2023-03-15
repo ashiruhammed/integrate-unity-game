@@ -2,8 +2,9 @@
 //export const BASE_URL = "https://gateway-backend.onrender.com"
 //export const BASE_URL = "https://api.gatewayapp.co"
 import * as SecureStore from 'expo-secure-store';
-import {BASE_URL, ACCESS_TOKEN} from "@env";
+import {BASE_URL, ACCESS_TOKEN, DEV_BASE_URL} from "@env";
 //const access_token = 'JGFyZ29uMmlkJHY9MTkkbT00MDk2LHQ9MyxwPTEkWnJjNEVDR05JTEYzU3B2WUJLZVBZdyRtdnNacUl6VVg3SG1UV2gvdjhQZXZGUXJOa1hWYUFHRkVKV3dCd0NobDBV'
+//const BASE_URL = __DEV__ ? DEV_BASE_URL : PROD_URL
 
 interface signupProps {
     "email": string,
@@ -2632,6 +2633,72 @@ export const changePassword = async (body: {}) => {
 
     return Promise.race([
         fetch(`${BASE_URL}/auth/password/change`, requestOptions)
+            .then(response => response.json()),
+        new Promise((resolve, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+            //  clearTimeout(timeoutId)
+        }).then(() => {
+            clearTimeout(timeoutId)
+        })
+
+    ])
+}
+
+export const requestDeleteAccount = async () => {
+
+    let Token = await SecureStore.getItemAsync('Gateway-Token');
+
+    const myHeaders = {
+        'Authorization': `Bearer ${Token}`,
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
+    }
+    let timeoutId: NodeJS.Timeout
+
+
+    const requestOptions = {
+        method: 'DELETE',
+        headers: myHeaders,
+
+    };
+
+
+    return Promise.race([
+        fetch(`${BASE_URL}/user/delete`, requestOptions)
+            .then(response => response.json()),
+        new Promise((resolve, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+            //  clearTimeout(timeoutId)
+        }).then(() => {
+            clearTimeout(timeoutId)
+        })
+
+    ])
+}
+export const deleteAccountNow = async (body:any) => {
+
+    let Token = await SecureStore.getItemAsync('Gateway-Token');
+
+    const myHeaders = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${Token}`,
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
+    }
+    let timeoutId: NodeJS.Timeout
+
+
+    const requestOptions = {
+        method: 'DELETE',
+        headers: myHeaders,
+        body
+    };
+
+
+    return Promise.race([
+        fetch(`${BASE_URL}/user/delete/confirm`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)

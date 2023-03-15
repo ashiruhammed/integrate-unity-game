@@ -216,6 +216,24 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
 
     }
 
+
+
+    const viewTheCommunity = (id: string, ownerId: string, visibility: string, displayPhoto: string) => {
+
+        dispatch(setCurrentCommunityId({
+            id,
+            currentCommunity: {
+                ownerId: ownerId,
+                visibility: visibility,
+                displayPhoto: displayPhoto
+            }
+        }))
+        navigation.navigate('SeeCommunity', {
+            screen: 'ViewCommunity',
+            //params:{id:item.id}
+        })
+    }
+
     const joinModal = () => {
 
     }
@@ -390,7 +408,7 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
                                 </View>
                                 {
                                     allMyCommunities?.data?.result.map((item) => (
-                                        <CardPublicCommunity key={item.id} joinModal={joinModal} theme={theme}
+                                        <CardPublicCommunity viewTheCommunity={viewTheCommunity} key={item.id} joinModal={joinModal} theme={theme}
                                                              item={item}/>
                                     ))
                                 }
