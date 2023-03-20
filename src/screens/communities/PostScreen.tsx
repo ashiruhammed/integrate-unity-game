@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import {
     Text,
@@ -9,11 +9,11 @@ import {
     Dimensions,
     ActivityIndicator,
     RefreshControl,
-    ScrollView, TextInput as RNTextInput, Pressable, Animated as MyAnimated, FlatList
+    ScrollView, TextInput as RNTextInput, Pressable, Animated as MyAnimated, FlatList, Platform
 } from 'react-native';
 import {SafeAreaView} from "react-native-safe-area-context";
 import {RootStackScreenProps} from "../../../types";
-import {AntDesign, Ionicons, MaterialIcons, Octicons, SimpleLineIcons} from "@expo/vector-icons";
+import {AntDesign, Entypo, Ionicons, MaterialIcons, Octicons, SimpleLineIcons} from "@expo/vector-icons";
 import Animated, {
     Easing, FadeIn, FadeInDown,
     FadeInRight, FadeOut, FadeOutDown,
@@ -49,6 +49,10 @@ import {Video} from "expo-av";
 import {store} from "../../app/store";
 import {setResponse} from "../../app/slices/userSlice";
 import Toast from "../../components/Toast";
+import BottomSheet, {BottomSheetBackdrop, BottomSheetView} from "@gorhom/bottom-sheet";
+import {
+    BottomSheetDefaultBackdropProps
+} from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
 
 var relativeTime = require('dayjs/plugin/relativeTime')
 dayjs.extend(relativeTime)
@@ -88,11 +92,12 @@ interface cardProps {
         },
 
     },
-    likeComment:(id:string) =>void
+    handleSnapPress: (id: string,userId:string) => void,
+    likeComment: (id: string) => void
 
 }
 
-const CommentCard = ({theme, item,likeComment}: cardProps) => {
+const CommentCard = ({theme, item, likeComment,handleSnapPress}: cardProps) => {
 
     //  const {data: likes, refetch} = useQuery(['getPostLikes'], () => getPostLike(item.id))
 
@@ -107,108 +112,115 @@ const CommentCard = ({theme, item,likeComment}: cardProps) => {
     return (
         <Animated.View key={item.id} entering={FadeInDown} exiting={FadeOutDown}
                        layout={Layout.easing(Easing.ease).delay(20)}>
-        <Pressable style={[styles.postCard, {
-            minHeight: heightPixel(80),
+            <Pressable style={[styles.postCard, {
+                minHeight: heightPixel(80),
 
-            borderTopColor:borderColor,
-            borderTopWidth:1,
-            backgroundColor: backgroundColorCard
-        }]}>
-            <View style={styles.topPostSection}>
-                <View style={styles.userImage}>
+                borderTopColor: borderColor,
+                borderTopWidth: 1,
+                backgroundColor: backgroundColorCard
+            }]}>
+                <View style={styles.topPostSection}>
+                    <View style={styles.userImage}>
 
-                     {
-                        isRunningInExpoGo ?
-                            <Image
+                        {
+                            isRunningInExpoGo ?
+                                <Image
 
-                                source={{uri:!item?.user?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : item?.user?.avatar}}
-                                style={styles.avatar}
-                            />
-                            :
-                            <FastImage
-                                resizeMode={FastImage.resizeMode.cover}
-                                source={{
-                                    uri: !item?.user?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : item?.user?.avatar,
-                                    cache: FastImage.cacheControl.web,
-                                    priority: FastImage.priority.normal,
-                                }}
+                                    source={{uri: !item?.user?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : item?.user?.avatar}}
+                                    style={styles.avatar}
+                                />
+                                :
+                                <FastImage
+                                    resizeMode={FastImage.resizeMode.cover}
+                                    source={{
+                                        uri: !item?.user?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : item?.user?.avatar,
+                                        cache: FastImage.cacheControl.web,
+                                        priority: FastImage.priority.normal,
+                                    }}
 
-                                style={styles.avatar}
-                            />
-                    }
-                </View>
+                                    style={styles.avatar}
+                                />
+                        }
+                    </View>
 
-                <View style={styles.details}>
+                    <View style={styles.details}>
+                        <View style={styles.leftDetails}>
+                        <View style={styles.nameTag}>
+                            <Text style={[styles.postName, {
+                                color: textColor
+                            }]}>
+                                {
+                                    item.user.fullName
+                                }
+                            </Text>
 
-                    <View style={styles.nameTag}>
-                        <Text style={[styles.postName, {
-                            color: textColor
-                        }]}>
-                            {
-                                item.user.fullName
-                            }
-                        </Text>
-
-                     {/*   <View style={[styles.tag, {
+                            {/*   <View style={[styles.tag, {
                             // backgroundColor
                         }]}>
                             <Text style={styles.tagText}>
                                 Admin
                             </Text>
                         </View>*/}
+                        </View>
 
+                            <TouchableOpacity onPress={() => {
+                                handleSnapPress(item.id, item.user.id)
+
+                            }}>
+                                <Entypo name="dots-three-horizontal" size={24} color={lightTextColor}/>
+                            </TouchableOpacity>
+                        </View>
+                        <Text style={styles.postDate}>
+                            {dayjs(item.createdAt).fromNow()}
+
+
+                        </Text>
                     </View>
-                    <Text style={styles.postDate}>
-                        { dayjs(item.createdAt).fromNow() }
 
+
+                </View>
+
+                <View style={[styles.postSnippet, {}]}>
+
+
+                    <Text style={[styles.postHead, {
+                        color: textColor
+                    }]}>
+                        {item.content}
 
                     </Text>
                 </View>
 
-
-            </View>
-
-            <View style={[styles.postSnippet, {}]}>
-
-
-                <Text style={[styles.postHead, {
-                    color: textColor
+                <View style={[styles.actionButtons, {
+                    height: heightPixel(30),
                 }]}>
-                    {item.content}
+                    <TouchableOpacity style={styles.actionButton}>
+                        <MaterialIcons name="reply" size={20} color={"#838383"}/>
+                        <Text style={styles.actionButtonText}>
+                            Reply {item.commentRepliesCount} replies
+                        </Text>
+                    </TouchableOpacity>
 
-                </Text>
-            </View>
+                    <TouchableOpacity onPress={() => likeComment(item.id)} style={styles.actionButton}>
+                        {
+                            !item.liked ? <AntDesign name="like2" size={20} color={"#838383"}/>
+                                :
+                                <AntDesign name="like1" size={20} color={Colors.primaryColor}/>
+                        }
 
-            <View style={[styles.actionButtons,{
-                height: heightPixel(30),
-            }]}>
-                <TouchableOpacity style={styles.actionButton}>
-                    <MaterialIcons name="reply" size={20} color={"#838383"}/>
-                    <Text style={styles.actionButtonText}>
-                        Reply  {item.commentRepliesCount} replies
-                    </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={()=> likeComment(item.id)} style={styles.actionButton}>
-                    {
-                        !item.liked ?  <AntDesign name="like2" size={20} color={"#838383"}/>
-                            :
-                            <AntDesign name="like1" size={20} color={Colors.primaryColor} />
-                    }
-
-                    <Text style={styles.actionButtonText}>
-                        {item.commentLikesCount} likes
-                    </Text>
-                </TouchableOpacity>
-            </View>
-        </Pressable>
+                        <Text style={styles.actionButtonText}>
+                            {item.commentLikesCount} likes
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            </Pressable>
         </Animated.View>
     )
 }
 const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => {
 
-    const {postId, communityId,post} = route.params
-const dispatch = useAppDispatch()
+    const {postId, communityId, post} = route.params
+    const dispatch = useAppDispatch()
     const offset = useSharedValue(0);
     const [toggleMenu, setToggleMenu] = useState(false);
     const user = useAppSelector(state => state.user)
@@ -221,8 +233,11 @@ const dispatch = useAppDispatch()
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
     const videoRef = useRef(null);
 
+    const [sheetIndex, setSheetIndex] = useState('');
+    const [userId, setUserId] = useState('');
+
     const backgroundColorCard = theme == 'light' ? '#fff' : Colors.dark.disable
-    const { data:community,} = useQuery(['getCommunityInfo'], () => getCommunityInfo(communityId))
+    const {data: community,} = useQuery(['getCommunityInfo'], () => getCommunityInfo(communityId))
     const lightTextColor = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
     const borderColor = theme == 'light' ? Colors.borderColor : '#313131'
     const goBack = () => {
@@ -231,16 +246,52 @@ const dispatch = useAppDispatch()
     const {data, isLoading, refetch} = useQuery(['getCommunityPost'], () => getCommunityPost(postId))
     const {mutate: getPost} = useMutation(['getCommunityPost'], getCommunityPost)
 
-    const {mutate,data:likedData} = useMutation(['likeAPost'], likeAPost, {
+
+    const snapPoints = useMemo(() => ["1%", "35%"], []);
+
+    const sheetRef = useRef<BottomSheet>(null);
+    const handleSnapPress = useCallback((id: string, userId) => {
+        setSheetIndex(id)
+        setUserId(userId)
+        sheetRef.current?.snapToIndex(1);
+    }, []);
+    const handleClosePress = useCallback(() => {
+        sheetRef.current?.close();
+    }, []);
+
+
+    const blockUserScreen = () => {
+        handleClosePress()
+        navigation.navigate('BlockUser', {
+            userId
+        })
+    }
+
+    // renders
+    const renderBackdrop = useCallback(
+        (props: JSX.IntrinsicAttributes & BottomSheetDefaultBackdropProps) => (
+            <BottomSheetBackdrop
+                style={{
+                    backgroundColor: 'rgba(25,25,25,0.34)'
+                }}
+                {...props}
+                disappearsOnIndex={0}
+                appearsOnIndex={1}
+            />
+        ),
+        []
+    );
+
+    const {mutate, data: likedData} = useMutation(['likeAPost'], likeAPost, {
         onSuccess: (data) => {
-            if(data.success){
+            if (data.success) {
                 refetch()
                 dispatch(setResponse({
                     responseMessage: data.message,
                     responseState: true,
                     responseType: 'success',
                 }))
-            }else{
+            } else {
                 dispatch(setResponse({
                     responseMessage: data.message,
                     responseState: true,
@@ -259,7 +310,7 @@ const dispatch = useAppDispatch()
         fetchNextPage: fetchNextPageComment,
         isFetchingNextPage,
         refetch: fetchComments,
-isFetching,
+        isFetching,
         isRefetching
     } = useInfiniteQuery([`PostComments`], ({pageParam = 1}) => getPostComments.comments(pageParam, postId),
         {
@@ -275,7 +326,7 @@ isFetching,
         })
 
 
-      const {mutate:likeComment,data:liked} = useMutation(['likeAComment'], likeAComment,{
+    const {mutate: likeComment, data: liked} = useMutation(['likeAComment'], likeAComment, {
         onSuccess: (data) => {
 
             if (data.success) {
@@ -295,25 +346,24 @@ isFetching,
         }
     })
 
-    let type =  post?.thumbnailUrl?.substring(post?.thumbnailUrl.lastIndexOf(".") + 1);
+    let type = post?.thumbnailUrl?.substring(post?.thumbnailUrl.lastIndexOf(".") + 1);
 
     //console.log(comments?.pages[0]?.data?.result)
     const renderItem = useCallback(
         ({item}) => (
 
-                <>
-                    {
-      !loadingComments ?
+            <>
+                {
+                    !loadingComments ?
 
-        <CommentCard likeComment={likeComment} theme={theme} item={item}/>
-        :
-        <ActivityIndicator size='small' color={Colors.primaryColor}/>
-}
-                </>
+                        <CommentCard handleSnapPress={handleSnapPress} likeComment={likeComment} theme={theme} item={item}/>
+                        :
+                        <ActivityIndicator size='small' color={Colors.primaryColor}/>
+                }
+            </>
         ),
-        [theme,loadingComments,likeComment],
+        [theme, loadingComments, likeComment],
     );
-
 
 
     const commentOnPost = () => {
@@ -322,14 +372,21 @@ isFetching,
             post: data?.data
         })
     }
+
+    const flagPost = () => {
+        handleClosePress()
+        navigation.navigate('FlagPost',{
+            postId:sheetIndex
+        })
+    }
     const renderHeaderItem = useCallback(
         ({}) => (
             <Animated.View key={data?.data.id} entering={FadeIn} exiting={FadeOut}
-                           layout={Layout.easing(Easing.ease).delay(20)} style={[styles.postCard, {backgroundColor: backgroundColorCard}]}>
+                           layout={Layout.easing(Easing.ease).delay(20)}
+                           style={[styles.postCard, {backgroundColor: backgroundColorCard}]}>
 
                 <View style={styles.topPostSection}>
                     <View style={styles.userImage}>
-
 
 
                         <FastImage
@@ -347,18 +404,27 @@ isFetching,
                     <View style={styles.details}>
 
                         <View style={styles.nameTag}>
-                            <Text style={[styles.postName, {
-                                color: textColor
-                            }]}>
-                                {post?.user?.fullName}
-                            </Text>
-
-                            <View style={styles.tag}>
-                                <Text style={styles.tagText}>
-                                    Admin
+                            <View style={styles.leftDetails}>
+                                <Text style={[styles.postName, {
+                                    color: textColor
+                                }]}>
+                                    {post?.user?.fullName}
                                 </Text>
+
+                                <View style={styles.tag}>
+                                    <Text style={styles.tagText}>
+                                        Admin
+                                    </Text>
+                                </View>
                             </View>
 
+
+                            <TouchableOpacity onPress={() => {
+                                handleSnapPress(data?.data.id, data?.data.user.id)
+
+                            }}>
+                                <Entypo name="dots-three-horizontal" size={24} color={lightTextColor}/>
+                            </TouchableOpacity>
                         </View>
                         <Text style={styles.postDate}>
 
@@ -385,17 +451,17 @@ isFetching,
 
                     <View style={styles.postImageWrap}>
                         {
-                            type !== 'mov'  && type !== 'mp4' &&
-                        <FastImage
-                            resizeMode={FastImage.resizeMode.cover}
-                            source={{
-                                uri: post?.thumbnailUrl,
-                                cache: FastImage.cacheControl.web,
-                                priority: FastImage.priority.normal,
-                            }}
+                            type !== 'mov' && type !== 'mp4' &&
+                            <FastImage
+                                resizeMode={FastImage.resizeMode.cover}
+                                source={{
+                                    uri: post?.thumbnailUrl,
+                                    cache: FastImage.cacheControl.web,
+                                    priority: FastImage.priority.normal,
+                                }}
 
-                            style={styles.postImage}
-                        />
+                                style={styles.postImage}
+                            />
                         }
 
                         {
@@ -432,9 +498,9 @@ isFetching,
                                       style={styles.actionButton}>
 
                         {
-                            !post?.liked ?  <AntDesign name="like2" size={20} color={"#838383"}/>
+                            !post?.liked ? <AntDesign name="like2" size={20} color={"#838383"}/>
                                 :
-                                <AntDesign name="like1" size={20} color={Colors.primaryColor} />
+                                <AntDesign name="like1" size={20} color={Colors.primaryColor}/>
                         }
                         <Text style={styles.actionButtonText}>
                             {data?.data?.likes} likes
@@ -451,10 +517,8 @@ isFetching,
                 </View>
             </Animated.View>
         ),
-        [data,theme,post],
+        [data, theme, post],
     );
-
-
 
 
     const renderFooterItem = useCallback(
@@ -490,8 +554,6 @@ isFetching,
     );
 
 
-
-
     const keyExtractor = useCallback((item: { id: any; }) => item.id, [],);
 
     const menuToggle = () => {
@@ -510,10 +572,10 @@ isFetching,
         // Add a 'scroll' ref to your ScrollView
         // scroll.props.scrollToFocusedInput(reactNode)
     }
-    useEffect(()=>{
+    useEffect(() => {
         fetchComments()
-     },[postId])
-   // useRefreshOnFocus(fetchComments)
+    }, [postId])
+    // useRefreshOnFocus(fetchComments)
     useRefreshOnFocus(refetch)
 
     return (
@@ -532,16 +594,14 @@ isFetching,
                     <TouchableOpacity onPress={goBack} style={styles.goBack} activeOpacity={0.8}>
                         <AntDesign name="arrowleft" size={24} color={textColor}/>
                     </TouchableOpacity>
-                        <Text style={[styles.screenTitle, {
-                            color: textColor
-                        }]}>
-                            {community.data.name}
-                        </Text>
+                    <Text style={[styles.screenTitle, {
+                        color: textColor
+                    }]}>
+                        {community.data.name}
+                    </Text>
 
 
-
-
-                 {/*   <TouchableOpacity onPress={menuToggle} activeOpacity={0.8} style={styles.rightButton}>
+                    {/*   <TouchableOpacity onPress={menuToggle} activeOpacity={0.8} style={styles.rightButton}>
                         <SimpleLineIcons name="menu" size={24} color={textColor}/>
                     </TouchableOpacity>*/}
                 </View>
@@ -556,7 +616,7 @@ isFetching,
                     backgroundColor
                 }]} scrollEnabled
                     showsVerticalScrollIndicator={false}>*/}
-             {/*   {
+                {/*   {
                     isLoading &&
 
                     <ActivityIndicator color={Colors.primaryColor} size={"small"}
@@ -600,6 +660,82 @@ isFetching,
 
             </SafeAreaView>
 
+
+            <BottomSheet
+                backgroundStyle={{
+                    backgroundColor,
+                }}
+                handleIndicatorStyle={{
+                    backgroundColor: theme == 'light' ? "#121212" : '#cccccc'
+                }}
+                index={0}
+                ref={sheetRef}
+                snapPoints={snapPoints}
+                backdropComponent={renderBackdrop}
+            >
+
+                <View style={styles.sheetHead}>
+                    {Platform.OS == 'ios' && <View style={{
+                        width: '10%'
+                    }}/>
+                    }
+                    <Text style={[styles.sheetTitle, {
+                        color: textColor
+                    }]}>
+                        Actions
+                    </Text>
+                    <View style={{
+                        width: '10%'
+                    }}/>
+                    {Platform.OS == 'android' && <TouchableOpacity onPress={handleClosePress}
+                                                                   style={[styles.dismiss, {
+                                                                       backgroundColor: theme == 'light' ? "#f8f8f8" : Colors.dark.background
+                                                                   }]}>
+                        <Ionicons name="close-sharp" size={20} color={textColor}/>
+                    </TouchableOpacity>}
+                </View>
+
+                <BottomSheetView style={styles.optionBox}>
+
+
+                    <Pressable onPress={flagPost} style={[styles.optionsActionButton, {}]}>
+                        <Ionicons name="flag" size={20} color={textColor}/>
+
+                        <Text style={[styles.actionBtnTxt, {
+                            color: textColor,
+                            marginLeft: 10,
+                        }]}>
+                            Flag Post
+                        </Text>
+                    </Pressable>
+
+
+                    <Pressable onPress={blockUserScreen} style={[styles.optionsActionButton, {}]}>
+                        <MaterialIcons name="block" size={20} color={textColor}/>
+
+                        <Text style={[styles.actionBtnTxt, {
+                            color: textColor,
+                            marginLeft: 10,
+                        }]}>
+                            Block User
+                        </Text>
+                    </Pressable>
+
+
+                    <Pressable style={[styles.optionsActionButton, {}]}>
+                        <Ionicons name="md-trash-outline" size={20} color={Colors.primaryColor}/>
+                        <Text style={[styles.actionBtnTxt, {
+                            color: Colors.primaryColor,
+                            marginLeft: 10,
+                        }]}>
+                            Delete Post
+                        </Text>
+                    </Pressable>
+
+
+                </BottomSheetView>
+
+            </BottomSheet>
         </>
     );
 };
@@ -799,6 +935,59 @@ const styles = StyleSheet.create({
 
     },
 
+    leftDetails: {
+        width: '85%',
+        flexDirection: 'row',
+        alignItems: 'center',
+
+    },
+
+    sheetHead: {
+        paddingHorizontal: pixelSizeHorizontal(20),
+        height: 50,
+        width: '100%',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexDirection: 'row'
+    },
+    sheetTitle: {
+        //width: '70%',
+        textAlign: 'center',
+        fontSize: fontPixel(16),
+        fontFamily: Fonts.quicksandSemiBold,
+
+    },
+    optionBox: {
+        alignItems: 'center',
+        justifyContent: 'space-evenly',
+        width: '100%',
+        height: '80%',
+
+
+    },
+    optionsActionButton: {
+        width: '90%',
+        borderRadius: 10,
+        flexDirection: 'row',
+        alignItems: 'center',
+        height: 55,
+        justifyContent: 'flex-start'
+
+    },
+    actionBtnTxt: {
+        fontSize: fontPixel(18),
+        fontFamily: Fonts.quickSandBold,
+    },
+    dismiss: {
+        position: 'absolute',
+        right: 10,
+        borderRadius: 30,
+        height: 30,
+        width: 30,
+        alignItems: 'center',
+        justifyContent: 'center',
+
+    },
 })
 
 export default PostScreen;

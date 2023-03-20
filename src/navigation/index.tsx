@@ -60,6 +60,8 @@ import {
 import {widthPixel} from "../helpers/normalize";
 import {Icon} from "react-native-elements";
 import DeleteAccount from "../screens/profile/DeleteAccount";
+import BlockUser from "../screens/communities/components/BlockUser";
+import FlagPost from "../screens/communities/components/FlagPost";
 
 const styles = StyleSheet.create({
     displayPhoto: {
@@ -122,15 +124,13 @@ function CustomDrawerContent(props) {
     const {userData} = user
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
 
-    const toggle = () =>{
+    const toggle = () => {
         props.navigation.closeDrawer()
         props.navigation.navigate('LeaveCommunity')
 
     }
     return (
-        <DrawerContentScrollView contentContainerStyle={{
-
-        }}  {...props}>
+        <DrawerContentScrollView contentContainerStyle={{}}  {...props}>
             <View style={styles.displayPhoto}>
                 <Image
                     source={{uri: currentCommunity.displayPhoto}}
@@ -138,7 +138,6 @@ function CustomDrawerContent(props) {
                 />
             </View>
             <DrawerItemList  {...props} />
-
 
 
             <DrawerItem label="LeaveCommunity"
@@ -179,17 +178,15 @@ function CommunityMenu() {
             }} component={ViewCommunity}/>
 
 
-
-
             <Drawer.Screen name="Followers"
-                          options={{
-                              drawerIcon: ({size}) => (
-                                  <FontAwesome5 name="users" size={16} color={textColor}/>
-                              ),
-                              drawerActiveTintColor: Colors.primaryColor,
-                              drawerActiveBackgroundColor: Colors.tintColor
+                           options={{
+                               drawerIcon: ({size}) => (
+                                   <FontAwesome5 name="users" size={16} color={textColor}/>
+                               ),
+                               drawerActiveTintColor: Colors.primaryColor,
+                               drawerActiveBackgroundColor: Colors.tintColor
 
-                          }} component={Followers}/>
+                           }} component={Followers}/>
 
 
             {
@@ -197,52 +194,52 @@ function CommunityMenu() {
                 currentCommunity.visibility == 'PRIVATE' &&
                 <Drawer.Screen name="RequestsScreen"
 
-                              options={{
-                                  title: 'Requests',
-                                  drawerIcon: ({}) => (
-                                      <Ionicons name="person-add" size={18} color={textColor}/>
-                                  ),
-                                  drawerActiveTintColor: Colors.primaryColor,
-                                  drawerActiveBackgroundColor: Colors.tintColor
+                               options={{
+                                   title: 'Requests',
+                                   drawerIcon: ({}) => (
+                                       <Ionicons name="person-add" size={18} color={textColor}/>
+                                   ),
+                                   drawerActiveTintColor: Colors.primaryColor,
+                                   drawerActiveBackgroundColor: Colors.tintColor
 
-                              }}
+                               }}
 
-                              component={RequestsScreen}/>
+                               component={RequestsScreen}/>
             }
 
 
-      {
-          currentCommunity.ownerId == userData.id
-          &&
+            {
+                currentCommunity.ownerId == userData.id
+                &&
                 <Drawer.Screen name="GroupSettings"
 
-                              options={{
-                                  title: 'GroupSettings',
-                                  drawerIcon: ({}) => (
-                                      <FontAwesome name="cog" size={18} color={textColor}/>
-                                  ),
-                                  drawerActiveTintColor: Colors.primaryColor,
-                                  drawerActiveBackgroundColor: Colors.tintColor
+                               options={{
+                                   title: 'GroupSettings',
+                                   drawerIcon: ({}) => (
+                                       <FontAwesome name="cog" size={18} color={textColor}/>
+                                   ),
+                                   drawerActiveTintColor: Colors.primaryColor,
+                                   drawerActiveBackgroundColor: Colors.tintColor
 
-                              }}
+                               }}
 
-                              component={GroupSettings}/>
+                               component={GroupSettings}/>
             }
 
 
             <Drawer.Screen name="CommunityInfo"
 
 
-                          options={{
-                              title: 'About',
+                           options={{
+                               title: 'About',
 
-                              drawerIcon: ({}) => (
-                                  <Ionicons name="information-circle" size={18} color={textColor}/>
-                              ),
-                              drawerActiveTintColor: Colors.primaryColor,
-                              drawerActiveBackgroundColor: Colors.tintColor
+                               drawerIcon: ({}) => (
+                                   <Ionicons name="information-circle" size={18} color={textColor}/>
+                               ),
+                               drawerActiveTintColor: Colors.primaryColor,
+                               drawerActiveBackgroundColor: Colors.tintColor
 
-                          }} component={CommunityInfo}/>
+                           }} component={CommunityInfo}/>
         </Drawer.Navigator>
 
     );
@@ -291,7 +288,7 @@ function RootNavigator() {
 
 
                         <Stack.Screen name="LeaveCommunity" options={{
-                            animation:'slide_from_left'
+                            animation: 'slide_from_left'
                         }} component={LeaveCommunity}/>
 
                     </Stack.Group>
@@ -307,8 +304,14 @@ function RootNavigator() {
                         <Stack.Screen name="MakeAPost" options={{
                             animation: 'slide_from_bottom'
                         }} component={MakeAPost}/>
+                        <Stack.Screen name="BlockUser" options={{
+                            animation: 'slide_from_bottom'
+                        }} component={BlockUser}/>
+
                         <Stack.Screen name="PostScreen" options={{animation: 'slide_from_right'}}
                                       component={PostScreen}/>
+                        <Stack.Screen name="FlagPost" options={{animation: 'slide_from_bottom'}}
+                                      component={FlagPost}/>
 
                         <Stack.Screen name="CommentOnPost" options={{
                             animation: 'slide_from_bottom'

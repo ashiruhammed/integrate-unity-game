@@ -90,6 +90,12 @@ export type RootStackParamList = {
     LeaveCommunity: {
         id: string
     }
+    BlockUser: {
+        userId: string
+    }
+    FlagPost: {
+        postId: string
+    }
     NotFound: undefined;
 };
 

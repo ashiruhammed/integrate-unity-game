@@ -1,4 +1,4 @@
-import React, {memo, useCallback, useEffect, useRef, useState} from 'react';
+import React, {memo, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import {
     Text,
@@ -9,8 +9,7 @@ import {
     TextInput,
     Image,
     Animated as MyAnimated,
-    ActivityIndicator, Pressable,
-
+    ActivityIndicator, Pressable, Keyboard, Platform,
 } from 'react-native';
 import {CommunityStackScreenProps, RootStackScreenProps} from "../../../types";
 import NavBar from "../../components/layout/NavBar";
@@ -18,16 +17,14 @@ import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
 import {Fonts} from "../../constants/Fonts";
-import {AntDesign, Entypo, FontAwesome, Ionicons, Octicons, SimpleLineIcons} from "@expo/vector-icons";
-import {BottomSheetBackdrop} from "@gorhom/bottom-sheet";
+import {AntDesign, Entypo, FontAwesome, Ionicons, MaterialIcons, Octicons, SimpleLineIcons} from "@expo/vector-icons";
+import BottomSheet, {BottomSheetBackdrop, BottomSheetView} from "@gorhom/bottom-sheet";
 
 import Animated, {
 
     Easing, FadeInDown,
-    FadeInRight, FadeOutDown, FadeOutRight, Layout,
-    SlideInRight,
-    SlideOutRight,
-    useAnimatedStyle,
+    FadeOutDown, Layout,
+
     useSharedValue,
     withSpring
 } from 'react-native-reanimated';
@@ -56,6 +53,10 @@ import Toast from "../../components/Toast";
 import dayjs from "dayjs";
 import {Video} from "expo-av";
 import {store} from "../../app/store";
+import {
+    BottomSheetDefaultBackdropProps
+} from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
+
 
 const fullHeight = Dimensions.get('window').height
 
@@ -85,11 +86,14 @@ interface cardProps {
         },
     },
     myId: string,
-    viewPost: (id: string, post:{}) => void,
+    viewPost: (id: string, post: {}) => void,
     commentOnPost: (id: string, post: any) => void,
+    handleSnapPress: (id: string,userId:string) => void,
+    sheetIndex: string
+
 }
 
-const PostCard = ({theme, item, viewPost, commentOnPost}: cardProps) => {
+const PostCard = ({theme, item, viewPost, commentOnPost, handleSnapPress, sheetIndex}: cardProps) => {
 
     const {data: likes, refetch} = useQuery(['getPostLikes'], () => getPostLike(item.id))
     const {mutate} = useMutation(['likeAPost'], likeAPost, {
@@ -118,6 +122,7 @@ const PostCard = ({theme, item, viewPost, commentOnPost}: cardProps) => {
     const borderColor = theme == 'light' ? Colors.borderColor : '#313131'
     let type = item.thumbnailUrl?.substring(item.thumbnailUrl.lastIndexOf(".") + 1);
     const videoRef = useRef(null);
+
     return (
         <Animated.View key={item.id} entering={FadeInDown} exiting={FadeOutDown}
                        layout={Layout.easing(Easing.ease).delay(20)}>
@@ -126,11 +131,13 @@ const PostCard = ({theme, item, viewPost, commentOnPost}: cardProps) => {
                 <View style={styles.topPostSection}>
                     <View style={styles.userImage}>
                         <FastImage
+
                             resizeMode={FastImage.resizeMode.cover}
-                            source={{uri: !item?.user?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : item?.user?.avatar,
+                            source={{
+                                uri: !item?.user?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : item?.user?.avatar,
                                 cache: FastImage.cacheControl.web,
                                 priority: FastImage.priority.normal,
-                        }}
+                            }}
                             style={styles.avatar}/>
 
                     </View>
@@ -138,26 +145,44 @@ const PostCard = ({theme, item, viewPost, commentOnPost}: cardProps) => {
                     <View style={styles.details}>
 
                         <View style={styles.nameTag}>
-                            <Text style={[styles.postName, {
-                                color: textColor
-                            }]}>
-                                {item?.user?.fullName}
-                            </Text>
 
-                            <View style={[styles.tag, {
-                                // backgroundColor
-                            }]}>
-                                <Text style={styles.tagText}>
-                                    Admin
+
+                            <View style={styles.leftDetails}>
+
+
+                                <Text style={[styles.postName, {
+                                    color: textColor
+                                }]}>
+                                    {item?.user?.fullName}
                                 </Text>
+
+                                <View style={[styles.tag, {
+                                    // backgroundColor
+                                }]}>
+                                    <Text style={styles.tagText}>
+                                        Admin
+                                    </Text>
+                                </View>
+
+
                             </View>
 
+                            <TouchableOpacity onPress={() => {
+                                handleSnapPress(item.id, item.user.id)
+
+                            }}>
+                                <Entypo name="dots-three-horizontal" size={24} color={lightTextColor}/>
+                            </TouchableOpacity>
+
+
                         </View>
+
                         <Text style={styles.postDate}>
 
                             {dayjs(item.createdAt).format('DD MMM YYYY')}
                         </Text>
                     </View>
+
 
 
                 </View>
@@ -256,18 +281,32 @@ const ViewCommunity = ({navigation, route}: CommunityStackScreenProps<'ViewCommu
     const user = useAppSelector(state => state.user)
     const {responseState, responseType, responseMessage} = user
 
+    const [sheetIndex, setSheetIndex] = useState('');
+    const [userId, setUserId] = useState('');
 
     const dispatch = useAppDispatch()
     const queryClient = useQueryClient();
 
 
     const dataSlice = useAppSelector(state => state.data)
-    const {theme,currentCommunityId} = dataSlice
+    const {theme, currentCommunityId} = dataSlice
     const backgroundColor = theme == 'light' ? "#EDEDED" : Colors.dark.background
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
     const lightTextColor = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
     const borderColor = theme == 'light' ? Colors.borderColor : '#313131'
 
+
+    const snapPoints = useMemo(() => ["1%", "35%"], []);
+
+    const sheetRef = useRef<BottomSheet>(null);
+    const handleSnapPress = useCallback((id: string,userId) => {
+        setSheetIndex(id)
+        setUserId(userId)
+        sheetRef.current?.snapToIndex(1);
+    }, []);
+    const handleClosePress = useCallback(() => {
+        sheetRef.current?.close();
+    }, []);
     const goBack = () => {
         navigation.goBack()
     }
@@ -281,23 +320,7 @@ const ViewCommunity = ({navigation, route}: CommunityStackScreenProps<'ViewCommu
 
 
     const scrollOffsetY = useRef(new MyAnimated.Value(0)).current;
-    const headerScrollHeight = scrollOffsetY.interpolate({
-        inputRange: [0, H_SCROLL_DISTANCE],
-        outputRange: [H_MAX_HEIGHT, H_MIN_HEIGHT],
-        extrapolate: "clamp"
-    });
 
-    const headerScrollOpacity = scrollOffsetY.interpolate({
-        inputRange: [0, 50, 100],
-        outputRange: [1, 0.5, 0],
-        extrapolate: "clamp"
-    });
-
-    const topScrollHeight = scrollOffsetY.interpolate({
-        inputRange: [0, 250],
-        outputRange: [250, 0],
-        extrapolate: "clamp"
-    });
 
     const {isLoading: loadingUser, data: userInfo} = useQuery(['user-data'], getUser, {
         onSuccess: (data) => {
@@ -330,7 +353,7 @@ const ViewCommunity = ({navigation, route}: CommunityStackScreenProps<'ViewCommu
         })
 
 
-    const viewPost = (postId: string, post:any) => {
+    const viewPost = (postId: string, post: any) => {
         navigation.navigate('PostScreen', {
             postId,
             communityId: currentCommunityId,
@@ -339,13 +362,28 @@ const ViewCommunity = ({navigation, route}: CommunityStackScreenProps<'ViewCommu
 
     }
 
+    // renders
+    const renderBackdrop = useCallback(
+        (props: JSX.IntrinsicAttributes & BottomSheetDefaultBackdropProps) => (
+            <BottomSheetBackdrop
+                style={{
+                    backgroundColor: 'rgba(25,25,25,0.34)'
+                }}
+                {...props}
+                disappearsOnIndex={0}
+                appearsOnIndex={1}
+            />
+        ),
+        []
+    );
 
     const renderItem = useCallback(
         ({item}) => (
-            <PostCard commentOnPost={commentOnPost} myId={user?.userData?.id} viewPost={viewPost} theme={theme}
+            <PostCard sheetIndex={sheetIndex} handleSnapPress={handleSnapPress} commentOnPost={commentOnPost}
+                      myId={user?.userData?.id} viewPost={viewPost} theme={theme}
                       item={item}/>
         ),
-        [data, posts],
+        [data, posts, sheetIndex],
     );
     const keyExtractor = useCallback((item: { id: any; }) => item.id, [],);
 
@@ -362,7 +400,8 @@ const ViewCommunity = ({navigation, route}: CommunityStackScreenProps<'ViewCommu
                         </TouchableOpacity>
 
 
-                        <TouchableOpacity onPress={()=>navigation.openDrawer()} activeOpacity={0.8} style={styles.rightButton}>
+                        <TouchableOpacity onPress={() => navigation.openDrawer()} activeOpacity={0.8}
+                                          style={styles.rightButton}>
                             <SimpleLineIcons name="menu" size={24} color="#fff"/>
                         </TouchableOpacity>
                     </View>
@@ -421,16 +460,16 @@ const ViewCommunity = ({navigation, route}: CommunityStackScreenProps<'ViewCommu
                     <View style={styles.writePost}>
                         <View style={styles.userImage}>
 
-                                    <FastImage
-                                        style={styles.userImagePhoto}
-                                        source={{
-                                            uri: !userInfo?.data?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : userInfo?.data?.avatar,
+                            <FastImage
+                                style={styles.userImagePhoto}
+                                source={{
+                                    uri: !userInfo?.data?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : userInfo?.data?.avatar,
 
-                                            cache: FastImage.cacheControl.web,
-                                            priority: FastImage.priority.normal,
-                                        }}
-                                        resizeMode={FastImage.resizeMode.cover}
-                                    />
+                                    cache: FastImage.cacheControl.web,
+                                    priority: FastImage.priority.normal,
+                                }}
+                                resizeMode={FastImage.resizeMode.cover}
+                            />
 
                         </View>
                         <Pressable onPress={makePost} style={[styles.postInput, {
@@ -489,7 +528,7 @@ const ViewCommunity = ({navigation, route}: CommunityStackScreenProps<'ViewCommu
     useRefreshOnFocus(fetchPosts)
     const makePost = () => {
         navigation.navigate('MakeAPost', {
-            id:currentCommunityId
+            id: currentCommunityId
         })
     }
 
@@ -499,6 +538,19 @@ const ViewCommunity = ({navigation, route}: CommunityStackScreenProps<'ViewCommu
     const menuToggle = () => {
         offset.value = Math.random()
         setToggleMenu(!toggleMenu)
+    }
+
+    const blockUserScreen = () => {
+        handleClosePress()
+      navigation.navigate('BlockUser',{
+          userId
+      })
+    }
+ const flagPost = () => {
+        handleClosePress()
+      navigation.navigate('FlagPost',{
+          postId:sheetIndex
+      })
     }
 
 
@@ -519,61 +571,141 @@ const ViewCommunity = ({navigation, route}: CommunityStackScreenProps<'ViewCommu
 
 
     return (
-        <SafeAreaView style={[styles.safeArea, {
-            // backgroundColor
-        }]}>
-            <Toast message={responseMessage} state={responseState} type={responseType}/>
-            {
-                isLoading &&
+        <>
+            <SafeAreaView style={[styles.safeArea, {}]}>
+                <Toast message={responseMessage} state={responseState} type={responseType}/>
+                {
+                    isLoading &&
 
-                <ActivityIndicator color={Colors.primaryColor} size={"small"}
-                                   style={[StyleSheet.absoluteFillObject, {
-                                       backgroundColor: 'rgba(0,0,0,0.2)',
-                                       zIndex: 2,
-                                   }]}/>
-            }
-            {
-                toggleMenu &&
+                    <ActivityIndicator color={Colors.primaryColor} size={"small"}
+                                       style={[StyleSheet.absoluteFillObject, {
+                                           backgroundColor: 'rgba(0,0,0,0.2)',
+                                           zIndex: 2,
+                                       }]}/>
+                }
 
-                <Drawer communityId={id} menuToggle={menuToggle}/>
-            }
-            <View style={styles.scrollView}>
+                <View style={styles.scrollView}>
 
 
-                <View style={{
-                    width: '100%',
-                    flex: 1,
-                }}>
-                    {
-                        !loadingPost && posts &&
+                    <View style={{
+                        width: '100%',
+                        flex: 1,
+                    }}>
+                        {
+                            !loadingPost && posts &&
 
 
-                        <FlashList
-                            ListHeaderComponent={renderHeaderItem}
-                            onScroll={MyAnimated.event([
+                            <FlashList
+                                ListHeaderComponent={renderHeaderItem}
+                                onScroll={MyAnimated.event([
 
-                                {nativeEvent: {contentOffset: {y: scrollOffsetY}}}
-                            ], {useNativeDriver: false})}
-                            scrollEventThrottle={16}
-                            estimatedItemSize={200}
-                            refreshing={isLoading}
-                            onRefresh={refetch}
-                            scrollEnabled
-                            showsVerticalScrollIndicator={false}
-                            data={posts?.pages[0]?.data?.result}
-                            renderItem={renderItem}
+                                    {nativeEvent: {contentOffset: {y: scrollOffsetY}}}
+                                ], {useNativeDriver: false})}
+                                scrollEventThrottle={16}
+                                estimatedItemSize={200}
+                                refreshing={isLoading}
+                                onRefresh={refetch}
+                                scrollEnabled
+                                showsVerticalScrollIndicator={false}
+                                data={posts?.pages[0]?.data?.result}
+                                renderItem={renderItem}
 
-                            keyExtractor={keyExtractor}
-                            onEndReachedThreshold={0.3}
-                            ListFooterComponent={isFetchingNextPage ?
-                                <ActivityIndicator size="small" color={Colors.primaryColor}/> : null}
-                        />
+                                keyExtractor={keyExtractor}
+                                onEndReachedThreshold={0.3}
+                                ListFooterComponent={isFetchingNextPage ?
+                                    <ActivityIndicator size="small" color={Colors.primaryColor}/> : null}
+                            />
+                        }
+                    </View>
+
+
+                </View>
+            </SafeAreaView>
+            <BottomSheet
+                backgroundStyle={{
+                    backgroundColor,
+                }}
+                handleIndicatorStyle={{
+                    backgroundColor: theme == 'light' ? "#121212" : '#cccccc'
+                }}
+                index={0}
+                ref={sheetRef}
+                snapPoints={snapPoints}
+                backdropComponent={renderBackdrop}
+            >
+
+                <View style={styles.sheetHead}>
+                    {Platform.OS == 'ios' && <View style={{
+                        width: '10%'
+                    }}/>
                     }
+                    <Text style={[styles.sheetTitle, {
+                        color: textColor
+                    }]}>
+                        Actions
+                    </Text>
+                    <View style={{
+                        width: '10%'
+                    }}/>
+                    {Platform.OS == 'android' && <TouchableOpacity onPress={handleClosePress}
+                                                                   style={[styles.dismiss, {
+                                                                       backgroundColor: theme == 'light' ? "#f8f8f8" : Colors.dark.background
+                                                                   }]}>
+                        <Ionicons name="close-sharp" size={20} color={textColor}/>
+                    </TouchableOpacity>}
                 </View>
 
+                <BottomSheetView style={styles.optionBox}>
 
-            </View>
-        </SafeAreaView>
+
+                    <Pressable onPress={flagPost} style={[styles.optionsActionButton, {
+
+                    }]}>
+                        <Ionicons name="flag" size={20} color={textColor} />
+
+                        <Text style={[styles.actionBtnTxt, {
+                            color: textColor,
+                            marginLeft: 10,
+                        }]}>
+                            Flag Post
+                        </Text>
+                    </Pressable>
+
+
+                    <Pressable onPress={blockUserScreen} style={[styles.optionsActionButton, {
+
+                    }]}>
+                        <MaterialIcons name="block" size={20} color={textColor} />
+
+                        <Text style={[styles.actionBtnTxt, {
+                            color: textColor,
+                            marginLeft: 10,
+                        }]}>
+                            Block User
+                        </Text>
+                    </Pressable>
+
+
+                    <Pressable style={[styles.optionsActionButton, {
+
+                    }]}>
+                        <Ionicons name="md-trash-outline" size={20} color={Colors.primaryColor}/>
+                        <Text style={[styles.actionBtnTxt, {
+                            color: Colors.primaryColor,
+                            marginLeft: 10,
+                        }]}>
+                            Delete Post
+                        </Text>
+                    </Pressable>
+
+
+
+
+                </BottomSheetView>
+
+            </BottomSheet>
+        </>
+
     );
 };
 
@@ -805,6 +937,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
 
     },
+    leftDetails: {
+        width: '85%',
+        flexDirection: 'row',
+        alignItems: 'center',
+
+    },
     tag: {
         marginLeft: 10,
         minWidth: 50,
@@ -884,6 +1022,52 @@ const styles = StyleSheet.create({
         width: "100%",
         height: "100%",
     },
+    actionSheet: {
+        position: 'absolute',
+        width: 200,
+        zIndex: 1100,
+        top: 20,
+        right: 15,
+        height: 150,
+        backgroundColor: '#ccc',
+
+    },
+    sheetHead: {
+        paddingHorizontal: pixelSizeHorizontal(20),
+        height: 50,
+        width: '100%',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexDirection: 'row'
+    },
+    sheetTitle: {
+        //width: '70%',
+        textAlign: 'center',
+        fontSize: fontPixel(16),
+        fontFamily: Fonts.quicksandSemiBold,
+
+    },
+    optionBox: {
+        alignItems: 'center',
+        justifyContent: 'space-evenly',
+        width: '100%',
+        height: '80%',
+
+
+    },
+    optionsActionButton: {
+        width: '90%',
+        borderRadius: 10,
+        flexDirection: 'row',
+        alignItems: 'center',
+        height: 55,
+        justifyContent: 'flex-start'
+
+    },
+    actionBtnTxt: {
+        fontSize: fontPixel(18),
+        fontFamily: Fonts.quickSandBold,
+    }
 })
 
 export default memo(ViewCommunity);

@@ -348,7 +348,6 @@ export const updatePhoneNumberVerify = async (userdata: any) => {
 }
 
 
-
 export const getUserSettings = async () => {
 
     let Token = await SecureStore.getItemAsync('Gateway-Token');
@@ -680,8 +679,6 @@ export const userLeaderboards = {
 }
 
 
-
-
 export const getUserDashboard = async () => {
 
     let Token = await SecureStore.getItemAsync('Gateway-Token');
@@ -749,7 +746,6 @@ export const getUserRank = async () => {
 
     ])
 }
-
 
 
 export const uploadToCloudinary = async ({body, resource_type}: { body: any, resource_type: string }) => {
@@ -2213,6 +2209,70 @@ export const unFollowCommunity = async (id?: string | any) => {
 
     ])
 }
+export const blockUser = async (body?: any) => {
+
+    let Token = await SecureStore.getItemAsync('Gateway-Token');
+
+    const myHeaders = {
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
+        'Authorization': `Bearer ${Token}`
+    }
+    let timeoutId: NodeJS.Timeout
+
+
+    const requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body
+    };
+
+
+    return Promise.race([
+        fetch(`${BASE_URL}/user/block`, requestOptions)
+            .then(response => response.json()),
+        new Promise((resolve, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+            //  clearTimeout(timeoutId)
+        }).then(() => {
+            clearTimeout(timeoutId)
+        })
+
+    ])
+}
+export const flagPost = async (body?: any) => {
+
+    let Token = await SecureStore.getItemAsync('Gateway-Token');
+
+    const myHeaders = {
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
+        'Authorization': `Bearer ${Token}`
+    }
+    let timeoutId: NodeJS.Timeout
+
+
+    const requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body
+    };
+
+
+    return Promise.race([
+        fetch(`${BASE_URL}/post/flag`, requestOptions)
+            .then(response => response.json()),
+        new Promise((resolve, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+            //  clearTimeout(timeoutId)
+        }).then(() => {
+            clearTimeout(timeoutId)
+        })
+
+    ])
+}
 
 
 export const approveCommunityRequest = async (id?: string | any) => {
@@ -2677,7 +2737,7 @@ export const requestDeleteAccount = async () => {
 
     ])
 }
-export const deleteAccountNow = async (body:any) => {
+export const deleteAccountNow = async (body: any) => {
 
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
