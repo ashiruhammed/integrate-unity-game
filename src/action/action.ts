@@ -1628,8 +1628,7 @@ export const getUserBadges = async () => {
 }
 
 
-export const getAllBadges =
-    {
+export const getAllBadges = {
 
         badges: async (pageParam: string) => {
 
@@ -2214,6 +2213,7 @@ export const blockUser = async (body?: any) => {
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
+        'Content-Type': 'application/json',
         'x-access-token': ACCESS_TOKEN,
         'x-client-type': 'web',
         'Authorization': `Bearer ${Token}`
@@ -2241,11 +2241,84 @@ export const blockUser = async (body?: any) => {
 
     ])
 }
+export const unblockUser = async (body?: any) => {
+
+    let Token = await SecureStore.getItemAsync('Gateway-Token');
+
+    const myHeaders = {
+        'Content-Type': 'application/json',
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
+        'Authorization': `Bearer ${Token}`
+    }
+    let timeoutId: NodeJS.Timeout
+
+
+    const requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body
+    };
+
+
+    return Promise.race([
+        fetch(`${BASE_URL}/user/unblock`, requestOptions)
+            .then(response => response.json()),
+        new Promise((resolve, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+            //  clearTimeout(timeoutId)
+        }).then(() => {
+            clearTimeout(timeoutId)
+        })
+
+    ])
+}
+
+
+
+
+export const blockedUsers = {
+
+    blockedList: async (pageParam: string) => {
+
+        let Token = await SecureStore.getItemAsync('Gateway-Token');
+
+        const myHeaders = {
+            'x-access-token': ACCESS_TOKEN,
+            'x-client-type': 'web',
+            'Authorization': `Bearer ${Token}`
+        }
+        let timeoutId: NodeJS.Timeout
+
+
+        const requestOptions = {
+            method: 'GET',
+            headers: myHeaders,
+
+        };
+
+
+        return Promise.race([
+            fetch(`${BASE_URL}/user/blocked/list`, requestOptions)
+                .then(response => response.json()),
+            new Promise((resolve, reject) => {
+                timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+                //  clearTimeout(timeoutId)
+            }).then(() => {
+                clearTimeout(timeoutId)
+            })
+
+        ])
+    }
+}
 export const flagPost = async (body?: any) => {
 
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {
+        'Content-Type': 'application/json',
         'x-access-token': ACCESS_TOKEN,
         'x-client-type': 'web',
         'Authorization': `Bearer ${Token}`

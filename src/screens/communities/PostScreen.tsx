@@ -247,7 +247,7 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
     const {mutate: getPost} = useMutation(['getCommunityPost'], getCommunityPost)
 
 
-    const snapPoints = useMemo(() => ["1%", "35%"], []);
+    const snapPoints = useMemo(() => ["1%", "30%"], []);
 
     const sheetRef = useRef<BottomSheet>(null);
     const handleSnapPress = useCallback((id: string, userId) => {
@@ -714,14 +714,14 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
                         <MaterialIcons name="block" size={20} color={textColor}/>
 
                         <Text style={[styles.actionBtnTxt, {
-                            color: textColor,
+                            color: Colors.primaryColor,
                             marginLeft: 10,
                         }]}>
                             Block User
                         </Text>
                     </Pressable>
 
-
+{/*
                     <Pressable style={[styles.optionsActionButton, {}]}>
                         <Ionicons name="md-trash-outline" size={20} color={Colors.primaryColor}/>
                         <Text style={[styles.actionBtnTxt, {
@@ -730,7 +730,7 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
                         }]}>
                             Delete Post
                         </Text>
-                    </Pressable>
+                    </Pressable>*/}
 
 
                 </BottomSheetView>
@@ -959,7 +959,7 @@ const styles = StyleSheet.create({
     },
     optionBox: {
         alignItems: 'center',
-        justifyContent: 'space-evenly',
+        justifyContent: 'flex-start',
         width: '100%',
         height: '80%',
 

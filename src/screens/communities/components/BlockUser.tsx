@@ -38,7 +38,7 @@ const {userId} = route.params
             if (data.success) {
 
                 dispatch(setResponse({
-                    responseMessage: "User blocked, thank you for keeping the community cle=an",
+                    responseMessage: "User blocked, thank you for keeping the community clean",
                     responseState: true,
                     responseType: 'success',
                 }))

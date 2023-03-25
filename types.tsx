@@ -96,6 +96,7 @@ export type RootStackParamList = {
     FlagPost: {
         postId: string
     }
+    BlockedUsers:undefined
     NotFound: undefined;
 };
 

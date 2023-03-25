@@ -6,7 +6,7 @@ import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 import NavBar from "../../components/layout/NavBar";
 import {fontPixel, heightPixel, pixelSizeHorizontal, widthPixel} from "../../helpers/normalize";
 import {Fonts} from "../../constants/Fonts";
-import {AntDesign, Ionicons, MaterialCommunityIcons, SimpleLineIcons} from "@expo/vector-icons";
+import {AntDesign, Ionicons, MaterialCommunityIcons, MaterialIcons, SimpleLineIcons} from "@expo/vector-icons";
 import HorizontalLine from "../../components/HorizontalLine";
 import Colors from "../../constants/Colors";
 import * as yup from "yup";
@@ -93,6 +93,7 @@ const Settings = ({navigation}: RootStackScreenProps<'Settings'>) => {
 
     const backgroundColor = theme == 'light' ? "#fff" : Colors.dark.background
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
+    const lightTextColor = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
     /*  const color = Animated.interpolateColors(1, {
           inputRange: [0, 1],
           outputColorRange: ['red', 'blue'],
@@ -154,7 +155,9 @@ const Settings = ({navigation}: RootStackScreenProps<'Settings'>) => {
         }
     });
 
-
+    const blockList = () => {
+        navigation.navigate('BlockedUsers')
+    }
     useEffect(() => {
         // console.log(user)
         let time: NodeJS.Timeout | undefined;
@@ -368,6 +371,36 @@ const Settings = ({navigation}: RootStackScreenProps<'Settings'>) => {
                         </View>
                     </View>
 
+
+                    <HorizontalLine width={"90%"} margin color={theme == 'light' ? Colors.borderColor : '#313131'}/>
+
+
+                    <View style={[styles.utilityWrap, {
+                        justifyContent: 'flex-start',
+                        height: heightPixel(70),
+                    }]}>
+                        <Text style={[styles.utilityTitle, {
+                            color: textColor
+                        }]}>
+                            Privacy
+                        </Text>
+                        <TouchableOpacity onPress={blockList} activeOpacity={0.8} style={styles.utilityRow}>
+                            <View style={styles.utilityRowBody}>
+                                <MaterialIcons name="block" size={20} color={textColor}/>
+                                <Text style={[styles.utilityRowTitle, {
+                                    color: textColor
+                                }]}>
+                                    Blocked users
+                                </Text>
+                            </View>
+
+                            <Ionicons name="chevron-forward" size={20} color={lightTextColor}/>
+
+
+                        </TouchableOpacity>
+
+
+                    </View>
 
                     <HorizontalLine width={"90%"} margin color={theme == 'light' ? Colors.borderColor : '#313131'}/>
                     <View style={styles.authContainer}>

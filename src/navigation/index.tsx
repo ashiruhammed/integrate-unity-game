@@ -62,6 +62,7 @@ import {Icon} from "react-native-elements";
 import DeleteAccount from "../screens/profile/DeleteAccount";
 import BlockUser from "../screens/communities/components/BlockUser";
 import FlagPost from "../screens/communities/components/FlagPost";
+import BlockedUsers from "../screens/profile/BlockedUsers";
 
 const styles = StyleSheet.create({
     displayPhoto: {
@@ -274,6 +275,7 @@ function RootNavigator() {
                         animation: 'slide_from_right'
                     }}>
                         <Stack.Screen name="EditProfile" component={EditProfile}/>
+                        <Stack.Screen name="BlockedUsers" component={BlockedUsers}/>
 
                         <Stack.Screen name="Wallet" component={Wallet}/>
                         <Stack.Screen name="Leaderboard" component={Leaderboard}/>

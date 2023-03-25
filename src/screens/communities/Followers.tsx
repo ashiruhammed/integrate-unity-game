@@ -31,50 +31,52 @@ const H_MIN_HEIGHT = 52;
 const H_SCROLL_DISTANCE = H_MAX_HEIGHT - H_MIN_HEIGHT;
 
 interface cardProps {
-    theme:'dark'|'light',
-    item:{
-        createdAt:string,
-        follower:{
-            avatar:string,
-            fullName:string,
-            username:string,
+    theme: 'dark' | 'light',
+    item: {
+        createdAt: string,
+        follower: {
+            avatar: string,
+            fullName: string,
+            username: string,
         }
-    }
+    },
+
 }
-const FollowerCard = ({theme,item}:cardProps) =>{
+
+const FollowerCard = ({theme, item}: cardProps) => {
     const lightTextColor = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
     const borderColor = theme == 'light' ? Colors.borderColor : '#313131'
-        const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
-    return(
+    const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
+    return (
         <Animated.View key={item.follower.username} layout={Layout.easing(Easing.bounce).delay(30)}
-                       entering={FadeInDown.springify()} exiting={FadeOutDown} style={[styles.followersCard,{
+                       entering={FadeInDown.springify()} exiting={FadeOutDown} style={[styles.followersCard, {
             borderBottomColor: borderColor
         }]}>
             <View style={styles.avatar}>
-<Image
-    source={{uri: !item.follower.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : item.follower.avatar}}
-    style={styles.image}/>
+                <Image
+                    source={{uri: !item.follower.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : item.follower.avatar}}
+                    style={styles.image}/>
             </View>
 
             <View style={styles.CardBody}>
                 <View style={styles.bodyName}>
-                    <Text style={[styles.nameTxt,{
+                    <Text style={[styles.nameTxt, {
                         color: textColor
                     }]}>
                         {item.follower.fullName}
                     </Text>
                 </View>
                 <View style={styles.bodyName}>
-                    <Text style={[styles.time,{
-                        color:lightTextColor
+                    <Text style={[styles.time, {
+                        color: lightTextColor
                     }]}>
                         {dayjs(item.createdAt).format('DD, MMM YYYY')}
                     </Text>
-                    <Text style={[styles.nameTxt,{
+                    <Text style={[styles.nameTxt, {
                         color: textColor,
                         fontSize: fontPixel(14)
                     }]}>
-                        {item.follower.username && `@${item.follower.username}` }
+                        {item.follower.username && `@${item.follower.username}`}
                     </Text>
                 </View>
             </View>
@@ -93,7 +95,7 @@ const Followers = ({navigation, route}: CommunityStackScreenProps<'Followers'>) 
     const [toggleMenu, setToggleMenu] = useState(false);
 
     const dataSlice = useAppSelector(state => state.data)
-    const {theme,currentCommunityId} = dataSlice
+    const {theme, currentCommunityId} = dataSlice
     const backgroundColor = theme == 'light' ? "#fff" : Colors.dark.background
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
 
@@ -126,15 +128,13 @@ const Followers = ({navigation, route}: CommunityStackScreenProps<'Followers'>) 
         [],
     );
     const menuToggle = () => {
-       navigation.openDrawer()
+        navigation.openDrawer()
     }
 
     useRefreshOnFocus(getFollowers)
     const renderHeaderItem = useCallback(
         () => (
-            <MyAnimated.View style={[styles.cover, {
-
-            }]}>
+            <MyAnimated.View style={[styles.cover, {}]}>
 
                 <View style={styles.navBar}>
                     <TouchableOpacity onPress={goBack} activeOpacity={0.8}>
@@ -152,14 +152,13 @@ const Followers = ({navigation, route}: CommunityStackScreenProps<'Followers'>) 
                     style={{flex: 0.7, width: 200,}}
                     resizeMode={"contain"}/>
             </MyAnimated.View>
-        ),[])
+        ), [])
 
     const keyExtractor = useCallback((item: { id: any; }) => item.id, [],);
 
     return (
 
         <>
-
 
 
             <SafeAreaView style={[styles.safeArea, {
@@ -172,30 +171,29 @@ const Followers = ({navigation, route}: CommunityStackScreenProps<'Followers'>) 
 
                     {
                         loading && <ActivityIndicator size='small' color={Colors.primaryColor}
-                                                       style={[StyleSheet.absoluteFillObject, styles.loader]}/>
+                                                      style={[StyleSheet.absoluteFillObject, styles.loader]}/>
                     }
 
 
+                    <FlashList
+                        ListHeaderComponent={renderHeaderItem}
+                        onScroll={MyAnimated.event([
 
-                        <FlashList
-                            ListHeaderComponent={renderHeaderItem}
-                            onScroll={MyAnimated.event([
+                            {nativeEvent: {contentOffset: {y: scrollOffsetY}}}
+                        ], {useNativeDriver: false})}
+                        scrollEventThrottle={16}
+                        estimatedItemSize={200}
+                        refreshing={isLoading}
+                        onRefresh={refetch}
+                        scrollEnabled
+                        showsVerticalScrollIndicator={false}
+                        data={followers?.data?.result}
+                        renderItem={renderItem}
 
-                                {nativeEvent: {contentOffset: {y: scrollOffsetY}}}
-                            ], {useNativeDriver: false})}
-                            scrollEventThrottle={16}
-                            estimatedItemSize={200}
-                            refreshing={isLoading}
-                            onRefresh={refetch}
-                            scrollEnabled
-                            showsVerticalScrollIndicator={false}
-                            data={followers?.data?.result}
-                            renderItem={renderItem}
+                        keyExtractor={keyExtractor}
+                        onEndReachedThreshold={0.3}
 
-                            keyExtractor={keyExtractor}
-                            onEndReachedThreshold={0.3}
-
-                        />
+                    />
 
                 </View>
 
@@ -259,7 +257,7 @@ const styles = StyleSheet.create({
     image: {
         height: '100%',
         width: '100%',
-        resizeMode:'cover',
+        resizeMode: 'cover',
         borderRadius: 80
     },
     CardBody: {
@@ -275,7 +273,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
     },
-    nameTxt:{
+    nameTxt: {
         fontFamily: Fonts.quickSandBold,
         color: Colors.light.text,
         fontSize: fontPixel(16)
@@ -285,7 +283,7 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.quicksandSemiBold,
         fontSize: fontPixel(14)
     },
-    loader:{
+    loader: {
         zIndex: 1,
         backgroundColor: 'rgba(0,0,0,0.1)'
     }

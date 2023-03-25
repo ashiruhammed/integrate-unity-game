@@ -257,7 +257,7 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
         <>
 
             <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
-                <Toast message={responseMessage} state={responseState} type={responseType}/>
+
                 <ScrollView
                     refreshControl={<RefreshControl tintColor={Colors.borderColor}
                                                     refreshing={refreshing} onRefresh={refresh}/>}
@@ -278,7 +278,7 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
                             <Ionicons name="md-search-outline" size={20} color="#666666"/>
                         </View>
                     </View>
-
+                    <Toast message={responseMessage} state={responseState} type={responseType}/>
                     <View style={styles.segmentWrap}>
                         <SegmentedControl tabs={["All Communities", "Followed communities", "My Communities",]}
                                           currentIndex={tabIndex}

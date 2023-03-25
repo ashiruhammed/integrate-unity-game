@@ -296,7 +296,7 @@ const ViewCommunity = ({navigation, route}: CommunityStackScreenProps<'ViewCommu
     const borderColor = theme == 'light' ? Colors.borderColor : '#313131'
 
 
-    const snapPoints = useMemo(() => ["1%", "35%"], []);
+    const snapPoints = useMemo(() => ["1%", "25%"], []);
 
     const sheetRef = useRef<BottomSheet>(null);
     const handleSnapPress = useCallback((id: string,userId) => {
@@ -678,7 +678,7 @@ const ViewCommunity = ({navigation, route}: CommunityStackScreenProps<'ViewCommu
                         <MaterialIcons name="block" size={20} color={textColor} />
 
                         <Text style={[styles.actionBtnTxt, {
-                            color: textColor,
+                            color: Colors.primaryColor,
                             marginLeft: 10,
                         }]}>
                             Block User
@@ -686,7 +686,7 @@ const ViewCommunity = ({navigation, route}: CommunityStackScreenProps<'ViewCommu
                     </Pressable>
 
 
-                    <Pressable style={[styles.optionsActionButton, {
+                   {/* <Pressable style={[styles.optionsActionButton, {
 
                     }]}>
                         <Ionicons name="md-trash-outline" size={20} color={Colors.primaryColor}/>
@@ -696,7 +696,7 @@ const ViewCommunity = ({navigation, route}: CommunityStackScreenProps<'ViewCommu
                         }]}>
                             Delete Post
                         </Text>
-                    </Pressable>
+                    </Pressable>*/}
 
 
 
@@ -1049,7 +1049,7 @@ const styles = StyleSheet.create({
     },
     optionBox: {
         alignItems: 'center',
-        justifyContent: 'space-evenly',
+        justifyContent: 'flex-start',
         width: '100%',
         height: '80%',
 

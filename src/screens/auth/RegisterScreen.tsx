@@ -481,7 +481,7 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
                                 Sign up with Google
                             </Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={[styles.buttonSignUp, {
+                       {/* <TouchableOpacity style={[styles.buttonSignUp, {
                             marginBottom: 10
                         }]}>
 
@@ -509,7 +509,7 @@ style={styles.fbButtonSignUp}
                                     }
                                 }
                                 onLogoutFinished={() => console.log("logout.")}/>
-                        </TouchableOpacity>
+                        </TouchableOpacity>*/}
 
                         {
                             Platform.OS == 'ios' &&

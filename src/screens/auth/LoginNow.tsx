@@ -296,6 +296,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                         email: contentEmail
                     })
                 } else {
+
                     setToken('')
                     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
                     dispatch(setResponse({
@@ -314,6 +315,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
         },
 
         onError: (err) => {
+
             dispatch(setResponse({
                 responseMessage: err.message,
                 responseState: true,
@@ -458,8 +460,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                                              styles.container
                                          }>
 
-                    <View
-                        style={styles.topWithLogo}>
+                    <View style={styles.topWithLogo}>
 
                         <View style={styles.imageWrap}>
 
@@ -509,7 +510,8 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                                 Continue with Google
                             </Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={[styles.buttonSignUp, {
+
+                     {/*   <TouchableOpacity style={[styles.buttonSignUp, {
                             marginBottom: 10
                         }]}>
 
@@ -539,7 +541,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                                 }
 
                                 onLogoutFinished={() => console.log("logout.")}/>
-                        </TouchableOpacity>
+                        </TouchableOpacity>*/}
 
                         {
                             Platform.OS == 'ios' &&
