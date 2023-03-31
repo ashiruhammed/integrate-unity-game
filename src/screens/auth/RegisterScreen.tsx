@@ -1,5 +1,4 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-
 import {
     Text,
     View,
@@ -171,7 +170,7 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
                 if (data.success) {
 
 
-                    SecureStore.setItemAsync('Ports-Token', data.data.token).then(() => {
+                    SecureStore.setItemAsync('Gateway-Token', data.data.token).then(() => {
 
 
                         navigation.navigate('EmailConfirm', {
@@ -214,10 +213,16 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
             if (data.success) {
 
 
-                SecureStore.setItemAsync('Gateway-Token', data.data.token).then(() => {
+               /* SecureStore.setItemAsync('Gateway-Token', data.data.token).then(() => {
                     fetchUser()
-                })
+                })*/
+                SecureStore.setItemAsync('Gateway-Token', data.data.token).then(() => {
 
+
+                    navigation.navigate('EmailConfirm', {
+                        email: contentEmail
+                    })
+                })
 
             } else {
                 await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
@@ -253,11 +258,17 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
             if (data.success) {
 
 
-                SecureStore.setItemAsync('Gateway-Token', data.data.token).then(() => {
+              /*  SecureStore.setItemAsync('Gateway-Token', data.data.token).then(() => {
                     fetchUser()
+                })*/
+
+                SecureStore.setItemAsync('Gateway-Token', data.data.token).then(() => {
+
+
+                    navigation.navigate('EmailConfirm', {
+                        email: contentEmail
+                    })
                 })
-
-
             } else {
                 if (data.message == 'Your email is not verified, kindly verify your email to continue.') {
                     navigation.navigate('EmailConfirm', {
@@ -477,6 +488,7 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
                                 fontFamily: Fonts.quickSandBold,
                                 fontSize: fontPixel(16),
                                 color: Colors.light.text,
+                                marginLeft:8,
                             }]}>
                                 Sign up with Google
                             </Text>
@@ -518,7 +530,7 @@ style={styles.fbButtonSignUp}
 
                                 buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_UP}
                                 buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
-                                cornerRadius={5}
+                                cornerRadius={20}
                                 style={styles.buttonSignUp}
                                 onPress={async () => {
                                     try {
@@ -548,7 +560,14 @@ style={styles.fbButtonSignUp}
                             />
                         }
 
-                        <HorizontalLine margin/>
+                        <View style={styles.marginAndText}>
+                            <HorizontalLine width={'22%'}/>
+                            <Text style={styles.maginText}>
+                                Or Sign Up With Your details
+                            </Text>
+                            <HorizontalLine width={'22%'}/>
+                        </View>
+
 
                         <TextInput
 
@@ -910,6 +929,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center'
     },
     buttonText: {
+
         position: 'absolute',
         fontSize: fontPixel(16),
         color: "#fff",
@@ -919,8 +939,8 @@ const styles = StyleSheet.create({
 
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-evenly',
-        borderRadius: 5,
+        justifyContent: 'center',
+        borderRadius: 40,
         width: '90%',
 
         height: heightPixel(56)
@@ -935,6 +955,18 @@ const styles = StyleSheet.create({
 
         height: '100%'
     },
+    marginAndText:{
+        justifyContent:'space-around',
+        marginVertical:pixelSizeVertical(30),
+        width: '100%',
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    maginText:{
+        fontSize: fontPixel(14),
+        color:Colors.light.text,
+        fontFamily: Fonts.quicksandRegular
+    }
 
 })
 

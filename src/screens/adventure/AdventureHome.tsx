@@ -174,11 +174,23 @@ const MissionCard = ({
                  {/*   <TouchableOpacity activeOpacity={0.8}>
                         <Feather name="play-circle" size={28} color={Colors.primaryColor}/>
                     </TouchableOpacity>*/}
+<View style={[styles.missionCardLeft,{
+    width: '5%',
+    height:20,
+    alignItems: 'flex-end',
+    justifyContent:'flex-end'
+}]}>
 
-                    <Entypo name="chevron-right" style={{
+
+                    <Entypo onPress={() => {
+                        setCurrentIndex(index === currentIndex ? null : index);
+                        fetchLessons(index)
+                    }} name="chevron-right" style={{
                         transform:[{rotate: index === currentIndex ?'90deg' : '0deg'}]
                     }} size={14} color={"#fff"} />
+</View>
                 </View>
+
                 {index === currentIndex && (
 
 
@@ -424,7 +436,7 @@ useRefreshOnFocus(refetch)
                                 cache: FastImage.cacheControl.web,
                                 priority: FastImage.priority.normal,
                             }}
-                            resizeMode={FastImage.resizeMode.contain}
+                            resizeMode={FastImage.resizeMode.cover}
                         />
 
 
@@ -443,7 +455,12 @@ useRefreshOnFocus(refetch)
 
                 <View style={styles.container}>
 
+<View style={{
+    height:50,
+    width:'100%'
+}}>
 
+</View>
                     <ScrollView
                         style={{width: '100%',}} contentContainerStyle={styles.scrollView} scrollEnabled
                         showsVerticalScrollIndicator={false}>
@@ -728,6 +745,7 @@ const styles = StyleSheet.create({
         minHeight: heightPixel(350),
         marginTop: 30,
         width: '100%',
+        marginBottom:30,
     },
     aboutCard: {
         marginVertical: pixelSizeVertical(10),
@@ -862,6 +880,7 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.quickSandBold
     },
     reviewCard: {
+
         marginVertical: pixelSizeVertical(10),
         width: '100%',
         minHeight: heightPixel(80),
@@ -872,7 +891,7 @@ const styles = StyleSheet.create({
         width: '100%',
         flexDirection: 'row',
         justifyContent: 'flex-start',
-        alignItems: 'center'
+        alignItems: 'flex-start'
     },
     stars: {
         minWidth: 50,
@@ -882,19 +901,21 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     reviewBodyText: {
-        marginTop: 5,
+
         color: "#fff",
         fontSize: fontPixel(12),
         fontFamily: Fonts.quicksandRegular
-    }, reviewDateText: {
+    },
+    reviewDateText: {
         marginTop: 5,
         color: "#777777",
         fontSize: fontPixel(12),
         fontFamily: Fonts.quicksandRegular
     },
     missionCardHead: {
+
         paddingVertical: pixelSizeVertical(10),
-        alignItems: 'center',
+        alignItems: 'flex-start',
         justifyContent: 'space-between',
         flexDirection: 'row',
         width: '100%',
@@ -910,6 +931,7 @@ const styles = StyleSheet.create({
     missionCardLeft: {
         width: '80%',
         alignItems: 'flex-start',
+
     },
     missionTitle: {
         color: Colors.primaryColor,

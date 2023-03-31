@@ -1,5 +1,5 @@
 import React, {SetStateAction, useCallback, useEffect, useMemo, useRef, useState} from 'react';
-
+import ScrollingButtonMenu from 'react-native-scroll-menu';
 import {
     Text,
     View,
@@ -41,7 +41,7 @@ import Toast from "../../components/Toast";
 import {unSetResponse} from "../../app/slices/userSlice";
 import {useInfiniteQuery, useQuery} from "@tanstack/react-query";
 import {getFollowedCommunities, getMyCommunities, getPublicCommunities} from "../../action/action";
-import {useRefreshOnFocus} from "../../helpers";
+import {titleCase, useRefreshOnFocus} from "../../helpers";
 import CardPublicCommunity from "../../components/community/PublicCard";
 import {setCurrentCommunityId} from "../../app/slices/dataSlice";
 
@@ -54,7 +54,7 @@ const wait = (timeout: number) => {
 
 const {width} = Dimensions.get('window')
 const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
-
+    const [tabIndex1, setTabIndex1] = React.useState('0');
     const dispatch = useAppDispatch()
     const dataSlice = useAppSelector(state => state.data)
     const user = useAppSelector(state => state.user)
@@ -217,7 +217,6 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
     }
 
 
-
     const viewTheCommunity = (id: string, ownerId: string, visibility: string, displayPhoto: string) => {
 
         dispatch(setCurrentCommunityId({
@@ -252,6 +251,39 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
         };
     }, [responseState, responseMessage])
 
+    let filteredCommunity, filteredOwnCommunity: readonly any[] | null | undefined = []
+
+
+
+
+    if (tabIndex1 == '1') {
+        if (!isLoading && data && data?.pages[0]?.data) {
+            filteredCommunity = data?.pages[0]?.data?.result.filter((community: { community: { name: string | string[]; } }) =>
+                community?.community.name?.includes(titleCase(searchValue).trim())
+            )
+        }
+    }
+
+    if (tabIndex1 == '2') {
+        if (!loading && allMyCommunities && allMyCommunities?.data?.result) {
+            filteredOwnCommunity = allMyCommunities?.data?.result.filter((community: { name: string | string[]; }) =>
+                community?.name?.includes(titleCase(searchValue).trim())
+            )
+        }
+    }
+    let menus = [
+        {
+            name: 'Sekiz',
+            id: 1,
+            backgroundColor: '#388E3C',
+            borderColor: '#388E3C',
+        },
+        {
+            text: 'Penguen',
+            id: 2,
+        }
+    ];
+
     useRefreshOnFocus(fetchMyCommunity)
     return (
         <>
@@ -269,7 +301,8 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
 
                     <View style={styles.searchWrap}>
 
-                        <SearchValue isWidth={"80%"} placeholder={'Search for all types of Communities'}
+                        <SearchValue isWidth={"80%"} onChangeText={(text) => setSearchValue(text)}
+                                     placeholder={'Search for all types of Communities'}
                                      value={searchValue}/>
 
                         <View style={[styles.searchTangible, {
@@ -280,21 +313,50 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
                     </View>
                     <Toast message={responseMessage} state={responseState} type={responseType}/>
                     <View style={styles.segmentWrap}>
-                        <SegmentedControl tabs={["All Communities", "Followed communities", "My Communities",]}
+                       {/* <SegmentedControl tabs={["All Communities", "Followed communities", "My Communities",]}
                                           currentIndex={tabIndex}
                                           onChange={handleTabsChange}
                                           segmentedControlBackgroundColor={backgroundColor}
                                           activeSegmentBackgroundColor={Colors.primaryColor}
                                           activeTextColor={"#fff"}
                                           textColor={"#888888"}
-                                          paddingVertical={pixelSizeVertical(8)}/>
+                                          paddingVertical={pixelSizeVertical(8)}/>*/}
+                        <ScrollingButtonMenu
+                            items={[
+                                {
+                                    id: "0",
+                                    name: 'All Communities',
+                                },
+                                {
+                                    id: "1",
+                                    name: 'Followed communities',
+                                },
+                                {
+                                    id: "2",
+                                    name: 'My Communities',
+                                },
+
+                            ]}
+                            textStyle={{
+                                fontSize: fontPixel(12),
+                                textAlign: 'center',
+                                fontFamily:Fonts.quicksandSemiBold
+                            }}
+                            activeBackgroundColor={Colors.primaryColor}
+                            buttonStyle={styles.tabButtonStyle}
+                            onPress={(e: { id: React.SetStateAction<string>; }) => {
+                                setTabIndex1(e.id)
+                            }}
+                            selected={tabIndex1}
+                        />
+
                     </View>
 
                     {
                         !isLoading &&
                         <>
 
-                            <IF condition={tabIndex == 0}>
+                            <IF condition={tabIndex1 == '0'}>
                                 <View style={styles.ActivityCardTop}>
                                     <Text style={[styles.listTitle, {
                                         color: textColor
@@ -310,7 +372,7 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
                                     </TouchableOpacity>
                                 </View>
                                 <View style={styles.cardContainer}>
-                                    <PublicCommunity theme={theme}/>
+                                    <PublicCommunity searchValue={searchValue} theme={theme}/>
 
                                 </View>
 
@@ -331,24 +393,24 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
 
 
                                 <View style={styles.cardContainer}>
-                                    <PrivateCommunity theme={theme}/>
+                                    <PrivateCommunity searchValue={searchValue} theme={theme}/>
 
                                 </View>
 
                             </IF>
 
-                            <IF condition={tabIndex == 1}>
+                            <IF condition={tabIndex1 == '1'}>
 
 
                                 {
                                     isLoading && <ActivityIndicator size='small' color={Colors.primaryColor}/>
                                 }
                                 {
-                                    !isLoading && data?.pages[0]?.data?.result.map((({
-                                                                                         id,
-                                                                                         community,
-                                                                                         totalUsersJoined
-                                                                                     }) => (
+                                    !isLoading && filteredCommunity?.map((({
+                                                                               id,
+                                                                               community,
+                                                                               totalUsersJoined
+                                                                           }) => (
                                         <TouchableOpacity key={id} activeOpacity={0.8}
                                                           onPress={() => seeCommunity(community?.id, community.ownerId, community.visibility, community.displayPhoto)}
                                                           style={[styles.myCommunityCard, {
@@ -388,7 +450,7 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
                             </IF>
 
 
-                            <IF condition={tabIndex == 2}>
+                            <IF condition={tabIndex1 == '2'}>
 
                                 <View style={styles.startCommunity}>
                                     <Text style={[styles.TextTitle, {
@@ -407,8 +469,9 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
 
                                 </View>
                                 {
-                                    allMyCommunities?.data?.result.map((item) => (
-                                        <CardPublicCommunity viewTheCommunity={viewTheCommunity} key={item.id} joinModal={joinModal} theme={theme}
+                                    filteredOwnCommunity.map((item) => (
+                                        <CardPublicCommunity viewTheCommunity={viewTheCommunity} key={item.id}
+                                                             joinModal={joinModal} theme={theme}
                                                              item={item}/>
                                     ))
                                 }
@@ -730,11 +793,11 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        width: '100%',
+        width: '90%',
         height: heightPixel(70),
     },
     listTitle: {
-        fontSize: fontPixel(16),
+        fontSize: fontPixel(14),
         fontFamily: Fonts.quickSandBold,
         color: Colors.light.text
     },
@@ -782,7 +845,7 @@ const styles = StyleSheet.create({
         height: 50,
         width: 50,
         borderRadius: 5,
-        backgroundColor: "blue"
+        // backgroundColor: Colors.primaryColor
     },
     communityLogoImag: {
         height: '100%',
@@ -897,6 +960,16 @@ const styles = StyleSheet.create({
         minHeight: heightPixel(40),
         paddingVertical: pixelSizeVertical(10)
     },
+    tabButtonStyle:{
+        borderWidth:0,
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: 30,
+        borderTopLeftRadius: 10,
+        borderBottomLeftRadius: 0,
+        borderBottomRightRadius: 10,
+        borderTopRightRadius: 0,
+    }
 })
 
 export default Community;

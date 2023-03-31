@@ -311,10 +311,11 @@ const CommunityCard = ({theme,item,loadingBadge,joinModal,viewTheCommunity}: car
 
 const {width} = Dimensions.get('window')
 interface CardProps {
-    theme:'light'|'dark'
+    theme:'light'|'dark',
+    searchValue:string
 }
 
-const PrivateCommunity = ({theme}:CardProps) => {
+const PrivateCommunity = ({theme,searchValue}:CardProps) => {
 
     const dispatch = useAppDispatch()
     const queryClient = useQueryClient();
@@ -428,6 +429,26 @@ const PrivateCommunity = ({theme}:CardProps) => {
         follow({id: communityId})
     }
 
+    let filteredCommunity: readonly any[] | null | undefined = []
+
+
+    function titleCase(str) {
+        var splitStr = str.toLowerCase().split(' ');
+        for (var i = 0; i < splitStr.length; i++) {
+            // You do not need to check if i is larger than splitStr length, as your for does that for you
+            // Assign it back to the array
+            splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);
+        }
+        // Directly return the joined string
+        return splitStr.join(' ');
+    }
+
+
+    if (!isLoading && data && data?.pages[0]?.data) {
+        filteredCommunity = data?.pages[0]?.data?.result.filter((community: { visibility: string; }) => community.visibility === 'PRIVATE').slice(0,8)?.filter((community: { name: string | string[]; }) =>
+            community?.name?.includes(titleCase(searchValue).trim())
+        )
+    }
 
     const renderItem = useCallback(({item}) => (
         <CommunityCard viewTheCommunity={viewTheCommunity} joinModal={joinModal} loadingBadge={loadingBadge}  theme={theme} item={item}/>
@@ -507,7 +528,7 @@ const PrivateCommunity = ({theme}:CardProps) => {
 
         <FlatList
 
-            data={data?.pages[0]?.data?.result.filter((community: { visibility: string; }) => community.visibility === 'PRIVATE').slice(0,8)}
+            data={filteredCommunity}
             onMomentumScrollEnd={updateCurrentSlideIndex}
             keyExtractor={(item, index) => item.id + index}
             horizontal
@@ -538,7 +559,7 @@ const styles = StyleSheet.create({
 
 
     communityCard: {
-        width: widthPixel(320),
+        width: widthPixel(340),
         height: heightPixel(300),
         shadowColor: "#212121",
         alignItems: 'center',
@@ -551,7 +572,7 @@ const styles = StyleSheet.create({
             width: 0,
             height: 1,
         },
-        shadowOpacity: 0.32,
+        shadowOpacity: 0.12,
         shadowRadius: 7.22,
         elevation: 3,
     },

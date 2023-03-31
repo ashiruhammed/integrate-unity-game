@@ -60,6 +60,7 @@ const dataSlice = useAppSelector(state => state.data)
     }
 
 
+
     return (
         <SafeAreaView style={[styles.safeArea,{
             backgroundColor
@@ -166,8 +167,9 @@ const dataSlice = useAppSelector(state => state.data)
 
                         }}>
                             <Text style={styles.buttonText}>
-                                Start Mission
 
+                                {adventure?.userAdventure?.status == 'COMPLETED' ?  'Completed'  :
+                                adventure?.userAdventure?.status == 'INPROGESS' || 'INPROGRESS' ? 'Continue'  :  ' Start Mission'}
                             </Text>
 
                         </RectButton>
@@ -272,8 +274,9 @@ const dataSlice = useAppSelector(state => state.data)
 
                         }}>
                             <Text style={styles.buttonText}>
-                                continue Mission
 
+                                {adventure?.userAdventure?.status == 'COMPLETED' ?  'Completed'  :
+                                    adventure?.userAdventure?.status == 'INPROGESS' || 'INPROGRESS' ? 'continue Mission'  :  ' Start Mission'}
                             </Text>
 
                         </RectButton>

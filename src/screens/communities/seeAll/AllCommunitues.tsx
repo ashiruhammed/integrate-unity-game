@@ -43,6 +43,8 @@ import {
 } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
 import FastImage from "react-native-fast-image";
 import {setCurrentCommunityId} from "../../../app/slices/dataSlice";
+import ScrollingButtonMenu from "react-native-scroll-menu";
+import {titleCase} from "../../../helpers";
 
 
 const {width} = Dimensions.get('window')
@@ -126,7 +128,7 @@ const AllCommunities = ({navigation}: RootStackScreenProps<'AllCommunities'>) =>
     const [badgeId, setBadgeId] = useState('');
     const [communityId, setCommunityId] = useState('');
     const [requiredBadges, setRequiredBadges] = useState('');
-    const [tabIndex, setTabIndex] = useState(0);
+    const [tabIndex, setTabIndex] = useState('0');
     const handleTabsChange = useCallback((index: SetStateAction<number>) => {
         setTabIndex(index);
     }, [tabIndex]);
@@ -376,21 +378,21 @@ const AllCommunities = ({navigation}: RootStackScreenProps<'AllCommunities'>) =>
     let filterCommunity: readonly any[] | null | undefined = []
     let filterFollowedCommunity: readonly any[] | null | undefined = []
 
-    if (tabIndex == 0) {
+    if (tabIndex == '0') {
 
 
         if (!isLoading && data && data?.pages[0]?.data) {
             filterCommunity = data?.pages[0]?.data?.result?.filter((community: { name: string | string[]; }) =>
-                community?.name?.includes(searchValue.trim())
+                community?.name?.includes(titleCase(searchValue).trim())
             )
         }
     }
-    if (tabIndex == 1) {
+    if (tabIndex == '1') {
 
 
         if (!isLoading && data && data?.pages[0]?.data) {
             filterFollowedCommunity = followedCommunities?.pages[0]?.data?.result?.filter((community: { community: { name: string | string[]; } }) =>
-                community?.community.name?.includes(searchValue.trim())
+                community?.community.name?.includes(titleCase(searchValue).trim())
             )
         }
     }
@@ -487,19 +489,39 @@ const AllCommunities = ({navigation}: RootStackScreenProps<'AllCommunities'>) =>
                 </View>
 
                 <View style={styles.segmentWrap}>
-                    <SegmentedControl tabs={["All Communities", "Followed communities", "My Communities"]}
-                                      currentIndex={tabIndex}
-                                      onChange={handleTabsChange}
-                                      segmentedControlBackgroundColor={backgroundColor}
-                                      activeSegmentBackgroundColor={Colors.primaryColor}
-                                      activeTextColor={"#fff"}
-                                      textColor={"#888888"}
-                                      paddingVertical={pixelSizeVertical(8)}/>
+                    <ScrollingButtonMenu
+                        items={[
+                            {
+                                id: "0",
+                                name: 'All Communities',
+                            },
+                            {
+                                id: "1",
+                                name: 'Followed communities',
+                            },
+                            {
+                                id: "2",
+                                name: 'My Communities',
+                            },
+
+                        ]}
+                        textStyle={{
+                            fontSize: fontPixel(12),
+                            textAlign: 'center',
+                            fontFamily:Fonts.quicksandSemiBold
+                        }}
+                        activeBackgroundColor={Colors.primaryColor}
+                        buttonStyle={styles.tabButtonStyle}
+                        onPress={(e: { id: React.SetStateAction<string>; }) => {
+                            setTabIndex(e.id)
+                        }}
+                        selected={tabIndex}
+                    />
                 </View>
 
 
                 {
-                    tabIndex == 0
+                    tabIndex == '0'
                     &&
                     <View style={styles.ActivityCardTop}>
                         <Text style={[styles.listTitle, {
@@ -510,7 +532,7 @@ const AllCommunities = ({navigation}: RootStackScreenProps<'AllCommunities'>) =>
                     </View>
                 }
                 {
-                    tabIndex == 1
+                    tabIndex == '1'
                     &&
                     <View style={styles.ActivityCardTop}>
                         <Text style={[styles.listTitle, {
@@ -529,7 +551,7 @@ const AllCommunities = ({navigation}: RootStackScreenProps<'AllCommunities'>) =>
                     loading && <ActivityIndicator size='small' color={Colors.primaryColor}/>
                 }
 
-                <IF condition={tabIndex == 0}>
+                <IF condition={tabIndex == '0'}>
                     <View style={styles.listWrap}>
                         {/*    */}
 
@@ -553,7 +575,7 @@ const AllCommunities = ({navigation}: RootStackScreenProps<'AllCommunities'>) =>
 
                     </View>
                 </IF>
-                <IF condition={tabIndex == 1}>
+                <IF condition={tabIndex == '1'}>
                     <View style={styles.listWrap}>
 
 
@@ -586,7 +608,7 @@ const AllCommunities = ({navigation}: RootStackScreenProps<'AllCommunities'>) =>
 
                     </View>
                 </IF>
-                <IF condition={tabIndex == 2}>
+                <IF condition={tabIndex == '2'}>
                     <View style={styles.listWrap}>
 
 
@@ -1165,6 +1187,16 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         flexDirection: 'row'
     },
+    tabButtonStyle:{
+        borderWidth:0,
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: 30,
+        borderTopLeftRadius: 10,
+        borderBottomLeftRadius: 0,
+        borderBottomRightRadius: 10,
+        borderTopRightRadius: 0,
+    }
 })
 
 export default AllCommunities;

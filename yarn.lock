@@ -7839,6 +7839,11 @@ react-native-screens@~3.18.0:
     react-freeze "^1.0.0"
     warn-once "^0.1.0"
 
+react-native-scroll-menu@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/react-native-scroll-menu/-/react-native-scroll-menu-1.1.1.tgz#9b0e531c33d9d6c5e59ef381f13f5dc3673a11b3"
+  integrity sha512-RGnRzNPDzfFupRt+xl0pa0tLWjljp5zLoy6KM3hfJjbBbZS0XvWyJaBLih9cPPoPULsGJKSaw1e60HL2wHA6nA==
+
 react-native-size-matters@^0.3.1:
   version "0.3.1"
   resolved "https://registry.yarnpkg.com/react-native-size-matters/-/react-native-size-matters-0.3.1.tgz#24d0cfc335a2c730f6d58bd7b43ea5a41be4b49f"

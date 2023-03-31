@@ -9,6 +9,8 @@ import Colors from "../../constants/Colors";
 import {useAppSelector} from "../../app/hooks";
 import FastImage from "react-native-fast-image";
 import Constants from "expo-constants";
+import {useInfiniteQuery} from "@tanstack/react-query";
+import {userNotifications} from "../../action/action";
 
 
 
@@ -29,7 +31,34 @@ const TopBar = ({message,title}:props) => {
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
 
 
+
+
     const navigation = useNavigation()
+
+
+    const {
+        isLoading,
+        data: notifications,
+        refetch,
+        isFetchingNextPage,
+        hasNextPage,
+        hasPreviousPage,
+        fetchNextPage
+    } = useInfiniteQuery([`notifications`], ({pageParam = 1}) => userNotifications.notifications({pageParam}),
+        {
+            networkMode: 'online',
+
+            getNextPageParam: lastPage => {
+                if (lastPage.next !== null) {
+                    return lastPage.next;
+                }
+
+                return lastPage;
+            },
+            getPreviousPageParam: (firstPage, allPages) => firstPage.prevCursor,
+
+        })
+
     const openNotifications = ()=>{
         navigation.navigate('Notifications')
     }
@@ -66,12 +95,16 @@ const TopBar = ({message,title}:props) => {
             <View style={styles.rightButton}>
                 <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}
                                   style={styles.roundTopBtn}>
-                   {/* <View style={[styles.dot,{
+                    {
+                        notifications?.pages[0].data.result.length > 0 &&
+
+                    <View style={[styles.dot,{
                         borderColor: theme =='light' ?"#fff":Colors.dark.background,
-                    }]}/>*/}
+                    }]}/>
+                    }
                     <Octicons name="bell-fill" size={20} color={ theme =='light' ? "#1F2937" : '#fff' }/>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={openProfile} activeOpacity={0.6}
+               {/* <TouchableOpacity onPress={openProfile} activeOpacity={0.6}
                                   style={styles.roundTopBtn}>
 
 
@@ -88,7 +121,7 @@ const TopBar = ({message,title}:props) => {
                             />
 
 
-                </TouchableOpacity>
+                </TouchableOpacity>*/}
             </View>
 
         </View>
@@ -108,7 +141,7 @@ const styles = StyleSheet.create({
         width: widthPixel(100),
         height: '90%',
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-end',
         alignItems: 'center',
     },
     roundTopBtn: {

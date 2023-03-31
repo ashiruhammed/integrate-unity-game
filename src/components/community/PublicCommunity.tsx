@@ -66,13 +66,13 @@ interface cardProps {
             fullName: string
         }
     },
-    viewTheCommunity:(id:string,ownerId:string,visibility:string,displayPhoto:string)=>void
+    viewTheCommunity: (id: string, ownerId: string, visibility: string, displayPhoto: string) => void
     joinModal: (badgeId: string, accessNFTBadgeAmount: string, communityId: string) => void
 }
 
 const isRunningInExpoGo = Constants.appOwnership === 'expo'
 
-const PublicCommunityCard = ({theme, loadingBadge, item, joinModal,viewTheCommunity}: cardProps) => {
+const PublicCommunityCard = ({theme, loadingBadge, item, joinModal, viewTheCommunity}: cardProps) => {
     const user = useAppSelector(state => state.user)
     const {userData} = user
     const dispatch = useAppDispatch()
@@ -80,15 +80,14 @@ const PublicCommunityCard = ({theme, loadingBadge, item, joinModal,viewTheCommun
     // const {isLoading, data} = useQuery(['getCommunityFollowers'], () => getCommunityFollowers(item.id))
 
 
-
     const open = () => {
 
         if (item?.owner?.id == userData.id) {
 
-            viewTheCommunity(item.id,item.ownerId,item.visibility,item.displayPhoto)
+            viewTheCommunity(item.id, item.ownerId, item.visibility, item.displayPhoto)
         } else if (item.currentUserJoined) {
 
-            viewTheCommunity(item.id,item.ownerId,item.visibility,item.displayPhoto)
+            viewTheCommunity(item.id, item.ownerId, item.visibility, item.displayPhoto)
 
         } else {
             joinModal(item.badgeId, item.accessNFTBadgeAmount, item.id)
@@ -129,6 +128,7 @@ const PublicCommunityCard = ({theme, loadingBadge, item, joinModal,viewTheCommun
                     color: textColor
                 }]}>
                     {item?.name}
+
                 </Text>
             </View>
 
@@ -358,10 +358,11 @@ const PublicCommunityCard = ({theme, loadingBadge, item, joinModal,viewTheCommun
 const {width} = Dimensions.get('window')
 
 interface props {
-    theme: 'light' | 'dark'
+    theme: 'light' | 'dark',
+    searchValue: string
 }
 
-const PublicCommunity = ({theme}: props) => {
+const PublicCommunity = ({theme, searchValue}: props) => {
 
     const dispatch = useAppDispatch()
     const queryClient = useQueryClient();
@@ -486,7 +487,8 @@ const PublicCommunity = ({theme}: props) => {
     const keyExtractor = useCallback((item: { id: any; }) => item.id, [],);
 
     const renderItem = useCallback(({item}) => (
-        <PublicCommunityCard viewTheCommunity={viewTheCommunity} loadingBadge={loadingBadge} joinModal={joinModal} theme={theme} item={item}/>
+        <PublicCommunityCard viewTheCommunity={viewTheCommunity} loadingBadge={loadingBadge} joinModal={joinModal}
+                             theme={theme} item={item}/>
     ), [loadingBadge, theme])
 
     const loadMore = () => {
@@ -494,6 +496,31 @@ const PublicCommunity = ({theme}: props) => {
             fetchNextPageWallet();
         }
     };
+
+    function capitalize(s) {
+        return s && s[0].toUpperCase() + s.slice(1);
+    }
+
+    let filteredCommunity: readonly any[] | null | undefined = []
+
+
+    function titleCase(str) {
+        var splitStr = str.toLowerCase().split(' ');
+        for (var i = 0; i < splitStr.length; i++) {
+            // You do not need to check if i is larger than splitStr length, as your for does that for you
+            // Assign it back to the array
+            splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);
+        }
+        // Directly return the joined string
+        return splitStr.join(' ');
+    }
+
+
+    if (!isLoading && data && data?.pages[0]?.data) {
+        filteredCommunity = data?.pages[0]?.data?.result.filter((community: { visibility: string; }) => community.visibility !== 'PRIVATE').slice(0, 8)?.filter((community: { name: string | string[]; }) =>
+            community?.name?.includes(titleCase(searchValue).trim())
+        )
+    }
 
 
     useRefreshOnFocus(refetch)
@@ -589,7 +616,9 @@ const PublicCommunity = ({theme}: props) => {
 
                 <FlatList
                     // data={data?.pages[0]?.data?.result?.slice(0, 8)}
-                    data={data?.pages[0]?.data?.result.filter((community: { visibility: string; }) => community.visibility !== 'PRIVATE').slice(0, 8)}
+                    data={
+                        filteredCommunity
+                    }
                     onMomentumScrollEnd={updateCurrentSlideIndex}
                     keyExtractor={keyExtractor}
                     horizontal
@@ -621,7 +650,7 @@ const styles = StyleSheet.create({
 
 
     communityCard: {
-        width: widthPixel(320),
+        width: widthPixel(340),
         height: heightPixel(300),
         shadowColor: "#212121",
         alignItems: 'center',
@@ -634,14 +663,14 @@ const styles = StyleSheet.create({
             width: 0,
             height: 1,
         },
-        shadowOpacity: 0.32,
+        shadowOpacity: 0.12,
         shadowRadius: 7.22,
         elevation: 3,
     },
 
     topCard: {
         width: '100%',
-        height: 50,
+        minHeight: 50,
         alignItems: 'center',
         justifyContent: 'flex-start',
         flexDirection: 'row'
@@ -660,6 +689,8 @@ const styles = StyleSheet.create({
         height: "100%",
     },
     cardTitle: {
+
+        width: '85%',
         fontFamily: Fonts.quickSandBold,
         color: "#000000",
         marginLeft: 8,

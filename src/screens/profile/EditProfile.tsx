@@ -521,7 +521,7 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
                                 :
 
                                 <Text style={styles.btnText}>
-                                    Continue
+                                    Save changes
 
                                 </Text>
                         }

@@ -209,7 +209,7 @@ const Leaderboard = ({}: RootStackScreenProps<'Leaderboard'>) => {
                             backgroundColor: "#3AB8A9",
                         }]}>
                             <Text style={styles.streakText}>
-                                {data?.pages[0]?.data[1]?.rank}
+                                {data?.pages[0]?.data[2]?.rank}
                             </Text>
                         </View>
                     </View>

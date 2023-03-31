@@ -98,7 +98,13 @@ const AdventureItem = ({item, action, setAdventure}: itemProps) => {
 
                                 }} style={styles.startButton}>
                                     <Text style={styles.btnText}>
-                                        {item?.userAdventure?.status}
+
+                                        {
+                                            item?.userAdventure?.status == 'COMPLETED' ?  'Completed'  :
+                                                item?.userAdventure?.status == 'INPROGESS' || 'INPROGRESS' ? 'In progress'  :  'Start Adventure'
+                                        }
+
+
                                     </Text>
                                 </TouchableOpacity>
                                 :
