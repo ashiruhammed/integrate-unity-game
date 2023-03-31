@@ -212,19 +212,14 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
 
             if (data.success) {
 
-
-               /* SecureStore.setItemAsync('Gateway-Token', data.data.token).then(() => {
+               SecureStore.setItemAsync('Gateway-Token', data.data.token).then(() => {
                     fetchUser()
-                })*/
-                SecureStore.setItemAsync('Gateway-Token', data.data.token).then(() => {
 
-
-                    navigation.navigate('EmailConfirm', {
-                        email: contentEmail
-                    })
                 })
 
+
             } else {
+
                 await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
                 dispatch(setResponse({
                     responseMessage: data.message,
@@ -258,17 +253,11 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
             if (data.success) {
 
 
-              /*  SecureStore.setItemAsync('Gateway-Token', data.data.token).then(() => {
-                    fetchUser()
-                })*/
-
                 SecureStore.setItemAsync('Gateway-Token', data.data.token).then(() => {
-
-
-                    navigation.navigate('EmailConfirm', {
-                        email: contentEmail
-                    })
+                    fetchUser()
                 })
+
+
             } else {
                 if (data.message == 'Your email is not verified, kindly verify your email to continue.') {
                     navigation.navigate('EmailConfirm', {
@@ -476,23 +465,6 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
                         </View>
 
 
-                        <TouchableOpacity onPress={async () => await googleAuth()} activeOpacity={0.6}
-                                          style={[styles.buttonSignUp, {
-                                              borderWidth: 1,
-                                              borderColor: Colors.borderColor,
-                                              marginVertical: pixelSizeVertical(10),
-                                          }]}>
-
-                            <GoogleIcon/>
-                            <Text style={[{
-                                fontFamily: Fonts.quickSandBold,
-                                fontSize: fontPixel(16),
-                                color: Colors.light.text,
-                                marginLeft:8,
-                            }]}>
-                                Sign up with Google
-                            </Text>
-                        </TouchableOpacity>
                        {/* <TouchableOpacity style={[styles.buttonSignUp, {
                             marginBottom: 10
                         }]}>
@@ -523,50 +495,8 @@ style={styles.fbButtonSignUp}
                                 onLogoutFinished={() => console.log("logout.")}/>
                         </TouchableOpacity>*/}
 
-                        {
-                            Platform.OS == 'ios' &&
 
-                            <AppleAuthentication.AppleAuthenticationButton
 
-                                buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_UP}
-                                buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
-                                cornerRadius={20}
-                                style={styles.buttonSignUp}
-                                onPress={async () => {
-                                    try {
-                                        const credential = await AppleAuthentication.signInAsync({
-                                            requestedScopes: [
-                                                AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-                                                AppleAuthentication.AppleAuthenticationScope.EMAIL,
-                                            ],
-                                        });
-                                        const body = JSON.stringify({
-                                            access_token: credential.identityToken,
-                                            full_name: credential.fullName?.familyName,
-                                            referralCode: values.referralCode,
-                                            "source": "mobile"
-                                        })
-                                        appleOAuth(body)
-
-                                        // signed in
-                                    } catch (e) {
-                                        if (e.code === 'ERR_CANCELED') {
-                                            // handle that the user canceled the sign-in flow
-                                        } else {
-                                            // handle other errors
-                                        }
-                                    }
-                                }}
-                            />
-                        }
-
-                        <View style={styles.marginAndText}>
-                            <HorizontalLine width={'22%'}/>
-                            <Text style={styles.maginText}>
-                                Or Sign Up With Your details
-                            </Text>
-                            <HorizontalLine width={'22%'}/>
-                        </View>
 
 
                         <TextInput
@@ -712,6 +642,70 @@ style={styles.fbButtonSignUp}
                             Already have an account?
                         </Text>
 
+                        <View style={styles.marginAndText}>
+                            <HorizontalLine width={'30%'}/>
+                            <Text style={styles.maginText}>
+                                Or sign up with
+                            </Text>
+                            <HorizontalLine width={'30%'}/>
+                        </View>
+
+
+
+                        {
+                            Platform.OS == 'ios' &&
+
+                            <AppleAuthentication.AppleAuthenticationButton
+
+                                buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_UP}
+                                buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+                                cornerRadius={15}
+                                style={styles.buttonSignUp}
+                                onPress={async () => {
+                                    try {
+                                        const credential = await AppleAuthentication.signInAsync({
+                                            requestedScopes: [
+                                                AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+                                                AppleAuthentication.AppleAuthenticationScope.EMAIL,
+                                            ],
+                                        });
+                                        const body = JSON.stringify({
+                                            access_token: credential.identityToken,
+                                            full_name: credential.fullName?.familyName,
+                                            referralCode: values.referralCode,
+                                            "source": "mobile"
+                                        })
+                                        appleOAuth(body)
+
+                                        // signed in
+                                    } catch (e) {
+                                        if (e.code === 'ERR_CANCELED') {
+                                            // handle that the user canceled the sign-in flow
+                                        } else {
+                                            // handle other errors
+                                        }
+                                    }
+                                }}
+                            />
+                        }
+                        <TouchableOpacity onPress={async () => await googleAuth()} activeOpacity={0.6}
+                                          style={[styles.buttonSignUp, {
+                                              borderWidth: 1,
+                                              borderColor: Colors.borderColor,
+                                              marginVertical: pixelSizeVertical(10),
+                                          }]}>
+
+                            <GoogleIcon/>
+                            <Text style={[{
+                                fontFamily: Fonts.quickSandBold,
+                                fontSize: fontPixel(16),
+                                color: Colors.light.text,
+                                marginLeft:8,
+                            }]}>
+                                Sign up with Google
+                            </Text>
+                        </TouchableOpacity>
+
                         <View style={styles.wrap}>
                             <Text style={styles.terms}>
                                 By proceeding, you consent to get calls, WhatsApp or SMS
@@ -803,7 +797,7 @@ const styles = StyleSheet.create({
     },
     titleContainer: {
         width: '100%',
-        height: 50,
+        height: 60,
         alignItems: 'flex-start',
         justifyContent: 'flex-start'
     },
@@ -940,10 +934,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        borderRadius: 40,
+        borderRadius: 15,
         width: '90%',
 
-        height: heightPixel(56)
+        height: heightPixel(45)
     },
     fbButtonSignUp: {
 

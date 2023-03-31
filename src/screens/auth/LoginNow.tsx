@@ -494,22 +494,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                         </View>
 
 
-                        <TouchableOpacity onPress={async () => await googleAuth()} activeOpacity={0.6}
-                                          style={[styles.buttonSignUp, {
-                                              borderWidth: 1,
-                                              borderColor: Colors.light.text,
-                                              marginVertical: pixelSizeVertical(10),
-                                          }]}>
 
-                            <GoogleIcon/>
-                            <Text style={[{
-                                fontFamily: Fonts.quickSandBold,
-                                fontSize: fontPixel(16),
-                                color: Colors.light.text,
-                            }]}>
-                                Continue with Google
-                            </Text>
-                        </TouchableOpacity>
 
                      {/*   <TouchableOpacity style={[styles.buttonSignUp, {
                             marginBottom: 10
@@ -543,46 +528,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                                 onLogoutFinished={() => console.log("logout.")}/>
                         </TouchableOpacity>*/}
 
-                        {
-                            Platform.OS == 'ios' &&
 
-                            <AppleAuthentication.AppleAuthenticationButton
-
-                                buttonType={AppleAuthentication.AppleAuthenticationButtonType.CONTINUE}
-                                buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.WHITE_OUTLINE}
-                                cornerRadius={5}
-
-                                style={styles.buttonSignUp}
-                                onPress={async () => {
-                                    try {
-                                        const credential = await AppleAuthentication.signInAsync({
-                                            requestedScopes: [
-                                                AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-                                                AppleAuthentication.AppleAuthenticationScope.EMAIL,
-                                            ],
-                                        });
-
-                                        const body = JSON.stringify({
-                                            access_token: credential.identityToken,
-                                            full_name: `${credential.fullName?.familyName} ${credential.fullName?.givenName}`,
-                                            source: "mobile",
-                                            "referralCode": "",
-                                        })
-                                        appleOAuth(body)
-
-                                        // signed in
-                                    } catch (e) {
-                                        if (e.code === 'ERR_CANCELED') {
-                                            // handle that the user canceled the sign-in flow
-                                        } else {
-                                            // handle other errors
-                                        }
-                                    }
-                                }}
-                            />
-                        }
-
-                        <HorizontalLine margin/>
                         <TextInput
 
                             placeholder="Email address"
@@ -666,7 +612,76 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
 
                         </TouchableOpacity>
 
+
+                        <View style={styles.marginAndText}>
+                            <HorizontalLine width={'30%'}/>
+                            <Text style={styles.maginText}>
+                                Or sign in with
+                            </Text>
+                            <HorizontalLine width={'30%'}/>
+                        </View>
+
+
+
+                        {
+                            Platform.OS == 'ios' &&
+
+                            <AppleAuthentication.AppleAuthenticationButton
+
+                                buttonType={AppleAuthentication.AppleAuthenticationButtonType.CONTINUE}
+                                buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+                                cornerRadius={15}
+
+                                style={styles.buttonSignUp}
+                                onPress={async () => {
+                                    try {
+                                        const credential = await AppleAuthentication.signInAsync({
+                                            requestedScopes: [
+                                                AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+                                                AppleAuthentication.AppleAuthenticationScope.EMAIL,
+                                            ],
+                                        });
+
+                                        const body = JSON.stringify({
+                                            access_token: credential.identityToken,
+                                            full_name: `${credential.fullName?.familyName} ${credential.fullName?.givenName}`,
+                                            source: "mobile",
+                                            "referralCode": "",
+                                        })
+                                        appleOAuth(body)
+
+                                        // signed in
+                                    } catch (e) {
+                                        if (e.code === 'ERR_CANCELED') {
+                                            // handle that the user canceled the sign-in flow
+                                        } else {
+                                            // handle other errors
+                                        }
+                                    }
+                                }}
+                            />
+                        }
+
+                        <TouchableOpacity onPress={async () => await googleAuth()} activeOpacity={0.6}
+                                          style={[styles.buttonSignUp, {
+                                              borderWidth: 1,
+                                              borderColor: Colors.borderColor,
+                                              marginVertical: pixelSizeVertical(10),
+                                          }]}>
+
+                            <GoogleIcon/>
+                            <Text style={[{
+                                fontFamily: Fonts.quickSandBold,
+                                fontSize: fontPixel(16),
+                                color: Colors.light.text,
+                                marginLeft:8,
+                            }]}>
+                                Continue with Google
+                            </Text>
+                        </TouchableOpacity>
                     </View>
+
+
                 </KeyboardAwareScrollView>
             </SafeAreaView>
         </>
@@ -734,7 +749,7 @@ const styles = StyleSheet.create({
     },
     titleContainer: {
         width: '100%',
-        height: 50,
+        height: 90,
         alignItems: 'flex-start',
         justifyContent: 'flex-start'
     },
@@ -808,11 +823,11 @@ const styles = StyleSheet.create({
 
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-evenly',
-        borderRadius: 5,
+        justifyContent: 'center',
+        borderRadius: 15,
         width: '90%',
 
-        height: heightPixel(56)
+        height: heightPixel(45)
     },
     fbButtonSignUp: {
 
@@ -827,6 +842,18 @@ const styles = StyleSheet.create({
     loader: {
         zIndex: 1,
         backgroundColor: 'rgba(0,0,0,0.1)'
+    },
+    marginAndText:{
+        justifyContent:'space-around',
+        marginVertical:pixelSizeVertical(30),
+        width: '100%',
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    maginText:{
+        fontSize: fontPixel(14),
+        color:Colors.light.text,
+        fontFamily: Fonts.quicksandRegular
     }
 })
 
