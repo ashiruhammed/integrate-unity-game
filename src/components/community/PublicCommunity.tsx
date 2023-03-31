@@ -650,7 +650,7 @@ const styles = StyleSheet.create({
 
 
     communityCard: {
-        width: widthPixel(340),
+        width: widthPixel(360),
         height: heightPixel(300),
         shadowColor: "#212121",
         alignItems: 'center',

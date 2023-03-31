@@ -8,6 +8,8 @@ import {useNavigation} from "@react-navigation/native";
 import Notifications from "../../screens/Notifications";
 import Colors from "../../constants/Colors";
 import {useAppSelector} from "../../app/hooks";
+import {useInfiniteQuery} from "@tanstack/react-query";
+import {userNotifications} from "../../action/action";
 
 
 
@@ -22,6 +24,24 @@ const NavBar = ({title,noBell,clearBtn,clearAction}:props) => {
     const dataSlice = useAppSelector(state => state.data)
     const {theme} = dataSlice
     const {goBack,navigate} = useNavigation()
+
+
+    const {
+        data: notifications,
+    } = useInfiniteQuery([`notifications`], ({pageParam = 1}) => userNotifications.notifications({pageParam}),
+        {
+            networkMode: 'online',
+
+            getNextPageParam: lastPage => {
+                if (lastPage.next !== null) {
+                    return lastPage.next;
+                }
+
+                return lastPage;
+            },
+            getPreviousPageParam: (firstPage, allPages) => firstPage.prevCursor,
+
+        })
 
     const openNotifications = ()=>{
         navigate('Notifications')
@@ -57,9 +77,13 @@ const NavBar = ({title,noBell,clearBtn,clearAction}:props) => {
 
                     <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}
                                       style={styles.roundTopBtn}>
-                      {/*  <View style={[styles.dot,{
+
+                        {
+                            notifications?.pages[0].data.result.length > 0 &&
+                            <View style={[styles.dot,{
                             borderColor: theme =='light' ?"#fff":Colors.dark.background,
-                        }]}/>*/}
+                        }]}/>
+                        }
                         <Octicons name="bell-fill" size={20} color={ theme =='light' ? "#1F2937" : '#fff' }/>
                     </TouchableOpacity>
                 }

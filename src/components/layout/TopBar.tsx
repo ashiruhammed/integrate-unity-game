@@ -37,13 +37,8 @@ const TopBar = ({message,title}:props) => {
 
 
     const {
-        isLoading,
         data: notifications,
-        refetch,
-        isFetchingNextPage,
-        hasNextPage,
-        hasPreviousPage,
-        fetchNextPage
+
     } = useInfiniteQuery([`notifications`], ({pageParam = 1}) => userNotifications.notifications({pageParam}),
         {
             networkMode: 'online',
@@ -68,9 +63,7 @@ const TopBar = ({message,title}:props) => {
         })
     }
     return (
-        <View style={[styles.topBar,{
-
-        }]}>
+        <View style={[styles.topBar,{}]}>
 
             <View style={styles.leftButton}>
 
@@ -138,6 +131,7 @@ const styles = StyleSheet.create({
 
     },
     rightButton: {
+
         width: widthPixel(100),
         height: '90%',
         flexDirection: 'row',
@@ -163,7 +157,6 @@ const styles = StyleSheet.create({
         width: '60%',
         height: '100%',
         justifyContent: 'center',
-
         alignItems: 'flex-start',
     },
     userDetails: {

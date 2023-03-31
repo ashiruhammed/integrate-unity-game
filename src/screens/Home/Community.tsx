@@ -271,18 +271,7 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
             )
         }
     }
-    let menus = [
-        {
-            name: 'Sekiz',
-            id: 1,
-            backgroundColor: '#388E3C',
-            borderColor: '#388E3C',
-        },
-        {
-            text: 'Penguen',
-            id: 2,
-        }
-    ];
+
 
     useRefreshOnFocus(fetchMyCommunity)
     return (
@@ -301,7 +290,7 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
 
                     <View style={styles.searchWrap}>
 
-                        <SearchValue isWidth={"80%"} onChangeText={(text) => setSearchValue(text)}
+                        <SearchValue isWidth={"85%"} onChangeText={(text) => setSearchValue(text)}
                                      placeholder={'Search for all types of Communities'}
                                      value={searchValue}/>
 
@@ -337,11 +326,14 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
                                 },
 
                             ]}
+                            containerStyle={{width:'110%',}}
                             textStyle={{
                                 fontSize: fontPixel(12),
                                 textAlign: 'center',
+                                color:textColor,
                                 fontFamily:Fonts.quicksandSemiBold
                             }}
+
                             activeBackgroundColor={Colors.primaryColor}
                             buttonStyle={styles.tabButtonStyle}
                             onPress={(e: { id: React.SetStateAction<string>; }) => {
@@ -742,12 +734,12 @@ const styles = StyleSheet.create({
         width: '100%',
         flex: 1,
         alignItems: 'center',
-
+        paddingHorizontal: pixelSizeHorizontal(20),
         //backgroundColor: "#fff",
         paddingBottom: Platform.OS === 'ios' ? -40 : 0
     },
     scrollView: {
-        paddingHorizontal: pixelSizeHorizontal(20),
+
         //  backgroundColor: Colors.background,
         //  backgroundColor: "#fff",
         width: '100%',
@@ -763,7 +755,8 @@ const styles = StyleSheet.create({
     searchWrap: {
         height: heightPixel(90),
         width: '100%',
-        justifyContent: 'space-evenly',
+
+        justifyContent: 'space-between',
         alignItems: 'center',
         flexDirection: 'row'
     },
@@ -793,7 +786,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        width: '90%',
+        width: '95%',
         height: heightPixel(70),
     },
     listTitle: {

@@ -508,6 +508,7 @@ const AllCommunities = ({navigation}: RootStackScreenProps<'AllCommunities'>) =>
                         textStyle={{
                             fontSize: fontPixel(12),
                             textAlign: 'center',
+                            color:textColor,
                             fontFamily:Fonts.quicksandSemiBold
                         }}
                         activeBackgroundColor={Colors.primaryColor}
@@ -914,11 +915,11 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         backgroundColor: "#fff",
-        paddingBottom: Platform.OS === 'ios' ? -40 : 0
+
     },
     segmentWrap: {
         height: heightPixel(60),
-        width: '100%',
+        width: '95%',
         justifyContent: 'space-evenly',
         alignItems: 'center',
         flexDirection: 'row'
@@ -951,7 +952,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        width: '90%',
+        width: '85%',
         height: heightPixel(70),
     },
     listTitle: {
@@ -961,7 +962,7 @@ const styles = StyleSheet.create({
     },
     listWrap: {
         width: '90%',
-
+alignItems:'center',
         flex: 1,
 
     },
@@ -1071,7 +1072,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginHorizontal: pixelSizeHorizontal(10),
+
         marginVertical: pixelSizeVertical(5),
         borderRadius: 10,
         padding: 15,

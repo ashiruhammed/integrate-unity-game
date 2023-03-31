@@ -153,14 +153,16 @@ const LeaveReview = ({navigation,route}: RootStackScreenProps<'LeaveReview'>) =>
 
 
             <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
-                <Toast message={responseMessage} state={responseState} type={responseType}/>
+
                 <StatusBar style={theme == 'light' ? 'dark' : 'light'}/>
                 <Toast message={responseMessage} state={responseState} type={responseType}/>
                 <KeyboardAwareScrollView style={{width: '100%',}} contentContainerStyle={styles.scrollView} scrollEnabled
                             showsVerticalScrollIndicator={false}>
 
                     <View style={styles.topBar}>
-                        <Text style={[styles.title, {}]}>
+                        <Text style={[styles.title, {
+                            color: textColor
+                        }]}>
                             Mission Finished
                         </Text>
                     </View>

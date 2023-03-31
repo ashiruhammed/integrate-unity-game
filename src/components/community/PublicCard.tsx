@@ -335,7 +335,7 @@ const CardPublicCommunity = ({theme, loadingBadge, item, joinModal,viewTheCommun
 const styles = StyleSheet.create({
 
     communityCard: {
-        width: widthPixel(340),
+        width: widthPixel(350),
         height: heightPixel(300),
         shadowColor: "#212121",
         alignItems: 'center',
