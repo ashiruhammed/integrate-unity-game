@@ -24,8 +24,8 @@ import AdventuresIcon from "../../assets/images/tabs/home/AdventuresIcon";
 import {RootTabScreenProps} from "../../../types";
 import {logoutUser, updateUserDashboard, updateUserInfo} from "../../app/slices/userSlice";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
-import {QueryCache, useQuery, useQueryClient} from "@tanstack/react-query";
-import {getUser, getUserDashboard} from "../../action/action";
+import {QueryCache, useInfiniteQuery, useQuery, useQueryClient} from "@tanstack/react-query";
+import {getUser, getUserDashboard, userNotifications} from "../../action/action";
 import Constants from "expo-constants";
 import FastImage from "react-native-fast-image";
 import {useRefreshOnFocus} from "../../helpers";
@@ -109,6 +109,26 @@ const Profile = ({navigation}: RootTabScreenProps<'Profile'>) => {
 
     }
 
+
+    const {
+        data: notifications,
+
+    } = useInfiniteQuery([`notifications`], ({pageParam = 1}) => userNotifications.notifications({pageParam}),
+        {
+            networkMode: 'online',
+
+            getNextPageParam: lastPage => {
+                if (lastPage.next !== null) {
+                    return lastPage.next;
+                }
+
+                return lastPage;
+            },
+            getPreviousPageParam: (firstPage, allPages) => firstPage.prevCursor,
+
+        })
+
+
     const refresh = () => {
         setRefreshing(true)
         refetch()
@@ -142,7 +162,10 @@ const Profile = ({navigation}: RootTabScreenProps<'Profile'>) => {
                         <View style={styles.rightButton}>
                             <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}
                                               style={styles.roundTopBtn}>
-                                {/*<View style={styles.dot}/>*/}
+                                {
+                                    notifications?.pages[0].data.result.length > 0 &&
+                                <View style={styles.dot}/>
+                                }
                                 <Octicons name="bell-fill" size={22} color={"#fff"}/>
                             </TouchableOpacity>
 
