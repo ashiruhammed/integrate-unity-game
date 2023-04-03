@@ -118,7 +118,7 @@ export default () => {
                 }}
             />
 
-            <Tabs.Screen
+          {/*  <Tabs.Screen
                 name="MarketPlace"
                 component={MarketPlace}
                 options={{
@@ -136,7 +136,7 @@ export default () => {
 
                     ),
                 }}
-            />
+            />*/}
 
             <Tabs.Screen
                 name="Profile"

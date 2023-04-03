@@ -358,7 +358,9 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
                     }
 
 
-                    <View style={styles.badgeContainer}>
+                    <View style={[styles.badgeContainer,{
+                        justifyContent: data?.pages[0]?.data?.result.length < 3 ? 'flex-start' : 'space-around',
+                    }]}>
 
                         {
                             isLoading &&
@@ -389,6 +391,8 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
                                                layout={Layout.easing(Easing.bounce).delay(20)}>
                                     <Pressable onPress={() => goToAdventure(item)}
                                                style={[styles.adventureItem, {
+                                                  // marginHorizontal:10,
+                                                   marginRight : data?.pages[0]?.data?.result.length < 3 ?  30: 0,
                                                    backgroundColor: theme == 'dark' ? Colors.dark.background : "#fff",
                                                }]}>
 
@@ -681,7 +685,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         flexDirection: 'row',
         flexWrap: 'wrap',
-        justifyContent: 'space-around',
+
         marginTop: 30,
 
         paddingHorizontal: pixelSizeHorizontal(20)
