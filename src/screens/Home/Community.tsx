@@ -300,7 +300,7 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
                             <Ionicons name="md-search-outline" size={20} color="#666666"/>
                         </View>
                     </View>
-                    <Toast message={responseMessage} state={responseState} type={responseType}/>
+
                     <View style={styles.segmentWrap}>
                        {/* <SegmentedControl tabs={["All Communities", "Followed communities", "My Communities",]}
                                           currentIndex={tabIndex}
@@ -472,7 +472,9 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
 
                         </>
                     }
+
                 </ScrollView>
+                <Toast message={responseMessage} state={responseState} type={responseType}/>
             </SafeAreaView>
 
 

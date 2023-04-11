@@ -302,7 +302,7 @@ const AdventureHome = ({navigation}: RootStackScreenProps<'AdventureHome'>) => {
             if (data.success) {
                // console.log(data)
                 navigation.navigate('VideoScreen', {
-                    lessonId: data?.data?.currentLessonId,
+                    currentLessonId: data?.data?.currentLessonId,
                     adventureId: data?.data?.id
                 })
 
@@ -367,7 +367,7 @@ useRefreshOnFocus(refetch)
 
 
         navigation.navigate('VideoScreen', {
-            lessonId: data?.data?.userAdventure?.currentLessonId,
+            currentLessonId: data?.data?.userAdventure?.currentLessonId,
             adventureId: data?.data?.id
         })
 

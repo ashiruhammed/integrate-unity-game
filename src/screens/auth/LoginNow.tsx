@@ -291,6 +291,12 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
 
 
             } else {
+                console.log(data)
+                dispatch(setResponse({
+                    responseMessage: data.message,
+                    responseState: true,
+                    responseType: 'error',
+                }))
                 if (data.message == 'Your email is not verified, kindly verify your email to continue.') {
                     navigation.navigate('EmailConfirm', {
                         email: contentEmail
@@ -472,8 +478,8 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                         </View>
                     </View>
 
-                    <Toast message={responseMessage} state={responseState} type={responseType}/>
 
+                    <Toast message={responseMessage} state={responseState} type={responseType}/>
                     <View style={styles.authContainer}>
                         {/* <View style={styles.topBar}>
                         <TouchableOpacity onPress={goBack} style={styles.backBtn}>

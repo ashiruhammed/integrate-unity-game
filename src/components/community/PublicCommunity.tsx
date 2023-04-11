@@ -73,6 +73,8 @@ interface cardProps {
 const isRunningInExpoGo = Constants.appOwnership === 'expo'
 
 const PublicCommunityCard = ({theme, loadingBadge, item, joinModal, viewTheCommunity}: cardProps) => {
+
+    console.log(item)
     const user = useAppSelector(state => state.user)
     const {userData} = user
     const dispatch = useAppDispatch()
@@ -388,8 +390,15 @@ const PublicCommunity = ({theme, searchValue}: props) => {
     } = useMutation(['getBadge'], () => getSingleBadge(badgeId), {
 
         onSuccess: (data) => {
+            console.log(data)
             if (data.success) {
                 setModalVisible(true)
+            }else{
+                dispatch(setResponse({
+                    responseMessage: data.message,
+                    responseState: true,
+                    responseType: 'error',
+                }))
             }
 
         }
@@ -473,10 +482,16 @@ const PublicCommunity = ({theme, searchValue}: props) => {
     }
 
     const joinModal = useCallback(async (badgeId: string, accessNFTBadgeAmount: string, communityId: string) => {
+        console.log({badgeId, accessNFTBadgeAmount, communityId})
         await setBadgeId(badgeId)
         setRequiredBadges(accessNFTBadgeAmount)
         setCommunityId(communityId)
-        mutate()
+        if(badgeId){
+            mutate()
+        }else {
+            followCommunityNow()
+        }
+
 
     }, [badgeId])
 
@@ -487,9 +502,9 @@ const PublicCommunity = ({theme, searchValue}: props) => {
     const keyExtractor = useCallback((item: { id: any; }) => item.id, [],);
 
     const renderItem = useCallback(({item}) => (
-        <PublicCommunityCard viewTheCommunity={viewTheCommunity} loadingBadge={loadingBadge} joinModal={joinModal}
+        <PublicCommunityCard viewTheCommunity={viewTheCommunity} loadingBadge={loadingBadge || following}  joinModal={joinModal}
                              theme={theme} item={item}/>
-    ), [loadingBadge, theme])
+    ), [loadingBadge, theme,following])
 
     const loadMore = () => {
         if (hasNextPage) {

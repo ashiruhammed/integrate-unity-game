@@ -60,7 +60,8 @@ const formSchema = yup.object().shape({
 
 const VideoScreen = ({navigation, route}: RootStackScreenProps<'VideoScreen'>) => {
 
-    const {lessonId} = route.params
+    const {currentLessonId} = route.params
+    const [lessonId, setLessonId] = useState(currentLessonId);
     const dispatch = useAppDispatch()
     const queryClient = useQueryClient();
     const animation = useRef(null);
@@ -136,6 +137,7 @@ const VideoScreen = ({navigation, route}: RootStackScreenProps<'VideoScreen'>) =
         refetch: getQuiz
     } = useQuery(['getQuizByLesson'], () => getQuizByLesson(lessonId))
 
+console.log(quiz)
 
     const {mutate: submitTaskNow, isLoading: submittingTask} = useMutation(['submitTask'], submitTask, {
         onSuccess: (data) => {
@@ -170,14 +172,16 @@ const VideoScreen = ({navigation, route}: RootStackScreenProps<'VideoScreen'>) =
     } = useMutation(['getNextMission'], getNextAdventure, {
         onSuccess: (data) => {
             // console.log("ADVENTURE NEXT")
-            // console.log(data)
+
             if (data.success) {
 
                 if (data.data.hasNextLesson) {
                     // console.log("===========GOING TO NEXT LESSON========")
                     mutate(data.data.nextLessonId)
+                    setLessonId(data.data.nextLessonId)
                 } else if (!data.data.isLastModuleLesson) {
                     // console.log("--------THIS IS GOING TO NEXT MODULE---------")
+                    setLessonId(data.data.nextLessonId)
                     mutate(data.data.nextLessonId)
                 } else if (data.data.isLastAdventureModule) {
                     // console.log("********THIS MEAN ADVENTURE IS COMPLETED********")

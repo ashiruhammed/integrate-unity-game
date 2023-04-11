@@ -39,7 +39,7 @@ export type RootStackParamList = {
 
     AdventureHome: undefined;
     VideoScreen: {
-        lessonId?: string,
+        currentLessonId: string,
         adventureId?: string
     };
     QuizScreen: {

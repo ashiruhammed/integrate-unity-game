@@ -71,7 +71,6 @@
     },
     "android": {
       "versionCode": 46,
-      "useNextNotificationsApi": true,
       "userInterfaceStyle": "light",
       "package": "com.gatewaymobile.app",
       "googleServicesFile": "./google-services.json",
