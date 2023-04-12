@@ -69,6 +69,8 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
     const {responseMessage, responseType, responseState} = user
     const [phoneNumber, setPhoneNumber] = useState('');
 
+    const [referralCode, setReferralCode] = useState('');
+
     const [value, setValue] = useState("");
     const [formattedValue, setFormattedValue] = useState("");
 
@@ -350,7 +352,7 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
             const body = JSON.stringify({
                 "grantType": "access_token",
                 "tokens": {access_token},
-                "referralCode": values.referralCode
+                referralCode
             })
 
             googleAuthLogin(body)
@@ -614,11 +616,12 @@ style={styles.fbButtonSignUp}
                             touched={touched.referralCode}
                             onChangeText={(e) => {
                                 handleChange('referralCode')(e);
-
+setReferralCode(e)
                             }}
                             onBlur={(e) => {
                                 handleBlur('referralCode')(e);
                             }}
+                            defaultValue={referralCode}
                             value={values.referralCode}
                             label="Referral code (optional)"/>
 
@@ -672,7 +675,7 @@ style={styles.fbButtonSignUp}
                                         const body = JSON.stringify({
                                             access_token: credential.identityToken,
                                             full_name: credential.fullName?.familyName,
-                                            referralCode: values.referralCode,
+                                            referralCode,
                                             "source": "mobile"
                                         })
                                         appleOAuth(body)

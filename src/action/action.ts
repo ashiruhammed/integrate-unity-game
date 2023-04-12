@@ -2545,8 +2545,9 @@ export const submitTask = async ({id, body}: { id: string, body: any }) => {
 
     ])
 }
-export const followACommunity = async ({id}: { id: string }) => {
-
+export const followACommunity = async (id :string) => {
+console.log("Community ID")
+console.log(id)
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
     const myHeaders = {

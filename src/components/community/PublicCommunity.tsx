@@ -74,7 +74,7 @@ const isRunningInExpoGo = Constants.appOwnership === 'expo'
 
 const PublicCommunityCard = ({theme, loadingBadge, item, joinModal, viewTheCommunity}: cardProps) => {
 
-    console.log(item)
+
     const user = useAppSelector(state => state.user)
     const {userData} = user
     const dispatch = useAppDispatch()
@@ -390,7 +390,7 @@ const PublicCommunity = ({theme, searchValue}: props) => {
     } = useMutation(['getBadge'], () => getSingleBadge(badgeId), {
 
         onSuccess: (data) => {
-            console.log(data)
+
             if (data.success) {
                 setModalVisible(true)
             }else{
@@ -481,23 +481,20 @@ const PublicCommunity = ({theme, searchValue}: props) => {
         setModalVisible(false)
     }
 
-    const joinModal = useCallback(async (badgeId: string, accessNFTBadgeAmount: string, communityId: string) => {
-        console.log({badgeId, accessNFTBadgeAmount, communityId})
+    const joinModal = async (badgeId: string, accessNFTBadgeAmount: string, communityId: string) => {
+
         await setBadgeId(badgeId)
         setRequiredBadges(accessNFTBadgeAmount)
-        setCommunityId(communityId)
+       await setCommunityId(communityId)
         if(badgeId){
             mutate()
         }else {
-            followCommunityNow()
+            follow( communityId)
         }
 
 
-    }, [badgeId])
-
-    const followCommunityNow = () => {
-        follow({id: communityId})
     }
+
 
     const keyExtractor = useCallback((item: { id: any; }) => item.id, [],);
 
@@ -605,7 +602,7 @@ const PublicCommunity = ({theme, searchValue}: props) => {
                         </View>
 
 
-                        <RectButton onPress={followCommunityNow} style={{
+                        <RectButton onPress={()=>    follow( communityId)} style={{
                             width: 220,
                         }}>
                             {
