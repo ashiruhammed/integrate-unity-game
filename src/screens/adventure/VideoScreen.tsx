@@ -62,6 +62,7 @@ const VideoScreen = ({navigation, route}: RootStackScreenProps<'VideoScreen'>) =
 
     const {currentLessonId} = route.params
     const [lessonId, setLessonId] = useState(currentLessonId);
+
     const dispatch = useAppDispatch()
     const queryClient = useQueryClient();
     const animation = useRef(null);
@@ -70,7 +71,7 @@ const VideoScreen = ({navigation, route}: RootStackScreenProps<'VideoScreen'>) =
     const user = useAppSelector(state => state.user)
     const {responseState, responseType, responseMessage} = user
     const [badgeModalVisible, setBadgeModalVisible] = useState(false);
-    const video = React.useRef(null);
+    const video = useRef(null);
     const [status, setStatus] = React.useState({});
     const [playing, setPlaying] = useState(false);
     const [terms, setTerms] = useState(false);
@@ -137,7 +138,6 @@ const VideoScreen = ({navigation, route}: RootStackScreenProps<'VideoScreen'>) =
         refetch: getQuiz
     } = useQuery(['getQuizByLesson'], () => getQuizByLesson(lessonId))
 
-console.log(quiz)
 
     const {mutate: submitTaskNow, isLoading: submittingTask} = useMutation(['submitTask'], submitTask, {
         onSuccess: (data) => {
@@ -256,8 +256,9 @@ console.log(quiz)
 
 
     //
-    const nextMission = async () => {
+    const nextMission =  useCallback( async() => {
 
+console.log(lessonId)
         if (quiz?.success) {
             updateVideoWatchCount(lessonId)
             navigation.navigate('QuizScreen', {
@@ -268,7 +269,7 @@ console.log(quiz)
         }
 
         // handleSnapPress(1)
-    }
+    },[lessonId])
 
     const goHome = () => {
         refetch()
@@ -281,6 +282,12 @@ console.log(quiz)
             adventureId: adventure?.id
         })
     }
+
+    useEffect(() => {
+        navigation.addListener('beforeRemove', () => {
+            video.current?.setNativeProps({ paused: true });
+        });
+    }, []);
 
 
     const nextSheet = () => {
@@ -470,19 +477,22 @@ console.log(quiz)
                         flex: 1,
                     }]}>
                         <VideoPlayer
+                            rate={1}
                             isFullscreen
                             toggleResizeModeOnFullscreen
                             onEnterFullscreen={() => setFullScreen(true)}
                             fullscreen={fullScreen}
                             fullscreenAutorotate
                             fullscreenOrientation='all'
-
+                            volume={1}
+                            paused={false}
+                            playInBackground={false}
                             containerStyle={styles.video}
                             videoRef={video}
                             source={{uri: lesson?.data?.video?.url}}
                             navigator={navigation}
                             showDuration
-
+                            muted={false}
                             seekColor={Colors.primaryColor}
                         />
                     </View>

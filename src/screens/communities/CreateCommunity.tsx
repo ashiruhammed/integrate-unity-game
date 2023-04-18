@@ -683,7 +683,7 @@ const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) 
                     <Text style={[styles.sheetTitle, {
                         color: textColor
                     }]}>
-                        Categories
+                        Badge access
                     </Text>
                     {
                         Platform.OS == 'android' &&

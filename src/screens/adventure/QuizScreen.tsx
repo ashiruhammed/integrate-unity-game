@@ -98,10 +98,12 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
         onSuccess:(data)=>{
             if(data.success){
                // console.log("THE NEXT LESSON IN THE NEXT MODULE")
-                navigation.navigate('VideoScreen', {
-                    lessonId: data.data.id,
+               navigation.navigate('VideoScreen', {
+                    currentLessonId: data.data.id,
 
                 })
+
+                console.log(data)
             }
         }
     })
@@ -150,14 +152,15 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
             if (data.success) {
 
                 if (data.data.hasNextLesson) {
-                    //console.log("THIS IS GOES TO THE NEXT LESSON IN THIS MODULE")
+
                     navigation.navigate('VideoScreen', {
-                        lessonId: data.data.nextLessonId,
+                        currentLessonId: data.data.nextLessonId,
 
                     })
+                  //  console.log(data)
                 }else if(!data.data.isLastModuleLesson){
                     //console.log("THIS IS GOING TO NEXT MODULE LESSON")
-                   mutate(data.data.nextLessonId)
+                  // mutate(data.data.nextLessonId)
                 }  else if (data.data.isLastAdventureModule){
                    // console.log("THIS IS GET THE TASK TO COMPLETE ADVENTURE")
 
@@ -192,7 +195,7 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
     const {data:task,mutate:getTask,isLoading:gettingTask} = useMutation(['getModuleTask'],getModuleTask,{
         onSuccess: (data)=>{
 
-//console.log("Fetching... task")
+
 
             if(data.success){
                 handleSnapPress(1)
@@ -211,9 +214,10 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
                 if(data.sucess){
 
                     navigation.navigate('VideoScreen', {
-                        lessonId:data.result.id
+                        currentLessonId:data.result.id
 
                     })
+                    console.log("++++/+/++++/+/+ NAVIGATE ++++++++++")
                 }
             }
         })

@@ -411,10 +411,10 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                 <Recaptcha
                     ref={$recaptcha}
                     lang="eng"
-                    headerComponent={
+                   /* headerComponent={
                         <Button title="Close modal" onPress={handleClosePress}/>
-                    }
-                    footerComponent={<Text>Footer here</Text>}
+                    }*/
+                    /*footerComponent={<Text>Footer here</Text>}*/
                     siteKey="6Les7rgjAAAAACAihGpA2LD4k-jx7Wjtl68Y8whF"
                     baseUrl="https://api.gatewayapp.co"
                     size={'invisible'}
