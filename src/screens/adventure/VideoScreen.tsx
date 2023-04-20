@@ -61,7 +61,8 @@ const formSchema = yup.object().shape({
 const VideoScreen = ({navigation, route}: RootStackScreenProps<'VideoScreen'>) => {
 
     const {currentLessonId} = route.params
-    const [lessonId, setLessonId] = useState(currentLessonId);
+    const [lessonId, setLessonId] = useState('');
+
 
     const dispatch = useAppDispatch()
     const queryClient = useQueryClient();
@@ -244,6 +245,11 @@ const VideoScreen = ({navigation, route}: RootStackScreenProps<'VideoScreen'>) =
     }, []);
 
 
+    useEffect(() => {
+        setLessonId(currentLessonId)
+    }, [currentLessonId]);
+
+
     const goBack = () => {
         navigation.goBack()
     }
@@ -255,21 +261,20 @@ const VideoScreen = ({navigation, route}: RootStackScreenProps<'VideoScreen'>) =
     }, [lessonId]);
 
 
-    //
-    const nextMission =  useCallback( async() => {
+    const nextMission = useCallback(async () => {
 
-console.log(lessonId)
-        if (quiz?.success) {
-            updateVideoWatchCount(lessonId)
-            navigation.navigate('QuizScreen', {
-                lessonId,
-            })
-        } else {
-            nextLevel(adventure?.id)
+        if (!loadingQuiz) {
+            if (quiz?.success) {
+                updateVideoWatchCount(lessonId)
+                navigation.navigate('QuizScreen', {
+                    lessonId,
+                })
+            } else {
+                nextLevel(adventure?.id)
+            }
         }
-
         // handleSnapPress(1)
-    },[lessonId])
+    }, [lessonId])
 
     const goHome = () => {
         refetch()
@@ -285,7 +290,7 @@ console.log(lessonId)
 
     useEffect(() => {
         navigation.addListener('beforeRemove', () => {
-            video.current?.setNativeProps({ paused: true });
+            video.current?.setNativeProps({paused: true});
         });
     }, []);
 

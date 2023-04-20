@@ -234,53 +234,25 @@ interface Interface {
 const isRunningInExpoGo = Constants.appOwnership === 'expo'
 const AdventureHome = ({navigation}: RootStackScreenProps<'AdventureHome'>) => {
 
-
     const dispatch = useAppDispatch()
     const queryClient = useQueryClient();
 
     const dataSlice = useAppSelector(state => state.data)
     const user = useAppSelector(state => state.user)
-    const [lessonId, setLessonId] = useState('');
 
     const {responseState, responseType, responseMessage} = user
     const {missionId, adventure} = dataSlice
 
 
-    const sheetRef = useRef<BottomSheet>(null);
 
 
-    // variables
-    const snapPoints = useMemo(() => ["1%", "70%"], []);
-    const handleSnapPress = useCallback((index: number) => {
-        sheetRef.current?.snapToIndex(index);
-    }, []);
-    const handleClosePress = useCallback(() => {
-        sheetRef.current?.close();
-    }, []);
 
-
-    const sheetFormRef = useRef<BottomSheet>(null);
-
-    // variables
-    const snapPointsForm = useMemo(() => ["1%", "70%"], []);
-    const handleSnapPressForm = useCallback((index: number) => {
-        sheetFormRef.current?.snapToIndex(index);
-    }, []);
-    const handleClosePressForm = useCallback(() => {
-        sheetFormRef.current?.close();
-    }, []);
     const [currentIndex, setCurrentIndex] = useState<number | null | string>(null);
 
-    const sheetRefReward = useRef<BottomSheet>(null);
+
 
     // variables
 
-    const handleSnapPressReward = useCallback((index: number) => {
-        sheetRefReward.current?.snapToIndex(index);
-    }, []);
-    const handleClosePressReward = useCallback(() => {
-        sheetRefReward.current?.close();
-    }, []);
 
     const [tabIndex, setTabIndex] = useState(0);
     const handleTabsChange = useCallback((index: SetStateAction<number>) => {
@@ -341,10 +313,6 @@ const AdventureHome = ({navigation}: RootStackScreenProps<'AdventureHome'>) => {
 
     // renders
 
-    const nextSheet = () => {
-        handleClosePress()
-        handleSnapPressForm(1)
-    }
 
 
     const goBack = () => {
@@ -364,8 +332,6 @@ const AdventureHome = ({navigation}: RootStackScreenProps<'AdventureHome'>) => {
     }
 useRefreshOnFocus(refetch)
     const nextQuiz = () => {
-
-
         navigation.navigate('VideoScreen', {
             currentLessonId: data?.data?.userAdventure?.currentLessonId,
             adventureId: data?.data?.id

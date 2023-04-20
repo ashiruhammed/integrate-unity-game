@@ -13,7 +13,7 @@
       "iosDisplayInForeground": true,
       "androidMode": "collapse",
       "androidCollapsedTitle": "Gateway Block-Edu",
-      "icon": "./src/assets/images/app-icon.png"
+      "icon": "./src/assets/images/gateway-adaptive.png"
     },
     "splash": {
       "image": "./src/assets/images/splash.png",

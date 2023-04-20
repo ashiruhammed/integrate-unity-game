@@ -1,6 +1,16 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
-import {Text, View, StyleSheet, Image, Platform, Keyboard, TouchableOpacity, ActivityIndicator} from 'react-native';
+import {
+    Text,
+    View,
+    StyleSheet,
+    Image,
+    Platform,
+    Keyboard,
+    TouchableOpacity,
+    ActivityIndicator,
+    Switch, Button
+} from 'react-native';
 import NavBar from "../../components/layout/NavBar";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
@@ -29,7 +39,14 @@ import {allAvailableBadges, createCommunity, updateCompleteProfile, uploadToClou
 import Toast from "../../components/Toast";
 import {isLessThanTheMB} from "../../helpers";
 import {api_key, upload_preset} from "../../constants";
+import {setCurrentCommunityId} from "../../app/slices/dataSlice";
 
+
+
+const SWITCH_TRACK_COLOR = {
+    true: "rgba(246,114,114,0.45)",
+    false: "rgba(206,206,206,0.1)",
+};
 
 const getFileInfo = async (fileURI: string) => {
     const fileInfo = await FileSystem.getInfoAsync(fileURI, {
@@ -42,7 +59,7 @@ const getFileInfo = async (fileURI: string) => {
 
 }
 
-const formSchema = yup.object().shape({
+const formSchema =(requireNFTBadgeAccess: boolean) => yup.object().shape({
     communityName: yup.string().min(2, 'Name is Too short').required('Community name is required'),
     //   category: yup.string().required('Category is required').trim('No white spaces'),
     memberLimit: yup.string().required('Member is required'),
@@ -51,7 +68,12 @@ const formSchema = yup.object().shape({
     // amountOfBadge: yup.string().required('Please provide number of Badges access'),
     // NFTAccess: yup.string().required('Please provide NFTs required for access'),
     about: yup.string().required('Please community description'),
+    accessNFTBadgeAmount: yup.string().when([], {
+        // any condition to remove validation
+        is: () => requireNFTBadgeAccess,
+        then: yup.string().trim().required('Access NFT BadgeAmount is required'),
 
+    }),
 });
 
 const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) => {
@@ -63,7 +85,11 @@ const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) 
     const user = useAppSelector(state => state.user)
     const {theme} = dataSlice
 
-    const {responseState, responseType, responseMessage} = user
+    const [amountOfBadge, setAmountOfBadge] = useState('0');
+    const [fAmountOfBadge, setFAmountOfBadge] = useState(false);
+
+    const [requireNFTBadgeAccess, setRequireNFTBadgeAccess] = useState(false);
+    const {responseState, responseType, responseMessage, userData} = user
     const [image, setImage] = useState('');
     const [imageUrl, setImageUrl] = useState('');
 
@@ -106,6 +132,29 @@ const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) 
         sheetRefBadge.current?.close();
     }, []);
 
+    const viewCommunity = (id: string, ownerId: string, visibility: string, displayPhoto: string) => {
+        dispatch(setCurrentCommunityId({
+            id,
+            currentCommunity: {
+                ownerId: ownerId,
+                visibility: visibility,
+                displayPhoto: displayPhoto
+            }
+        }))
+        navigation.navigate('SeeCommunity', {
+            screen: 'ViewCommunity',
+
+
+        })
+    }
+
+    const viewStatus = () => {
+      navigation.navigate('Dashboard',{
+          screen:'Community',
+          params:{newTabIndex:'3'}
+      })
+    }
+
 
     const {isLoading: loadingBadges, data} = useQuery(['allAvailableBadges'], allAvailableBadges)
 
@@ -116,11 +165,11 @@ const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) 
 
             onSuccess: async (data) => {
 
-                if (data.success) {
 
-                    navigation.navigate('ViewCommunity', {
-                        id: data.data.id
-                    })
+                if (data.success) {
+                    resetForm()
+                    //viewCommunity(data.data.id,userData.id,data.data.visibility, data.data.displayPhoto)
+                    viewStatus()
                     dispatch(setResponse({
                         responseMessage: data.message,
                         responseState: true,
@@ -171,27 +220,29 @@ const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) 
         touched,
         isValid
     } = useFormik({
-        validationSchema: formSchema,
+        validationSchema:formSchema(requireNFTBadgeAccess),
         initialValues: {
             communityName: '',
             category: '',
             memberLimit: '',
             gateWayUsername: '',
             badgeId: '',
-            amountOfBadge: '',
             NFTAccess: '',
-            about: ''
+            about: '',
+            accessNFTBadgeAmount: '',
+            requireNFTBadgeAccess:requireNFTBadgeAccess
 
 
         },
         onSubmit: (values) => {
-            const {communityName, badgeId, gateWayUsername, memberLimit, category, about} = values
+            const {communityName, badgeId, requireNFTBadgeAccess,accessNFTBadgeAmount,gateWayUsername, memberLimit, category, about} = values
             if (imageUrl !== '') {
 
 
                 const body = JSON.stringify({
+                    requireNFTBadgeAccess,
                     accessNFTBadgeId: badgeId,
-                    accessNFTBadgeAmount: '1',
+                    accessNFTBadgeAmount,
                     "name": communityName,
                     "slug": gateWayUsername,
                     memberLimit,
@@ -394,6 +445,8 @@ const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) 
                                            }]}/>
                     }
 
+
+
                     <View style={styles.imageCanvas}>
                         <TouchableOpacity onPress={pickImage} activeOpacity={0.8} style={styles.profileDetailsImage}>
 
@@ -522,26 +575,57 @@ const CreateCommunity = ({navigation}: RootStackScreenProps<'CreateCommunity'>) 
                             value={values.badgeId}
                             Btn={true}/>
 
+                        <TouchableOpacity activeOpacity={0.9}
+                                          style={[styles.profileButton, {
+                                              borderBottomColor: "#F3F4F6"
+                                          }]}>
+                            <Text style={[styles.leftTxt, {
+                                color:textColor
+                            }]}>
 
-                        {/*  <TextInput
+                          Require NFT Badge access
+
+                            </Text>
+
+
+                            <View style={styles.right}>
+                                <Switch
+                                    style={{
+
+
+                                    }}
+                                    trackColor={SWITCH_TRACK_COLOR}
+                                    thumbColor={requireNFTBadgeAccess ? Colors.primaryColor : "#fff"}
+                                    ios_backgroundColor={textColor}
+                                    onValueChange={(toggled) => {
+                                        setRequireNFTBadgeAccess(toggled)
+                                    }}
+                                    value={requireNFTBadgeAccess}
+                                />
+                            </View>
+
+                        </TouchableOpacity>
+
+                        { requireNFTBadgeAccess  &&
+                          <TextInput
 
                             keyboardType={"number-pad"}
-                            touched={touched.amountOfBadge}
-                            error={touched.amountOfBadge && errors.amountOfBadge}
+                            touched={touched.accessNFTBadgeAmount}
+                            error={touched.accessNFTBadgeAmount && errors.accessNFTBadgeAmount}
                             onFocus={() => setFAmountOfBadge(true)}
                             onChangeText={(e) => {
-                                handleChange('amountOfBadge')(e);
+                                handleChange('accessNFTBadgeAmount')(e);
                                 setAmountOfBadge(e);
                             }}
                             onBlur={(e) => {
-                                handleBlur('amountOfBadge')(e);
+                                handleBlur('accessNFTBadgeAmount')(e);
                                 setFAmountOfBadge(false);
                             }}
                             defaultValue={amountOfBadge}
                             focus={fAmountOfBadge}
-                            value={values.amountOfBadge}
+                            value={values.accessNFTBadgeAmount}
                             label="Amount of Badge required"/>
-*/}
+                        }
 
                         {/*  <SelectInput
                             //placeholder={"Business Size"}
@@ -858,7 +942,31 @@ const styles = StyleSheet.create({
     note: {
         fontSize: fontPixel(14),
         fontFamily: Fonts.quicksandRegular
-    }
+    },
+    profileButton: {
+        width: '100%',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        height: heightPixel(65),
+        alignItems: 'center',
+
+
+    },
+    leftTxt: {
+
+        fontSize: fontPixel(14),
+        fontFamily: Fonts.quicksandSemiBold,
+
+    },
+
+    right: {
+
+        width: '50%',
+        height: '100%',
+        alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'flex-end'
+    },
 })
 
 export default CreateCommunity;

@@ -23,8 +23,8 @@ import {RectButton} from "../../../components/RectButton";
 import {SmallRectButton} from "../../../components/buttons/SmallRectButton";
 import {useInfiniteQuery, useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {
-    followACommunity,
-     getFollowedCommunities,
+    followACommunity, getAllCommunities,
+    getFollowedCommunities,
     getMyCommunities,
     getPublicCommunities,
     getSingleBadge
@@ -44,7 +44,8 @@ import {
 import FastImage from "react-native-fast-image";
 import {setCurrentCommunityId} from "../../../app/slices/dataSlice";
 import ScrollingButtonMenu from "react-native-scroll-menu";
-import {titleCase} from "../../../helpers";
+import {titleCase, useRefreshOnFocus} from "../../../helpers";
+import InActiveCard from "../../../components/community/InActiveCard";
 
 
 const {width} = Dimensions.get('window')
@@ -274,6 +275,54 @@ const AllCommunities = ({navigation}: RootStackScreenProps<'AllCommunities'>) =>
             }
         })
 
+
+    const {
+        isLoading:loadingPending,
+        data:pendingCommunities,
+
+        refetch:fetchPendingCommunities,
+
+
+    } = useInfiniteQuery([`getAllCommunitiesPending`], ({pageParam = 1}) => getAllCommunities.communities( 'PENDING'),
+        {
+            networkMode: 'online',
+            getNextPageParam: lastPage => {
+                if (lastPage.next !== null) {
+                    return lastPage.next;
+                }
+
+                return lastPage;
+            },
+            onSuccess: (data) => {
+                // console.log(data.pages[0].data)
+            },
+            getPreviousPageParam: (firstPage, allPages) => firstPage.prevCursor,
+        })
+
+    const {
+        isLoading:loadingDeclined,
+        data:declinedCommunities,
+
+        refetch:fetchDeclinedCommunities,
+
+
+    } = useInfiniteQuery([`getAllCommunitiesDeclined`], ({pageParam = 1}) => getAllCommunities.communities( 'DECLINED'),
+        {
+            networkMode: 'online',
+            getNextPageParam: lastPage => {
+                if (lastPage.next !== null) {
+                    return lastPage.next;
+                }
+
+                return lastPage;
+            },
+            onSuccess: (data) => {
+                // console.log(data.pages[0].data)
+            },
+            getPreviousPageParam: (firstPage, allPages) => firstPage.prevCursor,
+        })
+
+
     const {isLoading: following, mutate: follow} = useMutation(['followACommunity'], followACommunity, {
 
         onSuccess: (data) => {
@@ -308,12 +357,7 @@ const AllCommunities = ({navigation}: RootStackScreenProps<'AllCommunities'>) =>
             id: communityId
         })
     }
-    const seeCommunity = (id: string) => {
-        dispatch(unSetResponse())
-        navigation.navigate('ViewCommunity', {
-            id
-        })
-    }
+
     const joinModal = useCallback(async (badgeId: string, accessNFTBadgeAmount: string, communityId: string) => {
         await setBadgeId(badgeId)
         setRequiredBadges(accessNFTBadgeAmount)
@@ -348,6 +392,11 @@ const AllCommunities = ({navigation}: RootStackScreenProps<'AllCommunities'>) =>
         <CardPublicCommunity viewTheCommunity={viewTheCommunity} loadingBadge={loadingBadge} joinModal={joinModal}
                              theme={theme} item={item}/>
     ), [loadingBadge, theme, tabIndex])
+
+    const renderItemCard = useCallback(({item}) => (
+        <InActiveCard  loadingBadge={loadingBadge}
+                             theme={theme} item={item}/>
+    ), [ theme, tabIndex])
 
     const renderItemFollowed = useCallback(({item}) => (
         <CardFollowedCommunity leaveCommunity={leaveCommunity} seeCommunity={viewTheCommunity} theme={theme}
@@ -398,6 +447,10 @@ const AllCommunities = ({navigation}: RootStackScreenProps<'AllCommunities'>) =>
     }
 
 
+    useRefreshOnFocus(fetchMyCommunity)
+    useRefreshOnFocus(refetch)
+    useRefreshOnFocus(fetchPendingCommunities)
+    useRefreshOnFocus(fetchDeclinedCommunities)
     return (
 
         <>
@@ -502,6 +555,14 @@ const AllCommunities = ({navigation}: RootStackScreenProps<'AllCommunities'>) =>
                             {
                                 id: "2",
                                 name: 'My Communities',
+                            },
+                            {
+                                id: "3",
+                                name: 'Pending',
+                            },
+                            {
+                                id: "4",
+                                name: 'Declined',
                             },
 
                         ]}
@@ -653,6 +714,45 @@ const AllCommunities = ({navigation}: RootStackScreenProps<'AllCommunities'>) =>
                     </View>
                 </IF>
 
+                <IF condition={tabIndex == '3'}>
+                    <View style={styles.listWrap}>
+                        <FlatList
+
+
+                            refreshing={isLoading}
+                            onRefresh={fetchPendingCommunities}
+                            scrollEnabled
+                            showsVerticalScrollIndicator={false}
+                            data={pendingCommunities?.pages[0]?.data?.result}
+                            renderItem={renderItemCard}
+
+                            keyExtractor={keyExtractor}
+                            onEndReachedThreshold={0.3}
+                            ListFooterComponent={loading ?
+                                <ActivityIndicator size="small" color={Colors.primaryColor}/> : null}
+                        />
+                    </View>
+                </IF>
+
+                <IF condition={tabIndex == '4'}>
+                    <View style={styles.listWrap}>
+                        <FlatList
+
+
+                            refreshing={isLoading}
+                            onRefresh={fetchDeclinedCommunities}
+                            scrollEnabled
+                            showsVerticalScrollIndicator={false}
+                            data={declinedCommunities?.pages[0]?.data?.result}
+                            renderItem={renderItemCard}
+
+                            keyExtractor={keyExtractor}
+                            onEndReachedThreshold={0.3}
+                            ListFooterComponent={loading ?
+                                <ActivityIndicator size="small" color={Colors.primaryColor}/> : null}
+                        />
+                    </View>
+                </IF>
 
             </SafeAreaView>
 

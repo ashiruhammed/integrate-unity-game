@@ -40,10 +40,11 @@ import AdventuresIcon from "../../assets/images/tabs/home/AdventuresIcon";
 import Toast from "../../components/Toast";
 import {unSetResponse} from "../../app/slices/userSlice";
 import {useInfiniteQuery, useQuery} from "@tanstack/react-query";
-import {getFollowedCommunities, getMyCommunities, getPublicCommunities} from "../../action/action";
+import {getAllCommunities, getFollowedCommunities, getMyCommunities, getPublicCommunities} from "../../action/action";
 import {titleCase, useRefreshOnFocus} from "../../helpers";
 import CardPublicCommunity from "../../components/community/PublicCard";
 import {setCurrentCommunityId} from "../../app/slices/dataSlice";
+import InActiveCard from "../../components/community/InActiveCard";
 
 
 const wait = (timeout: number) => {
@@ -53,32 +54,26 @@ const wait = (timeout: number) => {
 };
 
 const {width} = Dimensions.get('window')
-const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
-    const [tabIndex1, setTabIndex1] = React.useState('0');
+const Community = ({navigation, route}: RootTabScreenProps<'Community'>) => {
+
+    const {newTabIndex } = route.params
+
+    const [tabIndex1, setTabIndex1] = useState( '0');
     const dispatch = useAppDispatch()
     const dataSlice = useAppSelector(state => state.data)
     const user = useAppSelector(state => state.user)
     const {theme} = dataSlice
     const {responseState, responseType, responseMessage} = user
     const [terms, setTerms] = useState(false);
-    const [tabIndex, setTabIndex] = useState(0);
 
-    const scrollX = new Animated.Value(0)
-    let position = Animated.divide(scrollX, width)
-    const [dataList, setDataList] = useState(CommunityData)
-    const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+
+
+
 
     const [refreshing, setRefreshing] = useState(false);
     const backgroundColor = theme == 'light' ? Colors.light.background : Colors.dark.background
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
 
-
-    const updateCurrentSlideIndex = (e: { nativeEvent: { contentOffset: { x: any; }; }; }) => {
-        const contentOffsetX = e.nativeEvent.contentOffset.x;
-        const currentIndex = Math.round(contentOffsetX / width);
-        setCurrentSlideIndex(currentIndex);
-
-    };
 
 
     const [searchValue, setSearchValue] = useState('');
@@ -136,10 +131,11 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
             getPreviousPageParam: (firstPage, allPages) => firstPage.prevCursor,
         })
 
-    const handleTabsChange = useCallback((index: SetStateAction<number>) => {
-        setTabIndex(index);
+    useEffect(() => {
+        setTabIndex1(newTabIndex)
+    }, [newTabIndex]);
 
-    }, [tabIndex]);
+
     const {
         isLoading: loading,
         data: allMyCommunities,
@@ -152,6 +148,52 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
             onSuccess: (data) => {
 
             }
+        })
+
+    const {
+        isLoading:loadingPending,
+        data:pendingCommunities,
+
+        refetch:fetchPendingCommunities,
+
+
+    } = useInfiniteQuery([`getAllCommunitiesPending`], ({pageParam = 1}) => getAllCommunities.communities( 'PENDING'),
+        {
+            networkMode: 'online',
+            getNextPageParam: lastPage => {
+                if (lastPage.next !== null) {
+                    return lastPage.next;
+                }
+
+                return lastPage;
+            },
+            onSuccess: (data) => {
+                // console.log(data.pages[0].data)
+            },
+            getPreviousPageParam: (firstPage, allPages) => firstPage.prevCursor,
+        })
+
+    const {
+        isLoading:loadingDeclined,
+        data:declinedCommunities,
+
+        refetch:fetchDeclinedCommunities,
+
+
+    } = useInfiniteQuery([`getAllCommunitiesDeclined`], ({pageParam = 1}) => getAllCommunities.communities( 'DECLINED'),
+        {
+            networkMode: 'online',
+            getNextPageParam: lastPage => {
+                if (lastPage.next !== null) {
+                    return lastPage.next;
+                }
+
+                return lastPage;
+            },
+            onSuccess: (data) => {
+                // console.log(data.pages[0].data)
+            },
+            getPreviousPageParam: (firstPage, allPages) => firstPage.prevCursor,
         })
 
 
@@ -178,7 +220,7 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
         }
     }
 
-    useRefreshOnFocus(refetch)
+
 
 
     const seeCommunity = (id: string, ownerId: string, visibility: string, displayPhoto: string) => {
@@ -274,6 +316,9 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
 
 
     useRefreshOnFocus(fetchMyCommunity)
+    useRefreshOnFocus(refetch)
+    useRefreshOnFocus(fetchPendingCommunities)
+    useRefreshOnFocus(fetchDeclinedCommunities)
     return (
         <>
 
@@ -302,14 +347,7 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
                     </View>
 
                     <View style={styles.segmentWrap}>
-                       {/* <SegmentedControl tabs={["All Communities", "Followed communities", "My Communities",]}
-                                          currentIndex={tabIndex}
-                                          onChange={handleTabsChange}
-                                          segmentedControlBackgroundColor={backgroundColor}
-                                          activeSegmentBackgroundColor={Colors.primaryColor}
-                                          activeTextColor={"#fff"}
-                                          textColor={"#888888"}
-                                          paddingVertical={pixelSizeVertical(8)}/>*/}
+
                         <ScrollingButtonMenu
                             items={[
                                 {
@@ -324,7 +362,14 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
                                     id: "2",
                                     name: 'My Communities',
                                 },
-
+                                {
+                                    id: "3",
+                                    name: 'Pending',
+                                },
+                                {
+                                    id: "4",
+                                    name: 'Declined',
+                                },
                             ]}
                             containerStyle={{width:'110%',}}
                             textStyle={{
@@ -464,6 +509,33 @@ const Community = ({navigation}: RootTabScreenProps<'Community'>) => {
                                     filteredOwnCommunity.map((item) => (
                                         <CardPublicCommunity viewTheCommunity={viewTheCommunity} key={item.id}
                                                              joinModal={joinModal} theme={theme}
+                                                             item={item}/>
+                                    ))
+                                }
+
+                            </IF>
+
+                            <IF condition={tabIndex1 == '3'}>
+
+
+                                {
+                                    !loadingPending &&
+                                    pendingCommunities?.pages[0]?.data?.result.map((item) => (
+                                        <InActiveCard  key={item.id}
+                                                              theme={theme}
+                                                             item={item}/>
+                                    ))
+                                }
+
+                            </IF>
+                            <IF condition={tabIndex1 == '4'}>
+
+
+                                {
+                                    !loadingDeclined &&
+                                    declinedCommunities?.pages[0]?.data?.result.map((item) => (
+                                        <InActiveCard  key={item.id}
+                                                              theme={theme}
                                                              item={item}/>
                                     ))
                                 }

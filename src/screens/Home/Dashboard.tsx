@@ -359,7 +359,7 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
 
 
                     <View style={[styles.badgeContainer,{
-                        justifyContent: data?.pages[0]?.data?.result.length < 3 ? 'flex-start' : 'space-around',
+                        justifyContent: data && data?.pages[0]?.data?.result.length < 3 ? 'flex-start' : 'space-around',
                     }]}>
 
                         {

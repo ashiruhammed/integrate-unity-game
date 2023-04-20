@@ -97,6 +97,8 @@ export default () => {
             />
 
             <Tabs.Screen
+                initialParams={{ newTabIndex: '0' }}
+
                 name="Community"
                 component={Community}
                 options={{

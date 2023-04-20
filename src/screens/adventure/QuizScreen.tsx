@@ -103,6 +103,7 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
 
                 })
 
+                console.log("THE NEXT LESSON TO IN THE NEXT MODULE THEN PREVIOUS SCREEN")
                 console.log(data)
             }
         }
@@ -134,7 +135,7 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
         sheetFormRef.current?.close();
     }, []);
 
-//console.log(adventure)
+
 
     const {
         mutate: nextLevel,
@@ -143,7 +144,7 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
     } = useMutation(['getNextMission'], getNextAdventure, {
         onSuccess: (data) => {
 
-           // console.log(data)
+
 
             //has next lesson ? get next lesson
             //doesnt have next lesson ? get next module
@@ -157,17 +158,17 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
                         currentLessonId: data.data.nextLessonId,
 
                     })
-                  //  console.log(data)
+
                 }else if(!data.data.isLastModuleLesson){
                     //console.log("THIS IS GOING TO NEXT MODULE LESSON")
-                  // mutate(data.data.nextLessonId)
+                   mutate(data.data.nextLessonId)
                 }  else if (data.data.isLastAdventureModule){
                    // console.log("THIS IS GET THE TASK TO COMPLETE ADVENTURE")
 
                    getTask(currentLesson?.data?.moduleId)
                     if(data.data.nextModuleId == '') {
 
-                        // getTask(currentLesson?.data?.moduleId)
+                        getTask(currentLesson?.data?.moduleId)
                     }
                 }
             } else {
@@ -208,7 +209,7 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
         }
     })
 
-    const {isLoading: loadingLessons, data: lessons, mutate: fetchLessons} = useMutation(['getLessonsByModule'],
+/*    const {isLoading: loadingLessons, data: lessons, mutate: fetchLessons} = useMutation(['getLessonsByModule'],
         getLessonsByModule, {
             onSuccess:(data)=>{
                 if(data.sucess){
@@ -220,7 +221,7 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
                     console.log("++++/+/++++/+/+ NAVIGATE ++++++++++")
                 }
             }
-        })
+        })*/
 
     const {mutate: submitTaskNow, isLoading: submittingTask} = useMutation(['submitTask'], submitTask, {
         onSuccess: (data) => {
@@ -247,7 +248,8 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
     })
 
 
-
+    //console.log("<<<< ADVENTURE NEXT >>>>")
+   // console.log(adventure.id)
 
     const {mutate: submitAdventureNow, isLoading: submitting} = useMutation(['submitQuizAnswers'], submitQuizAnswers, {
         onSuccess: (data) => {
@@ -256,7 +258,7 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
                 dispatch(clearSubmissions())
                 //   setModalVisible(true)
 
-              //  console.log("ADVENTURE NEXT >>>>")
+
                 nextLevel(adventure.id)
                 dispatch(setResponse({
                     responseMessage: data.message,
