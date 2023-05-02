@@ -103,8 +103,7 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
 
                 })
 
-                console.log("THE NEXT LESSON TO IN THE NEXT MODULE THEN PREVIOUS SCREEN")
-                console.log(data)
+
             }
         }
     })

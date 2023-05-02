@@ -94,10 +94,11 @@ interface cardProps {
     },
     handleSnapPress: (id: string,userId:string) => void,
     likeComment: (id: string) => void
+    replyComment: (comment: {  }) => void
 
 }
 
-const CommentCard = ({theme, item, likeComment,handleSnapPress}: cardProps) => {
+const CommentCard = ({theme, item, likeComment,handleSnapPress,replyComment}: cardProps) => {
 
     //  const {data: likes, refetch} = useQuery(['getPostLikes'], () => getPostLike(item.id))
 
@@ -108,11 +109,14 @@ const CommentCard = ({theme, item, likeComment,handleSnapPress}: cardProps) => {
     const lightTextColor = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
     const borderColor = theme == 'light' ? Colors.borderColor : '#313131'
 
+    const reply = (item: { id?: string; content?: string; imageUrl?: ""; userId?: string; postId?: string; commentLikesCount?: 0; commentDislikesCount?: 0; commentRepliesCount?: 0; isEdited?: true; parentId?: null; liked?: boolean; isDeleted?: false; createdAt?: string; updatedAt?: string; deletedAt?: null; user?: { username: null; avatar: string; fullName: string; id: string; }; }) => {
+      replyComment(item)
+    }
 
     return (
         <Animated.View key={item.id} entering={FadeInDown} exiting={FadeOutDown}
                        layout={Layout.easing(Easing.ease).delay(20)}>
-            <Pressable style={[styles.postCard, {
+            <Pressable  style={[styles.postCard, {
                 minHeight: heightPixel(80),
 
                 borderTopColor: borderColor,
@@ -194,7 +198,7 @@ const CommentCard = ({theme, item, likeComment,handleSnapPress}: cardProps) => {
                 <View style={[styles.actionButtons, {
                     height: heightPixel(30),
                 }]}>
-                    <TouchableOpacity style={styles.actionButton}>
+                    <TouchableOpacity activeOpacity={0.6} onPress={()=>reply(item)} style={styles.actionButton}>
                         <MaterialIcons name="reply" size={20} color={"#838383"}/>
                         <Text style={styles.actionButtonText}>
                             Reply {item.commentRepliesCount} replies
@@ -244,7 +248,7 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
         navigation.goBack()
     }
     const {data, isLoading, refetch} = useQuery(['getCommunityPost'], () => getCommunityPost(postId))
-    const {mutate: getPost} = useMutation(['getCommunityPost'], getCommunityPost)
+
 
 
     const snapPoints = useMemo(() => ["1%", "30%"], []);
@@ -302,6 +306,12 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
         }
     })
 
+    const replyComment = (comment: {  })=>{
+
+        navigation.navigate('CommentScreen',{
+            comment
+        })
+    }
 
     const {
         isLoading: loadingComments,
@@ -331,17 +341,17 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
 
             if (data.success) {
                 fetchComments()
-                store.dispatch(setResponse({
+               /* store.dispatch(setResponse({
                     responseMessage: data.message,
                     responseState: true,
                     responseType: 'success',
-                }))
+                }))*/
             } else {
-                store.dispatch(setResponse({
+               /* store.dispatch(setResponse({
                     responseMessage: data.message,
                     responseState: true,
                     responseType: 'error',
-                }))
+                }))*/
             }
         }
     })
@@ -356,7 +366,7 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
                 {
                     !loadingComments ?
 
-                        <CommentCard handleSnapPress={handleSnapPress} likeComment={likeComment} theme={theme} item={item}/>
+                        <CommentCard replyComment={replyComment} handleSnapPress={handleSnapPress} likeComment={likeComment} theme={theme} item={item}/>
                         :
                         <ActivityIndicator size='small' color={Colors.primaryColor}/>
                 }
@@ -521,7 +531,7 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
     );
 
 
-    const renderFooterItem = useCallback(
+   /* const renderFooterItem = useCallback(
         ({}) => (
             <View style={styles.replyInputContainer}>
                 <View style={[styles.inputContainer, {}]}>
@@ -551,7 +561,7 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
 
         ),
         [content],
-    );
+    );*/
 
 
     const keyExtractor = useCallback((item: { id: any; }) => item.id, [],);
@@ -581,11 +591,7 @@ const PostScreen = ({navigation, route}: RootStackScreenProps<'PostScreen'>) => 
     return (
 
         <>
-            {
-                toggleMenu &&
 
-                <Drawer communityId={communityId} menuToggle={menuToggle}/>
-            }
             <SafeAreaView style={[styles.safeArea, {
                 backgroundColor
             }]}>

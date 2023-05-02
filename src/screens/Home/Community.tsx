@@ -58,7 +58,7 @@ const Community = ({navigation, route}: RootTabScreenProps<'Community'>) => {
 
     const {newTabIndex } = route.params
 
-    const [tabIndex1, setTabIndex1] = useState( '0');
+    const [tabIndex1, setTabIndex1] = useState<string>( '0');
     const dispatch = useAppDispatch()
     const dataSlice = useAppSelector(state => state.data)
     const user = useAppSelector(state => state.user)
@@ -319,6 +319,8 @@ const Community = ({navigation, route}: RootTabScreenProps<'Community'>) => {
     useRefreshOnFocus(refetch)
     useRefreshOnFocus(fetchPendingCommunities)
     useRefreshOnFocus(fetchDeclinedCommunities)
+
+
     return (
         <>
 
@@ -349,6 +351,7 @@ const Community = ({navigation, route}: RootTabScreenProps<'Community'>) => {
                     <View style={styles.segmentWrap}>
 
                         <ScrollingButtonMenu
+
                             items={[
                                 {
                                     id: "0",

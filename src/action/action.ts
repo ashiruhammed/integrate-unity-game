@@ -1856,7 +1856,7 @@ export const getCommunityPosts = {
             method: 'GET',
             headers: myHeaders,
         };
-
+      //  https://api.gatewayapp.co/post/comment/replies/de9314a5-0507-43b3-987b-30ee30526942
 
         return Promise.race([
             fetch(`${BASE_URL}/post/community/${id}`, requestOptions)
@@ -1907,7 +1907,76 @@ export const getPostComments = {
     }
 }
 
+export const getCommentReplies = {
+    comments: async (pageParam: string, id: string) => {
 
+        let Token = await SecureStore.getItemAsync('Gateway-Token');
+
+        const myHeaders = {
+            'x-access-token': ACCESS_TOKEN,
+            'x-client-type': 'web',
+            'Authorization': `Bearer ${Token}`
+        }
+        let timeoutId: NodeJS.Timeout
+
+
+        const requestOptions = {
+            method: 'GET',
+            headers: myHeaders,
+        };
+
+
+        return Promise.race([
+            fetch(`${BASE_URL}/post/comment/replies/${id}`, requestOptions)
+                .then(response => response.json()),
+            new Promise((resolve, reject) => {
+                timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+                //  clearTimeout(timeoutId)
+            }).then(() => {
+                clearTimeout(timeoutId)
+            })
+
+        ])
+    }
+}
+
+
+export const replyToComment = async (body:any) => {
+
+    let Token = await SecureStore.getItemAsync('Gateway-Token');
+
+    const myHeaders = {
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${Token}`
+    }
+    let timeoutId: NodeJS.Timeout
+ /*   content:"yea"
+    parentId:"a7f152f3-3c1b-4ff8-92d9-a5311c6b5a0e"
+    postId:"9c065ab3-f150-4693-9c9a-9d64af8a1213"*/
+
+    const requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body
+    };
+
+
+    return Promise.race([
+        fetch(`${BASE_URL}/post/comment`, requestOptions)
+            .then(response => response.json()),
+        new Promise((resolve, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+            //  clearTimeout(timeoutId)
+        }).then(() => {
+            clearTimeout(timeoutId)
+        })
+
+    ])
+}
 export const commentOnAPost = async (body: any) => {
 
     let Token = await SecureStore.getItemAsync('Gateway-Token');

@@ -235,7 +235,7 @@ const Profile = ({navigation}: RootTabScreenProps<'Profile'>) => {
                             <Text style={[styles.boardText, {
                                 color: textColor,
                             }]}>
-                                Total points
+                                Total Accrued points
                             </Text>
                             <View style={[styles.board, {
                                 backgroundColor

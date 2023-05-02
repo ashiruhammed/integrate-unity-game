@@ -6,10 +6,7 @@
 import {BottomTabScreenProps} from '@react-navigation/bottom-tabs';
 import {CompositeScreenProps, NavigatorScreenParams} from '@react-navigation/native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import GroupSettings from "./src/screens/communities/GroupSettings";
-import LeaveCommunity from "./src/screens/communities/LeaveCommunity";
-import CommentOnPost from "./src/screens/communities/components/CommentOnPost";
-import RequestsScreen from "./src/screens/communities/RequestsScreen";
+
 
 declare global {
     namespace ReactNavigation {
@@ -34,7 +31,7 @@ export type RootStackParamList = {
     OnBoardingScreen: undefined;
     CreateCommunity: undefined;
     ConfirmPhonenumber: {
-        phone:string
+        phone: string
     }
 
     AdventureHome: undefined;
@@ -83,7 +80,7 @@ export type RootStackParamList = {
         }
     }
 
-      MakeAPost: {
+    MakeAPost: {
         id: string,
 
     };
@@ -96,7 +93,42 @@ export type RootStackParamList = {
     FlagPost: {
         postId: string
     }
-    BlockedUsers:undefined
+    BlockedUsers: undefined
+    CommentScreen: {
+        comment: {
+            "commentDislikesCount": number,
+            "commentLikesCount": number,
+            "commentRepliesCount": number,
+            "content": string,
+            "createdAt": string,
+            "deletedAt": null,
+            "id": string,
+            "imageUrl": null,
+            "isDeleted": boolean,
+            "isEdited": boolean,
+            "liked": boolean,
+            "parentId": string,
+            "postId": string,
+            "updatedAt": string,
+            "user": {
+                "avatar": string,
+                "fullName": string,
+                "id": string,
+                "username": string,
+            },
+            "userId": string,
+        }
+    }
+    CommentOnPost: {
+        id: string,
+        post: {}
+    },
+    ReplyComment: {
+        id: string,
+        parentId: string,
+        post: {},
+    },
+
     NotFound: undefined;
 };
 
@@ -117,7 +149,6 @@ export type AuthStackParamList = {
     ForgotPassword: undefined;
 
 
-
 };
 
 export type CommunityStackParamList = {
@@ -129,12 +160,9 @@ export type CommunityStackParamList = {
     }
 
 
-    CommentOnPost: {
-        id: string,
-        post: {}
-    },
 
-    ViewCommunity:undefined
+
+    ViewCommunity: undefined
 
     Followers: {
         id: string
@@ -151,7 +179,6 @@ export type AuthStackScreenProps<Screen extends keyof AuthStackParamList> = Nati
 export type CommunityStackScreenProps<Screen extends keyof CommunityStackParamList> = NativeStackScreenProps<CommunityStackParamList, Screen>;
 
 
-
 export type RootStackScreenProps<Screen extends keyof RootStackParamList> = NativeStackScreenProps<RootStackParamList,
     Screen>;
 
@@ -159,7 +186,7 @@ export type RootTabParamList = {
     Home: undefined;
     Adventures: undefined;
     Community: {
-        newTabIndex:string
+        newTabIndex: string
     };
     MarketPlace: undefined;
     Profile: undefined;

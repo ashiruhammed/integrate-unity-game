@@ -36,7 +36,7 @@ const EmailConfirm = ({route, navigation}: AuthStackScreenProps<'EmailConfirm'>)
     const queryClient = useQueryClient();
     const {email} = route.params
     const [countDown, setCountDown] = useState(0);
-    const [counter, setCounter] = React.useState(10);
+    const [counter, setCounter] = useState(10);
     const user = useAppSelector(state => state.user)
     const {responseMessage, responseType, responseState} = user
 

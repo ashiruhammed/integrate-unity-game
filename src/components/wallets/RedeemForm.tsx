@@ -41,7 +41,8 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance, nearBalance}: props) =>
 
 
     const [convertedPoints, setConvertedPoints] = useState('');
-
+    const [defaultPointsConvertValue, setDefaultPointsConvertValue] = useState('');
+    const [pointsVal, setPointsVal] = useState('');
 
     const dataSlice = useAppSelector(state => state.data)
     const {theme} = dataSlice
@@ -83,17 +84,19 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance, nearBalance}: props) =>
         }
     });
 
-    let defaultPointsConvertValue = '0'
-    let pointsVal = '0'
+   // let defaultPointsConvertValue = '0'
+  //  let pointsVal = '0'
     useEffect(() => {
         if (data && data?.success) {
-            pointsVal = `${data?.data[0]?.value} ${data?.data[0]?.token}`
-            defaultPointsConvertValue = `${data?.data[0]?.value * +points}`
+           setPointsVal(`${data?.data[1]?.value} ${data?.data[1]?.token}`)
+            //defaultPointsConvertValue =
+
+            setDefaultPointsConvertValue(`${data?.data[1]?.value * +points}`)
         } else {
-            defaultPointsConvertValue = '0'
-            pointsVal = '0'
+            setDefaultPointsConvertValue('0')
+            setPointsVal('0')
         }
-    }, [data]);
+    }, [data,points]);
 
 
     const maxAmount = () => {

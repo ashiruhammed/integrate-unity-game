@@ -47,15 +47,26 @@ import Constants from "expo-constants";
 import {CardProps} from "react-native-elements";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
 import {FlashList} from "@shopify/flash-list";
-import {truncate, useRefreshOnFocus} from "../../helpers";
+import {numberWithCommas, truncate, useRefreshOnFocus} from "../../helpers";
 import Drawer from "./components/Drawer";
 import Toast from "../../components/Toast";
 import dayjs from "dayjs";
+import advanced from  "dayjs/plugin/advancedFormat"
 import {Video} from "expo-av";
 import {store} from "../../app/store";
 import {
     BottomSheetDefaultBackdropProps
 } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
+
+
+var utc = require("dayjs/plugin/utc")
+var timezone = require("dayjs/plugin/timezone")
+
+
+dayjs.extend(timezone)
+dayjs.extend(utc)
+dayjs.extend(advanced)
+//console.log(dayjs.tz.guess())
 
 
 const fullHeight = Dimensions.get('window').height
@@ -64,6 +75,7 @@ const fullHeight = Dimensions.get('window').height
 const isRunningInExpoGo = Constants.appOwnership === 'expo'
 
 interface cardProps {
+    likePost:(id:string)=>void
     theme: 'light' | 'dark',
     item: {
         "id": string,
@@ -93,27 +105,11 @@ interface cardProps {
 
 }
 
-const PostCard = ({theme, item, viewPost, commentOnPost, handleSnapPress, sheetIndex}: cardProps) => {
+const PostCard = ({theme, item, viewPost, commentOnPost, handleSnapPress,likePost, sheetIndex}: cardProps) => {
 
+//console.log(item.createdAt)
     const {data: likes, refetch} = useQuery(['getPostLikes'], () => getPostLike(item.id))
-    const {mutate} = useMutation(['likeAPost'], likeAPost, {
-        onSuccess: (data) => {
 
-            if (data.success) {
-                store.dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'succss',
-                }))
-            } else {
-                store.dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'error',
-                }))
-            }
-        }
-    })
 
     const backgroundColorCard = theme == 'light' ? '#fff' : Colors.dark.disable
     const backgroundColor = theme == 'light' ? "#EDEDED" : Colors.dark.background
@@ -178,8 +174,8 @@ const PostCard = ({theme, item, viewPost, commentOnPost, handleSnapPress, sheetI
                         </View>
 
                         <Text style={styles.postDate}>
-
-                            {dayjs(item.createdAt).format('DD MMM YYYY')}
+                            {dayjs(item.createdAt).utc().format('DD MMM YYYY')}
+                          {/*  {dayjs.tz(item.createdAt,"Africa/Lagos").format('DD MMM YYYY')}*/}
                         </Text>
                     </View>
 
@@ -244,7 +240,7 @@ const PostCard = ({theme, item, viewPost, commentOnPost, handleSnapPress, sheetI
                     </View>
                 }
                 <View style={styles.actionButtons}>
-                    <TouchableOpacity activeOpacity={0.9} onPress={() => mutate(item.id)} style={styles.actionButton}>
+                    <TouchableOpacity activeOpacity={0.1} onPress={() => likePost(item.id)} style={styles.actionButton}>
 
                         {
                             !item.liked ? <AntDesign name="like2" size={20} color={"#838383"}/>
@@ -256,7 +252,7 @@ const PostCard = ({theme, item, viewPost, commentOnPost, handleSnapPress, sheetI
                         </Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity activeOpacity={0.9} onPress={() => commentOnPost(item.id, item)}
+                    <TouchableOpacity activeOpacity={0.7} onPress={() => commentOnPost(item.id, item)}
                                       style={styles.actionButton}>
 
                         <Octicons name="comment" size={20} color="#838383"/>
@@ -357,7 +353,8 @@ const ViewCommunity = ({navigation, route}: CommunityStackScreenProps<'ViewCommu
         navigation.navigate('PostScreen', {
             postId,
             communityId: currentCommunityId,
-            post
+            post,
+
         })
 
     }
@@ -376,10 +373,30 @@ const ViewCommunity = ({navigation, route}: CommunityStackScreenProps<'ViewCommu
         ),
         []
     );
+    const {mutate:likePost} = useMutation(['likeAPost'], likeAPost, {
+        onSuccess: (data) => {
+
+            if (data.success) {
+                fetchPosts()
+                /* store.dispatch(setResponse({
+                     responseMessage: data.message,
+                     responseState: true,
+                     responseType: 'success',
+                 }))*/
+            } else {
+                /* store.dispatch(setResponse({
+                     responseMessage: data.message,
+                     responseState: true,
+                     responseType: 'error',
+                 }))*/
+            }
+        }
+    })
+
 
     const renderItem = useCallback(
         ({item}) => (
-            <PostCard sheetIndex={sheetIndex} handleSnapPress={handleSnapPress} commentOnPost={commentOnPost}
+            <PostCard likePost={likePost} sheetIndex={sheetIndex} handleSnapPress={handleSnapPress} commentOnPost={commentOnPost}
                       myId={user?.userData?.id} viewPost={viewPost} theme={theme}
                       item={item}/>
         ),
@@ -450,7 +467,7 @@ const ViewCommunity = ({navigation, route}: CommunityStackScreenProps<'ViewCommu
                                 <Text style={[styles.statsText, {
                                     color: textColor
                                 }]}>
-                                    4 followed
+                                    { data?.data?.spaceLeft && numberWithCommas(data?.data?.spaceLeft)} Space Left
                                 </Text>
                             </View>
                         </View>
@@ -569,7 +586,7 @@ const ViewCommunity = ({navigation, route}: CommunityStackScreenProps<'ViewCommu
         };
     }, [responseState, responseMessage])
 
-
+console.log(posts?.pages[0])
     return (
         <>
             <SafeAreaView style={[styles.safeArea, {}]}>

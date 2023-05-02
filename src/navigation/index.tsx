@@ -63,6 +63,8 @@ import DeleteAccount from "../screens/profile/DeleteAccount";
 import BlockUser from "../screens/communities/components/BlockUser";
 import FlagPost from "../screens/communities/components/FlagPost";
 import BlockedUsers from "../screens/profile/BlockedUsers";
+import CommentScreen from "../screens/communities/CommentScreen";
+import ReplyComment from "../screens/communities/seeAll/ReplyComment";
 
 const styles = StyleSheet.create({
     displayPhoto: {
@@ -306,6 +308,12 @@ function RootNavigator() {
                         <Stack.Screen name="MakeAPost" options={{
                             animation: 'slide_from_bottom'
                         }} component={MakeAPost}/>
+                        <Stack.Screen name="ReplyComment" options={{
+                            animation: 'slide_from_bottom'
+                        }} component={ReplyComment}/>
+                        <Stack.Screen name="CommentScreen" options={{
+                            animation: 'slide_from_right'
+                        }} component={CommentScreen}/>
                         <Stack.Screen name="BlockUser" options={{
                             animation: 'slide_from_bottom'
                         }} component={BlockUser}/>

@@ -159,6 +159,7 @@ const styles = StyleSheet.create({
 
     },
     input: {
+
         fontSize: fontPixel(14),
 paddingTop:10,
         fontFamily:Fonts.quickSandBold,
