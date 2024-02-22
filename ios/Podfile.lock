@@ -31,6 +31,8 @@ PODS:
     - React-Core
   - ExpoAppleAuthentication (6.3.0):
     - ExpoModulesCore
+  - ExpoBlur (12.9.2):
+    - ExpoModulesCore
   - ExpoClipboard (5.0.1):
     - ExpoModulesCore
   - ExpoCrypto (12.8.1):
@@ -1375,6 +1377,7 @@ DEPENDENCIES:
   - Expo (from `../node_modules/expo`)
   - ExpoAdapterFBSDKNext (from `../node_modules/react-native-fbsdk-next/ios`)
   - ExpoAppleAuthentication (from `../node_modules/expo-apple-authentication/ios`)
+  - ExpoBlur (from `../node_modules/expo-blur/ios`)
   - ExpoClipboard (from `../node_modules/expo-clipboard/ios`)
   - ExpoCrypto (from `../node_modules/expo-crypto/ios`)
   - ExpoDevice (from `../node_modules/expo-device/ios`)
@@ -1523,6 +1526,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-fbsdk-next/ios"
   ExpoAppleAuthentication:
     :path: "../node_modules/expo-apple-authentication/ios"
+  ExpoBlur:
+    :path: "../node_modules/expo-blur/ios"
   ExpoClipboard:
     :path: "../node_modules/expo-clipboard/ios"
   ExpoCrypto:
@@ -1701,6 +1706,7 @@ SPEC CHECKSUMS:
   Expo: 1cf3922a9b26262b2556544d4defcecccd37d033
   ExpoAdapterFBSDKNext: cb13ee1823c70383d17a82e7e2385053fa917d01
   ExpoAppleAuthentication: 4fc9972356977f009911f2f3a5f56319c2a5b11b
+  ExpoBlur: e832d874bd94afc0645daddbd3162ec1ce172080
   ExpoClipboard: b597982124f067ff9f5b89093eb3d97898d5d877
   ExpoCrypto: b6428f48599c007676dc81a9b5f72c07e62fdccc
   ExpoDevice: d204395e17fffdcefa7470bdef33b07719ac41b1

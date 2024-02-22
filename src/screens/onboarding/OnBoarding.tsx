@@ -15,31 +15,32 @@ const slides = [
         id: '1',
         imagePath: require('../../assets/images/onboarding/gatewaymascot.png'),
         title: 'Hey, Friend',
-        description: 'Welcome to gateway, a fun & free place to learn about crypto & blockchain',
+        description: 'Welcome to Gateway! A NFT-powered gaming and learning app',
     },
+
     {
         id: '2',
-        imagePath: require('../../assets/images/onboarding/Adventures.png'),
-        title: 'Adventures',
-        description: 'Pick an adventure to learn with relatable stories. Take your missions, complete your quiz and tasks for an enjoyable experience',
+        imagePath: require('../../assets/images/onboarding/progressbar.png'),
+        title: 'Games',
+        description: 'Play various genre of games in story mode and real time multiplayer with your friendsE',
     },
     {
         id: '3',
-        imagePath: require('../../assets/images/onboarding/progressbar.png'),
-        title: 'Progress Bar',
-        description: 'Build your gateway character to unlock exclusive rewards by participating in adventures, communities and marketplace',
+        imagePath: require('../../assets/images/onboarding/Adventures.png'),
+        title: 'Learning',
+        description: 'Take learning adventures to learn about blockchain with relatable stories. Leverage our AI to create learning adventures about anything',
     },
     {
         id: '4',
         imagePath: require('../../assets/images/onboarding/Community.png'),
-        title: 'Community',
-        description: 'Join your tribe of fellow learners in communities of shared interests to build connections and unlock more rewards',
+        title: 'Discover',
+        description: 'Explore web3 apps in our curated store to find useful products for your daily lives',
     },
     {
         id: '5',
         imagePath: require('../../assets/images/onboarding/Rewards.png'),
         title: 'Rewards',
-        description: 'Earn rewards in points, crypto, badges and \n NFTs for completing adventures and other activities on the app',
+        description: 'Earn rewards in points, tokens, badges and NFTs for doing things you love. Gaming, Learning and lots more on the app',
     },
 ];
 

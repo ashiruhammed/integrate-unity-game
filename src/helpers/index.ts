@@ -146,6 +146,13 @@ export function isLessThan24HourAgo(date: number) {
     return date > twentyFourHoursAgo && date <= Date.now();
 }
 
+export const wait = (timeout: number) => {
+    return new Promise((resolve) => {
+        setTimeout(resolve, timeout);
+    });
+};
+
+
 
 export function titleCase(str) {
     var splitStr = str.toLowerCase().split(' ');

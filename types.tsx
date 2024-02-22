@@ -6,6 +6,7 @@
 import {BottomTabScreenProps} from '@react-navigation/bottom-tabs';
 import {CompositeScreenProps, NavigatorScreenParams} from '@react-navigation/native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import Games from "./src/screens/Home/Games";
 
 
 declare global {
@@ -184,10 +185,11 @@ export type RootStackScreenProps<Screen extends keyof RootStackParamList> = Nati
 
 export type RootTabParamList = {
     Home: undefined;
-    Adventures: undefined;
-    Community: {
-        newTabIndex: string
-    };
+   // Adventures: undefined;
+    Learn: undefined;
+    Games: undefined;
+
+    Wallet: undefined;
     MarketPlace: undefined;
     Profile: undefined;
 };

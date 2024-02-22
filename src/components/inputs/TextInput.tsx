@@ -151,8 +151,8 @@ const BottomSheetInput: FC<Props> = ({
                     &&
                     <TouchableOpacity onPress={action} style={styles.passBtn}>
                         {
-                            passState ? <Ionicons name="md-eye" size={18} color="#C4C4C4"/>
-                                : <Ionicons name="md-eye-off" size={18} color="#C4C4C4"/>
+                            passState ? <Ionicons name="eye" size={18} color="#C4C4C4"/>
+                                : <Ionicons name="eye-off" size={18} color="#C4C4C4"/>
                         }
 
                     </TouchableOpacity>

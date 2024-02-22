@@ -1,77 +1,209 @@
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useState} from 'react';
 
 import {
     Text,
     View,
     StyleSheet,
     Platform,
+    RefreshControl,
     ScrollView,
-    ImageBackground,
     TouchableOpacity,
-    Image,
-    ActivityIndicator, Pressable, RefreshControl
+    ImageBackground, Pressable, Image, FlatList
 } from 'react-native';
 import {SafeAreaView} from "react-native-safe-area-context";
-import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
-import {AntDesign, Ionicons, Octicons} from "@expo/vector-icons";
 import Colors from "../../constants/Colors";
-import FruitIcon from "../../assets/images/svg/FruitIcon";
-import WarmIcon from "../../assets/images/svg/WarmIcon";
-import {Fonts} from "../../constants/Fonts";
-import {useAppDispatch, useAppSelector} from "../../app/hooks";
-import {useInfiniteQuery, useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
-import {
-    getAllAdventure,
-    getBadges,
-    getUser,
-    requestPhoneVerification,
-    updatePhoneNumberVerify,
-    verifyPhone
-} from "../../action/action";
-import Animated, {Easing, FadeInDown, FadeInUp, FadeOutDown, Layout} from "react-native-reanimated";
-import {setResponse, unSetResponse, updateUserInfo} from "../../app/slices/userSlice";
-import FastImage from 'react-native-fast-image';
-import Constants from "expo-constants";
-import {setAdventure} from "../../app/slices/dataSlice";
 import {RootTabScreenProps} from "../../../types";
-import {useRefreshOnFocus} from "../../helpers";
-import Toast from "../../components/Toast";
-import {RectButton} from "../../components/RectButton";
-import BottomSheet, {BottomSheetBackdrop, BottomSheetModal, BottomSheetModalProvider} from "@gorhom/bottom-sheet";
-import {
-    BottomSheetDefaultBackdropProps
-} from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
-import {Portal} from "@gorhom/portal";
-import PhoneInputText from "../../components/inputs/PhoneInputText";
-import {useFormik} from "formik";
-import * as yup from "yup";
-import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
+import {useAppDispatch, useAppSelector} from "../../app/hooks";
+import {useInfiniteQuery, useQueryClient} from "@tanstack/react-query";
+import {wait} from "../../helpers";
+import {Ionicons, Octicons} from "@expo/vector-icons";
+import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
+import {userNotifications} from "../../action/action";
+import {Fonts} from "../../constants/Fonts";
+
+import GameIconLarge from "../../assets/images/svg/GameIconLarge";
+import {FlatListExtra} from "../../components/flatlist-extra";
+import {BlurView} from "expo-blur";
 
 
-const formSchema = yup.object().shape({
-    phoneNumber: yup.string().required('Phone number is required').min(10, 'Please enter a valid phone number'),
-});
+const users = [
+    {
+        id: '1',
+        image: 'https://images.pexels.com/photos/773371/pexels-photo-773371.jpeg?auto=compress&cs=tinysrgb&w=800'
+    },
+    {
+        id: '2',
+        image: "https://images.pexels.com/photos/3394335/pexels-photo-3394335.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+    },
+    {
+        id: '3',
+        image: "https://images.pexels.com/photos/428333/pexels-photo-428333.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+    },
+    {
+        id: '4',
+        image: "https://images.pexels.com/photos/3626313/pexels-photo-3626313.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+    },
+    {
+        id: '5',
+        image: "https://images.pexels.com/photos/1832959/pexels-photo-1832959.jpeg?auto=compress&cs=tinysrgb&w=800"
+    },
+    {
+        id: '6',
+        image: "https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+    },
+    {
+        id: '7',
+        image: "https://images.pexels.com/photos/3674249/pexels-photo-3674249.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+    },
+    {
+        id: '8',
+        image: "https://images.pexels.com/photos/11805711/pexels-photo-11805711.jpeg?auto=compress&cs=tinysrgb&w=800&lazy=load"
+    },
+];
 
 
-const wait = (timeout: number) => {
-    return new Promise((resolve) => {
-        setTimeout(resolve, timeout);
-    });
-};
+const Games = [{
+    gameImage: "https://images.pexels.com/photos/2708981/pexels-photo-2708981.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+    id:'1',
+    name:"It takes two",
+    category:"Multiplayer"
+},{
+    gameImage: "https://images.pexels.com/photos/6080928/pexels-photo-6080928.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+    id:'2',
+    name:"Fortnite",
+    category:"Single-player"
+}]
+
+const Achievements = [
+    {
+        title: 'Games',
+        subText: '200 Played',
+        id: '1',
+        bg: '#FFE8EC',
+        color: Colors.primaryColor
+    }, {
+        title: 'Learn',
+        subText: '60 Courses Completed',
+        id: '2',
+        bg: "#ECFFEE",
+        color: '#22BB33'
+    }, {
+        title: 'Products',
+        subText: '9,000 Products',
+        id: '3',
+        bg: '#FFF1EB',
+        color: '#FFAA88'
+    }, {
+        title: 'Highest Streak',
+        subText: '600 Daily Streaks',
+        id: '4',
+        bg: '#F0F3FF',
+        color: '#325AE8'
+    },
+]
+
+interface AchievementsProps {
+    item: {
+        title: string,
+        subText: string,
+        bg: string,
+        color: string,
+
+
+    }
+
+}
+
+interface gameProps {
+    item:{
+        gameImage:string,
+        name:string,
+        category:string
+    }
+}
 
 interface props {
-    badge: {
-        imageUrl: string,
-        "nftCollection": {
-            "seriesId": string,
-        },
-        "title": string,
-    },
-    badgeId: string
+    item: {
+        image: string
+    }
+}
+
+const FriendItem = ({item}: props) => {
+
+    return (
+        <Pressable style={styles.friendsOnlineCard}>
+            <View style={styles.dotOnline}/>
+            <Image source={{uri: item.image}} style={styles.friendsOnlineCardImage}/>
+        </Pressable>
+    )
+}
+const GameItem = ({item}: gameProps) => {
+
+    return (
+        <Pressable style={styles.gameCard}>
+            <ImageBackground resizeMode={'cover'} resizeMethod={'scale'} style={styles.gameCardImage}
+                             source={{uri:item.gameImage}}>
+
+                <View style={styles.gameCardBottom}>
+                    <BlurView intensity={40} tint="light" style={[styles.blurContainer, {
+                        backgroundColor: '#4F4F4F40',
+
+                    },
+                    ]}>
+                        <View style={styles.bodyWrap}>
+                            <Text style={styles.bottomTxt}>
+                                {item.name}
+                            </Text>
+
+                            <Text style={styles.bottomSubTxt}>
+                                <Octicons name="people" size={12} color="#CCCCCC"/>    {item.category}
+                            </Text>
+                        </View>
+
+
+                    </BlurView>
+
+                </View>
+            </ImageBackground>
+        </Pressable>
+    )
 }
 
 
+const AchievementsItem = ({item}: AchievementsProps) => {
+    const dataSlice = useAppSelector(state => state.data)
+    const {theme} = dataSlice
+    const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
+    return (
+        <Pressable style={[styles.achievementsCard, {
+            backgroundColor: item.bg
+        }]}>
+
+
+            <View style={styles.achievementsCardLeft}>
+                <Text style={[styles.achievementsCardTitle, {
+                    color: textColor
+                }]}>
+                    {item.title}
+                </Text>
+                <Text style={[styles.achievementsCardSubText, {
+                    color: item.color
+                }]}>
+                    {item.subText}
+                </Text>
+            </View>
+
+            <View style={styles.iconWrap}>
+
+                <GameIconLarge/>
+            </View>
+
+        </Pressable>
+    )
+}
+
 const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
+
 
     const dispatch = useAppDispatch()
     const queryClient = useQueryClient();
@@ -80,137 +212,28 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
     const dataSlice = useAppSelector(state => state.data)
     const {theme} = dataSlice
 
-    const [countryCode, setCountryCode] = useState('');
-    const [phoneNumber, setPhoneNumber] = useState('');
-
     const [refreshing, setRefreshing] = useState(false);
-
-    const backgroundColor = theme == 'light' ? "#FEF1F1" : "#141414"
+    const backgroundColor = theme == 'light' ? "#FFFFFF" : "#141414"
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
     const lightText = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
 
-    // ref
-    const bottomSheetRef = useRef<BottomSheet>(null);
-    // variables
-    const snapPoints = useMemo(() => ['1%', '65%'], []);
-    const handleClosePress = () => {
-        bottomSheetRef.current?.close()
+    const refresh = () => {
+        setRefreshing(true)
+        //refetch()
+
+        wait(2000).then(() => setRefreshing(false));
     }
-    const openSheet = () => {
-        bottomSheetRef.current?.snapToIndex(1)
+
+    const openNotifications = () => {
+        navigation.navigate('Notifications')
     }
-    const renderBackdrop = useCallback(
-        (props: JSX.IntrinsicAttributes & BottomSheetDefaultBackdropProps) => (
-            <BottomSheetBackdrop
-                {...props}
-                disappearsOnIndex={0}
-                appearsOnIndex={1}
-            />
-        ),
-        []
-    );
-
-
-    const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-
-    // variables
-    const modalSnapPoints = useMemo(() => ['1%', '25%'], []);
-
-    // callbacks
-    const handlePresentModalPress = useCallback(() => {
-        bottomSheetModalRef.current?.present();
-    }, []);
-    const handleClosetModal = useCallback(() => {
-        bottomSheetModalRef.current?.close();
-    }, []);
-
 
     const {
-        isLoading: loading,
-        mutate: requestCodeNow
-    } = useMutation(['updatePhoneNumberVerify'], updatePhoneNumberVerify, {
-        onSuccess: (data) => {
+        data: notifications,
 
-            if (data.success) {
-                dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'success',
-                }))
-                handleClosePress()
-                navigation.navigate('ConfirmPhonenumber', {
-                    phone: phoneNumber
-                })
-            } else {
-                handleClosePress()
-                dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'error',
-                }))
-            }
-        },
-        onSettled: () => {
-            queryClient.invalidateQueries(['updatePhoneNumberVerify']);
-        }
-    })
-
-
-    const {
-        resetForm,
-        handleChange, handleSubmit, handleBlur,
-        setFieldValue,
-        isSubmitting,
-        setSubmitting,
-        values,
-        errors,
-        touched,
-        isValid
-    } = useFormik({
-        validationSchema: formSchema,
-        initialValues: {
-
-            phoneNumber: '',
-
-
-        },
-        onSubmit: (values) => {
-            const {phoneNumber} = values;
-
-            const body = JSON.stringify({
-                phone: phoneNumber,
-                countryCode
-
-            })
-//console.log(body)
-            requestCodeNow(body)
-        }
-    });
-
-    const {isLoading: loadingUser, refetch: fetchUser} = useQuery(['user-data'], getUser, {
-        onSuccess: (data) => {
-            if (data.success) {
-
-                dispatch(updateUserInfo(data.data))
-
-            }
-        },
-    })
-
-
-    const {
-        isLoading,
-        data,
-        hasNextPage,
-        fetchNextPage: fetchNextPageWallet,
-        isFetchingNextPage,
-        refetch,
-
-        isRefetching
-    } = useInfiniteQuery([`getAllAdventure`], ({pageParam = 1}) => getAllAdventure.adventures(pageParam),
+    } = useInfiniteQuery([`notifications`], ({pageParam = 1}) => userNotifications.notifications({pageParam}),
         {
             networkMode: 'online',
-            refetchOnWindowFocus: true,
 
             getNextPageParam: lastPage => {
                 if (lastPage.next !== null) {
@@ -220,326 +243,182 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
                 return lastPage;
             },
             getPreviousPageParam: (firstPage, allPages) => firstPage.prevCursor,
+
         })
 
+    const keyExtractor = useCallback((item: { id: any; }) => item.id, [],)
 
-    const goToAdventure = (adventure: {}) => {
-        dispatch(setAdventure({adventure}))
-        navigation.navigate('AdventureHome')
-
-    }
-    const refresh = () => {
-        setRefreshing(true)
-        refetch()
-
-        wait(2000).then(() => setRefreshing(false));
-    }
-
-
-    const verifyPhoneNumber = () => {
-        if (userData?.phone) {
-            const body = JSON.stringify({
-                phone: userData?.phone,
-                countryCode: userData?.countryCode,
-            })
-            requestCodeNow(body)
-
-        } else {
-            openSheet()
-        }
-    }
-
-
-    useEffect(() => {
-        // console.log(user)
-        let time: NodeJS.Timeout | undefined;
-        if (responseState || responseMessage) {
-
-            time = setTimeout(() => {
-                dispatch(unSetResponse())
-            }, 3000)
-
-        }
-        return () => {
-            clearTimeout(time)
-        };
-    }, [responseState, responseMessage])
-
-    useRefreshOnFocus(fetchUser)
+    const renderItem = useCallback(
+        ({item}) => <FriendItem item={item}/>,
+        [],
+    );  const renderItemGame = useCallback(
+        ({item}) => <GameItem item={item}/>,
+        [],
+    );
+    const renderAchievementsItem = useCallback(
+        ({item}) => <AchievementsItem item={item}/>,
+        [],
+    );
 
     return (
-        <>
-
-            <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
-                <Toast message={responseMessage} state={responseState} type={responseType}/>
-                <ScrollView
-                    refreshControl={<RefreshControl tintColor={Colors.primaryColor}
-                                                    refreshing={refreshing} onRefresh={refresh}/>}
-                    style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {
-                    backgroundColor
-                }]} scrollEnabled
-                    showsVerticalScrollIndicator={false}>
-                    <View style={[styles.topDashboard, {
-                        backgroundColor: theme == 'dark' ? backgroundColor : "#fff"
-                    }]}>
+        <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
+            <ScrollView
+                refreshControl={<RefreshControl tintColor={Colors.primaryColor}
+                                                refreshing={refreshing} onRefresh={refresh}/>}
+                style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {
+                backgroundColor
+            }]} scrollEnabled
+                showsVerticalScrollIndicator={false}>
 
 
-                        {/*   */}
-                        <Animated.View key={userData?.fullName} entering={FadeInUp} exiting={FadeOutDown}
-                                       layout={Layout.easing(Easing.bounce).delay(20)} style={styles.userImage}>
+                <View style={styles.topBar}>
 
-                            <View style={styles.profileImage}>
+                    <View style={styles.leftButton}>
 
-                                <FastImage
-                                    style={styles.Image}
-                                    source={{
-                                        uri: !user.userData?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : user.userData?.avatar,
-
-                                        cache: FastImage.cacheControl.web,
-                                        priority: FastImage.priority.normal,
-                                    }}
-                                    resizeMode={FastImage.resizeMode.cover}
-                                />
-
-
-                            </View>
-
-                        </Animated.View>
-
-
-                        <View style={[styles.fullNameWrap, {
-                            height: userData?.username ? heightPixel(80) : heightPixel(50),
-                        }]}>
-                            <Text style={[styles.fullName, {
-                                color: textColor
-                            }]}>
-                                {userData?.fullName}
-                            </Text>
-                            <Text style={[styles.subTitle, {
-                                color: textColor
-                            }]}>
-                                {userData?.username && `@${userData?.username}`}
-                            </Text>
+                        <View style={styles.pointWrap}>
+                            <Ionicons name="gift" size={16} color="#22BB33"/>
+                            <Text style={styles.pointsText}>20000</Text>
                         </View>
-
-                        <View style={styles.progressBarContainer}>
-                            <FruitIcon/>
-                            <View style={styles.progressBar}>
-                                <View style={styles.Bar}/>
-
-                            </View>
-                            <WarmIcon/>
-                        </View>
-
-                        <Text onPress={handlePresentModalPress} style={[styles.learnMore, {
-                            color: lightText
-                        }]}>
-                            Learn more <AntDesign name="questioncircle" size={14} color={lightText}/>
-                        </Text>
                     </View>
 
-
-                    {
-                        !user?.userData?.phoneNumberVerified &&
-
-                        <TouchableOpacity onPress={verifyPhoneNumber} style={[styles.verifyCard, {
-
-                            backgroundColor: theme == 'light' ? "#fff" : Colors.dark.tFareBtn
-                        }]}>
-                            <Text style={[styles.verifyText, {
-                                color: textColor
-                            }]}>
-                                👋 Please Verify your phone number
-                            </Text>
-                            <TouchableOpacity activeOpacity={0.6} style={styles.chevronGreen}>
-                                <Ionicons name="warning-outline" size={14} color={Colors.primaryColor}/>
-                            </TouchableOpacity>
+                    <View style={styles.rightButton}>
+                        <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}
+                                          style={styles.roundTopBtn}>
+                            {
+                                notifications?.pages[0]?.data?.result.length > 0 &&
+                                <View style={styles.dot}/>
+                            }
+                            <Octicons name="bell-fill" size={22} color={"#000"}/>
                         </TouchableOpacity>
-                    }
 
-
-                    <View style={[styles.badgeContainer,{
-                        justifyContent: data && data?.pages[0]?.data?.result.length < 3 ? 'flex-start' : 'space-around',
-                    }]}>
-
-                        {
-                            isLoading &&
-
-                            <View style={styles.loaderContainer}>
-                                <ActivityIndicator size='small' color={Colors.primaryColor}/>
-                            </View>
-                        }
-                        {
-                            !isLoading &&
-
-                            <View style={styles.titleWrap}>
-
-
-                                <Text style={[styles.learnMore, {
-                                    width: '70%',
-                                    lineHeight: heightPixel(22),
-                                    color: textColor
-                                }]}>
-                                    Explore story adventures below and earn rewards
-                                </Text>
-                            </View>
-                        }
-                        {
-                            !loading && data &&
-                            data?.pages[0]?.data?.result.slice(0, 12).map(((item) => (
-                                <Animated.View key={item.id} entering={FadeInDown} exiting={FadeOutDown}
-                                               layout={Layout.easing(Easing.bounce).delay(20)}>
-                                    <Pressable onPress={() => goToAdventure(item)}
-                                               style={[styles.adventureItem, {
-                                                  // marginHorizontal:10,
-                                                   marginRight : data?.pages[0]?.data?.result.length < 3 ?  30: 0,
-                                                   backgroundColor: theme == 'dark' ? Colors.dark.background : "#fff",
-                                               }]}>
-
-
-                                        <FastImage
-                                            style={styles.adventureItemImage}
-                                            source={{
-                                                uri: item.imageUrl,
-                                                cache: FastImage.cacheControl.web,
-                                                priority: FastImage.priority.normal,
-                                            }}
-                                            resizeMode={FastImage.resizeMode.cover}
-                                        />
-
-
-                                    </Pressable>
-                                </Animated.View>
-                            )))
-
-
-                        }
                     </View>
-                </ScrollView>
+
+                </View>
 
 
-            </SafeAreaView>
-
-            <Portal>
-                <BottomSheet
-                    backgroundStyle={{
-                        backgroundColor: theme == 'light' ? "#fff" : Colors.dark.background,
-                    }}
-                    handleIndicatorStyle={Platform.OS == 'android' && {display: 'none'}}
-                    ref={bottomSheetRef}
-                    index={0}
-                    snapPoints={snapPoints}
-                    keyboardBehavior="interactive"
-                    backdropComponent={renderBackdrop}
-                    style={{
-                        paddingHorizontal: pixelSizeHorizontal(20)
-                    }}
-                >
+                <View style={styles.dashWrap}>
+                    <Text style={[styles.dashTitle, {
+                        color: textColor
+                    }]}>
+                        Play Games, Learn, Discover and Earn Rewards
+                    </Text>
+                </View>
 
 
-                    <View style={styles.sheetHead}>
+                <View style={styles.streakBox}>
+                    <View style={styles.dailyStreak}>
+                        <ImageBackground style={styles.streaKIcon} resizeMode={'contain'}
+                                         source={require('../../assets/images/streakicon.png')}>
 
-
-                        <Text style={[styles.sheetTitle, {
+                        </ImageBackground>
+                        <Text style={[styles.dailyStreakText, {
                             color: textColor
                         }]}>
-                            Update phone number
+
+                            Daily Streak
                         </Text>
-                        {Platform.OS == 'android' && <TouchableOpacity onPress={handleClosePress}
-                                                                       style={[styles.dismiss, {
-                                                                           backgroundColor: theme == 'light' ? "#f8f8f8" : Colors.dark.background
-                                                                       }]}>
-                            <Ionicons name="close-sharp" size={20} color={textColor}/>
-                        </TouchableOpacity>}
+                    </View>
+
+                    <Text style={[styles.dailyStreakTextSub, {
+                        color: lightText
+                    }]}>
+                        Login to mark a day
+                    </Text>
+
+                </View>
+
+
+                <View style={styles.friendsOnline}>
+                    <View style={{marginBottom: 10}}>
+                        <Text style={[styles.friendsOnlineTitle, {
+                            color: textColor
+                        }]}>
+                            Friends Online
+                        </Text>
                     </View>
 
 
-                    <KeyboardAwareScrollView scrollEnabled
-                                             style={{
-                                                 width: '100%',
+                    <FlatList
 
-                                             }}
-                                             showsVerticalScrollIndicator={false}
-                                             showsHorizontalScrollIndicator={false}
-                                             contentContainerStyle={
-                                                 styles.sheetContainer
-                                             }>
-                        <View style={styles.authContainer}>
-                            <PhoneInputText
-                                error={errors.phoneNumber}
-                                label="Phone number"
-                                onChangeText={(text,code) => {
-                                    handleChange('phoneNumber')(text);
-                                    setPhoneNumber(text)
-                                    setCountryCode(code)
-                                }}
+                        data={users}
+                        keyExtractor={keyExtractor}
+                        horizontal
+                        pagingEnabled
+                        scrollEnabled
+                        snapToAlignment="center"
+                        scrollEventThrottle={16}
+                        decelerationRate={"fast"}
+                        showsHorizontalScrollIndicator={false}
+                        renderItem={renderItem}
+                    />
+
+                </View>
 
 
-                                value={values.phoneNumber}
-                                errorMessage=''
-                                placeholder="Phone number"/>
+                <View style={styles.achievements}>
+                    <View style={{marginBottom: 10}}>
+                        <Text style={[styles.friendsOnlineTitle, {
+                            color: textColor
+                        }]}>
+                            Achievements
+                        </Text>
+                    </View>
+
+                    <FlatListExtra
+
+                        data={Achievements}
+                        keyExtractor={keyExtractor}
+                        horizontal
+                        pagingEnabled
+                        scrollEnabled
+                        numRows={2}
+                        snapToAlignment="center"
+                        scrollEventThrottle={16}
+                        decelerationRate={"fast"}
+                        showsHorizontalScrollIndicator={false}
+                        renderItem={renderAchievementsItem}
+                    />
 
 
-                            <RectButton style={{marginTop: 30, width: widthPixel(200)}} onPress={() => handleSubmit()}>
-                                {
-                                    loading ? <ActivityIndicator size="small" color={"#fff"}/> :
-
-                                        <Text style={styles.buttonText}>
-                                            Proceed
-
-                                        </Text>
-                                }
-                            </RectButton>
-                        </View>
-                    </KeyboardAwareScrollView>
-                </BottomSheet>
+                </View>
 
 
-                <BottomSheetModalProvider>
+                <View style={styles.games}>
+                    <View style={styles.titleWrap}>
+                        <Text style={[styles.friendsOnlineTitle, {
+                            color: textColor
+                        }]}>
+                            Popular Games
+                        </Text>
 
 
-                    <BottomSheetModal
-
-                        backgroundStyle={{
-                            backgroundColor,
-                        }}
-                        backdropComponent={renderBackdrop}
-                        ref={bottomSheetModalRef}
-                        index={1}
-                        snapPoints={modalSnapPoints}
-                        handleIndicatorStyle={[{backgroundColor: theme == 'light' ? "#333" : "#eee"}, Platform.OS == 'android' && {display: 'none',}]}
-
-                    >
-                        <View style={styles.contentContainer}>
-                            <View style={[styles.sheetHead, {
-                                height: 40,
-                            }]}>
+                        <Text style={styles.seeMoreTxt}>
+                            See all
+                        </Text>
+                    </View>
 
 
-                                <Text style={[styles.sheetTitle, {
-                                    fontSize: fontPixel(14),
-                                    color: Colors.primaryColor
-                                }]}>
-                                    Growth bar
-                                </Text>
-                                {Platform.OS == 'android' && <TouchableOpacity onPress={handleClosetModal}
-                                                                               style={[styles.dismiss, {
-                                                                                   backgroundColor: theme == 'light' ? "#f8f8f8" : Colors.dark.background
-                                                                               }]}>
-                                    <Ionicons name="close-sharp" size={20} color={textColor}/>
-                                </TouchableOpacity>}
-                            </View>
 
-                            <Text style={[styles.learnMoreText, {
-                                color: textColor
-                            }]}>This bar represents your growth from an egg to the ladybug, it fills up based on your
-                                activities on the app 🎉</Text>
-                        </View>
-                    </BottomSheetModal>
+                    <FlatList
 
-                </BottomSheetModalProvider>
-            </Portal>
-        </>
+                        data={Games}
+                        keyExtractor={keyExtractor}
+                        horizontal
+                        pagingEnabled
+                        scrollEnabled
+                        snapToAlignment="center"
+                        scrollEventThrottle={16}
+                        decelerationRate={"fast"}
+                        showsHorizontalScrollIndicator={false}
+                        renderItem={renderItemGame}
+                    />
+
+
+                </View>
+
+
+            </ScrollView>
+        </SafeAreaView>
     );
 };
 
@@ -557,34 +436,6 @@ const styles = StyleSheet.create({
         width: '100%',
         alignItems: 'center'
     },
-    topDashboard: {
-
-        height: heightPixel(360),
-        width: '100%',
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderBottomStartRadius: 30,
-        borderBottomEndRadius: 30,
-        shadowColor: "#000",
-        borderRadius: 8,
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.42,
-        shadowRadius: 7.22,
-
-        elevation: 3,
-    },
-    topCover: {
-        height: heightPixel(150),
-        width: '100%',
-        alignItems: 'center',
-        backgroundColor: 'red',
-        borderBottomStartRadius: 250,
-        borderBottomEndRadius: 250,
-        resizeMode: 'center'
-    },
     topBar: {
         paddingHorizontal: pixelSizeHorizontal(15),
         width: '100%',
@@ -593,48 +444,30 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center'
     },
-    userImage: {
-        width: 115,
-        height: 115,
-        alignItems: 'center',
+    leftButton: {
+        width: '60%',
+        height: '100%',
         justifyContent: 'center',
-        borderRadius: 120,
-        //  borderWidth:5,
-        // borderStyle:'dashed',
-        // backgroundColor:Colors.primaryColor,
-        bottom: -30
-    },
-    profileImage: {
-        width: 110,
-        height: 110,
-        borderRadius: 120,
 
-        position: 'absolute',
+        alignItems: 'flex-start',
     },
-    Image: {
-        borderRadius: 120,
-        width: "100%",
-        height: "100%",
-        resizeMode: 'cover'
-    },
-    fullNameWrap: {
-        marginTop: 40,
-        width: '100%',
-
+    pointWrap: {
+        height: 25,
+        paddingHorizontal: pixelSizeHorizontal(10),
+        borderRadius: 10,
+        minWidth: widthPixel(70),
         alignItems: 'center',
-        justifyContent: 'space-evenly'
-    },
-    fullName: {
-        fontFamily: Fonts.quickSandBold,
-        fontSize: fontPixel(24),
-        color: Colors.light.text,
-    },
-    subTitle: {
-        fontFamily: Fonts.quicksandMedium,
-        fontSize: fontPixel(16),
-        color: Colors.light.text,
-    },
+        justifyContent: "center",
+        flexDirection: 'row',
+        backgroundColor: "#181818"
 
+    },
+    pointsText: {
+        color: "#fff",
+        marginLeft: 5,
+        fontSize: fontPixel(12),
+        fontFamily: Fonts.quicksandMedium
+    },
     rightButton: {
         width: widthPixel(70),
         height: '90%',
@@ -650,209 +483,234 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    progressBarContainer: {
-        width: '100%',
-        height: heightPixel(40),
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    progressBar: {
-        width: widthPixel(150),
-        height: 10,
-        marginHorizontal: pixelSizeHorizontal(10),
-        borderRadius: 10,
-        backgroundColor: '#DEDEDE'
-    },
-    Bar: {
-        width: widthPixel(50),
-        height: 10,
-        borderRadius: 10,
-        backgroundColor: Colors.primaryColor
-    },
-    leftButton: {
-        width: '60%',
-        height: '100%',
-        justifyContent: 'center',
-
-        alignItems: 'flex-start',
-    },
-    titleWrap: {
-        width: '100%'
-    },
-    badgeContainer: {
-        width: '100%',
-        alignItems: 'center',
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-
-        marginTop: 30,
-
-        paddingHorizontal: pixelSizeHorizontal(20)
-    },
-
-    badgeImageWrap: {
-        height: heightPixel(110),
-        width: widthPixel(85),
-        alignItems: 'center',
-        marginHorizontal: pixelSizeHorizontal(20),
-        marginVertical: pixelSizeVertical(15),
-        justifyContent: 'center',
-    },
-    badgeImage: {
-        height: '100%',
-        width: '100%',
-        resizeMode: 'center',
-
-    },
-    badgeItemBody: {
-        marginLeft: 15,
-        height: '80%',
-        width: '75%',
-        alignItems: 'flex-start',
-        justifyContent: 'center'
-    },
-
-    badgeStreakScore: {
+    dot: {
         position: 'absolute',
-        bottom: 10,
-        right: 5,
-        borderRadius: 10,
-        backgroundColor: "#fff",
-        width: widthPixel(35),
-        height: heightPixel(18),
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingHorizontal: pixelSizeHorizontal(5),
-        shadowColor: "#212121",
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.12,
-        shadowRadius: 7.22,
-
-        elevation: 3,
+        width: 10,
+        height: 10,
+        top: 5,
+        zIndex: 1,
+        right: 10,
+        borderWidth: 2,
+        borderColor: "#fff",
+        backgroundColor: Colors.errorRed,
+        borderRadius: 15,
     },
-    badgeStreakText: {
-        color: Colors.light.text,
-        fontFamily: Fonts.quicksandMedium,
-        fontSize: fontPixel(12)
-    },
-    loaderContainer: {
+    dashWrap: {
         width: '100%',
+        padding: 15,
+
+    },
+    dashTitle: {
+
+        fontSize: fontPixel(24),
+        fontFamily: Fonts.quicksandMedium,
+        lineHeight: 30
+
+    },
+    streakBox: {
+        marginTop: 15,
+        marginBottom: 10,
+        backgroundColor: "#F0F0F0",
+        width: '90%',
+        height: heightPixel(65),
+        flexDirection: 'row',
+        alignItems: "center",
+        justifyContent: 'space-between',
+        paddingHorizontal: pixelSizeHorizontal(10),
+        borderRadius: 10,
+
+    },
+
+    dailyStreak: {
+        width: widthPixel(200),
+        alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        height: '70%'
+    },
+    streaKIcon: {
+        width: 40,
+        resizeMode: 'center',
+        height: '100%'
+    },
+    dailyStreakText: {
+        marginLeft: 10,
+        fontSize: fontPixel(16),
+        fontFamily: Fonts.quicksandSemiBold,
+    },
+    dailyStreakTextSub: {
+        marginLeft: 10,
+        fontSize: fontPixel(14),
+        fontFamily: Fonts.quicksandMedium,
+    },
+    friendsOnline: {
+        width: '90%',
+        height: 80,
+
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        marginTop: pixelSizeVertical(30),
+        marginBottom: 10
+    },
+    friendsOnlineTitle: {
+        marginBottom: 5,
+        fontSize: fontPixel(16),
+        fontFamily: Fonts.quickSandBold,
+    },
+    friendsOnlineCard: {
+        width: 45,
         alignItems: 'center',
         justifyContent: 'center',
-        height: heightPixel(250)
-    },
-    adventureItem: {
-        marginTop: 20,
-        width: 100,
-        height: 100,
+        marginHorizontal: 10,
+        height: 45,
         borderRadius: 100,
-        alignItems: 'center',
-        justifyContent: 'center',
-
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.10,
-        shadowRadius: 7.22,
-
-        elevation: 3,
     },
-    adventureItemImage: {
-        width: 85,
-        height: 85,
+    friendsOnlineCardImage: {
+        width: '100%',
+        height: '100%',
         borderRadius: 100,
         resizeMode: 'cover'
     },
-    verifyCard: {
-        marginTop: 16,
-        width: '80%',
+    dotOnline: {
+        position: 'absolute',
+        width: 10,
+        height: 10,
+        top: 5,
+        zIndex: 1,
+        right: 1,
 
+        backgroundColor: "#5AFF60",
+        borderRadius: 15,
+    },
+    achievements: {
+        width: '90%',
+        height: 200,
+
+        flexWrap: 'wrap',
+
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        marginTop: pixelSizeVertical(30)
+    },
+    achievementsCard: {
+        width: widthPixel(250),
         height: heightPixel(80),
         borderRadius: 10,
-        padding: 15,
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexDirection: 'row'
-    },
-    verifyText: {
-        fontSize: fontPixel(14),
-        fontFamily: Fonts.quicksandMedium,
-        color: Colors.tintColor
+        marginRight: 15,
+        marginBottom: 15,
+        paddingHorizontal: pixelSizeHorizontal(15),
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        backgroundColor: '#FFE8EC'
 
     },
-    chevronGreen: {
-        width: 25,
-        height: 25,
-        backgroundColor: "#fff",
-        borderRadius: 45,
-        alignItems: 'center',
-        justifyContent: 'center'
+    achievementsCardLeft: {
+        width: '60%',
+        justifyContent: 'center',
+        height: '60%',
+        alignItems: 'flex-start',
+
     },
-    contentContainer: {
-        paddingHorizontal: pixelSizeHorizontal(20),
+    achievementsCardTitle: {
+        fontSize: fontPixel(16),
+        fontFamily: Fonts.quicksandSemiBold,
+
+    },
+    achievementsCardSubText: {
+        fontSize: fontPixel(12),
+        fontFamily: Fonts.quicksandRegular,
+
+    },
+    iconWrap: {
+        width: 55,
+        height: 55,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 100,
+        backgroundColor: Colors.primaryColor
+    },
+    games: {
+        width: '90%',
+        height: 330,
+
+
+        justifyContent: 'flex-start',
+
+        marginTop: 40
+    },
+    titleWrap: {
+
+        flexDirection: 'row',
         width: '100%',
-        flex: 0.8,
+        // height:40,
+        marginBottom: 20,
+        justifyContent: 'space-between',
+    },
+    seeMoreTxt: {
+        color: Colors.primaryColor,
+        fontSize: fontPixel(14),
+        fontFamily: Fonts.quicksandMedium,
+    },
+    gameCard: {
+        marginRight:15,
+        width: widthPixel(250),
+        height: heightPixel(270),
+        borderRadius: 10,
+        overflow: 'hidden',
         justifyContent: 'center',
         alignItems: 'center'
     },
-    learnMoreText: {
-        textAlign: "center",
-        lineHeight: heightPixel(24),
-        fontSize: fontPixel(16),
-        fontFamily: Fonts.quicksandMedium
-    },
-    sheetHead: {
-        // paddingHorizontal: pixelSizeHorizontal(20),
-        height: 60,
+    gameCardImage: {
         width: '100%',
-        alignItems: 'center',
+        flex: 1,
+        resizeMode: 'cover',
+        borderRadius: 10,
+        justifyContent: 'flex-end',
+
+        alignItems: 'center'
+    },
+    gameCardBottom: {
+        width: '95%',
+        borderRadius: 5,
+        height: 55,
+        overflow: 'hidden',
+        marginBottom: 10,
+
+    },
+    bodyWrap: {
+        width: '100%',
+        height: '80%',
+        paddingHorizontal: 5,
+        justifyContent: 'space-evenly',
+        alignItems: 'flex-start',
+
+    },
+    blurContainer: {
+
+        height: '100%',
+        flex: 1,
         justifyContent: 'center',
-        flexDirection: 'row'
+        alignItems: 'center',
+
+
+        borderRadius: 5,
+        flexDirection: 'row',
+
+        paddingHorizontal: pixelSizeHorizontal(10),
+        // Shadow for iOS
+    },
+    bottomTxt: {
+        color: '#fff',
+
+        fontSize: fontPixel(16),
+        fontFamily: Fonts.quicksandSemiBold
+    },
+    bottomSubTxt: {
+        color: '#CCCCCC',
+        fontSize: fontPixel(12),
+        fontFamily: Fonts.quicksandMedium
     }
-    ,
-    sheetTitle: {
-        fontSize: fontPixel(18),
-        fontFamily: Fonts.quickSandBold,
-        color: Colors.light.text
-    },
-    sheetContainer: {
-        marginTop: 10,
-
-        width: '100%',
-        alignItems: 'center',
-    },
-    authContainer: {
-
-        width: '100%',
-        alignItems: 'center',
-        height: heightPixel(400)
-    },
-    buttonText: {
-        position: 'absolute',
-        fontSize: fontPixel(16),
-        color: "#fff",
-        fontFamily: Fonts.quickSandBold
-    },
-    dismiss: {
-        position: 'absolute',
-        right: 10,
-        borderRadius: 30,
-        height: 30,
-        width: 30,
-        alignItems: 'center',
-        justifyContent: 'center',
-
-    },
-    learnMore: {
-        fontSize: fontPixel(14),
-        fontFamily: Fonts.quicksandMedium
-    },
 
 
 })

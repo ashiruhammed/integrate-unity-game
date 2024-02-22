@@ -1,7 +1,7 @@
 import {StatusBar} from 'expo-status-bar';
 import React, {useEffect, useRef, useState} from "react";
 import {PermissionsAndroid, TouchableOpacity, View,Text,StyleSheet} from 'react-native'
-
+import 'react-native-gesture-handler';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import * as SecureStore from 'expo-secure-store';
 import useCachedResources from './src/hooks/useCachedResources';
@@ -41,6 +41,7 @@ import {fontPixel, heightPixel} from "./src/helpers/normalize";
 import {Colors} from "react-native/Libraries/NewAppScreen";
 import {Fonts} from "./src/constants/Fonts";
 import ErrorBoundary from "react-native-error-boundary";
+import {GestureHandlerRootView} from "react-native-gesture-handler";
 
 Settings.initializeSDK();
 Settings.setAppID(AppID);
@@ -257,6 +258,8 @@ export default function App() {
     } else {
         return (
             <ErrorBoundary FallbackComponent={CustomFallback}>
+
+
             <SafeAreaProvider>
                 {
                     firstLaunch ?
@@ -266,7 +269,7 @@ export default function App() {
 
                         <Provider store={store}>
                             {/*@ts-ignore*/}
-
+                            <GestureHandlerRootView style={{flex: 1, }}>
                             <PersistGate loading={null} persistor={persistor}>
                                 <PersistQueryClientProvider
                                     client={queryClient}
@@ -287,10 +290,13 @@ export default function App() {
                                     </QueryClientProvider>
                                 </PersistQueryClientProvider>
                             </PersistGate>
+                            </GestureHandlerRootView>
                         </Provider>
                 }
                 <StatusBar/>
             </SafeAreaProvider>
+
+
             </ErrorBoundary>
         );
     }

@@ -12,7 +12,7 @@ import {fontPixel} from "../../helpers/normalize";
 import {Fonts} from "../../constants/Fonts";
 
 import {FontAwesome5, Ionicons, MaterialCommunityIcons, Octicons} from "@expo/vector-icons";
-import Dashboard from "../../screens/Home/Dashboard";
+
 import Adventures from "../../screens/Home/Adventures";
 import Community from "../../screens/Home/Community";
 import MarketPlace from "../../screens/Home/MarketPlace";
@@ -30,6 +30,14 @@ import Animated, {
 import {useAppSelector} from "../../app/hooks";
 import FastImage from "react-native-fast-image";
 import Constants from "expo-constants";
+import Dashboard from "../../screens/Home/Dashboard";
+import Games from "../../screens/Home/Games";
+import Wallet from "../../screens/Home/Wallet";
+import Learn from "../../screens/Home/Learn";
+import HomeIcon from "../../assets/tabs-svg/HomeIcon";
+import LearnIcon from "../../assets/tabs-svg/LearnIcon";
+import GameIcon from "../../assets/tabs-svg/GameIcon";
+import WalletIcon from "../../assets/tabs-svg/WalletIcon";
 
 
 const Tabs = BottomTabNavigator<RootTabParamList>()
@@ -46,8 +54,8 @@ export default () => {
         <Tabs.Navigator backBehavior='history'
                         initialRouteName="Home"
                         tabBarOptions={{
-                            activeTintColor:textColor,
-                            inactiveTintColor: "#ccc",
+                            activeTintColor:Colors.primaryColor,
+                            inactiveTintColor: "#616161",
                             labelStyle: {
                                 fontSize: fontPixel(12),
                                 fontFamily: Fonts.quicksandRegular,
@@ -66,10 +74,10 @@ export default () => {
                             <Animated.View key={focused}
                                            entering={BounceIn}
                                            exiting={BounceOut}>
-                                <HomeFocused opacity={1}/>
+                                <HomeIcon color={Colors.primaryColor}/>
                             </Animated.View>
                             :
-                            <HomeFocused opacity={0.3}/>
+                            <HomeIcon color={"#616161"} />
                     ),
 
                 }}
@@ -77,8 +85,8 @@ export default () => {
 
 
             <Tabs.Screen
-                name="Adventures"
-                component={Adventures}
+                name="Learn"
+                component={Learn}
                 options={{
                     tabBarIcon: ({focused, color}: any) => (
 
@@ -86,21 +94,41 @@ export default () => {
                             <Animated.View key={focused}
                                            entering={BounceIn}
                                            exiting={BounceOut}>
-                                <AdventuresIcon opacity={1}/>
+                                <LearnIcon color={Colors.primaryColor}/>
                             </Animated.View>
 
                             :
-                            <AdventuresIcon opacity={0.3}/>
+                            <LearnIcon color={"#616161"}/>
 
                     ),
                 }}
             />
 
             <Tabs.Screen
-                initialParams={{ newTabIndex: '0' }}
+                name="Games"
+                component={Games}
+                options={{
+                    tabBarIcon: ({focused, color}: any) => (
 
-                name="Community"
-                component={Community}
+                        focused ?
+                            <Animated.View key={focused}
+                                           entering={BounceIn}
+                                           exiting={BounceOut}>
+                                <GameIcon color={Colors.primaryColor}/>
+                            </Animated.View>
+
+                            :
+                            <GameIcon color={"#616161"}/>
+
+                    ),
+                }}
+            />
+
+            <Tabs.Screen
+
+
+                name="Wallet"
+                component={Wallet}
                 options={{
                     tabBarIcon: ({focused, color}: any) => (
                         /*<Image style={styles.userImage} resizeMethod="scale"
@@ -110,10 +138,10 @@ export default () => {
 
                                            entering={BounceIn}
                                            exiting={BounceOut}>
-                                <CommunityIcon opacity={1}/>
+                                <WalletIcon color={Colors.primaryColor}/>
                             </Animated.View>
                             :
-                            <CommunityIcon opacity={0.3}/>
+                            <WalletIcon color={"#616161"}/>
 
                     ),
 
