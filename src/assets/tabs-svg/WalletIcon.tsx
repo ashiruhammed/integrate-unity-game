@@ -9,7 +9,7 @@ const SvgComponent = (props: SvgProps) => (
         fill="none"
         {...props}
     >
-        <G fill="#616161" clipPath="url(#a)">
+        <G      fill={props.color} clipPath="url(#a)">
             <Path d="M13.25 9.75a1.125 1.125 0 1 1-2.25 0 1.125 1.125 0 0 1 2.25 0Z" />
             <Path
                 fillRule="evenodd"
