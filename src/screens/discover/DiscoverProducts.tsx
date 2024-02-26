@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 
-import {Text, View, StyleSheet, Platform, ImageBackground, TouchableOpacity} from 'react-native';
+import {Text, View, StyleSheet, Platform, ImageBackground, TouchableOpacity, Pressable, FlatList} from 'react-native';
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
 import {Fonts} from "../../constants/Fonts";
 import Colors from "../../constants/Colors";
@@ -10,6 +10,19 @@ import {useAppSelector} from "../../app/hooks";
 import {useInfiniteQuery} from "@tanstack/react-query";
 import {userNotifications} from "../../action/action";
 import {RootStackScreenProps} from "../../../types";
+
+
+
+const data = [
+    { id: '1', title: 'Item 1' },
+    { id: '2', title: 'Item 2' },
+    { id: '3', title: 'Item 3' },
+    { id: '4', title: 'Item 4' },
+    { id: '5', title: 'Item 5' },
+    { id: '6', title: 'Item 6' },
+];
+const numColumns = 3;
+
 
 const DiscoverProducts = ({navigation}:RootStackScreenProps<'DiscoverProducts'>) => {
 
@@ -49,6 +62,14 @@ const DiscoverProducts = ({navigation}:RootStackScreenProps<'DiscoverProducts'>)
 
         })
 
+
+    const renderItem = ({ item }) => (
+        <View style={styles.item}>
+            <Text style={styles.title}>{item.title}</Text>
+        </View>
+    );
+
+    const numColumns = 2;
 
 
     return (
@@ -97,6 +118,53 @@ const DiscoverProducts = ({navigation}:RootStackScreenProps<'DiscoverProducts'>)
 
 
             <View style={styles.productDashboard}>
+
+                <View style={styles.leftProductDash}>
+                    <Text style={styles.leftProductDashTitle}>
+                        #1 Top Ranked for the week
+                    </Text>
+
+
+                    <View style={styles.productRow}>
+
+                    </View>
+
+
+                    <Text style={styles.leftProductDashDescription}>
+                        Generating of NFT
+                        images made easy
+                        with AI 🔥
+                    </Text>
+
+
+                    <Pressable>
+
+                    </Pressable>
+                </View>
+
+
+                <View style={styles.rightProductDash}>
+                    <View style={styles.masonryWrap}>
+
+
+                    <FlatList
+                        data={data}
+                        keyExtractor={(item) => item.id}
+                        renderItem={({ item, index }) => (
+                            <View
+                                style={[
+                                    styles.item,
+                                    index % numColumns === 0 ? styles.leftItem : styles.rightItem,
+                                ]}
+                            >
+                                <Text>{item.title}</Text>
+                            </View>
+                        )}
+                        numColumns={numColumns}
+                    />
+                    </View>
+                </View>
+
 
             </View>
 
@@ -210,8 +278,74 @@ const styles = StyleSheet.create({
     productDashboard:{
         width:'100%',
         backgroundColor:"#000",
+        flexDirection:'row',
+        justifyContent:'space-between',
+        paddingHorizontal:pixelSizeHorizontal(10),
+        alignItems:'center',
+height:heightPixel(250)
+    },
+    leftProductDash:{
+        justifyContent:'space-between',
+        alignItems:'center',
+        height:'90%',
+        width:'50%',
+        padding:10,
+    },
+    rightProductDash:{
 
-    }
+        alignItems:'center',
+        height:'100%',
+        width:'45%',
+
+    },
+    leftProductDashTitle:{
+        fontSize: fontPixel(12),
+        color: "#fff",
+        fontFamily: Fonts.quickSandBold
+    },
+    productRow:{
+        flexDirection:'row',
+        alignItems:"center",
+        justifyContent:'space-between',
+        height:25,
+    },
+    leftProductDashDescription:{
+        fontSize: fontPixel(18),
+        color: "#fff",
+        lineHeight:22,
+        fontFamily: Fonts.quickSandBold
+    },
+    bottomBtn:{
+        height:40,
+        backgroundColor:"#01AAFF",
+        width:140,
+    },
+    row: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 10,
+    },
+    masonryWrap:{
+        width:'100%',
+        flex:1,
+        alignItems: 'center',
+    },
+    item: {
+
+        width:70,
+        margin: 5,
+        height: 75, // Set your desired height here
+        backgroundColor: '#f9c2ff',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    leftItem: {
+        marginTop: 5,
+    },
+    rightItem: {
+        marginTop: -15,
+    },
+
 })
 
 export default DiscoverProducts;
