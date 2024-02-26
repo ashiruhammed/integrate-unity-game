@@ -1,31 +1,42 @@
 import React, {useState} from 'react';
 
-import {Text, View, StyleSheet, Platform, ImageBackground, TouchableOpacity, Pressable, FlatList} from 'react-native';
+import {
+    Text,
+    View,
+    StyleSheet,
+    Platform,
+    ImageBackground,
+    TouchableOpacity,
+    Pressable,
+    FlatList,
+    Image
+} from 'react-native';
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
 import {Fonts} from "../../constants/Fonts";
 import Colors from "../../constants/Colors";
-import {AntDesign, Ionicons, Octicons} from "@expo/vector-icons";
+import {AntDesign, FontAwesome, Ionicons, Octicons} from "@expo/vector-icons";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {useAppSelector} from "../../app/hooks";
 import {useInfiniteQuery} from "@tanstack/react-query";
 import {userNotifications} from "../../action/action";
 import {RootStackScreenProps} from "../../../types";
-
+import {LinearGradient} from 'expo-linear-gradient';
+import GradientText from "../../components/GradientText";
+import {FlashList} from "@shopify/flash-list";
 
 
 const data = [
-    { id: '1', title: 'Item 1' },
-    { id: '2', title: 'Item 2' },
-    { id: '3', title: 'Item 3' },
-    { id: '4', title: 'Item 4' },
-    { id: '5', title: 'Item 5' },
-    { id: '6', title: 'Item 6' },
+    {id: '1', title: 'Item 1', imageUrl:'https://i.redd.it/irsfp5m03m081.jpg'},
+    {id: '2', title: 'Item 2', imageUrl: 'https://codespaceinc.co/images/uploads/https___specials-images.forbesimg.com_imageserve_6170e01f8d7639b95a7f2eeb_sotheby-s-nft-natively-digital-1-2-sale-bored-ape-yacht-club-8817-by-yuga-labs_0x0.png'},
+    {id: '3', title: 'Item 3', imageUrl: "https://cdn.geekwire.com/wp-content/uploads/2022/07/melaniabilustracion-No-Planet-B-square.jpg"},
+    {id: '4', title: 'Item 4', imageUrl: "https://storage.googleapis.com/billionaire-club-327223.appspot.com/brain_mary_jane_efcfd214be/brain_mary_jane_efcfd214be.png"},
+    {id: '5', title: 'Item 5', imageUrl: 'https://pbs.twimg.com/media/FMZ-_aYXsAMvecg.jpg:large'},
+    {id: '6', title: 'Item 6',imageUrl: 'https://media.zenfs.com/en/accesswire.ca/1e994831850c6e6ed911cf9867c15f1c'},
 ];
 const numColumns = 3;
 
 
-const DiscoverProducts = ({navigation}:RootStackScreenProps<'DiscoverProducts'>) => {
-
+const DiscoverProducts = ({navigation}: RootStackScreenProps<'DiscoverProducts'>) => {
 
 
     const user = useAppSelector(state => state.user)
@@ -63,11 +74,7 @@ const DiscoverProducts = ({navigation}:RootStackScreenProps<'DiscoverProducts'>)
         })
 
 
-    const renderItem = ({ item }) => (
-        <View style={styles.item}>
-            <Text style={styles.title}>{item.title}</Text>
-        </View>
-    );
+
 
     const numColumns = 2;
 
@@ -109,8 +116,8 @@ const DiscoverProducts = ({navigation}:RootStackScreenProps<'DiscoverProducts'>)
             </View>
 
             <View style={styles.pageTitleWrap}>
-                <Text style={[styles.pageTitle,{
-                    color:textColor
+                <Text style={[styles.pageTitle, {
+                    color: textColor
                 }]}>
                     Discover
                 </Text>
@@ -127,18 +134,43 @@ const DiscoverProducts = ({navigation}:RootStackScreenProps<'DiscoverProducts'>)
 
                     <View style={styles.productRow}>
 
+                        <View style={styles.productRowItem}>
+                            <Text style={styles.productRowItemText}>
+                                NFTworld
+                            </Text>
+                        </View>
+
+                        <View style={[styles.productRowItem,
+                            {justifyContent: 'flex-end'}]}>
+                            <FontAwesome name="thumbs-up" size={12} color="white" />
+                            <Text style={styles.productRowItemText}>
+                                3000 Thumbs up
+                            </Text>
+                        </View>
+                    </View>
+
+                    <View style={styles.textBody}>
+                        <Text style={styles.leftProductDashDescription}>
+                            Generating of
+                        </Text>
+                        <GradientText style={styles.leftProductDashDescription}>NFT images
+                        </GradientText>
+                        <Text style={styles.leftProductDashDescription}> MADE
+                        </Text>
+                        <GradientText style={styles.leftProductDashDescription}>
+                            easy
+                            with AI
+                        </GradientText>
+                        <Text style={styles.leftProductDashDescription}>
+                            🔥
+                        </Text>
                     </View>
 
 
-                    <Text style={styles.leftProductDashDescription}>
-                        Generating of NFT
-                        images made easy
-                        with AI 🔥
-                    </Text>
-
-
-                    <Pressable>
-
+                    <Pressable style={styles.viewBtn}>
+                        <Text style={styles.viewBtnText}>
+                            View Product
+                        </Text>
                     </Pressable>
                 </View>
 
@@ -147,21 +179,25 @@ const DiscoverProducts = ({navigation}:RootStackScreenProps<'DiscoverProducts'>)
                     <View style={styles.masonryWrap}>
 
 
-                    <FlatList
-                        data={data}
-                        keyExtractor={(item) => item.id}
-                        renderItem={({ item, index }) => (
-                            <View
-                                style={[
-                                    styles.item,
-                                    index % numColumns === 0 ? styles.leftItem : styles.rightItem,
-                                ]}
-                            >
-                                <Text>{item.title}</Text>
-                            </View>
-                        )}
-                        numColumns={numColumns}
-                    />
+                        <FlatList
+
+                            scrollEnabled
+                            showsVerticalScrollIndicator={false}
+                            showsHorizontalScrollIndicator={false}
+                            data={data}
+                            keyExtractor={(item) => item.id}
+                            renderItem={({item, index}) => (
+                                <View
+                                    style={[
+                                        styles.item,
+                                        index % numColumns === 0 ? styles.leftItem : styles.rightItem,
+                                    ]}
+                                >
+                                   <Image source={{uri:item.imageUrl}} style={styles.itemImage}/>
+                                </View>
+                            )}
+                            numColumns={numColumns}
+                        />
                     </View>
                 </View>
 
@@ -169,10 +205,8 @@ const DiscoverProducts = ({navigation}:RootStackScreenProps<'DiscoverProducts'>)
             </View>
 
 
-
-
         </SafeAreaView>
-            );
+    );
 };
 
 const styles = StyleSheet.create({
@@ -183,13 +217,13 @@ const styles = StyleSheet.create({
         backgroundColor: "#FEF1F1",
         paddingBottom: Platform.OS === 'ios' ? -40 : 0
     },
-    pageTitleWrap:{
+    pageTitleWrap: {
         width: '90%',
-        marginVertical:pixelSizeVertical(10),
+        marginVertical: pixelSizeVertical(20),
         flexDirection: 'row',
         justifyContent: 'flex-start',
     },
-    pageTitle:{
+    pageTitle: {
         fontSize: fontPixel(24),
         fontFamily: Fonts.quickSandBold
     },
@@ -275,69 +309,87 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.errorRed,
         borderRadius: 15,
     },
-    productDashboard:{
-        width:'100%',
-        backgroundColor:"#000",
-        flexDirection:'row',
-        justifyContent:'space-between',
-        paddingHorizontal:pixelSizeHorizontal(10),
-        alignItems:'center',
-height:heightPixel(250)
-    },
-    leftProductDash:{
-        justifyContent:'space-between',
-        alignItems:'center',
-        height:'90%',
-        width:'50%',
-        padding:10,
-    },
-    rightProductDash:{
+    productDashboard: {
+        width: '100%',
+        backgroundColor: "#000",
+        flexDirection: 'row',
+        justifyContent: 'center',
 
-        alignItems:'center',
-        height:'100%',
-        width:'45%',
+        alignItems: 'center',
+        height: heightPixel(250)
+    },
+    leftProductDash: {
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        height: '90%',
+        width: '55%',
+
+        paddingVertical: pixelSizeVertical(5),
+    },
+    rightProductDash: {
+
+        alignItems: 'center',
+        height: '100%',
+        width: '40%',
 
     },
-    leftProductDashTitle:{
+    leftProductDashTitle: {
         fontSize: fontPixel(12),
         color: "#fff",
         fontFamily: Fonts.quickSandBold
     },
-    productRow:{
-        flexDirection:'row',
-        alignItems:"center",
-        justifyContent:'space-between',
-        height:25,
+    textBody: {
+        width: '100%',
+        flexDirection: 'row',
+        alignItems: "center",
+        justifyContent: 'center',
+        flexWrap: 'wrap'
+
     },
-    leftProductDashDescription:{
+    productRow: {
+        width: '100%',
+        flexDirection: 'row',
+        alignItems: "center",
+        justifyContent: 'space-evenly',
+        height: 25,
+    },
+    leftProductDashDescription: {
         fontSize: fontPixel(18),
         color: "#fff",
-        lineHeight:22,
+        lineHeight: 22,
+        textTransform: 'uppercase',
         fontFamily: Fonts.quickSandBold
     },
-    bottomBtn:{
-        height:40,
-        backgroundColor:"#01AAFF",
-        width:140,
+    bottomBtn: {
+        height: 40,
+        backgroundColor: "#01AAFF",
+        width: 140,
     },
     row: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginBottom: 10,
     },
-    masonryWrap:{
-        width:'100%',
-        flex:1,
+    masonryWrap: {
+        width: '100%',
+        flex: 1,
         alignItems: 'center',
+        overflow:'hidden'
     },
     item: {
 
-        width:70,
+        width: 70,
         margin: 5,
         height: 75, // Set your desired height here
-        backgroundColor: '#f9c2ff',
+        borderColor: '#fff',
+        borderWidth:1,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    itemImage:{
+        width:'100%',
+        height:'100%',
+        resizeMode:'cover'
     },
     leftItem: {
         marginTop: 5,
@@ -345,6 +397,33 @@ height:heightPixel(250)
     rightItem: {
         marginTop: -15,
     },
+    viewBtn: {
+        backgroundColor: "#01AAFF",
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 30,
+        height: 35,
+        width: 130,
+    },
+    viewBtnText: {
+        fontSize: fontPixel(14),
+        color: "#fff",
+        textTransform: 'capitalize',
+        fontFamily: Fonts.quicksandSemiBold
+
+    },
+
+    productRowItem: {
+        flexDirection: 'row',
+        alignItems: "center",
+        justifyContent: 'flex-start'
+    },
+    productRowItemText:{
+        fontSize: fontPixel(10),
+        color: "#fff",
+        marginLeft:5,
+        fontFamily: Fonts.quicksandSemiBold
+    }
 
 })
 
