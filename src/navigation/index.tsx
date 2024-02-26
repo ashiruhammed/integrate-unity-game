@@ -65,6 +65,8 @@ import FlagPost from "../screens/communities/components/FlagPost";
 import BlockedUsers from "../screens/profile/BlockedUsers";
 import CommentScreen from "../screens/communities/CommentScreen";
 import ReplyComment from "../screens/communities/seeAll/ReplyComment";
+import CreateAIAdventure from "../screens/learn/CreateAIAdventure";
+import CreatingAdventure from "../screens/learn/CreatingAdventure";
 
 const styles = StyleSheet.create({
     displayPhoto: {
@@ -341,6 +343,8 @@ function RootNavigator() {
                         <Stack.Screen name="VideoScreen" component={VideoScreen}/>
                         <Stack.Screen name="QuizScreen" component={QuizScreen}/>
                         <Stack.Screen name="AllBadges" component={AllBadges}/>
+                        <Stack.Screen name="CreateAIAdventure" component={CreateAIAdventure}/>
+                        <Stack.Screen name="CreatingAdventure" component={CreatingAdventure}/>
 
 
                         <Stack.Screen name="Notifications" options={{

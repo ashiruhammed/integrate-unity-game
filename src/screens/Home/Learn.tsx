@@ -200,6 +200,11 @@ const Learn = ({navigation}: RootTabScreenProps<'Learn'>) => {
         <LearnCardItem  item={item} theme={theme}/>
     ), [theme])
 
+
+    const create = () => {
+      navigation.navigate('CreateAIAdventure')
+    }
+
     return (
         <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
             <View style={styles.topBar}>
@@ -230,6 +235,14 @@ const Learn = ({navigation}: RootTabScreenProps<'Learn'>) => {
 
                 </View>
 
+            </View>
+
+            <View style={styles.pageTitleWrap}>
+                <Text style={[styles.pageTitle,{
+                    color:textColor
+                }]}>
+                    Learn
+                </Text>
             </View>
 
 
@@ -275,7 +288,7 @@ const Learn = ({navigation}: RootTabScreenProps<'Learn'>) => {
             <IF condition={tabIndex === 1}>
                 <View style={styles.flatList}>
 
-                    <TouchableOpacity activeOpacity={0.8} style={styles.createBtn}>
+                    <TouchableOpacity onPress={create} activeOpacity={0.8} style={styles.createBtn}>
                         <AntDesign name="pluscircle" size={14} color={Colors.primaryColor} />
                         <Text style={styles.createBtnText}>
                             Create an adventure with AI
@@ -320,6 +333,17 @@ const styles = StyleSheet.create({
         backgroundColor: "#FEF1F1",
         paddingBottom: Platform.OS === 'ios' ? -40 : 0
     },
+    pageTitleWrap:{
+        width: '100%',
+    marginVertical:pixelSizeVertical(10),
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+    },
+    pageTitle:{
+        fontSize: fontPixel(16),
+        fontFamily: Fonts.quickSandBold
+    },
+
     topBar: {
         paddingHorizontal: pixelSizeHorizontal(15),
         width: '100%',

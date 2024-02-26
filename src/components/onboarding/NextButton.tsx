@@ -57,7 +57,7 @@ const NextButton = ({percentage,scrollTo}:props ) => {
 
     return (
         <View style={styles.container}>
-            <Svg width={size} height={size}>
+            <Svg width={size} height={size} fill={"#fff"}>
                 <G rotation={"-90"} origin={center}>
 
 
@@ -84,8 +84,8 @@ const styles = StyleSheet.create({
         justifyContent: 'center'
     },
     button: {
-width:52,
-        height:52,
+width:60,
+        height:60,
         position: 'absolute',
         alignItems: 'center',
         justifyContent: 'center',

@@ -7,6 +7,8 @@ import {BottomTabScreenProps} from '@react-navigation/bottom-tabs';
 import {CompositeScreenProps, NavigatorScreenParams} from '@react-navigation/native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import Games from "./src/screens/Home/Games";
+import CreateAIAdventure from "./src/screens/learn/CreateAIAdventure";
+import CreatingAdventure from "./src/screens/learn/CreatingAdventure";
 
 
 declare global {
@@ -21,6 +23,10 @@ export type RootStackParamList = {
     SeeCommunity: NavigatorScreenParams<CommunityStackParamList> | undefined;
     Dashboard: NavigatorScreenParams<RootTabParamList> | undefined;
     EditProfile: undefined;
+    CreateAIAdventure: undefined;
+    CreatingAdventure: {
+        adventureTitle:string
+    };
     Wallet: undefined;
     Leaderboard: undefined;
     Badges: undefined;

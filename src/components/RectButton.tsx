@@ -19,11 +19,12 @@ export function RectButton(props: ButtonProps) {
 
         }]}>
 
-           <ImageBackground resizeMode={'contain'} style={[props?.style,{
+           <ImageBackground resizeMode={'cover'} style={[props?.style,{
                height: heightPixel(40),
                alignItems: 'center',
                flexDirection:'row',
                justifyContent: 'center',
+
            }]}  source={require('../assets/images/Rectangle.png')}>
             {props.children}
            </ImageBackground>

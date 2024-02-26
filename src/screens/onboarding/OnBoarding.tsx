@@ -20,7 +20,7 @@ const slides = [
 
     {
         id: '2',
-        imagePath: require('../../assets/images/onboarding/progressbar.png'),
+        imagePath: require('../../assets/images/onboarding/GameSlide.png'),
         title: 'Games',
         description: 'Play various genre of games in story mode and real time multiplayer with your friendsE',
     },
@@ -32,7 +32,7 @@ const slides = [
     },
     {
         id: '4',
-        imagePath: require('../../assets/images/onboarding/Community.png'),
+        imagePath: require('../../assets/images/onboarding/DiscoverSlide.png'),
         title: 'Discover',
         description: 'Explore web3 apps in our curated store to find useful products for your daily lives',
     },
