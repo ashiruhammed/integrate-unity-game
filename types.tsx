@@ -9,6 +9,7 @@ import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import Games from "./src/screens/Home/Games";
 import CreateAIAdventure from "./src/screens/learn/CreateAIAdventure";
 import CreatingAdventure from "./src/screens/learn/CreatingAdventure";
+import DiscoverProducts from "./src/screens/discover/DiscoverProducts";
 
 
 declare global {
@@ -28,6 +29,7 @@ export type RootStackParamList = {
         adventureTitle:string
     };
     Wallet: undefined;
+    DiscoverProducts: undefined;
     Leaderboard: undefined;
     Badges: undefined;
     Settings: undefined;

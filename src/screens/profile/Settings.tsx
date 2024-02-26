@@ -286,7 +286,7 @@ const Settings = ({navigation}: RootStackScreenProps<'Settings'>) => {
                         <View style={styles.utilityRow}>
                             <View style={styles.utilityRowBody}>
 
-                                <Ionicons name="md-compass-outline" size={20} color={textColor}/>
+                                <Ionicons name="compass-outline" size={20} color={textColor}/>
                                 <Text style={[styles.utilityRowTitle, {
                                     color: textColor
                                 }]}>
@@ -315,7 +315,7 @@ const Settings = ({navigation}: RootStackScreenProps<'Settings'>) => {
 
                         <View style={styles.utilityRow}>
                             <View style={styles.utilityRowBody}>
-                                <Ionicons name="md-trophy-outline" size={20} color={textColor}/>
+                                <Ionicons name="trophy-outline" size={20} color={textColor}/>
 
                                 <Text style={[styles.utilityRowTitle, {
                                     color: textColor
@@ -482,7 +482,7 @@ const Settings = ({navigation}: RootStackScreenProps<'Settings'>) => {
                             label="Confirm password"/>
 
                         <View style={styles.warningWrap}>
-                            <Ionicons name="ios-information-circle-outline" size={14} color="black"/>
+                            <Ionicons name="information-circle-outline" size={14} color="black"/>
                             <Text style={[styles.warning, {
                                 color: textColor
                             }]}>
@@ -514,7 +514,7 @@ const Settings = ({navigation}: RootStackScreenProps<'Settings'>) => {
                         </Text>
 
                         <TouchableOpacity onPress={deleteAccount} style={styles.deleteButton}>
-                            <Ionicons name="md-trash-sharp" size={20} color="white"/>
+                            <Ionicons name="trash-sharp" size={20} color="white"/>
                             <Text style={[styles.utilityTitle, {
                                 color: "#fff",
                                 marginLeft: 5,

@@ -67,6 +67,7 @@ import CommentScreen from "../screens/communities/CommentScreen";
 import ReplyComment from "../screens/communities/seeAll/ReplyComment";
 import CreateAIAdventure from "../screens/learn/CreateAIAdventure";
 import CreatingAdventure from "../screens/learn/CreatingAdventure";
+import DiscoverProducts from "../screens/discover/DiscoverProducts";
 
 const styles = StyleSheet.create({
     displayPhoto: {
@@ -345,6 +346,7 @@ function RootNavigator() {
                         <Stack.Screen name="AllBadges" component={AllBadges}/>
                         <Stack.Screen name="CreateAIAdventure" component={CreateAIAdventure}/>
                         <Stack.Screen name="CreatingAdventure" component={CreatingAdventure}/>
+                        <Stack.Screen name="DiscoverProducts" component={DiscoverProducts}/>
 
 
                         <Stack.Screen name="Notifications" options={{

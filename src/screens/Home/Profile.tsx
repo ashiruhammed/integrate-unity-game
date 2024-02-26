@@ -92,7 +92,7 @@ const Profile = ({navigation}: RootTabScreenProps<'Profile'>) => {
     })
 
     useRefreshOnFocus(refetch)
-    const openScreen = (screen: 'EditProfile' | 'Wallet' | 'Leaderboard' | 'Badges' | 'Settings' | 'MyReferrals') => {
+    const openScreen = (screen: 'EditProfile' | 'DiscoverProducts' | 'Leaderboard' | 'Badges' | 'Settings' | 'MyReferrals') => {
         navigation.navigate(screen)
     }
 
@@ -364,26 +364,7 @@ const Profile = ({navigation}: RootTabScreenProps<'Profile'>) => {
                     </TouchableOpacity>
 
 
-                    <TouchableOpacity onPress={() => openScreen('Wallet')} activeOpacity={0.9}
-                                      style={styles.profileButton}>
 
-                        <View style={[styles.profileButtonIcon, {
-                            backgroundColor: "#4F1F80"
-                        }]}>
-                            <Ionicons name="wallet-outline" size={24} color="#fff"/>
-
-                        </View>
-
-                        <View style={styles.profileButtonBody}>
-                            <Text style={[styles.profileButtonText, {
-                                color: textColor,
-                            }]}>
-                                Wallet
-                            </Text>
-                        </View>
-
-                        <Octicons name="chevron-right" size={20} color={textColor}/>
-                    </TouchableOpacity>
 
 
                     <TouchableOpacity onPress={() => openScreen('Leaderboard')} activeOpacity={0.9}
@@ -406,14 +387,12 @@ const Profile = ({navigation}: RootTabScreenProps<'Profile'>) => {
                         <Octicons name="chevron-right" size={20} color={textColor}/>
                     </TouchableOpacity>
 
-
-                    <TouchableOpacity onPress={() => openScreen('Badges')} activeOpacity={0.9}
+  <TouchableOpacity onPress={() => openScreen('DiscoverProducts')} activeOpacity={0.9}
                                       style={styles.profileButton}>
 
                         <View style={[styles.profileButtonIcon, {
-                            backgroundColor: "#FFBD26"
+                            backgroundColor: "#97C602"
                         }]}>
-
                             <MaterialCommunityIcons name="medal-outline" size={24} color="#fff"/>
                         </View>
 
@@ -421,12 +400,15 @@ const Profile = ({navigation}: RootTabScreenProps<'Profile'>) => {
                             <Text style={[styles.profileButtonText, {
                                 color: textColor,
                             }]}>
-                                My Badges
+                                Discover Trending Products
                             </Text>
                         </View>
 
                         <Octicons name="chevron-right" size={20} color={textColor}/>
                     </TouchableOpacity>
+
+
+
 
 
                     <TouchableOpacity onPress={() => openScreen('Settings')} activeOpacity={0.9}

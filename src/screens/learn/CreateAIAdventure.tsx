@@ -26,8 +26,6 @@ import TextInput from "../../components/inputs/TextInput";
 import {RectButton} from "../../components/RectButton";
 
 
-
-
 const formSchema = yup.object().shape({
 
     contract: yup.string().required('Title is required'),
@@ -35,9 +33,7 @@ const formSchema = yup.object().shape({
 });
 
 
-
-
-const CreateAIAdventure = ({navigation}:RootStackScreenProps<'CreateAIAdventure'>) => {
+const CreateAIAdventure = ({navigation}: RootStackScreenProps<'CreateAIAdventure'>) => {
 
 
     const dispatch = useAppDispatch()
@@ -78,7 +74,6 @@ const CreateAIAdventure = ({navigation}:RootStackScreenProps<'CreateAIAdventure'
         })
 
 
-
     const {
         resetForm,
         handleChange, handleSubmit, handleBlur,
@@ -99,9 +94,9 @@ const CreateAIAdventure = ({navigation}:RootStackScreenProps<'CreateAIAdventure'
         onSubmit: (values) => {
             const {contract} = values;
             const body = JSON.stringify({email: ''})
-navigation.navigate('CreatingAdventure',{
-    title:contract
-})
+            navigation.navigate('CreatingAdventure', {
+                adventureTitle: contract
+            })
         }
     });
 
@@ -116,90 +111,90 @@ navigation.navigate('CreatingAdventure',{
             }]} scrollEnabled
                 showsVerticalScrollIndicator={false}>
 
-            <View style={styles.topBar}>
+                <View style={styles.topBar}>
 
-                <View style={styles.leftButton}>
-                    <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.8} style={styles.backButton}>
+                    <View style={styles.leftButton}>
+                        <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.8}
+                                          style={styles.backButton}>
 
-                        <AntDesign name="arrowleft" size={30} color="black" />
-                    </TouchableOpacity>
-                    <View style={styles.pointWrap}>
-                        <Ionicons name="gift" size={16} color="#22BB33"/>
-                        <Text style={styles.pointsText}>20000</Text>
+                            <AntDesign name="arrowleft" size={30} color="black"/>
+                        </TouchableOpacity>
+                        <View style={styles.pointWrap}>
+                            <Ionicons name="gift" size={16} color="#22BB33"/>
+                            <Text style={styles.pointsText}>20000</Text>
+                        </View>
                     </View>
+
+                    <View style={styles.rightButton}>
+
+                        <ImageBackground style={styles.streaKIcon} resizeMode={'contain'}
+                                         source={require('../../assets/images/streakicon.png')}>
+                            <Text style={styles.streakText}> 200</Text>
+                        </ImageBackground>
+
+                        <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}
+                                          style={styles.roundTopBtn}>
+                            {
+                                notifications?.pages[0]?.data?.result.length > 0 &&
+                                <View style={styles.dot}/>
+                            }
+                            <Octicons name="bell-fill" size={22} color={"#000"}/>
+                        </TouchableOpacity>
+
+                    </View>
+
                 </View>
 
-                <View style={styles.rightButton}>
 
-                    <ImageBackground style={styles.streaKIcon} resizeMode={'contain'}
-                                     source={require('../../assets/images/streakicon.png')}>
-                        <Text style={styles.streakText}> 200</Text>
-                    </ImageBackground>
+                <View style={styles.bodyCreate}>
+                    <Image source={require('../../assets/images/gateway-adaptive.png')} style={styles.gatewayIcon}/>
+                    <Text style={styles.bodyText}>
+                        Let <Text style={{color: Colors.primaryColor}}>Learning</Text> help you
+                        become the best version of <Text style={{color: Colors.primaryColor}}>yourself</Text>.
+                    </Text>
 
-                    <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}
-                                      style={styles.roundTopBtn}>
-                        {
-                            notifications?.pages[0]?.data?.result.length > 0 &&
-                            <View style={styles.dot}/>
-                        }
-                        <Octicons name="bell-fill" size={22} color={"#000"}/>
-                    </TouchableOpacity>
+                    <TextInput
+
+                        placeholder="What are smart contracts?"
+                        keyboardType={"default"}
+                        touched={touched.contract}
+                        error={touched.contract && errors.contract}
+                        onFocus={() => setFocusContract(true)}
+                        onChangeText={(e) => {
+                            handleChange('contract')(e);
+
+                        }}
+                        onBlur={(e) => {
+                            handleBlur('contract')(e);
+                            setFocusContract(false);
+                        }}
+
+                        focus={focusContract}
+                        value={values.contract}
+                        label=""/>
+
+
+                    <RectButton disabled={!isValid} style={{
+
+                        width: widthPixel(250)
+                    }} onPress={() => handleSubmit()}>
+
+
+                        <Text style={styles.buttonText}>
+                            Create new adventure
+
+                        </Text>
+
+                    </RectButton>
 
                 </View>
 
-            </View>
 
-
-
-            <View style={styles.bodyCreate}>
-                <Image source={require('../../assets/images/gateway-adaptive.png')} style={styles.gatewayIcon}/>
-                <Text style={styles.bodyText}>
-                    Let <Text style={{color:Colors.primaryColor}}>Learning</Text> help you
-                    become the best version of <Text style={{color:Colors.primaryColor}}>yourself</Text>.
-                </Text>
-
-                <TextInput
-
-                    placeholder="What are smart contracts?"
-                    keyboardType={"default"}
-                    touched={touched.contract}
-                    error={touched.contract && errors.contract}
-                    onFocus={() => setFocusContract(true)}
-                    onChangeText={(e) => {
-                        handleChange('contract')(e);
-
-                    }}
-                    onBlur={(e) => {
-                        handleBlur('contract')(e);
-                        setFocusContract(false);
-                    }}
-
-                    focus={focusContract}
-                    value={values.contract}
-                    label=""/>
-
-
-                <RectButton disabled={!isValid} style={{
-
-                    width: widthPixel(250)
-                }} onPress={() => handleSubmit()}>
-
-
-                            <Text style={styles.buttonText}>
-                                Create new adventure
-
-                            </Text>
-
-                </RectButton>
-
-            </View>
-
-
-</KeyboardAwareScrollView>
+            </KeyboardAwareScrollView>
 
         </SafeAreaView>
 
-            );
+    );
 };
 
 const styles = StyleSheet.create({
@@ -235,7 +230,7 @@ const styles = StyleSheet.create({
         width: '15%',
         height: '100%',
         justifyContent: 'flex-start',
-flexDirection:'row',
+        flexDirection: 'row',
 
         alignItems: 'center',
     },
@@ -297,25 +292,25 @@ flexDirection:'row',
         backgroundColor: Colors.errorRed,
         borderRadius: 15,
     },
-    bodyCreate:{
-        width:'90%',
-        alignItems:'center',
-        justifyContent:'space-evenly',
-        height:heightPixel(500),
+    bodyCreate: {
+        width: '90%',
+        alignItems: 'center',
+        justifyContent: 'space-evenly',
+        height: heightPixel(500),
 
     },
-    gatewayIcon:{
-        width:250,
-        height:150,
-        objectFit:'cover'
+    gatewayIcon: {
+        width: 250,
+        height: 150,
+        objectFit: 'cover'
     },
-    bodyText:{
-        fontSize:fontPixel(24),
-        fontFamily:Fonts.quicksandSemiBold,
-        textAlign:'center',
-        lineHeight:30
+    bodyText: {
+        fontSize: fontPixel(24),
+        fontFamily: Fonts.quicksandSemiBold,
+        textAlign: 'center',
+        lineHeight: 30
     },
-    buttonText:{
+    buttonText: {
         position: 'absolute',
         fontSize: fontPixel(16),
         color: "#fff",

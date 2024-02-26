@@ -334,13 +334,13 @@ const styles = StyleSheet.create({
         paddingBottom: Platform.OS === 'ios' ? -40 : 0
     },
     pageTitleWrap:{
-        width: '100%',
+        width: '90%',
     marginVertical:pixelSizeVertical(10),
         flexDirection: 'row',
         justifyContent: 'flex-start',
     },
     pageTitle:{
-        fontSize: fontPixel(16),
+        fontSize: fontPixel(24),
         fontFamily: Fonts.quickSandBold
     },
 
