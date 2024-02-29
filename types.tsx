@@ -11,6 +11,7 @@ import CreateAIAdventure from "./src/screens/learn/CreateAIAdventure";
 import CreatingAdventure from "./src/screens/learn/CreatingAdventure";
 import DiscoverProducts from "./src/screens/discover/DiscoverProducts";
 import ProductView from "./src/screens/discover/ProductView";
+import FundamentalData from "./src/screens/discover/create/FundamentalData";
 
 
 declare global {
@@ -31,6 +32,8 @@ export type RootStackParamList = {
     };
     Wallet: undefined;
     DiscoverProducts: undefined;
+    ProductInformation: undefined;
+    FundamentalData: undefined;
     ProductView: {
         id?:string
     };

@@ -208,7 +208,7 @@ const DiscoverProducts = ({navigation}: RootStackScreenProps<'DiscoverProducts'>
     const numColumns = 2;
 
     const create = () => {
-
+navigation.navigate('ProductInformation')
     }
     const viewProduct = () => {
 navigation.navigate('ProductView')

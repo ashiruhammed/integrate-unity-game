@@ -69,6 +69,8 @@ import CreateAIAdventure from "../screens/learn/CreateAIAdventure";
 import CreatingAdventure from "../screens/learn/CreatingAdventure";
 import DiscoverProducts from "../screens/discover/DiscoverProducts";
 import ProductView from "../screens/discover/ProductView";
+import ProductInformation from "../screens/discover/create/ProductInformation";
+import FundamentalData from "../screens/discover/create/FundamentalData";
 
 const styles = StyleSheet.create({
     displayPhoto: {
@@ -349,6 +351,8 @@ function RootNavigator() {
                         <Stack.Screen name="CreatingAdventure" component={CreatingAdventure}/>
                         <Stack.Screen name="DiscoverProducts" component={DiscoverProducts}/>
                         <Stack.Screen name="ProductView" component={ProductView}/>
+                        <Stack.Screen name="ProductInformation" component={ProductInformation}/>
+                        <Stack.Screen name="FundamentalData" component={FundamentalData}/>
 
 
                         <Stack.Screen name="Notifications" options={{

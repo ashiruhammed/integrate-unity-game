@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useMemo, useRef, useState} from 'react';
 
 import {
     Text,
@@ -23,6 +23,20 @@ import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPix
 import {Fonts} from "../../constants/Fonts";
 import CommentInput from "../../components/inputs/CommentInput";
 import CommentIcon from "../../assets/images/svg/CommentIcon";
+import {
+    BottomSheetBackdrop,
+    BottomSheetModal,
+    BottomSheetModalProvider,
+    BottomSheetScrollView
+} from "@gorhom/bottom-sheet";
+import AccordionData from "../../components/accordion/AccordionData";
+import Accordion from "../../components/accordion/Accordion";
+import {
+    BottomSheetDefaultBackdropProps
+} from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
+import * as yup from "yup";
+import {useFormik} from "formik";
+import TextInput from "../../components/inputs/TextInput";
 
 
 const Products = [
@@ -78,10 +92,15 @@ interface props {
 }
 
 
+const formSchema = yup.object().shape({
+
+    email: yup.string().email("Please enter a valid email address").required('Email is required'),
 
 
+});
 
-const SimilarProductCardItem = ({item}:props) => {
+
+const SimilarProductCardItem = ({item}: props) => {
     const dataSlice = useAppSelector(state => state.data)
     const {theme} = dataSlice
     const backgroundColor = theme == 'light' ? "#FFFFFF" : "#141414"
@@ -122,8 +141,6 @@ const SimilarProductCardItem = ({item}:props) => {
             </View>
 
 
-
-
             <Text style={[styles.bodyText, {
                 color: tintText,
                 alignSelf: 'flex-start'
@@ -145,12 +162,6 @@ const SimilarProductCardItem = ({item}:props) => {
         </View>
     )
 }
-
-
-
-
-
-
 
 
 const ProductCardItem = ({item}: props) => {
@@ -239,561 +250,724 @@ const ProductView = ({navigation}: RootStackScreenProps<'ProductView'>) => {
     ), [])
 
 
+    // ref
+    const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+
+    // variables
+    const snapPoints = useMemo(() => ["25%", "75%","85%"], []);
+
+    // callbacks
+    const handlePresentModalPress = useCallback(() => {
+
+        bottomSheetModalRef.current?.present();
+    }, []);
+    const handleClose = useCallback(() => {
+        bottomSheetModalRef.current?.close();
+    }, []);
+
+    const renderBackdrop = useCallback(
+        (props: React.JSX.IntrinsicAttributes & BottomSheetDefaultBackdropProps) => (
+            <BottomSheetBackdrop
+                {...props}
+                disappearsOnIndex={0}
+                appearsOnIndex={1}
+            />
+        ),
+        []
+    );
+
+
+    const {
+        resetForm,
+        handleChange, handleSubmit, handleBlur,
+        setFieldValue,
+        isSubmitting,
+        setSubmitting,
+        values,
+        errors,
+        touched,
+        isValid
+    } = useFormik({
+        validationSchema: formSchema,
+        initialValues: {
+
+            email: '',
+
+        },
+        onSubmit: (values) => {
+            const {email} = values;
+            const body = JSON.stringify({email: email.toLowerCase()})
+
+
+        }
+    });
+
+
     return (
-        <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
 
-            <KeyboardAwareScrollView
+        <>
+            <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
 
-                style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {
-                backgroundColor
-            }]} scrollEnabled
-                showsVerticalScrollIndicator={false}>
+                <KeyboardAwareScrollView
+
+                    style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {
+                    backgroundColor
+                }]} scrollEnabled
+                    showsVerticalScrollIndicator={false}>
 
 
-                <View style={styles.topBar}>
+                    <View style={styles.topBar}>
 
-                    <View style={styles.leftButton}>
+                        <View style={styles.leftButton}>
 
-                        <View style={styles.pointWrap}>
-                            <Ionicons name="gift" size={16} color="#22BB33"/>
-                            <Text style={styles.pointsText}>20000</Text>
+                            <View style={styles.pointWrap}>
+                                <Ionicons name="gift" size={16} color="#22BB33"/>
+                                <Text style={styles.pointsText}>20000</Text>
+                            </View>
                         </View>
+
+                        <View style={styles.rightButton}>
+
+                            <ImageBackground style={styles.streaKIcon} resizeMode={'contain'}
+                                             source={require('../../assets/images/streakicon.png')}>
+                                <Text style={styles.streakText}> 200</Text>
+                            </ImageBackground>
+
+                            <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}
+                                              style={styles.roundTopBtn}>
+                                {
+                                    notifications?.pages[0]?.data?.result.length > 0 &&
+                                    <View style={styles.dot}/>
+                                }
+                                <Octicons name="bell-fill" size={22} color={"#000"}/>
+                            </TouchableOpacity>
+
+                        </View>
+
                     </View>
 
-                    <View style={styles.rightButton}>
 
-                        <ImageBackground style={styles.streaKIcon} resizeMode={'contain'}
-                                         source={require('../../assets/images/streakicon.png')}>
-                            <Text style={styles.streakText}> 200</Text>
-                        </ImageBackground>
+                    <View style={styles.navButtonWrap}>
+                        <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.8}
+                                          style={styles.navButton}>
 
-                        <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}
-                                          style={styles.roundTopBtn}>
-                            {
-                                notifications?.pages[0]?.data?.result.length > 0 &&
-                                <View style={styles.dot}/>
-                            }
-                            <Octicons name="bell-fill" size={22} color={"#000"}/>
+                            <AntDesign name="arrowleft" size={24} color="black"/>
+                            <Text style={[styles.backText, {
+                                color: darkTextColor
+                            }]}>Back</Text>
                         </TouchableOpacity>
 
+
+                        <TouchableOpacity activeOpacity={0.8}
+                                          style={styles.rightNavButton}>
+                            <MaterialIcons name="outlined-flag" size={24} color={Colors.primaryColor}/>
+
+                            <Text style={styles.reportText}>Report</Text>
+                        </TouchableOpacity>
+
+
                     </View>
 
-                </View>
 
-
-                <View style={styles.navButtonWrap}>
-                    <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.8}
-                                      style={styles.navButton}>
-
-                        <AntDesign name="arrowleft" size={24} color="black"/>
-                        <Text style={[styles.backText, {
-                            color: darkTextColor
-                        }]}>Back</Text>
-                    </TouchableOpacity>
-
-
-                    <TouchableOpacity activeOpacity={0.8}
-                                      style={styles.rightNavButton}>
-                        <MaterialIcons name="outlined-flag" size={24} color={Colors.primaryColor}/>
-
-                        <Text style={styles.reportText}>Report</Text>
-                    </TouchableOpacity>
-
-
-                </View>
-
-
-                <View style={styles.claimProduct}>
-                    <Text style={styles.claimProductText}>
-                        Will you like to claim this product?
-                    </Text>
-                </View>
-
-
-                <View style={styles.productDashInfo}>
-
-                    <View style={styles.productsCardImageWrap}>
-                        <Image
-                            source={{uri: 'https://images.unsplash.com/photo-1611488006018-95b79a137ff5?q=80&w=2953&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'}}
-                            style={styles.productsCardImage}
-                        />
-                    </View>
-
-                    <Text style={styles.productTitle}>
-                        Ether Vault
-                    </Text>
-
-                    <Text style={styles.productDescription}>
-                        A secure and easy-to-use wallet for managing your Ethereum and ERC-20...
-                    </Text>
-
-                </View>
-                <View style={styles.socialPlug}>
-                    <Pressable style={styles.shareBtn}>
-                        <Ionicons name="paper-plane" size={20} color="#BFBFBF"/>
+                    <Pressable onPress={handlePresentModalPress} style={styles.claimProduct}>
+                        <Text style={styles.claimProductText}>
+                            Will you like to claim this product?
+                        </Text>
                     </Pressable>
 
 
-                    <Pressable style={styles.shareBtn}>
-                        <Fontisto name="twitter" size={20} color="#BFBFBF"/>
-                    </Pressable>
+                    <View style={styles.productDashInfo}>
 
-                    <Pressable style={styles.shareBtn}>
-
-                        <FontAwesome name="facebook" size={20} color="#BFBFBF"/>
-                    </Pressable>
-                </View>
-
-
-                <View style={styles.actionBtnWrap}>
-                    <TouchableOpacity style={[styles.actionBtn, {
-                        backgroundColor: Colors.primaryColor
-                    }]}>
-                        <Fontisto name="world-o" size={14} color="#fff"/>
-                        <Text style={[styles.buttonText, {
-                            color: "#fff"
-                        }]}>
-                            Visit Website
-                        </Text>
-                    </TouchableOpacity>
-
-
-                    <TouchableOpacity style={[styles.actionBtn, {
-                        backgroundColor: "#F2F2F2"
-                    }]}>
-                        <FontAwesome name="thumbs-up" size={14} color={Colors.primaryColor}/>
-                        <Text style={[styles.buttonText, {
-                            color: Colors.primaryColor
-                        }]}>
-                            Thumbs up
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-
-
-                <View style={styles.productsContainer}>
-
-
-                    <FlatList
-
-                        data={Products}
-                        keyExtractor={keyExtractor}
-                        horizontal
-                        pagingEnabled
-                        scrollEnabled
-                        snapToAlignment="center"
-                        scrollEventThrottle={16}
-                        decelerationRate={"fast"}
-                        showsHorizontalScrollIndicator={false}
-                        renderItem={renderItem}
-                    />
-                </View>
-
-
-                <View style={styles.copyBoxWrap}>
-                    <Text style={styles.sectionTitle}>
-                        Shareable Link
-                    </Text>
-                    <TouchableOpacity style={styles.copyBox}>
-
-                        <Text style={styles.copyLinkText}>
-                            https://gatewayapp.co/ether...
-                        </Text>
-
-                        <Pressable style={styles.copyBtn}>
-                            <Text style={styles.copyBtnText}>Copy</Text>
-                        </Pressable>
-                    </TouchableOpacity>
-
-
-                </View>
-
-
-                <View style={styles.tagsBoxWrap}>
-
-                    <View style={styles.tagsWrap}>
-                        <Text style={styles.tagTitle}>
-                            Tags
-                        </Text>
-                        <View style={styles.tagItemContainer}>
-                            <View style={styles.tagItem}>
-                                <Text style={styles.tagItemText}>
-                                    SaaS
-                                </Text>
-                            </View>
-                        </View>
-                    </View>
-
-
-                    <View style={styles.countriesWrap}>
-                        <Text style={styles.tagTitle}>
-                            Supported Countries
-                        </Text>
-                        <View style={styles.tagItemContainer}>
-                            <View style={styles.tagItem}>
-                                <Image
-                                    source={{uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Flag_of_Egypt.svg/800px-Flag_of_Egypt.svg.png'}}
-                                    style={styles.flagIcon}/>
-                                <Text style={styles.tagItemText}>
-                                    Egypt
-                                </Text>
-                            </View>
-
-                            <View style={styles.tagItem}>
-                                <Image
-                                    source={{uri: 'https://media.istockphoto.com/id/652740802/vector/nigeria.jpg?s=612x612&w=0&k=20&c=CzqO6nCnCM6KXJp-nZWBV3oxRI5963lwdnQ5TT4TN7Q='}}
-                                    style={styles.flagIcon}/>
-                                <Text style={styles.tagItemText}>
-                                    Nigeria
-                                </Text>
-                            </View>
-
-                            <View style={styles.tagItem}>
-                                <Image source={{uri: 'https://cdn.britannica.com/15/15-004-B5D6BF80/Flag-Kenya.jpg'}}
-                                       style={styles.flagIcon}/>
-                                <Text style={styles.tagItemText}>
-                                    Kenya
-                                </Text>
-                            </View>
-
-                            <View style={styles.tagItem}>
-                                <Image
-                                    source={{uri: 'https://cdn.britannica.com/27/4227-004-32423B42/Flag-South-Africa.jpg'}}
-                                    style={styles.flagIcon}/>
-                                <Text style={styles.tagItemText}>
-                                    South Africa
-                                </Text>
-                            </View>
-
-                            <TouchableOpacity activeOpacity={0.8} style={[styles.tagItem, {
-                                backgroundColor: '#F2F2F2'
-                            }]}>
-                                <Text style={styles.seeMoreText}> See all</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-
-                </View>
-
-
-                <View style={styles.aboutBoxWrap}>
-                    <Text style={styles.tagTitle}>
-                        About Ether Vault
-                    </Text>
-                    <Text style={styles.authorText}>
-                        by Declan Rice
-                    </Text>
-
-                    <Text style={styles.aboutText}>
-                        EtherVault is a secure and user-friendly wallet designed for managing Ethereum and ERC-20
-                        tokens. It is built on the Ethereum blockchain and allows users to store, send, and receive
-                        transactions in a decentralized and trustless manner.
-                        One of the key features of EtherVault is its intuitive and easy-to-use interface, which makes it
-                        ideal for...
-                    </Text>
-
-                    <TouchableOpacity activeOpacity={0.8} style={[styles.tagItem, {
-                        backgroundColor: '#F2F2F2',
-                        justifyContent: 'flex-start',
-                        paddingHorizontal: 0
-                    }]}>
-                        <Text style={[styles.seeMoreText, {
-                            fontFamily: Fonts.quicksandSemiBold
-                        }]}> See more</Text>
-                    </TouchableOpacity>
-                </View>
-
-
-                <View style={styles.ourTeam}>
-                    <View style={{marginBottom: 5}}>
-                        <Text style={[styles.friendsOnlineTitle, {
-                            color: textColor
-                        }]}>
-                            Our Wonderful Team
-                        </Text>
-                    </View>
-
-
-                    <FlatList
-
-                        data={TeamData}
-                        keyExtractor={keyExtractor}
-                        horizontal
-                        pagingEnabled
-                        scrollEnabled
-                        snapToAlignment="center"
-                        scrollEventThrottle={16}
-                        decelerationRate={"fast"}
-                        showsHorizontalScrollIndicator={false}
-                        renderItem={renderTeamItem}
-                    />
-
-                </View>
-
-
-                <View style={styles.wrapCommentBox}>
-
-                    <View style={styles.userAvatar}>
-                        <Image source={{uri: "https://cdn.artstation.com/p/thumbnails/000/550/238/thumb.jpg"}}
-                               style={styles.userAvatarImage}/>
-                    </View>
-                    <CommentInput placeholder={'Leave a comment...'} value={commentText}/>
-
-
-                </View>
-
-
-                <View style={styles.commentCard}>
-                    <View style={styles.commentCardTop}>
-                        <View style={styles.commentUserAvatar}>
-                            <Image source={{uri: "https://cdn.artstation.com/p/thumbnails/000/550/238/thumb.jpg"}}
-                                   style={styles.userAvatarImage}/>
-                        </View>
-
-                        <View style={styles.commentBody}>
-
-                            <View style={styles.commentDetails}>
-                                <Text style={styles.userName}>
-                                    @isabellachills
-                                </Text>
-
-                                <Entypo name="dots-three-horizontal" size={24} color="#D9D9D9"/>
-                            </View>
-
-                            <Text style={styles.commentBodyText}>
-
-                                As we all know, keeping your digital assets safe is crucial in the world of
-                                cryptocurrencies. CryptoShield offers a simple and effective way to secure your digital
-                                assets, without relying on a centralized service. By storing your assets on the Ethereum
-                                blockchain, CryptoShield ensures that you have full control over your private keys and
-                                that your funds are stored in a trustless and decentralized manner.
-                            </Text>
-
-                        </View>
-                    </View>
-
-                    <View style={styles.commentCardBottom}>
-                        <View style={styles.usersComment}>
-
-                        </View>
-
-                        <Pressable style={styles.bottomBtn}>
-                            <CommentIcon/>
-                            <Text style={styles.bottomBtnText}>
-                                Reply
-                            </Text>
-                        </Pressable>
-
-
-                        <Pressable style={styles.bottomBtn}>
-                            <FontAwesome name="thumbs-up" size={18} color="#686868"/>
-                            <Text style={styles.bottomBtnText}>
-                                Thumbs up (200)
-                            </Text>
-                        </Pressable>
-
-                        <Pressable style={styles.bottomBtn}>
-
-                            <Text style={styles.bottomBtnText}>
-                                Share
-                            </Text>
-                        </Pressable>
-                    </View>
-
-
-                </View>
-                <View style={styles.commentCard}>
-                    <View style={styles.commentCardTop}>
-                        <View style={styles.commentUserAvatar}>
-                            <Image
-                                source={{uri: "https://img.freepik.com/premium-photo/3d-rendering-zoom-call-avatar_23-2149556774.jpg"}}
-                                style={styles.userAvatarImage}/>
-                        </View>
-
-                        <View style={styles.commentBody}>
-
-                            <View style={styles.commentDetails}>
-                                <Text style={styles.userName}>
-                                    @destinykams
-                                </Text>
-
-                                <Entypo name="dots-three-horizontal" size={24} color="#D9D9D9"/>
-                            </View>
-
-                            <Text style={styles.commentBodyText}>
-
-                                As we all know, keeping your digital assets safe is crucial in the world of
-                                cryptocurrencies. CryptoShield offers a simple and effective way to secure your digital
-                                assets, without relying on a centralized service. By storing your assets on the Ethereum
-                                blockchain, CryptoShield ensures that you have full control over your private keys and
-                                that your funds are stored in a trustless and decentralized manner.
-                            </Text>
-
-                        </View>
-                    </View>
-
-                    <View style={styles.commentCardBottom}>
-                        <View style={styles.usersComment}>
-
-                        </View>
-
-                        <Pressable style={styles.bottomBtn}>
-                            <CommentIcon/>
-                            <Text style={styles.bottomBtnText}>
-                                Reply
-                            </Text>
-                        </Pressable>
-
-
-                        <Pressable style={styles.bottomBtn}>
-                            <FontAwesome name="thumbs-up" size={18} color="#686868"/>
-                            <Text style={styles.bottomBtnText}>
-                                Thumbs up (200)
-                            </Text>
-                        </Pressable>
-
-                        <Pressable style={styles.bottomBtn}>
-
-                            <Text style={styles.bottomBtnText}>
-                                Share
-                            </Text>
-                        </Pressable>
-                    </View>
-
-
-                </View>
-
-
-                <View style={styles.statsVault}>
-
-                    <Text style={[styles.friendsOnlineTitle, {
-                        color: textColor
-                    }]}>
-                        Statistics on Ether Vault
-                    </Text>
-
-
-                    <View style={styles.vaultBox}>
-
-
-                        <View style={styles.vaultBoxImageWrap}>
+                        <View style={styles.productsCardImageWrap}>
                             <Image
                                 source={{uri: 'https://images.unsplash.com/photo-1611488006018-95b79a137ff5?q=80&w=2953&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'}}
                                 style={styles.productsCardImage}
                             />
                         </View>
 
-                        <View style={styles.vaultBoxBody}>
-                            <Text style={styles.vaultTitleBody}>
-                                Ether Vault
+                        <Text style={styles.productTitle}>
+                            Ether Vault
+                        </Text>
+
+                        <Text style={styles.productDescription}>
+                            A secure and easy-to-use wallet for managing your Ethereum and ERC-20...
+                        </Text>
+
+                    </View>
+                    <View style={styles.socialPlug}>
+                        <Pressable style={styles.shareBtn}>
+                            <Ionicons name="paper-plane" size={20} color="#BFBFBF"/>
+                        </Pressable>
+
+
+                        <Pressable style={styles.shareBtn}>
+                            <Fontisto name="twitter" size={20} color="#BFBFBF"/>
+                        </Pressable>
+
+                        <Pressable style={styles.shareBtn}>
+
+                            <FontAwesome name="facebook" size={20} color="#BFBFBF"/>
+                        </Pressable>
+                    </View>
+
+
+                    <View style={styles.actionBtnWrap}>
+                        <TouchableOpacity style={[styles.actionBtn, {
+                            backgroundColor: Colors.primaryColor
+                        }]}>
+                            <Fontisto name="world-o" size={14} color="#fff"/>
+                            <Text style={[styles.buttonText, {
+                                color: "#fff"
+                            }]}>
+                                Visit Website
                             </Text>
-                            <Text style={styles.vaultTextBody}>
-                                A secure and easy-to-use wallet for managing your Ethereum and ERC-20...
+                        </TouchableOpacity>
+
+
+                        <TouchableOpacity style={[styles.actionBtn, {
+                            backgroundColor: "#F2F2F2"
+                        }]}>
+                            <FontAwesome name="thumbs-up" size={14} color={Colors.primaryColor}/>
+                            <Text style={[styles.buttonText, {
+                                color: Colors.primaryColor
+                            }]}>
+                                Thumbs up
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+
+
+                    <View style={styles.productsContainer}>
+
+
+                        <FlatList
+
+                            data={Products}
+                            keyExtractor={keyExtractor}
+                            horizontal
+                            pagingEnabled
+                            scrollEnabled
+                            snapToAlignment="center"
+                            scrollEventThrottle={16}
+                            decelerationRate={"fast"}
+                            showsHorizontalScrollIndicator={false}
+                            renderItem={renderItem}
+                        />
+                    </View>
+
+
+                    <View style={styles.copyBoxWrap}>
+                        <Text style={styles.sectionTitle}>
+                            Shareable Link
+                        </Text>
+                        <TouchableOpacity style={styles.copyBox}>
+
+                            <Text style={styles.copyLinkText}>
+                                https://gatewayapp.co/ether...
+                            </Text>
+
+                            <Pressable style={styles.copyBtn}>
+                                <Text style={styles.copyBtnText}>Copy</Text>
+                            </Pressable>
+                        </TouchableOpacity>
+
+
+                    </View>
+
+
+                    <View style={styles.tagsBoxWrap}>
+
+                        <View style={styles.tagsWrap}>
+                            <Text style={styles.tagTitle}>
+                                Tags
+                            </Text>
+                            <View style={styles.tagItemContainer}>
+                                <View style={styles.tagItem}>
+                                    <Text style={styles.tagItemText}>
+                                        SaaS
+                                    </Text>
+                                </View>
+                            </View>
+                        </View>
+
+
+                        <View style={styles.countriesWrap}>
+                            <Text style={styles.tagTitle}>
+                                Supported Countries
+                            </Text>
+                            <View style={styles.tagItemContainer}>
+                                <View style={styles.tagItem}>
+                                    <Image
+                                        source={{uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Flag_of_Egypt.svg/800px-Flag_of_Egypt.svg.png'}}
+                                        style={styles.flagIcon}/>
+                                    <Text style={styles.tagItemText}>
+                                        Egypt
+                                    </Text>
+                                </View>
+
+                                <View style={styles.tagItem}>
+                                    <Image
+                                        source={{uri: 'https://media.istockphoto.com/id/652740802/vector/nigeria.jpg?s=612x612&w=0&k=20&c=CzqO6nCnCM6KXJp-nZWBV3oxRI5963lwdnQ5TT4TN7Q='}}
+                                        style={styles.flagIcon}/>
+                                    <Text style={styles.tagItemText}>
+                                        Nigeria
+                                    </Text>
+                                </View>
+
+                                <View style={styles.tagItem}>
+                                    <Image
+                                        source={{uri: 'https://cdn.britannica.com/15/15-004-B5D6BF80/Flag-Kenya.jpg'}}
+                                        style={styles.flagIcon}/>
+                                    <Text style={styles.tagItemText}>
+                                        Kenya
+                                    </Text>
+                                </View>
+
+                                <View style={styles.tagItem}>
+                                    <Image
+                                        source={{uri: 'https://cdn.britannica.com/27/4227-004-32423B42/Flag-South-Africa.jpg'}}
+                                        style={styles.flagIcon}/>
+                                    <Text style={styles.tagItemText}>
+                                        South Africa
+                                    </Text>
+                                </View>
+
+                                <TouchableOpacity activeOpacity={0.8} style={[styles.tagItem, {
+                                    backgroundColor: '#F2F2F2'
+                                }]}>
+                                    <Text style={styles.seeMoreText}> See all</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+
+                    </View>
+
+
+                    <View style={styles.aboutBoxWrap}>
+                        <Text style={styles.tagTitle}>
+                            About Ether Vault
+                        </Text>
+                        <Text style={styles.authorText}>
+                            by Declan Rice
+                        </Text>
+
+                        <Text style={styles.aboutText}>
+                            EtherVault is a secure and user-friendly wallet designed for managing Ethereum and ERC-20
+                            tokens. It is built on the Ethereum blockchain and allows users to store, send, and receive
+                            transactions in a decentralized and trustless manner.
+                            One of the key features of EtherVault is its intuitive and easy-to-use interface, which
+                            makes it
+                            ideal for...
+                        </Text>
+
+                        <TouchableOpacity activeOpacity={0.8} style={[styles.tagItem, {
+                            backgroundColor: '#F2F2F2',
+                            justifyContent: 'flex-start',
+                            paddingHorizontal: 0
+                        }]}>
+                            <Text style={[styles.seeMoreText, {
+                                fontFamily: Fonts.quicksandSemiBold
+                            }]}> See more</Text>
+                        </TouchableOpacity>
+                    </View>
+
+
+                    <View style={styles.ourTeam}>
+                        <View style={{marginBottom: 5}}>
+                            <Text style={[styles.friendsOnlineTitle, {
+                                color: textColor
+                            }]}>
+                                Our Wonderful Team
                             </Text>
                         </View>
-                    </View>
-
-                </View>
 
 
-                <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={styles.appStoreButton}>
-                        <Image source={{uri: 'https://miro.medium.com/v2/resize:fit:1400/1*V9-OPWpauGEi-JMp05RC_A.png'}}
-                               style={styles.logo}/>
+                        <FlatList
 
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.googlePlayButton}>
-                        <Image
-                            source={{uri: 'https://contentgrid.thdstatic.com/hdus/en_US/DTCCOMNEW/fetch/NexGen/ContentPage/androidbadgesbox2.png'}}
-                            style={styles.logo}/>
+                            data={TeamData}
+                            keyExtractor={keyExtractor}
+                            horizontal
+                            pagingEnabled
+                            scrollEnabled
+                            snapToAlignment="center"
+                            scrollEventThrottle={16}
+                            decelerationRate={"fast"}
+                            showsHorizontalScrollIndicator={false}
+                            renderItem={renderTeamItem}
+                        />
 
-                    </TouchableOpacity>
-                </View>
-
-                <View style={styles.noticeTextWrap}>
-                    <Text style={styles.commentBodyText}>
-                        Ether Vault by Declan Rice was hunted by David in SaaS, NFTs, DeFi. Made by Tosin, Emmanuel,
-                        David, Osazee, Joy, Susan, Richard. Featured on April 8th, 2023. Ether Vault is rated 5/5★ by 12
-                        users. This is Ether vault first launch.
-                    </Text>
-                </View>
-
-
-
-
-
-
-
-
-                <View style={styles.otherDetails}>
-
-                    <View style={styles.otherDetailsBox}>
-                        <Text style={styles.otherDetailsBoxTitle}>
-                            Thumbs up
-                        </Text>
-                        <Text style={styles.otherDetailsBoxNumber}>
-                            2000
-                        </Text>
                     </View>
 
 
-                    <View style={styles.otherDetailsBox}>
-                        <Text style={styles.otherDetailsBoxTitle}>
-                            Product of the week
+                    <View style={styles.wrapCommentBox}>
+
+                        <View style={styles.userAvatar}>
+                            <Image source={{uri: "https://cdn.artstation.com/p/thumbnails/000/550/238/thumb.jpg"}}
+                                   style={styles.userAvatarImage}/>
+                        </View>
+                        <CommentInput placeholder={'Leave a comment...'} value={commentText}/>
+
+
+                    </View>
+
+
+                    <View style={styles.commentCard}>
+                        <View style={styles.commentCardTop}>
+                            <View style={styles.commentUserAvatar}>
+                                <Image source={{uri: "https://cdn.artstation.com/p/thumbnails/000/550/238/thumb.jpg"}}
+                                       style={styles.userAvatarImage}/>
+                            </View>
+
+                            <View style={styles.commentBody}>
+
+                                <View style={styles.commentDetails}>
+                                    <Text style={styles.userName}>
+                                        @isabellachills
+                                    </Text>
+
+                                    <Entypo name="dots-three-horizontal" size={24} color="#D9D9D9"/>
+                                </View>
+
+                                <Text style={styles.commentBodyText}>
+
+                                    As we all know, keeping your digital assets safe is crucial in the world of
+                                    cryptocurrencies. CryptoShield offers a simple and effective way to secure your
+                                    digital
+                                    assets, without relying on a centralized service. By storing your assets on the
+                                    Ethereum
+                                    blockchain, CryptoShield ensures that you have full control over your private keys
+                                    and
+                                    that your funds are stored in a trustless and decentralized manner.
+                                </Text>
+
+                            </View>
+                        </View>
+
+                        <View style={styles.commentCardBottom}>
+                            <View style={styles.usersComment}>
+
+                            </View>
+
+                            <Pressable style={styles.bottomBtn}>
+                                <CommentIcon/>
+                                <Text style={styles.bottomBtnText}>
+                                    Reply
+                                </Text>
+                            </Pressable>
+
+
+                            <Pressable style={styles.bottomBtn}>
+                                <FontAwesome name="thumbs-up" size={18} color="#686868"/>
+                                <Text style={styles.bottomBtnText}>
+                                    Thumbs up (200)
+                                </Text>
+                            </Pressable>
+
+                            <Pressable style={styles.bottomBtn}>
+
+                                <Text style={styles.bottomBtnText}>
+                                    Share
+                                </Text>
+                            </Pressable>
+                        </View>
+
+
+                    </View>
+                    <View style={styles.commentCard}>
+                        <View style={styles.commentCardTop}>
+                            <View style={styles.commentUserAvatar}>
+                                <Image
+                                    source={{uri: "https://img.freepik.com/premium-photo/3d-rendering-zoom-call-avatar_23-2149556774.jpg"}}
+                                    style={styles.userAvatarImage}/>
+                            </View>
+
+                            <View style={styles.commentBody}>
+
+                                <View style={styles.commentDetails}>
+                                    <Text style={styles.userName}>
+                                        @destinykams
+                                    </Text>
+
+                                    <Entypo name="dots-three-horizontal" size={24} color="#D9D9D9"/>
+                                </View>
+
+                                <Text style={styles.commentBodyText}>
+
+                                    As we all know, keeping your digital assets safe is crucial in the world of
+                                    cryptocurrencies. CryptoShield offers a simple and effective way to secure your
+                                    digital
+                                    assets, without relying on a centralized service. By storing your assets on the
+                                    Ethereum
+                                    blockchain, CryptoShield ensures that you have full control over your private keys
+                                    and
+                                    that your funds are stored in a trustless and decentralized manner.
+                                </Text>
+
+                            </View>
+                        </View>
+
+                        <View style={styles.commentCardBottom}>
+                            <View style={styles.usersComment}>
+
+                            </View>
+
+                            <Pressable style={styles.bottomBtn}>
+                                <CommentIcon/>
+                                <Text style={styles.bottomBtnText}>
+                                    Reply
+                                </Text>
+                            </Pressable>
+
+
+                            <Pressable style={styles.bottomBtn}>
+                                <FontAwesome name="thumbs-up" size={18} color="#686868"/>
+                                <Text style={styles.bottomBtnText}>
+                                    Thumbs up (200)
+                                </Text>
+                            </Pressable>
+
+                            <Pressable style={styles.bottomBtn}>
+
+                                <Text style={styles.bottomBtnText}>
+                                    Share
+                                </Text>
+                            </Pressable>
+                        </View>
+
+
+                    </View>
+
+
+                    <View style={styles.statsVault}>
+
+                        <Text style={[styles.friendsOnlineTitle, {
+                            color: textColor
+                        }]}>
+                            Statistics on Ether Vault
                         </Text>
-                        <Text style={styles.otherDetailsBoxNumber}>
-                            x4
+
+
+                        <View style={styles.vaultBox}>
+
+
+                            <View style={styles.vaultBoxImageWrap}>
+                                <Image
+                                    source={{uri: 'https://images.unsplash.com/photo-1611488006018-95b79a137ff5?q=80&w=2953&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'}}
+                                    style={styles.productsCardImage}
+                                />
+                            </View>
+
+                            <View style={styles.vaultBoxBody}>
+                                <Text style={styles.vaultTitleBody}>
+                                    Ether Vault
+                                </Text>
+                                <Text style={styles.vaultTextBody}>
+                                    A secure and easy-to-use wallet for managing your Ethereum and ERC-20...
+                                </Text>
+                            </View>
+                        </View>
+
+                    </View>
+
+
+                    <View style={styles.buttonContainer}>
+                        <TouchableOpacity style={styles.appStoreButton}>
+                            <Image
+                                source={{uri: 'https://miro.medium.com/v2/resize:fit:1400/1*V9-OPWpauGEi-JMp05RC_A.png'}}
+                                style={styles.logo}/>
+
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.googlePlayButton}>
+                            <Image
+                                source={{uri: 'https://contentgrid.thdstatic.com/hdus/en_US/DTCCOMNEW/fetch/NexGen/ContentPage/androidbadgesbox2.png'}}
+                                style={styles.logo}/>
+
+                        </TouchableOpacity>
+                    </View>
+
+                    <View style={styles.noticeTextWrap}>
+                        <Text style={styles.commentBodyText}>
+                            Ether Vault by Declan Rice was hunted by David in SaaS, NFTs, DeFi. Made by Tosin, Emmanuel,
+                            David, Osazee, Joy, Susan, Richard. Featured on April 8th, 2023. Ether Vault is rated 5/5★
+                            by 12
+                            users. This is Ether vault first launch.
                         </Text>
                     </View>
 
 
-                    <View style={styles.otherDetailsBox}>
-                        <Text style={styles.otherDetailsBoxTitle}>
-                            All Time Ranking
-                        </Text>
-                        <Text style={styles.otherDetailsBoxNumber}>
-                            #9
+                    <View style={styles.otherDetails}>
+
+                        <View style={styles.otherDetailsBox}>
+                            <Text style={styles.otherDetailsBoxTitle}>
+                                Thumbs up
+                            </Text>
+                            <Text style={styles.otherDetailsBoxNumber}>
+                                2000
+                            </Text>
+                        </View>
+
+
+                        <View style={styles.otherDetailsBox}>
+                            <Text style={styles.otherDetailsBoxTitle}>
+                                Product of the week
+                            </Text>
+                            <Text style={styles.otherDetailsBoxNumber}>
+                                x4
+                            </Text>
+                        </View>
+
+
+                        <View style={styles.otherDetailsBox}>
+                            <Text style={styles.otherDetailsBoxTitle}>
+                                All Time Ranking
+                            </Text>
+                            <Text style={styles.otherDetailsBoxNumber}>
+                                #9
+                            </Text>
+                        </View>
+
+                    </View>
+
+
+                    <View style={[styles.pageTitleWrap, {
+                        marginTop: 50,
+                    }]}>
+                        <Text style={[styles.pageTitle, {
+                            color: darkTextColor,
+                            width: '70%'
+                        }]}>
+                            Similar Products
                         </Text>
                     </View>
 
-                </View>
+                    <View style={[styles.productsContainer, {}]}>
 
 
-                <View style={[styles.pageTitleWrap, {
-                    marginTop:50,
-                }]}>
-                <Text style={[styles.pageTitle, {
-                    color: darkTextColor,
-                    width: '70%'
-                }]}>
-                    Similar Products
-                </Text>
-            </View>
+                        <FlatList
 
-            <View style={[styles.productsContainer,{
-
-            }]}>
-
-
-                <FlatList
-
-                    data={Products}
-                    keyExtractor={keyExtractor}
-                    horizontal
-                    pagingEnabled
-                    scrollEnabled
-                    snapToAlignment="center"
-                    scrollEventThrottle={16}
-                    decelerationRate={"fast"}
-                    showsHorizontalScrollIndicator={false}
-                    renderItem={renderSimilarProductItem}
-                />
-            </View>
+                            data={Products}
+                            keyExtractor={keyExtractor}
+                            horizontal
+                            pagingEnabled
+                            scrollEnabled
+                            snapToAlignment="center"
+                            scrollEventThrottle={16}
+                            decelerationRate={"fast"}
+                            showsHorizontalScrollIndicator={false}
+                            renderItem={renderSimilarProductItem}
+                        />
+                    </View>
 
 
+                </KeyboardAwareScrollView>
+            </SafeAreaView>
 
-        </KeyboardAwareScrollView>
-        </SafeAreaView>
+
+            <BottomSheetModalProvider>
+
+
+                <BottomSheetModal
+                    ref={bottomSheetModalRef}
+                    index={1}
+                    backdropComponent={renderBackdrop}
+                    snapPoints={snapPoints}
+                    //  onChange={handleSheetChanges}
+                >
+
+
+                    <View style={[styles.sheetHead, {}]}>
+
+
+                        <Text style={[styles.sheetTitle, {
+
+                            color: textColor
+                        }]}>
+
+                        </Text>
+
+                        <Text style={[styles.resetText, {}]}>
+
+                        </Text>
+
+                        <TouchableOpacity onPress={handleClose}
+                                          style={[styles.dismiss, {}]}>
+                            <Ionicons name="close-sharp" size={24} color={textColor}/>
+                        </TouchableOpacity>
+
+                    </View>
+                    <KeyboardAwareScrollView
+                        enableOnAndroid={true}
+                        enableResetScrollToCoords={false}
+                        bounces={false}
+                        contentContainerStyle={{
+                            width: "100%",
+                            alignItems: "center"
+                        }}
+                        contentInsetAdjustmentBehavior="always"
+                        overScrollMode="always"
+                        showsVerticalScrollIndicator={true}
+                        style={styles.sheetScrollView}>
+
+                        <View style={styles.cardBody}>
+
+                            <View style={styles.sheetDetails}>
+
+
+                                <Text style={styles.sheetTitleText}>
+                                    We’ll try to access if its really you
+                                </Text>
+
+                                <Text style={styles.sheetText}>
+                                    This is a verification process to know if you really own <Text style={{
+                                        fontFamily:Fonts.quickSandBold,
+                                    color:'#000'
+                                }}>GATEWAYAPP</Text>
+                                </Text>
+
+
+
+
+                            </View>
+                            <Text style={[styles.sheetText,{
+                                marginBottom: 30,
+                            }]}>
+                                Please enter an email address that matches the product domain <Text style={{
+                                fontFamily:Fonts.quickSandBold,
+                                color:'#000'
+                            }}>(gatewayapp.co).</Text>
+                            </Text>
+                            <TextInput
+
+                                placeholder="Email address"
+                                keyboardType={"email-address"}
+                                touched={touched.email}
+                                error={touched.email && errors.email}
+
+                                onChangeText={(e) => {
+                                    handleChange('email')(e);
+
+                                }}
+                                onBlur={(e) => {
+                                    handleBlur('email')(e);
+
+                                }}
+
+                                value={values.email}
+                                label="Email"/>
+
+                            <Pressable disabled={!isValid} onPress={()=>handleSubmit()} style={styles.claimBtn}>
+                                <Text style={styles.claimBtnText}>
+                                    Make Request
+                                </Text>
+                            </Pressable>
+                        </View>
+                    </KeyboardAwareScrollView>
+
+                </BottomSheetModal>
+
+            </BottomSheetModalProvider>
+
+        </>
     );
 };
 
@@ -1404,11 +1578,11 @@ const styles = StyleSheet.create({
 
         borderRadius: 5,
     },
-    noticeTextWrap:{
-        marginTop:30,
-        width:'90%',
-        alignItems:'center',
-        justifyContent:'center'
+    noticeTextWrap: {
+        marginTop: 30,
+        width: '90%',
+        alignItems: 'center',
+        justifyContent: 'center'
     },
     pageTitleWrap: {
         width: '90%',
@@ -1535,29 +1709,103 @@ const styles = StyleSheet.create({
         color: "#181818",
         fontFamily: Fonts.quicksandSemiBold
     },
-    otherDetails:{
-        marginTop:20,
-       height:heightPixel(280),
-        alignItems:'center',
-        justifyContent:"space-evenly",
-        width:'90%'
+    otherDetails: {
+        marginTop: 20,
+        height: heightPixel(280),
+        alignItems: 'center',
+        justifyContent: "space-evenly",
+        width: '90%'
     },
-    otherDetailsBox:{
-        height:75,
-        width:'80%',
-        alignItems:'center',
-        justifyContent:"center"
+    otherDetailsBox: {
+        height: 75,
+        width: '80%',
+        alignItems: 'center',
+        justifyContent: "center"
     },
-    otherDetailsBoxTitle:{
+    otherDetailsBoxTitle: {
         fontSize: fontPixel(14),
         color: "#686868",
         fontFamily: Fonts.quicksandMedium
     },
-    otherDetailsBoxNumber:{
+    otherDetailsBoxNumber: {
         fontSize: fontPixel(24),
         marginTop: 5,
         color: "#181818",
         fontFamily: Fonts.quickSandBold
+    },
+    sheetScrollView: {
+        width: "100%",
+        marginTop: 10,
+        backgroundColor: "#fff"
+    },
+    sheetHead: {
+        // paddingHorizontal: pixelSizeHorizontal(20),
+        height: 40,
+        width: "100%",
+        alignItems: "center",
+        justifyContent: "space-between",
+        flexDirection: "row"
+    }
+    ,
+    sheetTitle: {
+        fontSize: fontPixel(24),
+        fontFamily: Fonts.quickSandBold,
+
+    },
+    resetText: {
+        fontSize: fontPixel(14),
+        fontFamily: Fonts.quicksandMedium,
+        color: Colors.primaryColor
+    },
+    dismiss: {
+
+        right: 10,
+        borderRadius: 30,
+        height: 30,
+        width: 30,
+        alignItems: "center",
+        justifyContent: "center"
+
+    },
+    cardBody: {
+        width: "90%",
+        flexDirection: "column",
+        marginTop: 10,
+        alignItems: "center",
+    },
+    sheetDetails: {
+        width: '100%',
+        height: 160,
+        alignItems: 'flex-start',
+        justifyContent: 'flex-start'
+    },
+    sheetTitleText: {
+        fontSize: fontPixel(24),
+        color: '#000',
+        fontFamily: Fonts.quickSandBold,
+        marginBottom: 20,
+    },
+    sheetText: {
+        fontSize: fontPixel(14),
+        color: '#AEAEAE',
+        lineHeight: 20,
+        fontFamily: Fonts.quicksandMedium,
+        marginBottom: 20,
+    },
+    claimBtn: {
+        height: 45,
+
+        width: widthPixel(235),
+        borderRadius: 30,
+        backgroundColor: Colors.primaryColor,
+        alignItems: 'center',
+        marginTop: 40,
+        justifyContent: 'center',
+    },
+    claimBtnText: {
+        fontSize: fontPixel(14),
+        color: "#fff",
+        fontFamily: Fonts.quicksandSemiBold
     }
 
 })
