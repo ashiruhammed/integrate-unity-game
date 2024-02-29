@@ -68,6 +68,7 @@ import ReplyComment from "../screens/communities/seeAll/ReplyComment";
 import CreateAIAdventure from "../screens/learn/CreateAIAdventure";
 import CreatingAdventure from "../screens/learn/CreatingAdventure";
 import DiscoverProducts from "../screens/discover/DiscoverProducts";
+import ProductView from "../screens/discover/ProductView";
 
 const styles = StyleSheet.create({
     displayPhoto: {
@@ -347,6 +348,7 @@ function RootNavigator() {
                         <Stack.Screen name="CreateAIAdventure" component={CreateAIAdventure}/>
                         <Stack.Screen name="CreatingAdventure" component={CreatingAdventure}/>
                         <Stack.Screen name="DiscoverProducts" component={DiscoverProducts}/>
+                        <Stack.Screen name="ProductView" component={ProductView}/>
 
 
                         <Stack.Screen name="Notifications" options={{

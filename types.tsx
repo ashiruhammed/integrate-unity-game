@@ -10,6 +10,7 @@ import Games from "./src/screens/Home/Games";
 import CreateAIAdventure from "./src/screens/learn/CreateAIAdventure";
 import CreatingAdventure from "./src/screens/learn/CreatingAdventure";
 import DiscoverProducts from "./src/screens/discover/DiscoverProducts";
+import ProductView from "./src/screens/discover/ProductView";
 
 
 declare global {
@@ -30,6 +31,9 @@ export type RootStackParamList = {
     };
     Wallet: undefined;
     DiscoverProducts: undefined;
+    ProductView: {
+        id?:string
+    };
     Leaderboard: undefined;
     Badges: undefined;
     Settings: undefined;
