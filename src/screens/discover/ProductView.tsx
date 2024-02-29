@@ -11,7 +11,7 @@ import {
     Pressable,
     FlatList
 } from 'react-native';
-import {AntDesign, FontAwesome, Fontisto, Ionicons, MaterialIcons, Octicons} from "@expo/vector-icons";
+import {AntDesign, Entypo, FontAwesome, Fontisto, Ionicons, MaterialIcons, Octicons} from "@expo/vector-icons";
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {useAppSelector} from "../../app/hooks";
@@ -21,6 +21,8 @@ import {userNotifications} from "../../action/action";
 import {RootStackScreenProps} from "../../../types";
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
 import {Fonts} from "../../constants/Fonts";
+import CommentInput from "../../components/inputs/CommentInput";
+import CommentIcon from "../../assets/images/svg/CommentIcon";
 
 
 const Products = [
@@ -37,42 +39,119 @@ const Products = [
 
 const TeamData = [
     {
-        teamName:"Declan Rice",
-        image:"https://img.freepik.com/free-photo/3d-rendering-zoom-call-avatar_23-2149556787.jpg?size=626&ext=jpg&ga=GA1.1.1546980028.1702339200&semt=ais",
-        id:'1',
-    },{
-        teamName:"Kelly Rolls",
+        teamName: "Declan Rice",
+        image: "https://img.freepik.com/free-photo/3d-rendering-zoom-call-avatar_23-2149556787.jpg?size=626&ext=jpg&ga=GA1.1.1546980028.1702339200&semt=ais",
+        id: '1',
+    }, {
+        teamName: "Kelly Rolls",
         image: 'https://img.freepik.com/premium-photo/3d-rendering-zoom-call-avatar_23-2149556775.jpg',
-        id:'2',
-    },{
-        teamName:"Zobolo Chucks",
-        image:'https://img.freepik.com/premium-photo/3d-rendering-zoom-call-avatar_23-2149556774.jpg',
-        id:'3',
-    },{
-        teamName:"Bruno Fernandes",
-        id:'4',
-        image:'https://img.freepik.com/fotos-premium/3d-darstellung-des-zoom-call-avatars_23-2149556773.jpg?size=626&ext=jpg'
-    },{
-        teamName:"Anita Beca",
-        id:'5',
+        id: '2',
+    }, {
+        teamName: "Zobolo Chucks",
+        image: 'https://img.freepik.com/premium-photo/3d-rendering-zoom-call-avatar_23-2149556774.jpg',
+        id: '3',
+    }, {
+        teamName: "Bruno Fernandes",
+        id: '4',
+        image: 'https://img.freepik.com/fotos-premium/3d-darstellung-des-zoom-call-avatars_23-2149556773.jpg?size=626&ext=jpg'
+    }, {
+        teamName: "Anita Beca",
+        id: '5',
         image: 'https://img.freepik.com/free-photo/3d-rendering-zoom-call-avatar_23-2149556779.jpg'
-    },{
-        teamName:"Andre Onana",
+    }, {
+        teamName: "Andre Onana",
         image: 'https://img.freepik.com/free-photo/3d-rendering-zoom-call-avatar_23-2149556784.jpg',
-        id:'6',
+        id: '6',
     },
 ]
 
 interface teamProps {
     item: {
-        teamName:string
+        teamName: string
         image: string
 
     }
 }
+
 interface props {
     item: {}
 }
+
+
+
+
+
+const SimilarProductCardItem = ({item}:props) => {
+    const dataSlice = useAppSelector(state => state.data)
+    const {theme} = dataSlice
+    const backgroundColor = theme == 'light' ? "#FFFFFF" : "#141414"
+    const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
+    const darkTextColor = theme == 'light' ? Colors.light.darkText : Colors.dark.text
+    const lightText = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
+    const tintText = theme == 'light' ? "#AEAEAE" : Colors.dark.tintTextColor
+    return (
+        <View style={styles.similarProductsCard}>
+            <View style={styles.topCard}>
+                <View style={styles.topCardLeft}>
+
+
+                    <View style={styles.simProductsCardImageWrap}>
+                        <Image
+                            source={{uri: 'https://images.unsplash.com/photo-1611488006018-95b79a137ff5?q=80&w=2953&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'}}
+                            style={styles.productsCardImage}
+                        />
+                    </View>
+
+                    <Text style={[styles.simProductsCardTitle, {
+                        color: darkTextColor
+                    }]}>
+                        Ether Vault
+                    </Text>
+                </View>
+
+                <View style={styles.pointCardWrap}>
+                    <FontAwesome name="thumbs-up" size={19} color={"#E01414"}/>
+                    <Text style={[styles.pointCardText, {
+                        color: '#E01414'
+                    }]}>
+                        1600
+                    </Text>
+                </View>
+
+
+            </View>
+
+
+
+
+            <Text style={[styles.bodyText, {
+                color: tintText,
+                alignSelf: 'flex-start'
+            }]}>
+                A secure and easy-to-use wallet for managing your Ethereum and ERC-20...
+            </Text>
+
+            <View style={styles.productsCardBottom}>
+                <View style={styles.tinyAvatar}>
+                    <Image
+                        source={{uri: 'https://pub-static.fotor.com/assets/projects/pages/bc0734b486094ec0b1dec9aa4148de39/fotor-45a3795d0c5b46bcadc381a82e81fae0.jpg'}}
+                        style={styles.tinyAvatarImg}
+                    />
+                </View>
+                <Text style={styles.productsCardBottomText}>
+                    Declan Rice
+                </Text>
+            </View>
+        </View>
+    )
+}
+
+
+
+
+
+
+
 
 const ProductCardItem = ({item}: props) => {
 
@@ -94,9 +173,9 @@ const TeamItem = ({item}: teamProps) => {
                 <Image source={{uri: item.image}} style={styles.friendsOnlineCardImage}/>
             </View>
 
-<Text style={styles.teamName}>
-    {item.teamName}
-</Text>
+            <Text style={styles.teamName}>
+                {item.teamName}
+            </Text>
 
         </Pressable>
 
@@ -104,6 +183,9 @@ const TeamItem = ({item}: teamProps) => {
 }
 
 const ProductView = ({navigation}: RootStackScreenProps<'ProductView'>) => {
+
+
+    const [commentText, setCommentText] = useState('')
 
     const user = useAppSelector(state => state.user)
     const {userData, responseState, responseType, responseMessage} = user
@@ -152,6 +234,9 @@ const ProductView = ({navigation}: RootStackScreenProps<'ProductView'>) => {
         <TeamItem item={item}/>
     ), [])
 
+    const renderSimilarProductItem = useCallback(({item}) => (
+        <SimilarProductCardItem item={item}/>
+    ), [])
 
 
     return (
@@ -412,15 +497,11 @@ const ProductView = ({navigation}: RootStackScreenProps<'ProductView'>) => {
                         justifyContent: 'flex-start',
                         paddingHorizontal: 0
                     }]}>
-                        <Text style={[styles.seeMoreText,{
+                        <Text style={[styles.seeMoreText, {
                             fontFamily: Fonts.quicksandSemiBold
                         }]}> See more</Text>
                     </TouchableOpacity>
                 </View>
-
-
-
-
 
 
                 <View style={styles.ourTeam}>
@@ -450,7 +531,268 @@ const ProductView = ({navigation}: RootStackScreenProps<'ProductView'>) => {
                 </View>
 
 
-            </KeyboardAwareScrollView>
+                <View style={styles.wrapCommentBox}>
+
+                    <View style={styles.userAvatar}>
+                        <Image source={{uri: "https://cdn.artstation.com/p/thumbnails/000/550/238/thumb.jpg"}}
+                               style={styles.userAvatarImage}/>
+                    </View>
+                    <CommentInput placeholder={'Leave a comment...'} value={commentText}/>
+
+
+                </View>
+
+
+                <View style={styles.commentCard}>
+                    <View style={styles.commentCardTop}>
+                        <View style={styles.commentUserAvatar}>
+                            <Image source={{uri: "https://cdn.artstation.com/p/thumbnails/000/550/238/thumb.jpg"}}
+                                   style={styles.userAvatarImage}/>
+                        </View>
+
+                        <View style={styles.commentBody}>
+
+                            <View style={styles.commentDetails}>
+                                <Text style={styles.userName}>
+                                    @isabellachills
+                                </Text>
+
+                                <Entypo name="dots-three-horizontal" size={24} color="#D9D9D9"/>
+                            </View>
+
+                            <Text style={styles.commentBodyText}>
+
+                                As we all know, keeping your digital assets safe is crucial in the world of
+                                cryptocurrencies. CryptoShield offers a simple and effective way to secure your digital
+                                assets, without relying on a centralized service. By storing your assets on the Ethereum
+                                blockchain, CryptoShield ensures that you have full control over your private keys and
+                                that your funds are stored in a trustless and decentralized manner.
+                            </Text>
+
+                        </View>
+                    </View>
+
+                    <View style={styles.commentCardBottom}>
+                        <View style={styles.usersComment}>
+
+                        </View>
+
+                        <Pressable style={styles.bottomBtn}>
+                            <CommentIcon/>
+                            <Text style={styles.bottomBtnText}>
+                                Reply
+                            </Text>
+                        </Pressable>
+
+
+                        <Pressable style={styles.bottomBtn}>
+                            <FontAwesome name="thumbs-up" size={18} color="#686868"/>
+                            <Text style={styles.bottomBtnText}>
+                                Thumbs up (200)
+                            </Text>
+                        </Pressable>
+
+                        <Pressable style={styles.bottomBtn}>
+
+                            <Text style={styles.bottomBtnText}>
+                                Share
+                            </Text>
+                        </Pressable>
+                    </View>
+
+
+                </View>
+                <View style={styles.commentCard}>
+                    <View style={styles.commentCardTop}>
+                        <View style={styles.commentUserAvatar}>
+                            <Image
+                                source={{uri: "https://img.freepik.com/premium-photo/3d-rendering-zoom-call-avatar_23-2149556774.jpg"}}
+                                style={styles.userAvatarImage}/>
+                        </View>
+
+                        <View style={styles.commentBody}>
+
+                            <View style={styles.commentDetails}>
+                                <Text style={styles.userName}>
+                                    @destinykams
+                                </Text>
+
+                                <Entypo name="dots-three-horizontal" size={24} color="#D9D9D9"/>
+                            </View>
+
+                            <Text style={styles.commentBodyText}>
+
+                                As we all know, keeping your digital assets safe is crucial in the world of
+                                cryptocurrencies. CryptoShield offers a simple and effective way to secure your digital
+                                assets, without relying on a centralized service. By storing your assets on the Ethereum
+                                blockchain, CryptoShield ensures that you have full control over your private keys and
+                                that your funds are stored in a trustless and decentralized manner.
+                            </Text>
+
+                        </View>
+                    </View>
+
+                    <View style={styles.commentCardBottom}>
+                        <View style={styles.usersComment}>
+
+                        </View>
+
+                        <Pressable style={styles.bottomBtn}>
+                            <CommentIcon/>
+                            <Text style={styles.bottomBtnText}>
+                                Reply
+                            </Text>
+                        </Pressable>
+
+
+                        <Pressable style={styles.bottomBtn}>
+                            <FontAwesome name="thumbs-up" size={18} color="#686868"/>
+                            <Text style={styles.bottomBtnText}>
+                                Thumbs up (200)
+                            </Text>
+                        </Pressable>
+
+                        <Pressable style={styles.bottomBtn}>
+
+                            <Text style={styles.bottomBtnText}>
+                                Share
+                            </Text>
+                        </Pressable>
+                    </View>
+
+
+                </View>
+
+
+                <View style={styles.statsVault}>
+
+                    <Text style={[styles.friendsOnlineTitle, {
+                        color: textColor
+                    }]}>
+                        Statistics on Ether Vault
+                    </Text>
+
+
+                    <View style={styles.vaultBox}>
+
+
+                        <View style={styles.vaultBoxImageWrap}>
+                            <Image
+                                source={{uri: 'https://images.unsplash.com/photo-1611488006018-95b79a137ff5?q=80&w=2953&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'}}
+                                style={styles.productsCardImage}
+                            />
+                        </View>
+
+                        <View style={styles.vaultBoxBody}>
+                            <Text style={styles.vaultTitleBody}>
+                                Ether Vault
+                            </Text>
+                            <Text style={styles.vaultTextBody}>
+                                A secure and easy-to-use wallet for managing your Ethereum and ERC-20...
+                            </Text>
+                        </View>
+                    </View>
+
+                </View>
+
+
+                <View style={styles.buttonContainer}>
+                    <TouchableOpacity style={styles.appStoreButton}>
+                        <Image source={{uri: 'https://miro.medium.com/v2/resize:fit:1400/1*V9-OPWpauGEi-JMp05RC_A.png'}}
+                               style={styles.logo}/>
+
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.googlePlayButton}>
+                        <Image
+                            source={{uri: 'https://contentgrid.thdstatic.com/hdus/en_US/DTCCOMNEW/fetch/NexGen/ContentPage/androidbadgesbox2.png'}}
+                            style={styles.logo}/>
+
+                    </TouchableOpacity>
+                </View>
+
+                <View style={styles.noticeTextWrap}>
+                    <Text style={styles.commentBodyText}>
+                        Ether Vault by Declan Rice was hunted by David in SaaS, NFTs, DeFi. Made by Tosin, Emmanuel,
+                        David, Osazee, Joy, Susan, Richard. Featured on April 8th, 2023. Ether Vault is rated 5/5★ by 12
+                        users. This is Ether vault first launch.
+                    </Text>
+                </View>
+
+
+
+
+
+
+
+
+                <View style={styles.otherDetails}>
+
+                    <View style={styles.otherDetailsBox}>
+                        <Text style={styles.otherDetailsBoxTitle}>
+                            Thumbs up
+                        </Text>
+                        <Text style={styles.otherDetailsBoxNumber}>
+                            2000
+                        </Text>
+                    </View>
+
+
+                    <View style={styles.otherDetailsBox}>
+                        <Text style={styles.otherDetailsBoxTitle}>
+                            Product of the week
+                        </Text>
+                        <Text style={styles.otherDetailsBoxNumber}>
+                            x4
+                        </Text>
+                    </View>
+
+
+                    <View style={styles.otherDetailsBox}>
+                        <Text style={styles.otherDetailsBoxTitle}>
+                            All Time Ranking
+                        </Text>
+                        <Text style={styles.otherDetailsBoxNumber}>
+                            #9
+                        </Text>
+                    </View>
+
+                </View>
+
+
+                <View style={[styles.pageTitleWrap, {
+                    marginTop:50,
+                }]}>
+                <Text style={[styles.pageTitle, {
+                    color: darkTextColor,
+                    width: '70%'
+                }]}>
+                    Similar Products
+                </Text>
+            </View>
+
+            <View style={[styles.productsContainer,{
+
+            }]}>
+
+
+                <FlatList
+
+                    data={Products}
+                    keyExtractor={keyExtractor}
+                    horizontal
+                    pagingEnabled
+                    scrollEnabled
+                    snapToAlignment="center"
+                    scrollEventThrottle={16}
+                    decelerationRate={"fast"}
+                    showsHorizontalScrollIndicator={false}
+                    renderItem={renderSimilarProductItem}
+                />
+            </View>
+
+
+
+        </KeyboardAwareScrollView>
         </SafeAreaView>
     );
 };
@@ -829,35 +1171,35 @@ const styles = StyleSheet.create({
         width: '90%',
         backgroundColor: "#F2F2F2"
     },
-authorText:{
-    marginTop:10,
-    fontSize: fontPixel(14),
-    fontFamily: Fonts.quicksandSemiBold,
-    color: "#464646",
+    authorText: {
+        marginTop: 10,
+        fontSize: fontPixel(14),
+        fontFamily: Fonts.quicksandSemiBold,
+        color: "#464646",
 
-},
+    },
     aboutText: {
-        marginTop:10,
-        lineHeight:26,
+        marginTop: 10,
+        lineHeight: 26,
         fontSize: fontPixel(16),
         fontFamily: Fonts.quicksandMedium,
         color: "#686868",
 
     },
-teamItem:{
-    width: 80,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: 10,
-    height: 110,
+    teamItem: {
+        width: 80,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginHorizontal: 10,
+        height: 110,
 
-},
-    teamName:{
-        marginTop:8,
-color:"#464646",
+    },
+    teamName: {
+        marginTop: 8,
+        color: "#464646",
         fontSize: fontPixel(14),
         fontFamily: Fonts.quicksandSemiBold,
-        textAlign:"center",
+        textAlign: "center",
     },
     friendsOnlineCard: {
         width: 45,
@@ -888,6 +1230,336 @@ color:"#464646",
         fontSize: fontPixel(24),
         fontFamily: Fonts.quickSandBold,
     },
+    wrapCommentBox: {
+        width: '90%',
+        height: 70,
+        marginVertical: pixelSizeVertical(15),
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'row'
+    },
+    userAvatar: {
+        marginRight: 15,
+        width: 36,
+        height: 36,
+        borderRadius: 100,
+        alignItems: 'center',
+        justifyContent: 'center',
+
+    },
+    userAvatarImage: {
+        width: '100%',
+        height: '100%',
+        borderRadius: 100,
+        resizeMode: 'cover'
+
+    },
+    commentCard: {
+        width: '90%',
+        marginVertical: pixelSizeVertical(15),
+    },
+    commentCardTop: {
+
+        width: '100%',
+
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        justifyContent: 'center'
+    },
+    commentUserAvatar: {
+        marginRight: 15,
+        width: 36,
+        height: 36,
+        borderRadius: 100,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+
+    commentBody: {
+
+        width: '85%',
+
+
+    },
+    commentDetails: {
+        height: 40,
+        width: '100%',
+
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+    },
+    userName: {
+        color: "#181818",
+        fontSize: fontPixel(18),
+        fontFamily: Fonts.quicksandSemiBold,
+    },
+    commentBodyText: {
+        color: "#686868",
+        fontSize: fontPixel(14),
+        fontFamily: Fonts.quicksandMedium,
+        lineHeight: 22,
+    },
+    commentCardBottom: {
+        height: 50,
+        width: '100%',
+
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+
+    },
+    bottomBtn: {
+        height: 40,
+        minWidth: 80,
+
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    bottomBtnText: {
+        color: "#686868",
+        marginLeft: 10,
+        fontSize: fontPixel(14),
+        fontFamily: Fonts.quicksandMedium,
+    },
+    usersComment: {
+        width: 45,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+
+    statsVault: {
+        width: '90%',
+
+
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        marginTop: pixelSizeVertical(30),
+        marginBottom: 10
+    },
+    vaultBox: {
+        marginTop: 20,
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+        width: '90%',
+        minHeight: 90,
+    },
+    vaultBoxImageWrap: {
+        marginRight: 10,
+        height: 55,
+        width: 55,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 100,
+    },
+    vaultBoxBody: {
+        width: '80%',
+        alignItems: 'flex-start',
+        justifyContent: 'flex-start',
+
+    },
+    vaultTitleBody: {
+        color: "#000",
+        fontSize: fontPixel(18),
+        fontFamily: Fonts.quickSandBold,
+
+    }, vaultTextBody: {
+        marginTop: 5,
+        color: "#AEAEAE",
+        lineHeight: 20,
+        fontSize: fontPixel(14),
+        fontFamily: Fonts.quicksandMedium,
+
+    },
+
+
+    buttonContainer: {
+        flexDirection: 'row',
+    },
+    appStoreButton: {
+        width: widthPixel(130),
+        height: 40,
+        flexDirection: 'row',
+        alignItems: 'center',
+        overflow: 'hidden',
+        borderRadius: 5,
+        marginRight: 10,
+    },
+    googlePlayButton: {
+        width: widthPixel(130),
+        height: 40,
+        flexDirection: 'row',
+        alignItems: 'center',
+        overflow: 'hidden',
+        borderRadius: 5,
+    },
+
+    logo: {
+        width: '100%',
+        height: '100%',
+        resizeMode: 'cover',
+
+        borderRadius: 5,
+    },
+    noticeTextWrap:{
+        marginTop:30,
+        width:'90%',
+        alignItems:'center',
+        justifyContent:'center'
+    },
+    pageTitleWrap: {
+        width: '90%',
+        marginTop: 20,
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+    },
+    pageTitle: {
+        fontSize: fontPixel(24),
+        fontFamily: Fonts.quickSandBold
+    },
+
+
+    similarProductsCard: {
+        marginTop: 20,
+        width: widthPixel(320),
+        height: heightPixel(200),
+        backgroundColor: "#fff",
+        shadowColor: "#212121",
+        alignItems: 'center',
+        marginHorizontal: pixelSizeHorizontal(10),
+        justifyContent: 'space-between',
+        paddingHorizontal: pixelSizeHorizontal(20),
+        paddingVertical: pixelSizeVertical(10),
+        borderRadius: 10,
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.12,
+        shadowRadius: 7.22,
+        elevation: 3,
+    },
+    wrap: {
+        marginTop: 25,
+        width: '90%',
+        alignItems: 'flex-start'
+    },
+    tagPill: {
+        backgroundColor: "#FDDCDC",
+        paddingHorizontal: pixelSizeHorizontal(10),
+        borderRadius: 10,
+        minWidth: 65,
+        height: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    tagPillText: {
+        fontSize: fontPixel(12),
+        color: Colors.primaryColor,
+        fontFamily: Fonts.quicksandSemiBold
+    },
+    topCard: {
+        height: 60,
+        flexDirection: 'row',
+        width: '100%',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+    },
+    pointCardWrap: {
+        width: '30%',
+        height: '70%',
+        alignItems: 'flex-end',
+        justifyContent: 'space-evenly',
+    },
+    pointCardText: {
+        fontSize: fontPixel(12),
+        fontFamily: Fonts.quickSandBold
+    },
+    simProductsCardImageWrap: {
+        height: 50,
+        width: 50,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 100,
+    },
+    simProductsCardImage: {
+        height: '100%',
+        width: '100%',
+        resizeMode: 'cover',
+        borderRadius: 100,
+    },
+    topCardLeft: {
+        width: '60%',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+    },
+
+    simProductsCardTitle: {
+        fontSize: fontPixel(18),
+        marginLeft: 10,
+        fontFamily: Fonts.quicksandSemiBold
+    },
+    bodyText: {
+        lineHeight: 20,
+        fontSize: fontPixel(14),
+        fontFamily: Fonts.quicksandMedium,
+        color: "#AEAEAE"
+    },
+    productsCardBottom: {
+        height: 35,
+        width: '100%',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-start'
+    },
+    tinyAvatar: {
+        height: 28,
+        width: 28,
+        borderRadius: 100,
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    tinyAvatarImg: {
+        height: '100%',
+        width: '100%',
+        borderRadius: 100,
+        resizeMode: 'cover',
+    },
+    productsCardBottomText: {
+        fontSize: fontPixel(14),
+        marginLeft: 10,
+        color: "#181818",
+        fontFamily: Fonts.quicksandSemiBold
+    },
+    otherDetails:{
+        marginTop:20,
+       height:heightPixel(280),
+        alignItems:'center',
+        justifyContent:"space-evenly",
+        width:'90%'
+    },
+    otherDetailsBox:{
+        height:75,
+        width:'80%',
+        alignItems:'center',
+        justifyContent:"center"
+    },
+    otherDetailsBoxTitle:{
+        fontSize: fontPixel(14),
+        color: "#686868",
+        fontFamily: Fonts.quicksandMedium
+    },
+    otherDetailsBoxNumber:{
+        fontSize: fontPixel(24),
+        marginTop: 5,
+        color: "#181818",
+        fontFamily: Fonts.quickSandBold
+    }
+
 })
 
 export default ProductView;

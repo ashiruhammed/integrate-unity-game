@@ -35,7 +35,7 @@ interface Props extends TextInputProps {
 }
 
 
-const SearchValue: FC<Props> = ({
+const CommentInput: FC<Props> = ({
                                          rightIcon,
                                          inputBg,
                                          rightAction,
@@ -74,47 +74,29 @@ const SearchValue: FC<Props> = ({
             <View style={[styles.inputContainer, {
                 width:isWidth ? isWidth : '80%',
                 borderRadius:  10,
-                borderColor: theme == 'light' ?"#DEE6ED" : Colors.dark.borderColor,
+                borderColor: theme == 'light' ?"#ccc" : Colors.dark.borderColor,
                 backgroundColor: 'transparent',
-                height: inputHeight ? inputHeight : heightPixel(45),
+                height: inputHeight ? inputHeight : heightPixel(55),
             }]}>
 
 
-                {leftIcon &&
-
-                    <View style={styles.leftIcon}>
-                        <Text style={styles.signTxt}>
-                            $
-                        </Text>
-                    </View>
-                }
-                {
-                    icon &&
-                    <View style={styles.leftIcon}>
-                        <Text style={styles.signTxt}>
-                            {icon}
-                        </Text>
-                    </View>
-                }
                 <RNTextInput
 
                     {...props}
                     placeholder={placeholder}
                     keyboardAppearance={theme}
-                    placeholderTextColor={"#9CA3AF"}
+                    placeholderTextColor={"#afafaf"}
                     style={[styles.input, {
-                        width: password || leftIcon || rightIcon || icon ? '90%' : '100%',
+                        width:  '85%' ,
                         color: '#131313',
 
                     }]}/>
 
-                {
-                    rightIcon && <TouchableOpacity onPress={action} style={styles.passBtn}>
+                <TouchableOpacity onPress={action} style={styles.passBtn}>
 
-                        {rightIcon}
+                    <Ionicons name="paper-plane-outline" size={18} color="#333333" />
 
-                    </TouchableOpacity>
-                }
+                </TouchableOpacity>
 
             </View>
 
@@ -199,4 +181,4 @@ alignItems:'center',
 
 })
 
-export default SearchValue
+export default CommentInput
