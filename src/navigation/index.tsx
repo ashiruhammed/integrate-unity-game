@@ -71,6 +71,8 @@ import DiscoverProducts from "../screens/discover/DiscoverProducts";
 import ProductView from "../screens/discover/ProductView";
 import ProductInformation from "../screens/discover/create/ProductInformation";
 import FundamentalData from "../screens/discover/create/FundamentalData";
+import VisualRepresentation from "../screens/discover/create/VisualRepresentation";
+import MoreInformation from "../screens/discover/create/MoreInformation";
 
 const styles = StyleSheet.create({
     displayPhoto: {
@@ -353,6 +355,8 @@ function RootNavigator() {
                         <Stack.Screen name="ProductView" component={ProductView}/>
                         <Stack.Screen name="ProductInformation" component={ProductInformation}/>
                         <Stack.Screen name="FundamentalData" component={FundamentalData}/>
+                        <Stack.Screen name="VisualRepresentation" component={VisualRepresentation}/>
+                        <Stack.Screen name="MoreInformation" component={MoreInformation}/>
 
 
                         <Stack.Screen name="Notifications" options={{

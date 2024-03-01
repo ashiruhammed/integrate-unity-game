@@ -1,7 +1,7 @@
-import React, {useCallback, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import {Text, View, StyleSheet, ImageBackground, TouchableOpacity, Pressable, Platform, Keyboard} from 'react-native';
-import {AntDesign, Ionicons, Octicons} from "@expo/vector-icons";
+import {AntDesign, Ionicons, MaterialCommunityIcons, Octicons} from "@expo/vector-icons";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 import PushIcon from "../../../assets/images/svg/PushIcon";
@@ -20,6 +20,7 @@ import BottomSheet, {BottomSheetBackdrop, BottomSheetFlatList} from "@gorhom/bot
 import {
     BottomSheetDefaultBackdropProps
 } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
+import TextArea from "../../../components/inputs/TextArea";
 
 
 const formSchema = yup.object().shape({
@@ -44,21 +45,31 @@ const Categories = [{
     "label": "NFT",
 
 },
-{
-    "_id": "4",
-    "label": "Design",
+    {
+        "_id": "4",
+        "label": "Design",
 
-},
+    },
 
-    ]
-
-
+]
 
 
+interface countryProps {
+    selectedCountry: any[],
+    item: {
+        "emoji": string,
+        "name": string,
+
+    },
+    addCountry: (details: {
 
 
+        "name": string,
+        "emoji": string,
 
-
+    }) => void
+    selectCountry: (symbol: {}) => void,
+}
 
 
 interface props {
@@ -81,7 +92,7 @@ interface props {
 
 }
 
-const BankItem = ({item, selectedItem, selectAsset, addPort}: props) => {
+const CategoryItem = ({item, selectedItem, selectAsset, addPort}: props) => {
 
 
     return (
@@ -103,7 +114,8 @@ const BankItem = ({item, selectedItem, selectAsset, addPort}: props) => {
                 <View style={styles.itemBody}>
                     <Text style={styles.accountName}>
                         {selectedItem.find(selected => selected._id == item._id) ?
-                            <Ionicons name="checkbox" size={14} color={Colors.primaryColor}/> : ''}
+                            <Ionicons name="checkbox" size={14} color={Colors.primaryColor}/> :
+                            <MaterialCommunityIcons name="checkbox-blank-outline" size={14} color="#ccc"/>}
                     </Text>
                     <Text style={styles.account}>
                         {item.label}
@@ -115,7 +127,45 @@ const BankItem = ({item, selectedItem, selectAsset, addPort}: props) => {
         </TouchableOpacity>
     )
 }
+const CountryItem = ({item, selectedCountry, selectCountry, addCountry}: countryProps) => {
 
+
+    return (
+        <TouchableOpacity onPress={() => {
+            selectCountry(item)
+            addCountry({
+
+                name: item.name,
+                emoji: item.emoji,
+            })
+        }} activeOpacity={0.6}
+                          style={[styles.transactionCardList, {
+                              backgroundColor: item.name == selectedCountry.name ? "#f9f9f9" : 'transparent'
+                          }]}>
+
+            <View style={styles.bankItem}>
+
+
+                <View style={styles.itemBody}>
+                    <Text style={styles.accountName}>
+                        {selectedCountry.find(selected => selected.name == item.name) ?
+                            <Ionicons name="checkbox" size={14} color={Colors.primaryColor}/> :
+                            <MaterialCommunityIcons name="checkbox-blank-outline" size={14} color="#ccc"/>}
+                    </Text>
+
+                    <Text style={styles.account}>
+                        {item.name}
+                    </Text>
+                    <Text style={styles.account}>
+                        {item.emoji}
+                    </Text>
+                </View>
+
+
+            </View>
+        </TouchableOpacity>
+    )
+}
 
 
 const FundamentalData = ({navigation}: RootStackScreenProps<'FundamentalData'>) => {
@@ -143,13 +193,27 @@ const FundamentalData = ({navigation}: RootStackScreenProps<'FundamentalData'>) 
         "label": string,
     }>({});
 
+    const [country, setCountry] = useState<{
+        "name": string,
+        "emoji": string,
 
-    const [selectedCategory , setSelectedCategory] = useState<any[]>([]);
+    }>({});
 
 
+    const [selectedCategory, setSelectedCategory] = useState<any[]>([]);
+    const [selectedCountry, setSelectedCountry] = useState<any[]>([]);
 
 
+    const [list, setList] = useState([]);
+    const [con, setCon] = useState([]);
 
+    useEffect(() => {
+        const countries = require('../../../constants/countries.json')
+        setCon(countries['countries'])
+        const cons = countries['countries']
+        setList(cons)
+
+    }, [])
 
     const openNotifications = () => {
         navigation.navigate('Notifications')
@@ -191,13 +255,16 @@ const FundamentalData = ({navigation}: RootStackScreenProps<'FundamentalData'>) 
             productName: '',
             productURL: '',
             productTagline: '',
+            twitter: '',
+            telegram: '',
+            facebook: '',
 
         },
         onSubmit: (values) => {
             const {productName} = values;
             //     const body = JSON.stringify({email: email.toLowerCase()})
 
-            navigation.navigate('FundamentalData')
+            navigation.navigate('VisualRepresentation')
         }
     });
 
@@ -213,31 +280,6 @@ const FundamentalData = ({navigation}: RootStackScreenProps<'FundamentalData'>) 
     const handleClosePress = useCallback(() => {
         sheetRef.current?.close();
     }, []);
-
-    const keyExtractor = useCallback((item: { _id: string; }) => item._id, [],
-    );
-    const renderItem = useCallback(({item}: any) => (
-        <BankItem selectedItem={selectedCategory} item={item}
-                  addPort={setCategory}
-                  selectAsset={updatePort}/>
-    ), [selectedCategory]);
-
-
-    const renderBackdrop = useCallback(
-        (props: JSX.IntrinsicAttributes & BottomSheetDefaultBackdropProps) => (
-            <BottomSheetBackdrop
-                style={{
-                    backgroundColor: 'rgba(25,25,25,0.34)'
-                }}
-                {...props}
-                disappearsOnIndex={0}
-                appearsOnIndex={1}
-            />
-        ),
-        []
-    );
-
-
 
 
     const updatePort = useCallback((payload: {
@@ -260,9 +302,66 @@ const FundamentalData = ({navigation}: RootStackScreenProps<'FundamentalData'>) 
     }, [selectedCategory])
 
 
+    const updateCountry = useCallback((payload: {
+        "name": string,
+        "emoji": string,
+    }) => {
+
+        const newData = selectedCountry.findIndex((country: { name: string }) => country.name === payload.name)
+
+        if (newData >= 0) {
+            setSelectedCountry((prevSelectedCountry) => {
+                return prevSelectedCountry.filter(
+                    (country) => country.name !== payload.name
+                );
+            });
+        } else {
+
+            setSelectedCountry(selectedCountry => [...selectedCountry, {...payload}])
+        }
+    }, [selectedCountry])
 
 
+    const c_keyExtractor = useCallback((item: { name: string; }) => item.name, [],);
+    const keyExtractor = useCallback((item: { _id: string; }) => item._id, [],);
+    const renderItem = useCallback(({item}: any) => (
+        <CategoryItem selectedItem={selectedCategory} item={item}
+                      addPort={setCategory}
+                      selectAsset={updatePort}/>
+    ), [selectedCategory]);
 
+
+    const countrySheetRef = useRef<BottomSheet>(null);
+
+    const c_handleSnapPress = useCallback((index: number) => {
+        Keyboard.dismiss()
+        countrySheetRef.current?.snapToIndex(index);
+    }, []);
+    const c_handleClosePress = useCallback(() => {
+        countrySheetRef.current?.close();
+    }, []);
+
+
+    const renderCountryItem = useCallback(({item}: any) => (
+        <CountryItem selectedCountry={selectedCountry} item={item}
+                     addCountry={setCountry}
+                     selectCountry={updateCountry}/>
+    ), [selectedCountry]);
+
+
+    const renderBackdrop = useCallback(
+        (props: JSX.IntrinsicAttributes & BottomSheetDefaultBackdropProps) => (
+            <BottomSheetBackdrop
+                style={{
+                    backgroundColor: 'rgba(25,25,25,0.34)'
+                }}
+                {...props}
+                disappearsOnIndex={0}
+                appearsOnIndex={1}
+            />
+        ),
+        []
+    );
 
 
     return (
@@ -270,292 +369,492 @@ const FundamentalData = ({navigation}: RootStackScreenProps<'FundamentalData'>) 
 
             <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
 
-            <KeyboardAwareScrollView
+                <KeyboardAwareScrollView
 
-                style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {
-                backgroundColor
-            }]} scrollEnabled
-                showsVerticalScrollIndicator={false}>
+                    style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {
+                    backgroundColor
+                }]} scrollEnabled
+                    showsVerticalScrollIndicator={false}>
 
 
-                <View style={styles.topBar}>
+                    <View style={styles.topBar}>
 
-                    <View style={styles.leftButton}>
+                        <View style={styles.leftButton}>
 
-                        <View style={styles.pointWrap}>
-                            <Ionicons name="gift" size={16} color="#22BB33"/>
-                            <Text style={styles.pointsText}>20000</Text>
+                            <View style={styles.pointWrap}>
+                                <Ionicons name="gift" size={16} color="#22BB33"/>
+                                <Text style={styles.pointsText}>20000</Text>
+                            </View>
                         </View>
+
+                        <View style={styles.rightButton}>
+
+                            <ImageBackground style={styles.streaKIcon} resizeMode={'contain'}
+                                             source={require('../../../assets/images/streakicon.png')}>
+                                <Text style={styles.streakText}> 200</Text>
+                            </ImageBackground>
+
+                            <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}
+                                              style={styles.roundTopBtn}>
+                                {
+                                    notifications?.pages[0]?.data?.result.length > 0 &&
+                                    <View style={styles.dot}/>
+                                }
+                                <Octicons name="bell-fill" size={22} color={"#000"}/>
+                            </TouchableOpacity>
+
+                        </View>
+
                     </View>
 
-                    <View style={styles.rightButton}>
 
-                        <ImageBackground style={styles.streaKIcon} resizeMode={'contain'}
-                                         source={require('../../../assets/images/streakicon.png')}>
-                            <Text style={styles.streakText}> 200</Text>
-                        </ImageBackground>
+                    <View style={styles.navButtonWrap}>
+                        <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.8}
+                                          style={styles.navButton}>
 
-                        <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}
-                                          style={styles.roundTopBtn}>
-                            {
-                                notifications?.pages[0]?.data?.result.length > 0 &&
-                                <View style={styles.dot}/>
-                            }
-                            <Octicons name="bell-fill" size={22} color={"#000"}/>
+                            <AntDesign name="arrowleft" size={24} color="black"/>
+                            <Text style={[styles.backText, {
+                                color: darkTextColor
+                            }]}>Back</Text>
                         </TouchableOpacity>
 
+
                     </View>
 
-                </View>
+                    <View style={styles.stepsBox}>
+                        <View style={styles.stepsBoxLeft}>
 
+                            <View style={styles.iconBox}>
+                                <PushIcon/>
+                            </View>
 
-                <View style={styles.navButtonWrap}>
-                    <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.8}
-                                      style={styles.navButton}>
+                            <View style={styles.mainInfo}>
+                                <Text style={styles.stepText}>
+                                    Step 2/4
+                                </Text>
 
-                        <AntDesign name="arrowleft" size={24} color="black"/>
-                        <Text style={[styles.backText, {
-                            color: darkTextColor
-                        }]}>Back</Text>
-                    </TouchableOpacity>
+                                <Text style={styles.pageTitle}>
+                                    Fundamental Data
+                                </Text>
+                            </View>
 
-
-                </View>
-
-                <View style={styles.stepsBox}>
-                    <View style={styles.stepsBoxLeft}>
-
-                        <View style={styles.iconBox}>
-                            <PushIcon/>
                         </View>
 
-                        <View style={styles.mainInfo}>
-                            <Text style={styles.stepText}>
-                                Step 2/4
-                            </Text>
-
-                            <Text style={styles.pageTitle}>
-                                Fundamental Data
-                            </Text>
+                        <View style={styles.stepsBoxRight}>
+                            <Pressable onPress={()=>navigation.navigate('VisualRepresentation')} style={styles.nextStep}>
+                                <Text style={styles.nextStepText}>
+                                    Next Step
+                                </Text>
+                                <AntDesign name="arrowright" size={16} color={Colors.primaryColor}/>
+                            </Pressable>
                         </View>
 
                     </View>
 
-                    <View style={styles.stepsBoxRight}>
-                        <Pressable style={styles.nextStep}>
-                            <Text style={styles.nextStepText}>
-                                Next Step
-                            </Text>
-                            <AntDesign name="arrowright" size={16} color={Colors.primaryColor}/>
-                        </Pressable>
-                    </View>
 
-                </View>
+                    <View style={styles.productBanner}>
 
-
-                <View style={styles.productBanner}>
-
-                    <Text style={styles.productPageTitle}>
-                        Give us more details about this product
-                    </Text>
-
-                    <Text style={styles.productPageText}>
-                        We’ll need the tagline, links, socials, about, categories
-                    </Text>
-                </View>
-
-
-                <View style={styles.authContainer}>
-
-
-                    <TextInput
-
-                        placeholder="Gatewayapp"
-                        keyboardType={"default"}
-                        touched={touched.productName}
-                        error={touched.productName && errors.productName}
-                        onFocus={() => setFocusProductName(true)}
-                        onChangeText={(e) => {
-                            handleChange('productName')(e);
-
-                        }}
-                        onBlur={(e) => {
-                            handleBlur('productName')(e);
-                            setFocusProductName(false);
-                        }}
-
-                        focus={focusProductName}
-                        value={values.productName}
-                        label="Product Name"/>
-
-
-                    <TextInput
-
-                        placeholder="Describe the product ina few words..."
-                        keyboardType={"default"}
-                        touched={touched.productTagline}
-                        error={touched.productTagline && errors.productTagline}
-                        onFocus={() => setFocusProductTagline(true)}
-                        onChangeText={(e) => {
-                            handleChange('productTagline')(e);
-
-                        }}
-                        onBlur={(e) => {
-                            handleBlur('productTagline')(e);
-                            setFocusProductTagline(false);
-                        }}
-
-                        focus={focusProductTagline}
-                        value={values.productTagline}
-                        label="Tagline"/>
-
-
-                    <TextInput
-
-                        placeholder="https://gatewayapp.co"
-                        keyboardType={"url"}
-                        touched={touched.productURL}
-                        error={touched.productURL && errors.productURL}
-                        onFocus={() => setFocusProductUrl(true)}
-                        onChangeText={(e) => {
-                            handleChange('productURL')(e);
-
-                        }}
-                        onBlur={(e) => {
-                            handleBlur('productURL')(e);
-                            setFocusProductUrl(false);
-                        }}
-
-                        focus={focusProductUrl}
-                        value={values.productURL}
-                        label="Product URL"/>
-
-
-                    <TouchableOpacity activeOpacity={0.8} style={styles.addLinkBtn}>
-                        <AntDesign name="pluscircle" size={14} color={Colors.primaryColor}/>
-                        <Text style={styles.linkBtnText}>
-                            Add more links
+                        <Text style={styles.productPageTitle}>
+                            Give us more details about this product
                         </Text>
 
-                        <View style={styles.linkContainer}>
-                            <Text style={styles.linksPlaceholderText}>
-                                (Google Play Store, App Store)
+                        <Text style={styles.productPageText}>
+                            We’ll need the tagline, links, socials, about, categories
+                        </Text>
+                    </View>
+
+
+                    <View style={styles.authContainer}>
+
+
+                        <TextInput
+
+                            placeholder="Gatewayapp"
+                            keyboardType={"default"}
+                            touched={touched.productName}
+                            error={touched.productName && errors.productName}
+                            onFocus={() => setFocusProductName(true)}
+                            onChangeText={(e) => {
+                                handleChange('productName')(e);
+
+                            }}
+                            onBlur={(e) => {
+                                handleBlur('productName')(e);
+                                setFocusProductName(false);
+                            }}
+
+                            focus={focusProductName}
+                            value={values.productName}
+                            label="Product Name"/>
+
+
+                        <TextInput
+
+                            placeholder="Describe the product ina few words..."
+                            keyboardType={"default"}
+                            touched={touched.productTagline}
+                            error={touched.productTagline && errors.productTagline}
+                            onFocus={() => setFocusProductTagline(true)}
+                            onChangeText={(e) => {
+                                handleChange('productTagline')(e);
+
+                            }}
+                            onBlur={(e) => {
+                                handleBlur('productTagline')(e);
+                                setFocusProductTagline(false);
+                            }}
+
+                            focus={focusProductTagline}
+                            value={values.productTagline}
+                            label="Tagline"/>
+
+
+                        <TextInput
+
+                            placeholder="https://gatewayapp.co"
+                            keyboardType={"url"}
+                            touched={touched.productURL}
+                            error={touched.productURL && errors.productURL}
+                            onFocus={() => setFocusProductUrl(true)}
+                            onChangeText={(e) => {
+                                handleChange('productURL')(e);
+
+                            }}
+                            onBlur={(e) => {
+                                handleBlur('productURL')(e);
+                                setFocusProductUrl(false);
+                            }}
+
+                            focus={focusProductUrl}
+                            value={values.productURL}
+                            label="Product URL"/>
+
+
+                        <TouchableOpacity activeOpacity={0.8} style={styles.addLinkBtn}>
+                            <AntDesign name="pluscircle" size={14} color={Colors.primaryColor}/>
+                            <Text style={styles.linkBtnText}>
+                                Add more links
                             </Text>
-                        </View>
-                    </TouchableOpacity>
 
-
-                    <HorizontalLine margin/>
-
-
-                    <TouchableOpacity activeOpacity={0.8} style={styles.selectPortField}
-                                      onPress={() => handleSnapPress(2)}>
-                        <View style={styles.labelWrap}>
-                            <Text style={styles.labelText}>
-                                Categories
-                            </Text>
-                        </View>
-                        <View style={styles.selectedPorts}>
-
-                            <View style={[styles.selectedPortsContainer,
-                                selectedCategory.length < 1 && {
-                                    alignItems: 'center'
-                                }]}>
-
-                                {
-                                    selectedCategory.length < 1 &&
-                                    <Text style={styles.placegholder}>
-                                        Categories
-                                    </Text>
-                                }
-
-                                {
-                                    selectedCategory.map((item, index) => (
-                                        <Pressable onPress={() => updatePort(item)} key={item._id}
-                                                   style={styles.portItem}>
-                                            <Text style={styles.portText}>
-                                                {item.label}
-                                            </Text>
-                                            <Ionicons name="close" size={12} color={"#005FD0"}/>
-                                        </Pressable>
-                                    ))
-                                }
-
-
+                            <View style={styles.linkContainer}>
+                                <Text style={styles.linksPlaceholderText}>
+                                    (Google Play Store, App Store)
+                                </Text>
                             </View>
-                            {/* <View style={styles.addBtn}>
+                        </TouchableOpacity>
+
+
+                        <HorizontalLine margin/>
+
+                        <View style={styles.socialTags}>
+                            <Text style={styles.socialLabel}>
+                                Socials
+                            </Text>
+
+                            <View style={styles.inputRow}>
+                                <View style={styles.socialTagName}>
+                                    <Text style={styles.textTag}>
+                                        Twitter
+                                    </Text>
+                                </View>
+
+
+                                <TextInput
+                                    isWidth={'70%'}
+                                    placeholder="@"
+                                    keyboardType={"default"}
+                                    touched={touched.twitter}
+                                    error={touched.twitter && errors.twitter}
+
+                                    onChangeText={(e) => {
+                                        handleChange('twitter')(e);
+
+                                    }}
+                                    onBlur={(e) => {
+                                        handleBlur('twitter')(e);
+
+                                    }}
+                                    value={values.twitter}
+                                    label=""/>
+                            </View>
+
+
+
+
+                            <View style={styles.inputRow}>
+                                <View style={styles.socialTagName}>
+                                    <Text style={styles.textTag}>
+                                        Telegram
+                                    </Text>
+                                </View>
+
+
+                                <TextInput
+                                    isWidth={'70%'}
+                                    placeholder="@"
+                                    keyboardType={"default"}
+                                    touched={touched.telegram}
+                                    error={touched.telegram && errors.telegram}
+
+                                    onChangeText={(e) => {
+                                        handleChange('telegram')(e);
+
+                                    }}
+                                    onBlur={(e) => {
+                                        handleBlur('telegram')(e);
+
+                                    }}
+                                    value={values.twitter}
+                                    label=""/>
+                            </View>
+
+
+
+                            <View style={styles.inputRow}>
+                                <View style={styles.socialTagName}>
+                                    <Text style={styles.textTag}>
+                                        Facebook
+                                    </Text>
+                                </View>
+
+
+                                <TextInput
+                                    isWidth={'70%'}
+                                    placeholder="@"
+                                    keyboardType={"default"}
+                                    touched={touched.facebook}
+                                    error={touched.facebook && errors.facebook}
+
+                                    onChangeText={(e) => {
+                                        handleChange('facebook')(e);
+
+                                    }}
+                                    onBlur={(e) => {
+                                        handleBlur('facebook')(e);
+
+                                    }}
+                                    value={values.facebook}
+                                    label=""/>
+                            </View>
+
+                        </View>
+                        <HorizontalLine margin/>
+
+
+
+                        <TextArea
+
+                            placeholder="https://gatewayapp.co"
+                            keyboardType={"url"}
+                            touched={touched.productURL}
+                            error={touched.productURL && errors.productURL}
+                            onFocus={() => setFocusProductUrl(true)}
+                            onChangeText={(e) => {
+                                handleChange('productURL')(e);
+
+                            }}
+                            onBlur={(e) => {
+                                handleBlur('productURL')(e);
+                                setFocusProductUrl(false);
+                            }}
+
+                            focus={focusProductUrl}
+                            value={values.productURL}
+                            label="Product URL"/>
+                        <HorizontalLine margin/>
+
+
+                        <TouchableOpacity activeOpacity={0.8} style={styles.selectPortField}
+                                          onPress={() => handleSnapPress(2)}>
+                            <View style={styles.labelWrap}>
+                                <Text style={styles.labelText}>
+                                    Categories
+                                </Text>
+                            </View>
+                            <View style={styles.selectedPorts}>
+
+                                <View style={[styles.selectedPortsContainer,
+                                    selectedCategory.length < 1 && {
+                                        alignItems: 'center'
+                                    }]}>
+
+                                    {
+                                        selectedCategory.length < 1 &&
+                                        <Text style={styles.placegholder}>
+                                            Categories
+                                        </Text>
+                                    }
+
+                                    {
+                                        selectedCategory.map((item, index) => (
+                                            <Pressable onPress={() => updatePort(item)} key={item._id}
+                                                       style={styles.portItem}>
+                                                <Text style={styles.portText}>
+                                                    {item.label}
+                                                </Text>
+                                                <Ionicons name="close" size={12} color={Colors.primaryColor}/>
+                                            </Pressable>
+                                        ))
+                                    }
+
+
+                                </View>
+                                {/* <View style={styles.addBtn}>
                                     <Ionicons name="ios-chevron-down-sharp" size={24} color="black"/>
                                 </View>*/}
-                        </View>
+                            </View>
 
 
+                        </TouchableOpacity>
+
+
+                        <HorizontalLine margin/>
+
+
+                        <TouchableOpacity activeOpacity={0.8} style={styles.selectPortField}
+                                          onPress={() => c_handleSnapPress(2)}>
+                            <View style={styles.labelWrap}>
+                                <Text style={styles.labelText}>
+                                    Countries
+                                </Text>
+                            </View>
+                            <View style={styles.selectedPorts}>
+
+                                <View style={[styles.selectedPortsContainer,
+                                    selectedCategory.length < 1 && {
+                                        alignItems: 'center'
+                                    }]}>
+
+                                    {
+                                        selectedCountry.length < 1 &&
+                                        <Text style={styles.placegholder}>
+                                            Countries
+                                        </Text>
+                                    }
+
+                                    {
+                                        selectedCountry.map((item, index) => (
+                                            <Pressable onPress={() => updateCountry(item)} key={item.name}
+                                                       style={styles.countryItem}>
+                                                <Text style={styles.portText}>
+                                                    {item.emoji}
+                                                </Text>
+                                                <Text style={styles.countryText}>
+                                                    {item.name}
+                                                </Text>
+                                                <Ionicons name="close" size={12} color={darkTextColor}/>
+                                            </Pressable>
+                                        ))
+                                    }
+
+
+                                </View>
+                                {/* <View style={styles.addBtn}>
+                                    <Ionicons name="ios-chevron-down-sharp" size={24} color="black"/>
+                                </View>*/}
+                            </View>
+
+
+                        </TouchableOpacity>
+
+
+                    </View>
+
+
+                    <Pressable disabled={!isValid} onPress={() => handleSubmit()} style={styles.claimBtn}>
+                        <Text style={styles.claimBtnText}>
+                            Next Step
+                        </Text>
+                    </Pressable>
+                </KeyboardAwareScrollView>
+            </SafeAreaView>
+
+
+            <BottomSheet
+                // handleIndicatorStyle={{display: 'none'}}
+                index={0}
+                ref={sheetRef}
+                snapPoints={snapPoints}
+                backdropComponent={renderBackdrop}
+            >
+                <View style={[styles.sheetHead, {}]}>
+
+
+                    <TouchableOpacity onPress={handleClosePress}
+                                      style={[styles.dismiss, {}]}>
+                        <Ionicons name="close-sharp" size={24} color={textColor}/>
                     </TouchableOpacity>
 
 
+                    <Text style={[styles.sheetTitle, {
+
+                        color: textColor
+                    }]}>
+                        Select Categories
+                    </Text>
+
+                    <Text style={[styles.resetText, {}]}>
+                        Reset
+                    </Text>
                 </View>
 
 
-                <Pressable disabled={!isValid} onPress={() => handleSubmit()} style={styles.claimBtn}>
-                    <Text style={styles.claimBtnText}>
-                        Next Step
+                {
+
+
+                    <BottomSheetFlatList scrollEnabled
+                                         data={Categories}
+                                         renderItem={renderItem}
+                                         keyExtractor={keyExtractor}
+                                         showsVerticalScrollIndicator={false}/>
+
+                }
+            </BottomSheet>
+
+
+            <BottomSheet
+                // handleIndicatorStyle={{display: 'none'}}
+                index={0}
+                ref={countrySheetRef}
+                snapPoints={snapPoints}
+                backdropComponent={renderBackdrop}
+            >
+                <View style={[styles.sheetHead, {}]}>
+
+
+                    <TouchableOpacity onPress={c_handleClosePress}
+                                      style={[styles.dismiss, {}]}>
+                        <Ionicons name="close-sharp" size={24} color={textColor}/>
+                    </TouchableOpacity>
+
+
+                    <Text style={[styles.sheetTitle, {
+
+                        color: textColor
+                    }]}>
+                        Select Country
                     </Text>
-                </Pressable>
-            </KeyboardAwareScrollView>
-        </SafeAreaView>
+
+                    <Text style={[styles.resetText, {}]}>
+                        Reset
+                    </Text>
+                </View>
 
 
+                {
 
 
+                    <BottomSheetFlatList scrollEnabled
+                                         data={list}
+                                         renderItem={renderCountryItem}
+                                         keyExtractor={c_keyExtractor}
+                                         showsVerticalScrollIndicator={false}/>
 
+                }
+            </BottomSheet>
 
-
-    <BottomSheet
-        // handleIndicatorStyle={{display: 'none'}}
-        index={0}
-        ref={sheetRef}
-        snapPoints={snapPoints}
-        backdropComponent={renderBackdrop}
-    >
-        <View style={[styles.sheetHead, {}]}>
-
-
-            <TouchableOpacity onPress={handleClosePress}
-                              style={[styles.dismiss, {
-
-                              }]}>
-                <Ionicons name="close-sharp" size={24} color={textColor} />
-            </TouchableOpacity>
-
-
-            <Text style={[styles.sheetTitle, {
-
-                color:textColor
-            }]}>
-                Select Categories
-            </Text>
-
-            <Text style={[styles.resetText, {
-
-            }]}>
-                Reset
-            </Text>
-        </View>
-
-
-        {
-
-
-            <BottomSheetFlatList scrollEnabled
-                                 data={Categories}
-                                 renderItem={renderItem}
-                                 keyExtractor={keyExtractor}
-                                 showsVerticalScrollIndicator={false}/>
-
-        }
-    </BottomSheet>
-
-    </>
-);
+        </>
+    );
 };
 
 const styles = StyleSheet.create({
@@ -861,13 +1160,30 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
 
         borderRadius: 15,
-        backgroundColor: "#005FD033"
+        backgroundColor: "#FFEDED"
+    }, countryItem: {
+        margin: 5,
+        paddingHorizontal: pixelSizeHorizontal(10),
+        minHeight: 30,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+
+        borderRadius: 15,
+        backgroundColor: "#E0E0E0"
     },
     portText: {
         marginRight: 5,
         fontSize: fontPixel(12),
         fontFamily: Fonts.quicksandSemiBold,
         color: Colors.primaryColor
+    },
+
+    countryText: {
+        marginRight: 5,
+        fontSize: fontPixel(12),
+        fontFamily: Fonts.quicksandSemiBold,
+        color: "#000"
     },
 
     labelWrap: {
@@ -884,7 +1200,7 @@ const styles = StyleSheet.create({
     placegholder: {
         fontSize: fontPixel(14),
         fontFamily: Fonts.quicksandRegular,
-        color: "#6D6D6D"
+        color: "#333333"
     },
     sheetHead: {
         paddingHorizontal: pixelSizeHorizontal(20),
@@ -896,14 +1212,14 @@ const styles = StyleSheet.create({
     }
     ,
     sheetTitle: {
-        fontSize: fontPixel(24),
+        fontSize: fontPixel(18),
         fontFamily: Fonts.quickSandBold,
 
     },
     resetText: {
         fontSize: fontPixel(14),
         fontFamily: Fonts.quicksandMedium,
-        color:Colors.primaryColor
+        color: Colors.primaryColor
     },
     dismiss: {
 
@@ -922,7 +1238,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         width: '90%',
-        marginLeft:10,
+        marginLeft: 10,
         height: heightPixel(70),
 
 
@@ -951,10 +1267,47 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.quickSandBold
     },
     account: {
+        marginLeft: 5,
         color: "#000",
         fontSize: fontPixel(14),
         fontFamily: Fonts.quicksandSemiBold
     },
+    socialTags: {
+        height: heightPixel(270),
+        width: '100%',
+        alignItems: 'center',
+
+    },
+    socialLabel: {
+        alignSelf: 'flex-start',
+        color: "#333333",
+        fontSize: fontPixel(16),
+        fontFamily: Fonts.quicksandMedium,
+    },
+    socialTagName: {
+        borderColor: "#CCCCCC",
+        borderWidth: 1,
+        width: 85,
+        height: 50,
+        alignItems: 'center',
+        marginRight: 15,
+        marginTop: 10,
+        borderRadius: 10,
+        justifyContent: 'center'
+    },
+    textTag: {
+        color: "#ADADAD",
+        fontSize: fontPixel(14),
+        fontFamily: Fonts.quicksandMedium,
+    },
+    inputRow: {
+
+        width: '100%',
+        height: 80,
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+        flexDirection: 'row'
+    }
 })
 
 export default FundamentalData;

@@ -1,35 +1,25 @@
 import React, {useState} from 'react';
 
-import {Text, View, StyleSheet, ImageBackground, TouchableOpacity, Platform, Pressable} from 'react-native';
-import {AntDesign, Ionicons, MaterialIcons, Octicons} from "@expo/vector-icons";
+import {Text, View, StyleSheet, ImageBackground, TouchableOpacity, Pressable, Platform} from 'react-native';
+import {RootStackScreenProps} from "../../../../types";
+import {AntDesign, Ionicons, Octicons} from "@expo/vector-icons";
+import ImageIcon from "../../../assets/images/svg/imageIcon";
 import Colors from "../../../constants/Colors";
-import {SafeAreaView} from "react-native-safe-area-context";
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
+import {SafeAreaView} from "react-native-safe-area-context";
+import {useAppSelector} from "../../../app/hooks";
 import {useInfiniteQuery} from "@tanstack/react-query";
 import {userNotifications} from "../../../action/action";
-import {RootStackScreenProps} from "../../../../types";
-import {useAppSelector} from "../../../app/hooks";
 import {fontPixel, heightPixel, pixelSizeHorizontal, widthPixel} from "../../../helpers/normalize";
 import {Fonts} from "../../../constants/Fonts";
-import {useFormik} from "formik";
-import * as yup from "yup";
-import PushIcon from "../../../assets/images/svg/PushIcon";
-import TextInput from "../../../components/inputs/TextInput";
-import HorizontalLine from "../../../components/HorizontalLine";
-import CheckYesIcon from "../../../assets/images/svg/CheckYesIcon";
-import CheckNoIcon from "../../../assets/images/svg/CheckNoIcon";
+import OpenBoxIcon from "../../../assets/images/svg/OpenBoxIcon";
+import SearchInput from "../../../components/inputs/SearchInput";
+
+const MoreInformation = ({navigation}:RootStackScreenProps<'MoreInformation'>) => {
 
 
-const formSchema = yup.object().shape({
+    const [searchValue, setSearchValue] = useState('')
 
-    productName: yup.string().required('Product Name is required'),
-    productURL: yup.string().url('Please enter a valid URL').required('Product URL is required'),
-
-
-});
-
-
-const ProductInformation = ({navigation}: RootStackScreenProps<'ProductInformation'>) => {
 
 
     const dataSlice = useAppSelector(state => state.data)
@@ -43,11 +33,6 @@ const ProductInformation = ({navigation}: RootStackScreenProps<'ProductInformati
     const tintText = theme == 'light' ? "#AEAEAE" : Colors.dark.tintTextColor
     const borderColor = theme == 'light' ? "#DEE5ED" : "#ccc"
 
-
-    const [focusProductName, setFocusProductName] = useState(false)
-    const [focusProductUrl, setFocusProductUrl] = useState(false)
-
-    const [checkOption, setCheckOption] = useState<'Yes'|'No'>('No')
 
     const openNotifications = () => {
         navigation.navigate('Notifications')
@@ -72,31 +57,8 @@ const ProductInformation = ({navigation}: RootStackScreenProps<'ProductInformati
         })
 
 
-    const {
-        resetForm,
-        handleChange, handleSubmit, handleBlur,
-        setFieldValue,
-        isSubmitting,
-        setSubmitting,
-        values,
-        errors,
-        touched,
-        isValid
-    } = useFormik({
-        validationSchema: formSchema,
-        initialValues: {
 
-            productName: '',
-            productURL: '',
 
-        },
-        onSubmit: (values) => {
-            const {productName} = values;
-            //     const body = JSON.stringify({email: email.toLowerCase()})
-
-navigation.navigate('FundamentalData')
-        }
-    });
 
     return (
         <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
@@ -153,28 +115,27 @@ navigation.navigate('FundamentalData')
 
                 </View>
 
-
                 <View style={styles.stepsBox}>
                     <View style={styles.stepsBoxLeft}>
 
                         <View style={styles.iconBox}>
-                            <PushIcon/>
+                            <OpenBoxIcon/>
                         </View>
 
                         <View style={styles.mainInfo}>
                             <Text style={styles.stepText}>
-                                Step 1/4
+                                Step 4/4
                             </Text>
 
                             <Text style={styles.pageTitle}>
-                                Product Information
+                                More Information
                             </Text>
                         </View>
 
                     </View>
 
                     <View style={styles.stepsBoxRight}>
-                        <Pressable onPress={()=>navigation.navigate('FundamentalData')} style={styles.nextStep}>
+                        <Pressable style={styles.nextStep}>
                             <Text style={styles.nextStepText}>
                                 Next Step
                             </Text>
@@ -185,108 +146,36 @@ navigation.navigate('FundamentalData')
                 </View>
 
 
-
                 <View style={styles.productBanner}>
 
                     <Text style={styles.productPageTitle}>
-                        Product Information
+                        More Information
                     </Text>
 
                     <Text style={styles.productPageText}>
-                        Please fill in the details below to get an accurate info on your product.
+                        Few more information you might want to add to your product
                     </Text>
                 </View>
 
 
-                <View style={styles.authContainer}>
+                <View style={styles.searchBoxWrap}>
+                    <SearchInput placeholder={'Search products here'} value={searchValue}/>
 
+                    <View style={[styles.searchIcon, {
+                        borderColor
+                    }]}>
 
-
-                <TextInput
-
-                    placeholder="Gatewayapp"
-                    keyboardType={"default"}
-                    touched={touched.productName}
-                    error={touched.productName && errors.productName}
-                    onFocus={() => setFocusProductName(true)}
-                    onChangeText={(e) => {
-                        handleChange('productName')(e);
-
-                    }}
-                    onBlur={(e) => {
-                        handleBlur('productName')(e);
-                        setFocusProductName(false);
-                    }}
-
-                    focus={focusProductName}
-                    value={values.productName}
-                    label="Product Name"/>
-
-
-
-
-                    <TextInput
-
-                    placeholder="https://gatewayapp.co"
-                    keyboardType={"url"}
-                    touched={touched.productURL}
-                    error={touched.productURL && errors.productURL}
-                    onFocus={() => setFocusProductUrl(true)}
-                    onChangeText={(e) => {
-                        handleChange('productURL')(e);
-
-                    }}
-                    onBlur={(e) => {
-                        handleBlur('productURL')(e);
-                        setFocusProductUrl(false);
-                    }}
-
-                    focus={focusProductUrl}
-                    value={values.productURL}
-                    label="Product URL"/>
-
-                    <HorizontalLine margin/>
-
-
-
-                </View>
-
-                <View style={styles.checkBoxContainer}>
-                    <Text style={styles.checkTitle}>
-                        Did you work on this product?
-                    </Text>
-
-                    <View style={styles.checkItem}>
-
-                        <Pressable onPress={()=>setCheckOption('Yes')} style={[styles.checkBox, checkOption == 'Yes' &&{
-                            borderColor:"#000"
-                        }]}>
-                            <CheckYesIcon/>
-                            <Text style={styles.checkBoxText}>
-                                Yes
-                            </Text>
-                        </Pressable>
-
-                        <Pressable onPress={()=>setCheckOption('No')} style={[styles.checkBox, checkOption == 'No' &&{
-                            borderColor:"#000"
-                        }]}>
-                            <CheckNoIcon/>
-                            <Text style={styles.checkBoxText}>
-                                No
-                            </Text>
-                        </Pressable>
-
+                        <AntDesign name="search1" size={18} color="black"/>
                     </View>
 
-
-
                 </View>
 
-                <Pressable disabled={!isValid} onPress={()=>handleSubmit()} style={styles.claimBtn}>
-                    <Text style={styles.claimBtnText}>
-                        Next Step
-                    </Text>
-                </Pressable>
+
+
+
+
+
+
 
             </KeyboardAwareScrollView>
         </SafeAreaView>
@@ -294,6 +183,7 @@ navigation.navigate('FundamentalData')
 };
 
 const styles = StyleSheet.create({
+
     safeArea: {
         width: '100%',
         flex: 1,
@@ -457,6 +347,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
 
     },
+
     mainInfo: {
 
         borderRadius: 100,
@@ -489,82 +380,49 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.quicksandSemiBold,
         color: Colors.primaryColor
     },
-    productBanner:{
-        height:heightPixel(120),
-        alignItems:'flex-start',
-        justifyContent:'center',
-        width:'90%',
-    },
 
-    productPageTitle:{
-        fontSize: fontPixel(24),
-        fontFamily: Fonts.quickSandBold,
-color:"#000"
-    },
-    productPageText:{
-        lineHeight:22,
-        marginTop:10,
-        fontSize: fontPixel(14),
-        fontFamily: Fonts.quicksandMedium,
-color:"#686868"
-    },
-
-    authContainer: {
-
+    productBanner: {
+        height: heightPixel(120),
+        alignItems: 'flex-start',
         justifyContent: 'center',
         width: '90%',
-marginTop:40,
     },
-    checkBoxContainer:{
-        height:heightPixel(120),
-        alignItems:'flex-start',
-        justifyContent:'center',
-        width:'80%',
 
+    productPageTitle: {
+        width: '80%',
+        fontSize: fontPixel(24),
+        fontFamily: Fonts.quickSandBold,
+        color: "#000"
     },
-    checkTitle:{
+    productPageText: {
+        lineHeight: 22,
+        marginTop: 10,
         fontSize: fontPixel(14),
         fontFamily: Fonts.quicksandMedium,
-        color:"#333333"
+        color: "#686868"
     },
-    checkItem:{
-        marginTop:10,
-        height:heightPixel(80),
-        alignItems:'center',
-        justifyContent:'space-between',
-        width:'100%',
-        flexDirection:'row',
-
-    },
-    checkBox:{
-        height:heightPixel(72),
-        alignItems:'center',
-        justifyContent:'center',
-        width:145,
-        borderRadius:6,
-        borderColor:"#ccc",
-        borderWidth:1,
-    },
-    checkBoxText:{
-        fontSize: fontPixel(10),
-        fontFamily: Fonts.quicksandMedium,
-        color:"#181818"
-    },
-    claimBtn: {
-        height: 45,
-
-        width: widthPixel(235),
-        borderRadius: 30,
-        backgroundColor: Colors.primaryColor,
-        alignItems: 'center',
-        marginVertical: 40,
+    authContainer: {
+        marginBottom:40,
         justifyContent: 'center',
+        width: '90%',
+
     },
-    claimBtnText: {
-        fontSize: fontPixel(14),
-        color: "#fff",
-        fontFamily: Fonts.quicksandSemiBold
-    }
+
+    searchBoxWrap: {
+
+        width: '90%',
+        flexDirection: "row",
+        alignItems: 'center',
+        justifyContent: 'space-between'
+    },
+    searchIcon: {
+        height: 40,
+        width: 40,
+        alignItems: 'center',
+        justifyContent: "center",
+        borderWidth: 1,
+        borderRadius: 10
+    },
 })
 
-export default ProductInformation;
+export default MoreInformation;

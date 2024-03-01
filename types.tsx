@@ -12,6 +12,7 @@ import CreatingAdventure from "./src/screens/learn/CreatingAdventure";
 import DiscoverProducts from "./src/screens/discover/DiscoverProducts";
 import ProductView from "./src/screens/discover/ProductView";
 import FundamentalData from "./src/screens/discover/create/FundamentalData";
+import VisualRepresentation from "./src/screens/discover/create/VisualRepresentation";
 
 
 declare global {
@@ -34,6 +35,8 @@ export type RootStackParamList = {
     DiscoverProducts: undefined;
     ProductInformation: undefined;
     FundamentalData: undefined;
+    MoreInformation: undefined;
+    VisualRepresentation: undefined;
     ProductView: {
         id?:string
     };
