@@ -1,21 +1,19 @@
 import React, {SetStateAction, useState} from 'react';
 
 import {Text, View, StyleSheet, ImageBackground, TouchableOpacity, Platform} from 'react-native';
-import {Ionicons, Octicons} from "@expo/vector-icons";
+import {AntDesign, Ionicons, Octicons} from "@expo/vector-icons";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
 import {useInfiniteQuery, useQueryClient} from "@tanstack/react-query";
 import Colors from "../../constants/Colors";
+import {userNotifications} from "../../action/action";
+import {RootStackScreenProps} from "../../../types";
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
 import {Fonts} from "../../constants/Fonts";
-import {userNotifications} from "../../action/action";
-import SegmentedControl from "../../components/segment-control/SegmentContol";
-import SegmentContolAlt from "../../components/segment-control/SegmentContolAlt";
-import MyCard from "../../components/wallets/cards/MyCard";
-import {IF} from "../../helpers/ConditionJsx";
+
+const ViewPoints = ({navigation}:RootStackScreenProps<'ViewPoints'>) => {
 
 
-const Wallet = () => {
 
 
     const [tabIndex, setTabIndex] = useState(0);
@@ -31,11 +29,12 @@ const Wallet = () => {
     const dataSlice = useAppSelector(state => state.data)
     const {theme} = dataSlice
 
-
     const [refreshing, setRefreshing] = useState(false);
     const backgroundColor = theme == 'light' ? "#FFFFFF" : "#141414"
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
     const lightText = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
+    const darkTextColor = theme == 'light' ? Colors.light.darkText : Colors.dark.text
+
 
     const openNotifications = () => {
         navigation.navigate('Notifications')
@@ -60,7 +59,10 @@ const Wallet = () => {
         })
 
 
+
+
     return (
+
         <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
             <View style={styles.topBar}>
 
@@ -92,40 +94,28 @@ const Wallet = () => {
 
             </View>
 
-            <View style={styles.pageTitleWrap}>
-                <Text style={[styles.pageTitle, {
-                    color: textColor
-                }]}>
-                    Wallet
-                </Text>
-            </View>
+            <View style={styles.navButtonWrap}>
+                <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.8}
+                                  style={styles.navButton}>
+
+                    <AntDesign name="arrowleft" size={24} color="black"/>
+                    <Text style={[styles.backText, {
+                        color: darkTextColor
+                    }]}>Gateway Points</Text>
+                </TouchableOpacity>
 
 
-            <View style={styles.segmentWrap}>
 
-                <SegmentContolAlt tabs={["Wallets", "Collectibles", "NFT Marketplace"]}
-                                  currentIndex={tabIndex}
-                                  onChange={handleTabsChange}
-                                  segmentedControlBackgroundColor={"#fff"}
-                                  activeSegmentBackgroundColor={Colors.primaryColor}
-                                  activeTextColor={textColor}
-                                  textColor={"#AFAFAF"}
-                                  paddingVertical={pixelSizeVertical(10)}/>
 
             </View>
-
-            <IF condition={tabIndex == 0}>
-                <MyCard/>
-            </IF>
 
 
         </SafeAreaView>
-    );
+
+            );
 };
 
 const styles = StyleSheet.create({
-
-
     safeArea: {
         width: '100%',
         flex: 1,
@@ -133,13 +123,13 @@ const styles = StyleSheet.create({
         backgroundColor: "#FEF1F1",
         paddingBottom: Platform.OS === 'ios' ? -40 : 0
     },
-    pageTitleWrap: {
+    pageTitleWrap:{
         width: '90%',
-        marginVertical: pixelSizeVertical(10),
+        marginVertical:pixelSizeVertical(10),
         flexDirection: 'row',
         justifyContent: 'flex-start',
     },
-    pageTitle: {
+    pageTitle:{
         fontSize: fontPixel(24),
         fontFamily: Fonts.quickSandBold
     },
@@ -218,13 +208,34 @@ const styles = StyleSheet.create({
         borderRadius: 15,
     },
 
-    segmentWrap: {
-        height: heightPixel(60),
+    navButtonWrap: {
+        paddingHorizontal: pixelSizeHorizontal(15),
         width: '100%',
-        justifyContent: 'space-evenly',
+        height: heightPixel(40),
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+    },
+    navButton: {
+        width: '75%',
+        height: '100%',
+        justifyContent: 'flex-start',
+        flexDirection: 'row',
+
         alignItems: 'center',
-        flexDirection: 'row'
+    },
+    rightNavButton: {
+        width: widthPixel(200),
+        height: '90%',
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+    },
+    backText: {
+        marginLeft: 5,
+        fontSize: fontPixel(16),
+        fontFamily: Fonts.quicksandSemiBold
     },
 })
 
-export default Wallet;
+export default ViewPoints;

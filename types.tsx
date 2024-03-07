@@ -13,6 +13,7 @@ import DiscoverProducts from "./src/screens/discover/DiscoverProducts";
 import ProductView from "./src/screens/discover/ProductView";
 import FundamentalData from "./src/screens/discover/create/FundamentalData";
 import VisualRepresentation from "./src/screens/discover/create/VisualRepresentation";
+import ViewPoints from "./src/screens/wallets/ViewPoints";
 
 
 declare global {
@@ -35,6 +36,7 @@ export type RootStackParamList = {
     DiscoverProducts: undefined;
     ProductInformation: undefined;
     FundamentalData: undefined;
+    ViewPoints: undefined;
     MoreInformation: undefined;
     VisualRepresentation: undefined;
     ProductView: {

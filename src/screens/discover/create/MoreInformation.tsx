@@ -136,10 +136,7 @@ const MoreInformation = ({navigation}:RootStackScreenProps<'MoreInformation'>) =
 
                     <View style={styles.stepsBoxRight}>
                         <Pressable style={styles.nextStep}>
-                            <Text style={styles.nextStepText}>
-                                Next Step
-                            </Text>
-                            <AntDesign name="arrowright" size={16} color={Colors.primaryColor}/>
+
                         </Pressable>
                     </View>
 
