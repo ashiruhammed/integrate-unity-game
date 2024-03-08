@@ -12,7 +12,7 @@ import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPix
 import {Fonts} from "../../constants/Fonts";
 import Animated, {FadeInDown, FadeOutDown} from 'react-native-reanimated';
 
-const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
+const GatewayToken = ({navigation}: RootStackScreenProps<'GatewayToken'>) => {
 
 
     const [tabIndex, setTabIndex] = useState(0);
@@ -105,7 +105,9 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
                         <AntDesign name="arrowleft" size={24} color="black"/>
                         <Text style={[styles.backText, {
                             color: darkTextColor
-                        }]}>Gateway Points</Text>
+                        }]}>
+                            Gateway Token
+                        </Text>
                     </TouchableOpacity>
 
 
@@ -114,17 +116,17 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
 
                 <View style={styles.dashboardBox}>
                     <Text style={styles.cardText}>
-                        GP
+                        $GATE
                     </Text>
 
                     <View style={[styles.bottomInfo, {
                         height: 30,
                     }]}>
                         <Text style={styles.cardTitle}>
-                            Gateway Points
+                            Gateway Token
                         </Text>
                         <Text style={styles.cardTitle}>
-                            5,000,000
+                            58,000
                         </Text>
                     </View>
 
@@ -142,6 +144,22 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
                 </View>
 
 
+                <View style={styles.copyWrap}>
+                    <Text style={[styles.copyText,{
+                        color: "#333333",
+                        fontFamily: Fonts.quicksandMedium
+                    }]}>
+                        x08978vfb9278g783632e5gs...
+                    </Text>
+
+                    <TouchableOpacity activeOpacity={0.8} style={styles.copyBtn}>
+                        <Ionicons name="copy-outline" size={16} color={Colors.primaryColor} />
+                        <Text style={styles.copyText}>
+                            Copy
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+
                 <View style={styles.buttonWrap}>
 
                     <Pressable style={[styles.dahButton, {
@@ -150,20 +168,11 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
                         <Text style={[styles.buttonText, {
                             color: "#E01414"
                         }]}>
-                            Buy Points
+                    Withdraw
                         </Text>
                     </Pressable>
 
 
-                    <Pressable style={[styles.dahButton, {
-                        backgroundColor: "#D90429"
-                    }]}>
-                        <Text style={[styles.buttonText, {
-                            color: "#fff"
-                        }]}>
-                            Redeem Points
-                        </Text>
-                    </Pressable>
 
 
                 </View>
@@ -183,40 +192,8 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
 
 
                 <View style={styles.transactions}>
-                    <Animated.View entering={FadeInDown.delay(200)
-                        .randomDelay()
-                    } exiting={FadeOutDown} style={styles.breakDownCard}>
-                        <View style={[styles.boxSign, {
-                            backgroundColor: Colors.successTint
-                        }]}>
-                            <AntDesign name="arrowdown" size={20} style={{transform: [{rotate: "-130deg"}]}}
-                                       color={Colors.success}/>
-                        </View>
-
-                        <View style={styles.boxTransactionBody}>
-
-                            <View style={styles.boxTransactionBodyLeft}>
-                                <Text style={styles.transactionTitle}>
-                                    Points Bought
-                                </Text>
-                                <Text style={styles.transactionDate}>
-                                    Jan 6, 2024
-                                </Text>
-                            </View>
-
-                            <View style={[styles.boxTransactionBodyLeft, {
-                                alignItems: 'flex-end',
-                                justifyContent: 'flex-start'
-                            }]}>
-                                <Text style={styles.transactionTitle}>
-                                    -500 GP
-                                </Text>
-
-                            </View>
-                        </View>
 
 
-                    </Animated.View>
 
 
  <Animated.View entering={FadeInDown.delay(200)
@@ -390,8 +367,8 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.quicksandSemiBold
     },
     dashboardBox: {
-        backgroundColor: "#D90429",
-        width: '90%',
+        backgroundColor: "#D9049D",
+        width: widthPixel(350),
         borderRadius: 15,
         height: heightPixel(100),
 
@@ -417,17 +394,41 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
 
     },
-    buttonWrap: {
-        width: '100%',
-        height: 120,
+    copyWrap: {
+        marginTop:30,
+        width: widthPixel(350),
+        height: 50,
+        borderRadius:15,
+        backgroundColor:"#eee",
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal:pixelSizeHorizontal(20),
+        flexDirection: 'row'
+    },
+    copyBtn:{
+        width:45,
         alignItems: 'center',
         justifyContent: 'center',
         flexDirection: 'row'
     },
+    copyText:{
+        marginLeft:5,
+        fontSize: fontPixel(14),
+        fontFamily: Fonts.quicksandRegular,
+        color:Colors.primaryColor
+    },
+    buttonWrap: {
+        marginVertical:pixelSizeVertical(15),
+        width: '100%',
+        height: 50,
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'column'
+    },
     dahButton: {
         marginHorizontal: pixelSizeHorizontal(15),
         height: 40,
-        width: widthPixel(156),
+        width: widthPixel(350),
         borderRadius: 30,
         alignItems: 'center',
         justifyContent: 'center',
@@ -507,4 +508,4 @@ const styles = StyleSheet.create({
 
 })
 
-export default ViewPoints;
+export default GatewayToken;

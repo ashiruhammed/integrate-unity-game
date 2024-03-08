@@ -15,6 +15,7 @@ import Animated, {
 import Card from './Card';
 import Colors from "../../../constants/Colors";
 import {useNavigation} from "@react-navigation/native";
+import Concordium from "../../../screens/wallets/Concordium";
 
 
 const {width, height} = Dimensions.get('window');
@@ -179,7 +180,7 @@ const MyCard = () => {
                 />
                 <CardContainer
                     id={1}
-                    action={()=>navigation.navigate('ViewPoints')}
+                    action={()=>navigation.navigate('GatewayToken')}
                     title={"Gateway Token"}
                     tag={"$GATE"}
                     value={"200"}
@@ -193,7 +194,7 @@ const MyCard = () => {
                 />
                 <CardContainer
                     id={0}
-                    action={()=>navigation.navigate('ViewPoints')}
+                    action={()=>navigation.navigate('Concordium')}
                     title={"Concordium"}
                     value={"200"}
                     number={"100,000"}

@@ -37,6 +37,8 @@ export type RootStackParamList = {
     ProductInformation: undefined;
     FundamentalData: undefined;
     ViewPoints: undefined;
+    Concordium: undefined;
+    GatewayToken: undefined;
     MoreInformation: undefined;
     VisualRepresentation: undefined;
     ProductView: {

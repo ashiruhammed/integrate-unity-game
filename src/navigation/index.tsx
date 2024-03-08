@@ -74,6 +74,8 @@ import FundamentalData from "../screens/discover/create/FundamentalData";
 import VisualRepresentation from "../screens/discover/create/VisualRepresentation";
 import MoreInformation from "../screens/discover/create/MoreInformation";
 import ViewPoints from "../screens/wallets/ViewPoints";
+import GatewayToken from "../screens/wallets/GatewayToken";
+import Concordium from "../screens/wallets/Concordium";
 
 const styles = StyleSheet.create({
     displayPhoto: {
@@ -359,6 +361,8 @@ function RootNavigator() {
                         <Stack.Screen name="VisualRepresentation" component={VisualRepresentation}/>
                         <Stack.Screen name="MoreInformation" component={MoreInformation}/>
                         <Stack.Screen name="ViewPoints" component={ViewPoints}/>
+                        <Stack.Screen name="GatewayToken" component={GatewayToken}/>
+                        <Stack.Screen name="Concordium" component={Concordium}/>
 
 
                         <Stack.Screen name="Notifications" options={{

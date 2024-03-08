@@ -68,7 +68,7 @@ const LeaderboardCard = ({item, theme}: props) => {
                 <View style={[styles.caret, {
                     backgroundColor: "#EAEAEA"
                 }]}>
-                    <Ionicons name="md-caret-up-outline" size={14} color={Colors.success}/>
+                    <Ionicons name="caret-up-outline" size={14} color={Colors.success}/>
                 </View>
             </View>
 
@@ -230,7 +230,7 @@ const Leaderboard = ({}: RootStackScreenProps<'Leaderboard'>) => {
                         {rank?.data?.rank}
                     </Text>
                     <View style={styles.caret}>
-                        <Ionicons name="md-caret-up-outline" size={18} color={Colors.success}/>
+                        <Ionicons name="caret-up-outline" size={18} color={Colors.success}/>
                     </View>
                 </View>
 

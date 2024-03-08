@@ -9,6 +9,8 @@ export default {
   disabled: "#9BA8AF",
   errorRed :'#FF3C3C',
   success :'#22BB33',
+  successTint :'#DDFFD7',
+  errorTint :'#FDDCDC',
   border: "#D1D5DB",
   borderColor: "#EAEAEA",
   light: {
