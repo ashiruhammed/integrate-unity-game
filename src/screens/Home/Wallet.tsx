@@ -1,6 +1,16 @@
-import React, {SetStateAction, useState} from 'react';
+import React, {SetStateAction, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
-import {Text, View, StyleSheet, ImageBackground, TouchableOpacity, Platform} from 'react-native';
+import {
+    Text,
+    View,
+    StyleSheet,
+    ImageBackground,
+    TouchableOpacity,
+    Platform,
+    Dimensions,
+    Pressable,
+    Image
+} from 'react-native';
 import {Ionicons, Octicons} from "@expo/vector-icons";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
@@ -13,9 +23,15 @@ import SegmentedControl from "../../components/segment-control/SegmentContol";
 import SegmentContolAlt from "../../components/segment-control/SegmentContolAlt";
 import MyCard from "../../components/wallets/cards/MyCard";
 import {IF} from "../../helpers/ConditionJsx";
+import {RootTabScreenProps} from "../../../types";
+import BottomSheet, {BottomSheetBackdrop, BottomSheetView} from "@gorhom/bottom-sheet";
+import {
+    BottomSheetDefaultBackdropProps
+} from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types';
+import {Portal} from "@gorhom/portal";
 
 
-const Wallet = () => {
+const Wallet = ({navigation}: RootTabScreenProps<'Learn'>) => {
 
 
     const [tabIndex, setTabIndex] = useState(0);
@@ -24,6 +40,35 @@ const Wallet = () => {
         //  setScreen(index === 0 ? 'Banks' : 'Wallets')
     };
 
+
+    // ref
+    const bottomSheetRef = useRef<BottomSheet>(null);
+
+    useEffect(() => {
+        if (tabIndex == 0) {
+            bottomSheetRef?.current?.expand()
+        }
+
+
+    }, [tabIndex])
+
+    const handleClose = () => {
+        bottomSheetRef?.current?.close()
+    }
+    // variables
+    const snapPoints = useMemo(() => ["1", "45%"], []);
+
+// renders
+    const renderBackdrop = useCallback(
+        (props: React.JSX.IntrinsicAttributes & BottomSheetDefaultBackdropProps) => (
+            <BottomSheetBackdrop
+                {...props}
+                disappearsOnIndex={0}
+                appearsOnIndex={1}
+            />
+        ),
+        []
+    );
     const dispatch = useAppDispatch()
     const queryClient = useQueryClient();
     const user = useAppSelector(state => state.user)
@@ -61,65 +106,123 @@ const Wallet = () => {
 
 
     return (
-        <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
-            <View style={styles.topBar}>
+        <>
 
-                <View style={styles.leftButton}>
+            <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
+                <View style={styles.topBar}>
 
-                    <View style={styles.pointWrap}>
-                        <Ionicons name="gift" size={16} color="#22BB33"/>
-                        <Text style={styles.pointsText}>20000</Text>
+                    <View style={styles.leftButton}>
+
+                        <View style={styles.pointWrap}>
+                            <Ionicons name="gift" size={16} color="#22BB33"/>
+                            <Text style={styles.pointsText}>20000</Text>
+                        </View>
                     </View>
+
+                    <View style={styles.rightButton}>
+
+                        <ImageBackground style={styles.streaKIcon} resizeMode={'contain'}
+                                         source={require('../../assets/images/streakicon.png')}>
+                            <Text style={styles.streakText}> 200</Text>
+                        </ImageBackground>
+
+                        <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}
+                                          style={styles.roundTopBtn}>
+                            {
+                                notifications?.pages[0]?.data?.result.length > 0 &&
+                                <View style={styles.dot}/>
+                            }
+                            <Octicons name="bell-fill" size={22} color={"#000"}/>
+                        </TouchableOpacity>
+
+                    </View>
+
                 </View>
 
-                <View style={styles.rightButton}>
+                <View style={styles.pageTitleWrap}>
+                    <Text style={[styles.pageTitle, {
+                        color: textColor
+                    }]}>
+                        Wallet
+                    </Text>
+                </View>
 
-                    <ImageBackground style={styles.streaKIcon} resizeMode={'contain'}
-                                     source={require('../../assets/images/streakicon.png')}>
-                        <Text style={styles.streakText}> 200</Text>
-                    </ImageBackground>
 
-                    <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}
-                                      style={styles.roundTopBtn}>
-                        {
-                            notifications?.pages[0]?.data?.result.length > 0 &&
-                            <View style={styles.dot}/>
-                        }
-                        <Octicons name="bell-fill" size={22} color={"#000"}/>
-                    </TouchableOpacity>
+                <View style={styles.segmentWrap}>
+
+                    <SegmentContolAlt tabs={["Wallets", "Collectibles", "NFT Marketplace"]}
+                                      currentIndex={tabIndex}
+                                      onChange={handleTabsChange}
+                                      segmentedControlBackgroundColor={"#fff"}
+                                      activeSegmentBackgroundColor={Colors.primaryColor}
+                                      activeTextColor={textColor}
+                                      textColor={"#AFAFAF"}
+                                      paddingVertical={pixelSizeVertical(10)}/>
 
                 </View>
 
-            </View>
+                <IF condition={tabIndex == 0}>
+                    <MyCard/>
+                </IF>
 
-            <View style={styles.pageTitleWrap}>
-                <Text style={[styles.pageTitle, {
-                    color: textColor
-                }]}>
-                    Wallet
-                </Text>
-            </View>
+                <IF condition={tabIndex == 2}>
+                    <View style={styles.marketplaceContainer}>
+                        <Image source={require('../../assets/images/marketplace.png')} style={styles.imageMarketplace}/>
 
 
-            <View style={styles.segmentWrap}>
-
-                <SegmentContolAlt tabs={["Wallets", "Collectibles", "NFT Marketplace"]}
-                                  currentIndex={tabIndex}
-                                  onChange={handleTabsChange}
-                                  segmentedControlBackgroundColor={"#fff"}
-                                  activeSegmentBackgroundColor={Colors.primaryColor}
-                                  activeTextColor={textColor}
-                                  textColor={"#AFAFAF"}
-                                  paddingVertical={pixelSizeVertical(10)}/>
-
-            </View>
-
-            <IF condition={tabIndex == 0}>
-                <MyCard/>
-            </IF>
+                        <Text style={styles.linkText}>
+                            Go to <Text style={{color:Colors.primaryColor}}>Marketplace</Text>
+                        </Text>
+                    </View>
+                </IF>
 
 
-        </SafeAreaView>
+            </SafeAreaView>
+
+            <Portal>
+                <BottomSheet
+                    backdropComponent={renderBackdrop}
+                    ref={bottomSheetRef}
+                    snapPoints={snapPoints}
+                    // add bottom inset to elevate the sheet
+                    bottomInset={66}
+                    index={1}
+                    // set `detached` to true
+                    detached={true}
+                    style={styles.sheetContainer}
+                >
+                    <BottomSheetView style={styles.contentContainer}>
+                        <View style={[styles.sheetHead, {
+                            height: 40
+                        }]}>
+
+
+                            <TouchableOpacity onPress={handleClose}
+                                              style={[styles.dismiss, {
+                                                  backgroundColor: "#11192E"
+                                              }]}>
+                                <Ionicons name="close-sharp" size={20} color={"#fff"}/>
+                            </TouchableOpacity>
+                        </View>
+                        <Text style={styles.sheetTitle}>
+                            Welcome to your Wallet
+                        </Text>
+                        <Text style={styles.sheetContentText}>
+                            Complete quick KYC to unlock wallet fully. Earn up to $5 afterward. Your wallet can receive
+                            Gateway Points, Tokens & NFTs as you explore. Necessary to prevent fraud.
+                        </Text>
+
+                        <Pressable style={styles.claimBtn}>
+                            <Text style={styles.claimBtnText}>
+                                Start (1min)
+                            </Text>
+                        </Pressable>
+                    </BottomSheetView>
+                </BottomSheet>
+
+            </Portal>
+
+        </>
     );
 };
 
@@ -225,6 +328,80 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         flexDirection: 'row'
     },
+    sheetContainer: {
+        width: '90%',
+        marginHorizontal: pixelSizeHorizontal(20)
+    },
+    contentContainer: {
+        paddingHorizontal: pixelSizeHorizontal(20),
+        alignItems: 'center',
+    },
+    sheetHead: {
+        // paddingHorizontal: pixelSizeHorizontal(20),
+        height: 60,
+        width: "100%",
+        alignItems: "center",
+        justifyContent: "flex-end",
+        flexDirection: "row"
+    }
+    ,
+    sheetTitle: {
+        marginVertical: 10,
+        fontSize: fontPixel(18),
+        fontFamily: Fonts.quickSandBold,
+        color: Colors.light.text
+    },
+    sheetContentText: {
+        color: "#5A5A5A",
+        fontSize: fontPixel(16),
+        lineHeight: 22,
+        fontFamily: Fonts.quicksandMedium,
+    },
+    dismiss: {
+
+
+        borderRadius: 30,
+        height: 30,
+        width: 30,
+        alignItems: "center",
+        justifyContent: "center"
+
+    },
+    claimBtn: {
+        height: 45,
+
+        width: widthPixel(235),
+        borderRadius: 30,
+        backgroundColor: Colors.primaryColor,
+        alignItems: 'center',
+        marginTop: 40,
+        justifyContent: 'center',
+    },
+    claimBtnText: {
+        fontSize: fontPixel(14),
+        color: "#fff",
+        fontFamily: Fonts.quicksandSemiBold
+    },
+    marketplaceContainer: {
+        width: '90%',
+        height: heightPixel(400),
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+
+    },
+
+    imageMarketplace: {
+        width: '90%',
+        height: heightPixel(250),
+        resizeMode: 'contain',
+    },
+    linkText: {
+        marginTop: 20,
+        fontSize: fontPixel(16),
+        color: "#000",
+        fontFamily: Fonts.quickSandBold
+    }
+
 })
 
 export default Wallet;

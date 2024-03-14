@@ -1,4 +1,4 @@
-import React, {SetStateAction, useState} from 'react';
+import React, {SetStateAction, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import {Text, View, StyleSheet, ImageBackground, TouchableOpacity, Platform, ScrollView, Pressable} from 'react-native';
 import {AntDesign, Entypo, Ionicons, Octicons} from "@expo/vector-icons";
@@ -11,6 +11,15 @@ import {RootStackScreenProps} from "../../../types";
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
 import {Fonts} from "../../constants/Fonts";
 import Animated, {FadeInDown, FadeOutDown} from 'react-native-reanimated';
+import BottomSheet, {
+    BottomSheetBackdrop,
+    BottomSheetModal,
+    BottomSheetModalProvider,
+    BottomSheetView
+} from "@gorhom/bottom-sheet";
+import {
+    BottomSheetDefaultBackdropProps
+} from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
 
 const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
 
@@ -35,6 +44,21 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
     const darkTextColor = theme == 'light' ? Colors.light.darkText : Colors.dark.text
 
 
+
+    const bottomSheetRef = useRef<BottomSheetModal>(null);
+
+   const handleOpen = () => {
+        bottomSheetRef?.current?.present()
+
+    }
+
+    const handleClose = () => {
+        bottomSheetRef?.current?.close()
+    }
+    // variables
+    const snapPoints = useMemo(() => ["1", "45%"], []);
+
+
     const openNotifications = () => {
         navigation.navigate('Notifications')
     }
@@ -57,6 +81,18 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
 
         })
 
+
+
+    const renderBackdrop = useCallback(
+        (props: React.JSX.IntrinsicAttributes & BottomSheetDefaultBackdropProps) => (
+            <BottomSheetBackdrop
+                {...props}
+                disappearsOnIndex={0}
+                appearsOnIndex={1}
+            />
+        ),
+        []
+    );
 
     return (
 
@@ -144,7 +180,7 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
                 </View>
 
 
-                <View style={styles.copyWrap}>
+                <Pressable onPress={handleOpen} style={styles.copyWrap}>
                     <Text style={[styles.copyText,{
                         color: Colors.primaryColor,
                         fontFamily: Fonts.quicksandMedium
@@ -157,7 +193,7 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
 
                         <AntDesign name="arrowright" size={16} color={Colors.primaryColor} />
                     </TouchableOpacity>
-                </View>
+                </Pressable>
 
                 <View style={styles.buttonWrap}>
 
@@ -232,6 +268,55 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
 
                 </View>
             </ScrollView>
+
+
+
+
+
+            <BottomSheetModalProvider>
+
+            <BottomSheetModal
+                backdropComponent={renderBackdrop}
+                ref={bottomSheetRef}
+                snapPoints={snapPoints}
+                // add bottom inset to elevate the sheet
+                bottomInset={140}
+                index={1}
+                // set `detached` to true
+                detached={true}
+                style={styles.sheetContainer}
+            >
+                <BottomSheetView style={styles.contentContainer}>
+                    <View style={[styles.sheetHead, {
+                        height: 40
+                    }]}>
+
+
+                        <TouchableOpacity onPress={handleClose}
+                                          style={[styles.dismiss, {
+
+                                          }]}>
+                            <Ionicons name="close-sharp" size={20} color={"#11192E"}/>
+                        </TouchableOpacity>
+                    </View>
+                    <Text style={styles.sheetTitle}>
+                        Private Key
+                    </Text>
+                    <View style={styles.keyWrap}>
+                        <Text style={styles.sheetContentText}>
+                            autjrhet4asrydmufo9oiuytr54wasdcvgbnmjuygfdsawq223490oijhvfdsaqavgbe5a456
+                        </Text>
+                    </View>
+
+
+                    <Pressable style={styles.claimBtn}>
+                        <Text style={styles.claimBtnText}>
+                            Copy
+                        </Text>
+                    </Pressable>
+                </BottomSheetView>
+            </BottomSheetModal>
+            </BottomSheetModalProvider>
 
         </SafeAreaView>
 
@@ -502,7 +587,74 @@ const styles = StyleSheet.create({
         color: "#9C9C9C",
         fontFamily: Fonts.quicksandMedium,
         fontSize: fontPixel(12),
+    },
+    sheetContainer: {
+        width: '90%',
+        marginHorizontal: pixelSizeHorizontal(20)
+    },
+    contentContainer: {
+        paddingHorizontal: pixelSizeHorizontal(20),
+        alignItems: 'center',
+        justifyContent:'space-between',
+    },
+    sheetHead: {
+        // paddingHorizontal: pixelSizeHorizontal(20),
+        height: 60,
+        width: "100%",
+        alignItems: "center",
+        justifyContent: "flex-end",
+        flexDirection: "row"
     }
+    ,
+    sheetTitle: {
+
+        fontSize: fontPixel(18),
+        fontFamily: Fonts.quickSandBold,
+        color: Colors.light.text
+    },
+    sheetContentText: {
+        color: "#000000",
+        fontSize: fontPixel(16),
+        lineHeight: 25,
+        fontFamily: Fonts.quicksandMedium,
+    },
+    dismiss: {
+
+
+        borderRadius: 30,
+        height: 30,
+        width: 30,
+        alignItems: "center",
+        justifyContent: "center"
+
+    },
+    claimBtn: {
+        height: 45,
+
+        width: widthPixel(235),
+        borderRadius: 30,
+        backgroundColor: Colors.primaryColor,
+        alignItems: 'center',
+
+        justifyContent: 'center',
+    },
+    claimBtnText: {
+        fontSize: fontPixel(14),
+        color: "#fff",
+        fontFamily: Fonts.quicksandSemiBold
+    },
+    keyWrap:{
+        marginVertical: 20,
+        borderColor:"#CCCCCC",
+        borderWidth:1,
+        paddingHorizontal:15,
+        borderRadius:10,
+        alignItems: 'center',
+        justifyContent: 'center',
+        width:'100%',
+        height:heightPixel(110),
+    }
+
 
 
 })
