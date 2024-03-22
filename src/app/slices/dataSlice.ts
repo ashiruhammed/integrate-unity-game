@@ -9,8 +9,44 @@ interface SubmissionProps {
 
 }
 
+interface SocialMediaProps {
+    "name": string,
+    "url": string
+}
+
+interface ProductStepsProps
+{
+    "index": 0,
+    "imageUrl": "www.img.com"
+}
+
+
+interface CountryProps{
+    "name": string,
+    "shortName": string,
+    "countryCode": string
+}
 
 export interface DataState {
+    productDetails:
+        {
+            "name": string,
+            "description": string,
+            "websiteUrl": string,
+            "ownerWorkedOnProject": boolean,
+            "tagline": string,
+            "googlePlayStoreUrl": string,
+            "appleStoreUrl": string,
+            "contributors": [],
+            "isCountryLimited": true,
+            "supportedCountries": CountryProps[],
+            "productLogo": string,
+            "launchDate": string,
+            "categories": String[],
+            "productSteps": ProductStepsProps[]
+            "socialMedia":SocialMediaProps[];
+        }
+
     theme: "light" | "dark",
 
     "submissions": SubmissionProps [
@@ -19,8 +55,8 @@ export interface DataState {
     currentCommunityId: string,
     currentCommunity: {
         ownerId: string,
-        displayPhoto:string,
-         visibility: "PUBLIC"|"PRIVATE"
+        displayPhoto: string,
+        visibility: "PUBLIC" | "PRIVATE"
     },
     adventure: {},
     missionId: string,
@@ -31,16 +67,35 @@ export interface DataState {
 
 }
 
+
+
+
 const initialState: DataState = {
     theme: 'light',
-
+    productDetails: {
+        name: "",
+        description: "",
+        websiteUrl: "",
+        ownerWorkedOnProject: true,
+        tagline: "",
+        googlePlayStoreUrl: "",
+        appleStoreUrl: "",
+        contributors: [],
+        isCountryLimited: true,
+        supportedCountries: [],
+        productLogo: "",
+       launchDate: "",
+        categories: [],
+        productSteps: [],
+        socialMedia: []
+    },
     submissions: [
         //  { questionId:'', optionIds:[""]}
 
     ],
     currentCommunityId: '',
     currentCommunity: {
-        ownerId:'',
+        ownerId: '',
         visibility: 'PUBLIC',
         displayPhoto: ''
     },
@@ -72,9 +127,21 @@ export const dataSlice = createSlice({
 
 
         },
+
+
+        updateProductDetails: (state, action: PayloadAction<DataState['productDetails']>) => {
+            state.productDetails = action.payload;
+        },
+        updateProductName: (state, action: PayloadAction<string>) => {
+            state.productDetails.name = action.payload;
+        },
+
+
         UPDATE_SUBMISSIONS: (state, action) => {
 
-            let idx = state.submissions.findIndex((game: { questionId: string }) => game.questionId === action.payload.questionId);
+            let idx = state.submissions.findIndex((game: {
+                questionId: string
+            }) => game.questionId === action.payload.questionId);
 
             if (idx >= 0) {
                 state.submissions[idx] = action.payload;
@@ -86,7 +153,9 @@ export const dataSlice = createSlice({
         updateSubmissions: (state, action) => {
 
             //const newData = state.submissions.findIndex((game: { questionId: string }) => game.questionId === action.payload.questionId)
-            const newData = state.submissions.findIndex((game: { questionId: string }) => game.questionId === action.payload.questionId)
+            const newData = state.submissions.findIndex((game: {
+                questionId: string
+            }) => game.questionId === action.payload.questionId)
 //console.log(state.submissions[newData])
 
             if (newData >= 0) {
@@ -112,12 +181,13 @@ export const dataSlice = createSlice({
 
 // Action creators are generated for each case reducer function
 export const {
-    toggleTheme,setCurrentCommunityId,
+    toggleTheme, setCurrentCommunityId,
     cleanData,
     setAdventure,
     UPDATE_SUBMISSIONS,
     updateSubmissions,
-    clearSubmissions
+    clearSubmissions,
+    updateProductDetails
 } = dataSlice.actions
 
 export default dataSlice.reducer

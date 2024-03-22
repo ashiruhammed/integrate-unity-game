@@ -6,9 +6,9 @@ import {SafeAreaView} from "react-native-safe-area-context";
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 import PushIcon from "../../../assets/images/svg/PushIcon";
 import Colors from "../../../constants/Colors";
-import {useAppSelector} from "../../../app/hooks";
-import {useInfiniteQuery} from "@tanstack/react-query";
-import {userNotifications} from "../../../action/action";
+import {useAppDispatch, useAppSelector} from "../../../app/hooks";
+import {useInfiniteQuery, useQuery} from "@tanstack/react-query";
+import {getProductCategories, userNotifications} from "../../../action/action";
 import {RootStackScreenProps} from "../../../../types";
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../../helpers/normalize";
 import {Fonts} from "../../../constants/Fonts";
@@ -21,13 +21,15 @@ import {
     BottomSheetDefaultBackdropProps
 } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
 import TextArea from "../../../components/inputs/TextArea";
+import {updateProductDetails} from "../../../app/slices/dataSlice";
 
 
 const formSchema = yup.object().shape({
 
-    productName: yup.string().required('Product Name is required'),
-    tagline: yup.string().required('Product Tagline is required'),
-    productURL: yup.string().url('Please enter a valid URL').required('Product URL is required'),
+    //productName: yup.string().required('Product Name is required'),
+    description: yup.string().required('Product description is required'),
+    productTagline: yup.string().required('Product Tagline is required'),
+   // productURL: yup.string().url('Please enter a valid URL').required('Product URL is required'),
 
 });
 
@@ -57,15 +59,17 @@ const Categories = [{
 interface countryProps {
     selectedCountry: any[],
     item: {
-        "emoji": string,
         "name": string,
-
+        "emoji": string,
+        shortName:string,
+        phone:string
     },
     addCountry: (details: {
 
-
         "name": string,
         "emoji": string,
+        shortName:string,
+        phone:string
 
     }) => void
     selectCountry: (symbol: {}) => void,
@@ -75,37 +79,42 @@ interface countryProps {
 interface props {
 
     selectedItem: any[],
-    addPort: (details: {
-        "_id": string,
+    addCategory: (details: {
+        "id": string,
 
-        "label": string,
+        "name": string,
 
     }) => void
     selectAsset: (symbol: {}) => void,
     item:
         {
-            "_id": string,
+            "id": string,
 
-            "label": string,
+            "name": string,
 
         }
 
 }
 
-const CategoryItem = ({item, selectedItem, selectAsset, addPort}: props) => {
+interface CategoryProps {
+    "id": string,
+    "name": string,
+}
+
+const CategoryItem = ({item, selectedItem, selectAsset, addCategory}: props) => {
 
 
     return (
         <TouchableOpacity onPress={() => {
             selectAsset(item)
-            addPort({
-                _id: item._id,
+            addCategory({
+                id: item.id,
 
-                label: item.label,
+                name: item.name,
             })
         }} activeOpacity={0.6}
                           style={[styles.transactionCardList, {
-                              backgroundColor: item._id == selectedItem._id ? "#f9f9f9" : 'transparent'
+                              backgroundColor: item.id == selectedItem.id ? "#f9f9f9" : 'transparent'
                           }]}>
 
             <View style={styles.bankItem}>
@@ -113,12 +122,12 @@ const CategoryItem = ({item, selectedItem, selectAsset, addPort}: props) => {
 
                 <View style={styles.itemBody}>
                     <Text style={styles.accountName}>
-                        {selectedItem.find(selected => selected._id == item._id) ?
+                        {selectedItem.find(selected => selected.id == item.id) ?
                             <Ionicons name="checkbox" size={14} color={Colors.primaryColor}/> :
                             <MaterialCommunityIcons name="checkbox-blank-outline" size={14} color="#ccc"/>}
                     </Text>
                     <Text style={styles.account}>
-                        {item.label}
+                        {item.name}
                     </Text>
                 </View>
 
@@ -134,7 +143,8 @@ const CountryItem = ({item, selectedCountry, selectCountry, addCountry}: country
         <TouchableOpacity onPress={() => {
             selectCountry(item)
             addCountry({
-
+phone:item.phone,
+                shortName:item.shortName,
                 name: item.name,
                 emoji: item.emoji,
             })
@@ -172,8 +182,9 @@ const FundamentalData = ({navigation}: RootStackScreenProps<'FundamentalData'>) 
 
 
     const dataSlice = useAppSelector(state => state.data)
-    const {theme} = dataSlice
+    const {theme,productDetails} = dataSlice
 
+    const dispatch = useAppDispatch()
 
     const backgroundColor = theme == 'light' ? "#FFFFFF" : "#141414"
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
@@ -189,18 +200,19 @@ const FundamentalData = ({navigation}: RootStackScreenProps<'FundamentalData'>) 
 
 
     const [category, setCategory] = useState<{
-        "_id": string,
-        "label": string,
-    }>({});
+        "id": string,
+        "name": string,
+    }>([]);
 
     const [country, setCountry] = useState<{
         "name": string,
         "emoji": string,
+shortName:string,
+        phone:string
+    }>([]);
 
-    }>({});
 
-
-    const [selectedCategory, setSelectedCategory] = useState<any[]>([]);
+    const [selectedCategory, setSelectedCategory] = useState<CategoryProps[][]>([]);
     const [selectedCountry, setSelectedCountry] = useState<any[]>([]);
 
 
@@ -218,6 +230,10 @@ const FundamentalData = ({navigation}: RootStackScreenProps<'FundamentalData'>) 
     const openNotifications = () => {
         navigation.navigate('Notifications')
     }
+
+
+    const {data,isLoading, refetch} =useQuery(['getProductCategories'],getProductCategories)
+
 
     const {
         data: notifications,
@@ -253,7 +269,9 @@ const FundamentalData = ({navigation}: RootStackScreenProps<'FundamentalData'>) 
         initialValues: {
 
             productName: '',
-            productURL: '',
+            googlePlayStoreUrl: '',
+            appleStoreUrl: '',
+            description: '',
             productTagline: '',
             twitter: '',
             telegram: '',
@@ -261,12 +279,36 @@ const FundamentalData = ({navigation}: RootStackScreenProps<'FundamentalData'>) 
 
         },
         onSubmit: (values) => {
-            const {productName} = values;
-            //     const body = JSON.stringify({email: email.toLowerCase()})
+            const {productName,description,productTagline,googlePlayStoreUrl,appleStoreUrl,twitter,facebook,telegram} = values;
 
-            navigation.navigate('VisualRepresentation')
+            const socialMedia = [{
+                name:"twitter",
+                url:twitter,
+            },{
+                name:"telegram",
+                url:telegram,
+            },{
+                name:"facebook",
+                url:facebook,
+            }]
+// Convert category object to an array of IDs
+            const categories = Object.values(selectedCategory).map(item => item.id);
+            let supportedCountries = selectedCountry.map((country: { name: any; shortName: any; phone: any; }) => {
+                return {
+                    "name": country.name,
+                    "shortName": country.shortName,
+                    "countryCode": country.phone
+                };
+            });
+
+            //     const body = JSON.stringify({email: email.toLowerCase()})
+            dispatch(updateProductDetails({description,tagline:productTagline,googlePlayStoreUrl,appleStoreUrl,socialMedia:socialMedia,categories,supportedCountries}))
+
+           navigation.navigate('VisualRepresentation')
         }
     });
+
+
 
 
     const snapPoints = useMemo(() => ["1%", "50%", "75%"], []);
@@ -282,29 +324,33 @@ const FundamentalData = ({navigation}: RootStackScreenProps<'FundamentalData'>) 
     }, []);
 
 
-    const updatePort = useCallback((payload: {
-        "_id": string,
-        "label": string,
+    const updateSelectCategory = useCallback((payload: {
+        "id": string,
+        "name": string,
+
     }) => {
 
-        const newData = selectedCategory.findIndex((bank: { _id: string }) => bank._id === payload._id)
+        const newData = selectedCategory.findIndex((cat: { id: string }) => cat.id === payload.id)
 
         if (newData >= 0) {
-            setSelectedCategory((prevSelectedBanks) => {
-                return prevSelectedBanks.filter(
-                    (bank) => bank._id !== payload._id
+            setSelectedCategory((prevSelectedCats) => {
+                return prevSelectedCats.filter(
+                    (cat) => cat.id !== payload.id
                 );
             });
         } else {
 
-            setSelectedCategory(selectedBanks => [...selectedBanks, {...payload}])
+            setSelectedCategory(selectedCats => [...selectedCats, {...payload}])
         }
     }, [selectedCategory])
+
 
 
     const updateCountry = useCallback((payload: {
         "name": string,
         "emoji": string,
+        phone:string,
+        shortName:string,
     }) => {
 
         const newData = selectedCountry.findIndex((country: { name: string }) => country.name === payload.name)
@@ -323,11 +369,11 @@ const FundamentalData = ({navigation}: RootStackScreenProps<'FundamentalData'>) 
 
 
     const c_keyExtractor = useCallback((item: { name: string; }) => item.name, [],);
-    const keyExtractor = useCallback((item: { _id: string; }) => item._id, [],);
+    const keyExtractor = useCallback((item: { id: string; }) => item.id, [],);
     const renderItem = useCallback(({item}: any) => (
         <CategoryItem selectedItem={selectedCategory} item={item}
-                      addPort={setCategory}
-                      selectAsset={updatePort}/>
+                      addCategory={setCategory}
+                      selectAsset={updateSelectCategory}/>
     ), [selectedCategory]);
 
 
@@ -350,7 +396,7 @@ const FundamentalData = ({navigation}: RootStackScreenProps<'FundamentalData'>) 
 
 
     const renderBackdrop = useCallback(
-        (props: JSX.IntrinsicAttributes & BottomSheetDefaultBackdropProps) => (
+        (props: React.JSX.IntrinsicAttributes & BottomSheetDefaultBackdropProps) => (
             <BottomSheetBackdrop
                 style={{
                     backgroundColor: 'rgba(25,25,25,0.34)'
@@ -363,7 +409,7 @@ const FundamentalData = ({navigation}: RootStackScreenProps<'FundamentalData'>) 
         []
     );
 
-
+console.log(errors)
     return (
         <>
 
@@ -467,7 +513,7 @@ const FundamentalData = ({navigation}: RootStackScreenProps<'FundamentalData'>) 
                     <View style={styles.authContainer}>
 
 
-                        <TextInput
+                       {/* <TextInput
 
                             placeholder="Gatewayapp"
                             keyboardType={"default"}
@@ -485,7 +531,7 @@ const FundamentalData = ({navigation}: RootStackScreenProps<'FundamentalData'>) 
 
                             focus={focusProductName}
                             value={values.productName}
-                            label="Product Name"/>
+                            label="Product Name"/>*/}
 
 
                         <TextInput
@@ -511,23 +557,43 @@ const FundamentalData = ({navigation}: RootStackScreenProps<'FundamentalData'>) 
 
                         <TextInput
 
-                            placeholder="https://gatewayapp.co"
+                            placeholder="https://"
                             keyboardType={"url"}
-                            touched={touched.productURL}
-                            error={touched.productURL && errors.productURL}
-                            onFocus={() => setFocusProductUrl(true)}
+                            touched={touched.googlePlayStoreUrl}
+                            error={touched.googlePlayStoreUrl && errors.googlePlayStoreUrl}
+
                             onChangeText={(e) => {
-                                handleChange('productURL')(e);
+                                handleChange('googlePlayStoreUrl')(e);
 
                             }}
                             onBlur={(e) => {
-                                handleBlur('productURL')(e);
+                                handleBlur('googlePlayStoreUrl')(e);
+
+                            }}
+
+
+                            value={values.googlePlayStoreUrl}
+                            label="Google PlayStore  URL"/>
+
+<TextInput
+
+                            placeholder="https://"
+                            keyboardType={"url"}
+                            touched={touched.appleStoreUrl}
+                            error={touched.appleStoreUrl && errors.appleStoreUrl}
+                            onFocus={() => setFocusProductUrl(true)}
+                            onChangeText={(e) => {
+                                handleChange('appleStoreUrl')(e);
+
+                            }}
+                            onBlur={(e) => {
+                                handleBlur('appleStoreUrl')(e);
                                 setFocusProductUrl(false);
                             }}
 
                             focus={focusProductUrl}
-                            value={values.productURL}
-                            label="Product URL"/>
+                            value={values.appleStoreUrl}
+                            label="AppleStore URL"/>
 
 
                         <TouchableOpacity activeOpacity={0.8} style={styles.addLinkBtn}>
@@ -642,25 +708,25 @@ const FundamentalData = ({navigation}: RootStackScreenProps<'FundamentalData'>) 
 
 
 
-                        <TextArea
+                     <TextArea
 
-                            placeholder="https://gatewayapp.co"
-                            keyboardType={"url"}
-                            touched={touched.productURL}
-                            error={touched.productURL && errors.productURL}
-                            onFocus={() => setFocusProductUrl(true)}
+                            placeholder="Cool product"
+                            keyboardType={"default"}
+                            touched={touched.description}
+                            error={touched.description && errors.description}
+
                             onChangeText={(e) => {
-                                handleChange('productURL')(e);
+                                handleChange('description')(e);
 
                             }}
                             onBlur={(e) => {
-                                handleBlur('productURL')(e);
-                                setFocusProductUrl(false);
+                                handleBlur('description')(e);
+
                             }}
 
                             focus={focusProductUrl}
-                            value={values.productURL}
-                            label="Product URL"/>
+                            value={values.description}
+                            label="Product description"/>
                         <HorizontalLine margin/>
 
 
@@ -687,10 +753,10 @@ const FundamentalData = ({navigation}: RootStackScreenProps<'FundamentalData'>) 
 
                                     {
                                         selectedCategory.map((item, index) => (
-                                            <Pressable onPress={() => updatePort(item)} key={item._id}
+                                            <Pressable onPress={() => updateSelectCategory(item)} key={item.id}
                                                        style={styles.portItem}>
                                                 <Text style={styles.portText}>
-                                                    {item.label}
+                                                    {item.name}
                                                 </Text>
                                                 <Ionicons name="close" size={12} color={Colors.primaryColor}/>
                                             </Pressable>
@@ -799,11 +865,11 @@ const FundamentalData = ({navigation}: RootStackScreenProps<'FundamentalData'>) 
                 </View>
 
 
-                {
+                {!isLoading && data?.data.length > 0  &&
 
 
                     <BottomSheetFlatList scrollEnabled
-                                         data={Categories}
+                                         data={data?.data}
                                          renderItem={renderItem}
                                          keyExtractor={keyExtractor}
                                          showsVerticalScrollIndicator={false}/>

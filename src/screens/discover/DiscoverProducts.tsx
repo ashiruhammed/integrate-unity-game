@@ -1,4 +1,4 @@
-import React, {useCallback, useMemo, useRef, useState} from 'react';
+import React, {FC, ReactElement, useCallback, useMemo, useRef, useState} from 'react';
 
 import {
     Text,
@@ -9,7 +9,7 @@ import {
     TouchableOpacity,
     Pressable,
     FlatList,
-    Image,
+    Image, StyleProp, ViewStyle,
 } from 'react-native';
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
 import {Fonts} from "../../constants/Fonts";
@@ -37,6 +37,7 @@ import Animated, {useAnimatedStyle, useSharedValue, withTiming} from "react-nati
 import AccordionData from "../../components/accordion/AccordionData";
 import Accordion from "../../components/accordion/Accordion";
 
+import MasonryList from '@react-native-seoul/masonry-list';
 
 
 
@@ -133,26 +134,30 @@ const Products = [
     }
 ]
 
-
-const data = [
-    {id: '1', title: 'Item 1', imageUrl: 'https://i.redd.it/irsfp5m03m081.jpg'},
+interface CardsImage {
+    id: string;
+    imageUrl: string;
+    title: string;
+}
+const data:CardsImage[] = [
+    {id: '0', title: 'Item 1', imageUrl: 'https://i.redd.it/irsfp5m03m081.jpg'},
     {
-        id: '2',
+        id: '1',
         title: 'Item 2',
         imageUrl: 'https://codespaceinc.co/images/uploads/https___specials-images.forbesimg.com_imageserve_6170e01f8d7639b95a7f2eeb_sotheby-s-nft-natively-digital-1-2-sale-bored-ape-yacht-club-8817-by-yuga-labs_0x0.png'
     },
     {
-        id: '3',
+        id: '2',
         title: 'Item 3',
         imageUrl: "https://cdn.geekwire.com/wp-content/uploads/2022/07/melaniabilustracion-No-Planet-B-square.jpg"
     },
     {
-        id: '4',
+        id: '3',
         title: 'Item 4',
         imageUrl: "https://storage.googleapis.com/billionaire-club-327223.appspot.com/brain_mary_jane_efcfd214be/brain_mary_jane_efcfd214be.png"
     },
-    {id: '5', title: 'Item 5', imageUrl: 'https://pbs.twimg.com/media/FMZ-_aYXsAMvecg.jpg:large'},
-    {id: '6', title: 'Item 6', imageUrl: 'https://media.zenfs.com/en/accesswire.ca/1e994831850c6e6ed911cf9867c15f1c'},
+    {id: '4', title: 'Item 5', imageUrl: 'https://pbs.twimg.com/media/FMZ-_aYXsAMvecg.jpg:large'},
+    {id: '5', title: 'Item 6', imageUrl: 'https://media.zenfs.com/en/accesswire.ca/1e994831850c6e6ed911cf9867c15f1c'},
 ];
 const numColumns = 3;
 
@@ -244,8 +249,41 @@ navigation.navigate('ProductView')
         []
     );
 
+    const MasonryCard: FC<{item: CardsImage; style: StyleProp<ViewStyle>}> = ({
+                                                                                   item,
+                                                                                   style,
+                                                                               },index) => {
+        const randomBool = useMemo(() => Math.random() < 0.5, []);
 
 
+        return (
+
+                <View
+                    key={item.id}
+                    style={[styles.item,
+                        parseInt(item.id) % numColumns === 0 ? styles.leftItem : styles.rightItem,
+                        {
+                            // marginVertical: randomBool ? 10 : 5,
+
+
+                        },]}
+                >
+                    <Image source={{uri: item.imageUrl}} style={styles.itemImage}/>
+                </View>
+
+        );
+    };
+
+    const renderItemMasonry = ({item, i}): ReactElement => {
+        return (
+            <MasonryCard item={item}
+                         style={[
+               /* {marginLeft: i % 2 === 0 ? 0 : 12}*/
+
+                         ]}
+            />
+        );
+    };
 
 
 
@@ -360,9 +398,16 @@ navigation.navigate('ProductView')
 
                     <View style={styles.rightProductDash}>
                         <View style={styles.masonryWrap}>
+                            <MasonryList
+                                data={data}
+                                keyExtractor={(item: CardsImage): string => item.id}
+                                numColumns={2}
+                                showsVerticalScrollIndicator={false}
+                                renderItem={renderItemMasonry}
 
 
-                            {/*   <FlatList
+                            />
+                 {/* <FlatList
 
                             scrollEnabled
                             showsVerticalScrollIndicator={false}
@@ -386,6 +431,9 @@ navigation.navigate('ProductView')
 
 
                 </View>
+
+
+
 
                 <View style={styles.wrap}>
 
@@ -778,7 +826,7 @@ const styles = StyleSheet.create({
     item: {
 
         width: 70,
-        margin: 5,
+       // marginVertical: 5,
         height: 75, // Set your desired height here
         borderColor: '#fff',
         borderWidth: 1,
@@ -791,10 +839,10 @@ const styles = StyleSheet.create({
         resizeMode: 'cover'
     },
     leftItem: {
-        marginTop: 5,
+        marginTop: 10,
     },
     rightItem: {
-        marginTop: -15,
+        marginTop: 15,
     },
     viewBtn: {
         backgroundColor: "#01AAFF",

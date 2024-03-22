@@ -8,7 +8,7 @@ import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 import {useInfiniteQuery} from "@tanstack/react-query";
 import {userNotifications} from "../../../action/action";
 import {RootStackScreenProps} from "../../../../types";
-import {useAppSelector} from "../../../app/hooks";
+import {useAppDispatch, useAppSelector} from "../../../app/hooks";
 import {fontPixel, heightPixel, pixelSizeHorizontal, widthPixel} from "../../../helpers/normalize";
 import {Fonts} from "../../../constants/Fonts";
 import {useFormik} from "formik";
@@ -18,6 +18,7 @@ import TextInput from "../../../components/inputs/TextInput";
 import HorizontalLine from "../../../components/HorizontalLine";
 import CheckYesIcon from "../../../assets/images/svg/CheckYesIcon";
 import CheckNoIcon from "../../../assets/images/svg/CheckNoIcon";
+import {updateProductDetails} from "../../../app/slices/dataSlice";
 
 
 const formSchema = yup.object().shape({
@@ -33,8 +34,8 @@ const ProductInformation = ({navigation}: RootStackScreenProps<'ProductInformati
 
 
     const dataSlice = useAppSelector(state => state.data)
-    const {theme} = dataSlice
-
+    const {theme,productDetails} = dataSlice
+const dispatch = useAppDispatch()
 
     const backgroundColor = theme == 'light' ? "#FFFFFF" : "#141414"
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
@@ -44,6 +45,8 @@ const ProductInformation = ({navigation}: RootStackScreenProps<'ProductInformati
     const borderColor = theme == 'light' ? "#DEE5ED" : "#ccc"
 
 
+    const [productName, setProductName] = useState(productDetails.name)
+    const [productURL, setProductURL] = useState(productDetails.websiteUrl)
     const [focusProductName, setFocusProductName] = useState(false)
     const [focusProductUrl, setFocusProductUrl] = useState(false)
 
@@ -86,15 +89,18 @@ const ProductInformation = ({navigation}: RootStackScreenProps<'ProductInformati
         validationSchema: formSchema,
         initialValues: {
 
-            productName: '',
-            productURL: '',
+            productName: productName,
+            productURL: productURL,
 
         },
         onSubmit: (values) => {
-            const {productName} = values;
+            const {productName,productURL} = values;
             //     const body = JSON.stringify({email: email.toLowerCase()})
-
+dispatch(updateProductDetails({
+    name:productName,websiteUrl:productURL,
+    ownerWorkedOnProject:checkOption == "Yes" ? true : false }))
 navigation.navigate('FundamentalData')
+
         }
     });
 
@@ -211,13 +217,13 @@ navigation.navigate('FundamentalData')
                     onFocus={() => setFocusProductName(true)}
                     onChangeText={(e) => {
                         handleChange('productName')(e);
-
+setProductName(e)
                     }}
                     onBlur={(e) => {
                         handleBlur('productName')(e);
                         setFocusProductName(false);
                     }}
-
+defaultValue={productName}
                     focus={focusProductName}
                     value={values.productName}
                     label="Product Name"/>
@@ -234,13 +240,13 @@ navigation.navigate('FundamentalData')
                     onFocus={() => setFocusProductUrl(true)}
                     onChangeText={(e) => {
                         handleChange('productURL')(e);
-
+                        setProductURL(e)
                     }}
                     onBlur={(e) => {
                         handleBlur('productURL')(e);
                         setFocusProductUrl(false);
                     }}
-
+defaultValue={productURL}
                     focus={focusProductUrl}
                     value={values.productURL}
                     label="Product URL"/>
@@ -282,7 +288,10 @@ navigation.navigate('FundamentalData')
 
                 </View>
 
-                <Pressable disabled={!isValid} onPress={()=>handleSubmit()} style={styles.claimBtn}>
+                <Pressable disabled={!isValid} onPress={()=>handleSubmit()} style={[styles.claimBtn,{
+                    backgroundColor:!isValid ? Colors.disabled : Colors.primaryColor,
+                }]}>
+
                     <Text style={styles.claimBtnText}>
                         Next Step
                     </Text>
@@ -555,7 +564,7 @@ marginTop:40,
 
         width: widthPixel(235),
         borderRadius: 30,
-        backgroundColor: Colors.primaryColor,
+
         alignItems: 'center',
         marginVertical: 40,
         justifyContent: 'center',
