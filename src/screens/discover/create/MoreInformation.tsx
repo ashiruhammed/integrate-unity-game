@@ -1,30 +1,50 @@
-import React, {useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
-import {Text, View, StyleSheet, ImageBackground, TouchableOpacity, Pressable, Platform} from 'react-native';
+import {
+    Text,
+    View,
+    StyleSheet,
+    ImageBackground,
+    TouchableOpacity,
+    Pressable,
+    Platform,
+    ActivityIndicator
+} from 'react-native';
 import {RootStackScreenProps} from "../../../../types";
 import {AntDesign, Ionicons, Octicons} from "@expo/vector-icons";
 import ImageIcon from "../../../assets/images/svg/imageIcon";
 import Colors from "../../../constants/Colors";
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 import {SafeAreaView} from "react-native-safe-area-context";
-import {useAppSelector} from "../../../app/hooks";
-import {useInfiniteQuery} from "@tanstack/react-query";
-import {userNotifications} from "../../../action/action";
-import {fontPixel, heightPixel, pixelSizeHorizontal, widthPixel} from "../../../helpers/normalize";
+import {useAppDispatch, useAppSelector} from "../../../app/hooks";
+import {useInfiniteQuery, useMutation, useQueryClient} from "@tanstack/react-query";
+import {getApprovedProduct, registerProductHunt, updateUserImage, userNotifications} from "../../../action/action";
+import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../../helpers/normalize";
 import {Fonts} from "../../../constants/Fonts";
 import OpenBoxIcon from "../../../assets/images/svg/OpenBoxIcon";
 import SearchInput from "../../../components/inputs/SearchInput";
+import Toast from "../../../components/Toast";
+import {setResponse, unSetResponse} from "../../../app/slices/userSlice";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+import {clearProductInfo, updateProduct, updateProductDetails} from "../../../app/slices/dataSlice";
+import {BottomSheetBackdrop, BottomSheetModal, BottomSheetModalProvider, BottomSheetView} from "@gorhom/bottom-sheet";
+import {
+    BottomSheetDefaultBackdropProps
+} from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
 
-const MoreInformation = ({navigation}:RootStackScreenProps<'MoreInformation'>) => {
+
+const MoreInformation = ({navigation}: RootStackScreenProps<'MoreInformation'>) => {
 
 
     const [searchValue, setSearchValue] = useState('')
 
-
+    const dispatch = useAppDispatch()
 
     const dataSlice = useAppSelector(state => state.data)
-    const {theme} = dataSlice
-
+    const user = useAppSelector(state => state.user)
+    const {theme, productDetails} = dataSlice
+    const {responseMessage, responseState, responseType} = user
+    const queryClient = useQueryClient();
 
     const backgroundColor = theme == 'light' ? "#FFFFFF" : "#141414"
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
@@ -33,10 +53,85 @@ const MoreInformation = ({navigation}:RootStackScreenProps<'MoreInformation'>) =
     const tintText = theme == 'light' ? "#AEAEAE" : Colors.dark.tintTextColor
     const borderColor = theme == 'light' ? "#DEE5ED" : "#ccc"
 
+    const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
+    const [contentLauchDate, setContentLauchDate] = useState<string>('2023-07-08T12:04:09.124Z');
+
+
+    // ref
+    const bottomSheetRef = useRef<BottomSheetModal>(null);
+
+
+    const handleClose = () => {
+        bottomSheetRef?.current?.close();
+    };
+    // variables
+    const snapPoints = useMemo(() => ["1", "45%"], []);
+
+
+    const hideDatePicker = () => {
+        setDatePickerVisibility(false);
+    };
+    const showDatePicker = () => {
+        setDatePickerVisibility(true);
+    };
+    const handleConfirm = (date: Date) => {
+        //   setContentLauchDate(dayjs(date).format('YYYY-DD-MM'))
+        console.log(date)
+        setContentLauchDate(date)
+        dispatch(updateProduct({launchDate: contentLauchDate}))
+        // setFieldValue('endDate', dayjs(date).format('YYYY-MM-DD'))
+        hideDatePicker();
+    };
     const openNotifications = () => {
         navigation.navigate('Notifications')
     }
+
+
+
+    const {mutate, isLoading} = useMutation(['registerProductHunt'], registerProductHunt,
+        {
+            onSuccess: async data => {
+
+                if (data.success) {
+                    // alert(message)
+                    bottomSheetRef.current?.present()
+
+                    dispatch(setResponse({
+                        responseMessage: data.message,
+                        responseState: true,
+                        responseType: 'success',
+                    }))
+
+                } else {
+
+
+                    dispatch(setResponse({
+                        responseMessage: `${data.message} 😞`,
+                        responseState: true,
+                        responseType: 'error',
+                    }))
+
+                }
+
+            },
+
+            onError: (err) => {
+                console.log(err)
+                dispatch(setResponse({
+                    responseMessage: 'Something happened, please try again 😞',
+                    responseState: true,
+                    responseType: 'error',
+                }))
+
+
+            },
+            onSettled: () => {
+                queryClient.invalidateQueries(['registerProductHunt']);
+            }
+
+        })
+
 
     const {
         data: notifications,
@@ -57,12 +152,77 @@ const MoreInformation = ({navigation}:RootStackScreenProps<'MoreInformation'>) =
         })
 
 
+    const launchProduct = () => {
 
+        const body = JSON.stringify({
+            "name": productDetails.name,
+            "description": productDetails.description,
+            "websiteUrl": productDetails.websiteUrl,
+            "ownerWorkedOnProject": productDetails.ownerWorkedOnProject,
+            "tagline": productDetails.tagline,
+            "googlePlayStoreUrl": productDetails.googlePlayStoreUrl,
+            "appleStoreUrl": productDetails.appleStoreUrl,
+            "contributors": [],
+            "isCountryLimited": productDetails.isCountryLimited,
+            "supportedCountries": productDetails.supportedCountries,
+            "productLogo": productDetails.productLogo,
+            "launchDate": productDetails.launchDate,
+            "categories": productDetails.categories,
+            "productSteps": productDetails.productSteps,
+            "socialMedia": productDetails.socialMedia
+        })
+
+
+
+       // console.log(productDetails)
+
+        mutate({body})
+
+    }
+
+
+    useEffect(() => {
+        // console.log(user)
+        let time: NodeJS.Timeout | undefined;
+        if (responseState || responseMessage) {
+
+            time = setTimeout(() => {
+                dispatch(unSetResponse())
+            }, 3000)
+
+        }
+        return () => {
+            clearTimeout(time)
+        };
+    }, [responseState, responseMessage])
+
+
+
+    const renderBackdrop = useCallback(
+        (props: React.JSX.IntrinsicAttributes & BottomSheetDefaultBackdropProps) => (
+            <BottomSheetBackdrop
+                {...props}
+                disappearsOnIndex={0}
+                appearsOnIndex={1}
+            />
+        ),
+        []
+    );
+
+
+    const continueScreen = () => {
+        dispatch(clearProductInfo())
+      navigation.navigate('Dashboard',{
+          screen:'Home'
+      })
+    }
 
 
     return (
-        <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
+        <>
 
+        <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
+            <Toast message={responseMessage} state={responseType == 'error' ? responseState : false} type={responseType}/>
             <KeyboardAwareScrollView
 
                 style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {
@@ -134,14 +294,16 @@ const MoreInformation = ({navigation}:RootStackScreenProps<'MoreInformation'>) =
 
                     </View>
 
-                    <View style={styles.stepsBoxRight}>
-                        <Pressable style={styles.nextStep}>
-
-                        </Pressable>
-                    </View>
 
                 </View>
-
+                <View style={styles.stepsBoxRight}>
+                    <TouchableOpacity onPress={showDatePicker} activeOpacity={0.8} style={styles.createBtn}>
+                        <AntDesign name="pluscircle" size={14} color={Colors.primaryColor}/>
+                        <Text style={styles.createBtnText}>
+                            Schedule a Launch Date
+                        </Text>
+                    </TouchableOpacity>
+                </View>
 
                 <View style={styles.productBanner}>
 
@@ -154,6 +316,32 @@ const MoreInformation = ({navigation}:RootStackScreenProps<'MoreInformation'>) =
                     </Text>
                 </View>
 
+
+                <View style={[styles.container, {
+                    height: 60,
+                    marginVertical: pixelSizeVertical(20)
+                }]}>
+
+
+                    <Text style={[styles.productPageText, {
+                        color: "#333333"
+                    }]}>
+                        Who worked on this product with you?
+                    </Text>
+                </View>
+
+                <View style={[styles.container, {
+                    height: 30,
+
+                }]}>
+
+
+                    <Text style={[styles.productPageText, {
+                        color: "#333333"
+                    }]}>
+                        Makers
+                    </Text>
+                </View>
 
                 <View style={styles.searchBoxWrap}>
                     <SearchInput placeholder={'Search products here'} value={searchValue}/>
@@ -168,14 +356,91 @@ const MoreInformation = ({navigation}:RootStackScreenProps<'MoreInformation'>) =
                 </View>
 
 
+                <Pressable onPress={launchProduct} style={[styles.claimBtn, {
+                    backgroundColor: Colors.primaryColor,
+                }]}>
+                    {!isLoading ?
+                        <Text style={styles.claimBtnText}>
+                            Launch Now
+                        </Text>
+                        :
 
+                        <ActivityIndicator size={"small"} color={"#fff"}/>
+                    }
+                </Pressable>
 
+                <DateTimePickerModal
+                    style={{
+                        backgroundColor: "#fff",
+                    }}
+                    pickerContainerStyleIOS={{
+                        backgroundColor: "#fff"
+                    }}
 
-
-
-
+                    isDarkModeEnabled={false}
+                    cancelTextIOS={"Close"}
+                    display={Platform.OS === 'ios' ? "inline" : 'spinner'}
+                    themeVariant={theme}
+                    isVisible={isDatePickerVisible}
+                    mode="date"
+                    onConfirm={(t) => handleConfirm(t)}
+                    onCancel={hideDatePicker}
+                />
             </KeyboardAwareScrollView>
         </SafeAreaView>
+
+            <BottomSheetModalProvider>
+                <BottomSheetModal
+                    backdropComponent={renderBackdrop}
+                    ref={bottomSheetRef}
+                    snapPoints={snapPoints}
+                    enableHandlePanningGesture={false}
+                    handleStyle={{ display: "none" }}
+                    // add bottom inset to elevate the sheet
+                    bottomInset={66}
+                    index={1}
+                    // set `detached` to true
+                    detached={true}
+                    style={styles.sheetContainer}
+                >
+                    <BottomSheetView style={styles.contentContainer}>
+                        <View style={[styles.sheetHead, {
+                            height: 40
+                        }]}>
+
+
+                            <TouchableOpacity onPress={handleClose}
+                                              style={[styles.dismiss, {}]}>
+                                <Ionicons name="close-sharp" size={20} color={"#11192E"} />
+                            </TouchableOpacity>
+                        </View>
+
+
+                        <View style={styles.checkCircle}>
+
+                            <Ionicons name="checkmark" size={34} color={Colors.success} />
+                        </View>
+
+
+                        <Text style={styles.successTitle}>
+                            Successful!
+                        </Text>
+                        <Text style={styles.successText}>
+                            {responseMessage}!
+                        </Text>
+
+
+                        <TouchableOpacity onPress={continueScreen} activeOpacity={0.8} style={{marginTop:25,}}>
+                            <Text style={styles.textContinue}>
+                                Continue
+                            </Text>
+                        </TouchableOpacity>
+
+                    </BottomSheetView>
+                </BottomSheetModal>
+            </BottomSheetModalProvider>
+
+            </>
     );
 };
 
@@ -330,10 +595,11 @@ const styles = StyleSheet.create({
     },
 
     stepsBoxRight: {
-        width: '30%',
-        height: '90%',
-        alignItems: 'flex-end',
-        justifyContent: 'center',
+        width: '100%',
+        height: heightPixel(45),
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        justifyContent: 'flex-end',
     },
     iconBox: {
         backgroundColor: "#FFEDED",
@@ -399,7 +665,7 @@ const styles = StyleSheet.create({
         color: "#686868"
     },
     authContainer: {
-        marginBottom:40,
+        marginBottom: 40,
         justifyContent: 'center',
         width: '90%',
 
@@ -420,6 +686,110 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 10
     },
+    createBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        alignSelf: 'flex-start',
+        height: 20,
+        width: widthPixel(180),
+        marginRight: 15,
+    },
+    createBtnText: {
+        marginLeft: 5,
+        color: Colors.primaryColor,
+        fontFamily: Fonts.quicksandMedium,
+        fontSize: fontPixel(14),
+    },
+    container: {
+        width: '90%',
+
+    },
+    claimBtn: {
+        height: 45,
+
+        width: widthPixel(235),
+        borderRadius: 30,
+
+        alignItems: 'center',
+        marginVertical: 40,
+        justifyContent: 'center',
+    },
+    claimBtnText: {
+        fontSize: fontPixel(14),
+        color: "#fff",
+        fontFamily: Fonts.quicksandSemiBold
+    },
+    sheetContainer: {
+        width: "90%",
+        marginHorizontal: pixelSizeHorizontal(20)
+    },
+    contentContainer: {
+        paddingHorizontal: pixelSizeHorizontal(20),
+        alignItems: "center"
+    },
+    sheetHead: {
+        // paddingHorizontal: pixelSizeHorizontal(20),
+        height: 60,
+        marginTop: 10,
+        width: "100%",
+        alignItems: "center",
+        justifyContent: "flex-end",
+        flexDirection: "row"
+    }
+    ,
+    sheetTitle: {
+        marginVertical: 10,
+        fontSize: fontPixel(18),
+        fontFamily: Fonts.quickSandBold,
+        color: Colors.light.text
+    },
+    sheetContentText: {
+        color: "#5A5A5A",
+        fontSize: fontPixel(16),
+        lineHeight: 22,
+        fontFamily: Fonts.quicksandMedium
+    },
+    dismiss: {
+
+
+        borderRadius: 30,
+        height: 30,
+        width: 30,
+        alignItems: "center",
+        justifyContent: "center"
+
+    },
+    checkCircle: {
+        marginTop: 20,
+        width: 80,
+        height: 80,
+        borderRadius: 100,
+        backgroundColor: Colors.successTint,
+        alignItems: "center",
+        justifyContent: "center"
+    },
+    successTitle: {
+        marginVertical: pixelSizeVertical(15),
+        color: "#000",
+        fontSize: fontPixel(18),
+
+        fontFamily: Fonts.quickSandBold
+    },
+    successText: {
+        marginVertical: pixelSizeVertical(10),
+        color: "#5A5A5A",
+        fontSize: fontPixel(14),
+
+        fontFamily: Fonts.quicksandMedium
+    },
+    textContinue:{
+        color: "#000",
+        fontSize: fontPixel(14),
+        fontFamily: Fonts.quickSandBold
+    }
+
+
 })
 
 export default MoreInformation;

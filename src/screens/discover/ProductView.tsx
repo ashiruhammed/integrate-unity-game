@@ -1,4 +1,4 @@
-import React, {useCallback, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
 import {
     Text,
@@ -9,15 +9,15 @@ import {
     Platform,
     Image,
     Pressable,
-    FlatList
+    FlatList, ActivityIndicator, Linking
 } from 'react-native';
 import {AntDesign, Entypo, FontAwesome, Fontisto, Ionicons, MaterialIcons, Octicons} from "@expo/vector-icons";
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {useAppSelector} from "../../app/hooks";
 import Colors from "../../constants/Colors";
-import {useInfiniteQuery} from "@tanstack/react-query";
-import {userNotifications} from "../../action/action";
+import {useInfiniteQuery, useQuery, useQueryClient,useMutation} from "@tanstack/react-query";
+import {getSingleProduct, upVoteProduct, userNotifications} from "../../action/action";
 import {RootStackScreenProps} from "../../../types";
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
 import {Fonts} from "../../constants/Fonts";
@@ -29,14 +29,29 @@ import {
     BottomSheetModalProvider,
     BottomSheetScrollView
 } from "@gorhom/bottom-sheet";
-import AccordionData from "../../components/accordion/AccordionData";
-import Accordion from "../../components/accordion/Accordion";
+
 import {
     BottomSheetDefaultBackdropProps
 } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
 import * as yup from "yup";
 import {useFormik} from "formik";
 import TextInput from "../../components/inputs/TextInput";
+import * as Clipboard from 'expo-clipboard';
+import FastImage from "react-native-fast-image";
+import Animated, {
+    Extrapolate,
+    interpolate, interpolateColor,
+    useAnimatedStyle,
+    useSharedValue,
+    withRepeat, withSequence,
+    withTiming
+} from "react-native-reanimated";
+
+
+
+const openLink = async (url:string) =>{
+    Linking.openURL(url)
+}
 
 
 const Products = [
@@ -88,7 +103,10 @@ interface teamProps {
 }
 
 interface props {
-    item: {}
+    item: {
+        imageUrl:string,
+        id:string
+    }
 }
 
 
@@ -168,6 +186,17 @@ const ProductCardItem = ({item}: props) => {
 
     return (
         <View style={styles.productsCard}>
+            <FastImage
+                style={styles.imageUrl}
+                source={{
+                    uri: item.imageUrl,
+
+                    cache: FastImage.cacheControl.web,
+                    priority: FastImage.priority.normal,
+                }}
+                resizeMode={FastImage.resizeMode.cover}
+            />
+
 
 
         </View>
@@ -193,9 +222,10 @@ const TeamItem = ({item}: teamProps) => {
     )
 }
 
-const ProductView = ({navigation}: RootStackScreenProps<'ProductView'>) => {
+const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) => {
 
-
+    const {item} = route.params
+    const queryClient = useQueryClient();
     const [commentText, setCommentText] = useState('')
 
     const user = useAppSelector(state => state.user)
@@ -203,6 +233,56 @@ const ProductView = ({navigation}: RootStackScreenProps<'ProductView'>) => {
     const dataSlice = useAppSelector(state => state.data)
     const {theme} = dataSlice
 
+    const [copied, setCopied] = useState(false)
+
+    const copyToClipboard = async () => {
+        await Clipboard.setStringAsync(item.websiteUrl);
+        setCopied(true)
+    };
+
+
+    const rotation = useSharedValue(0);
+
+
+    const progress = useSharedValue(0);
+    const progressMore = useSharedValue(0);
+
+
+    const animatedStyle = useAnimatedStyle(() => {
+        return {
+            transform: [{ rotateZ: `${rotation.value}deg` }]
+        };
+    });
+
+    const {data,isLoading,refetch} = useQuery(['getSingleProduct',item.slug],()=>getSingleProduct(item.slug))
+
+    const {mutate,isLoading:upvoting} = useMutation(['upVoteProduct'],upVoteProduct,{
+        onSuccess:(data)=>{
+            refetch()
+
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries(['upVoteProduct']);
+        }
+
+    })
+
+
+    const handlePressLike = () => {
+        mutate(item.id)
+        progress.value = withTiming(0, { duration: 500 });
+        progressMore.value = withTiming(0, { duration: 500 });
+        rotation.value = withSequence(
+            withTiming(-10, { duration: 50 }),
+            withRepeat(withTiming(10, { duration: 100 }), 6, true),
+            withTiming(0, { duration: 50 })
+        )
+
+
+
+    };
+
+    const [list, setList] = useState([]);
 
     const [refreshing, setRefreshing] = useState(false);
     const backgroundColor = theme == 'light' ? "#FFFFFF" : "#141414"
@@ -234,6 +314,20 @@ const ProductView = ({navigation}: RootStackScreenProps<'ProductView'>) => {
             getPreviousPageParam: (firstPage, allPages) => firstPage.prevCursor,
 
         })
+
+
+
+    useEffect(() => {
+        const countries = require('../../constants/countries.json')
+        const cons = countries['countries']
+        setList(cons)
+
+    }, [])
+
+
+    const filteredCountries = list.filter(country => {
+        return item.supportedCountries.some(filterItem => filterItem.name === country.name);
+    });
 
 
     const keyExtractor = useCallback((item: { id: any; }) => item.id, [],)
@@ -301,6 +395,7 @@ const ProductView = ({navigation}: RootStackScreenProps<'ProductView'>) => {
 
         }
     });
+
 
 
     return (
@@ -380,23 +475,24 @@ const ProductView = ({navigation}: RootStackScreenProps<'ProductView'>) => {
 
                         <View style={styles.productsCardImageWrap}>
                             <Image
-                                source={{uri: 'https://images.unsplash.com/photo-1611488006018-95b79a137ff5?q=80&w=2953&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'}}
+                                source={{uri: item.productLogo}}
                                 style={styles.productsCardImage}
                             />
                         </View>
 
                         <Text style={styles.productTitle}>
-                            Ether Vault
+                            {item.name}
                         </Text>
 
                         <Text style={styles.productDescription}>
-                            A secure and easy-to-use wallet for managing your Ethereum and ERC-20...
+                            {item.tagline}
                         </Text>
 
                     </View>
                     <View style={styles.socialPlug}>
                         <Pressable style={styles.shareBtn}>
-                            <Ionicons name="paper-plane" size={20} color="#BFBFBF"/>
+
+                            <Entypo name="instagram-with-circle" size={22} color="#BFBFBF" />
                         </Pressable>
 
 
@@ -412,7 +508,7 @@ const ProductView = ({navigation}: RootStackScreenProps<'ProductView'>) => {
 
 
                     <View style={styles.actionBtnWrap}>
-                        <TouchableOpacity style={[styles.actionBtn, {
+                        <TouchableOpacity onPress={()=>openLink(item.websiteUrl)} style={[styles.actionBtn, {
                             backgroundColor: Colors.primaryColor
                         }]}>
                             <Fontisto name="world-o" size={14} color="#fff"/>
@@ -424,25 +520,40 @@ const ProductView = ({navigation}: RootStackScreenProps<'ProductView'>) => {
                         </TouchableOpacity>
 
 
-                        <TouchableOpacity style={[styles.actionBtn, {
-                            backgroundColor: "#F2F2F2"
+                        <TouchableOpacity activeOpacity={0.7} onPress={handlePressLike}  style={[styles.actionBtn, {
+                            backgroundColor: data?.data?.upvotes.find(vote => vote.userId === userData.id) ? Colors.primaryColor : "#F2F2F2"
                         }]}>
-                            <FontAwesome name="thumbs-up" size={14} color={Colors.primaryColor}/>
-                            <Text style={[styles.buttonText, {
-                                color: Colors.primaryColor
+                            <Animated.View style={[animatedStyle,{
+                                flexDirection:'row',
+                                alignItems: 'center',
+                                justifyContent: 'space-evenly',
+                             width:'100%'
                             }]}>
-                                Thumbs up
-                            </Text>
+                                <FontAwesome name="thumbs-up" size={14} color={data.data.upvotes.find(vote => vote.userId === userData.id) ? "#fff" :Colors.primaryColor}/>
+                                <Text style={[styles.buttonText, {
+                                    color: data.data.upvotes.find(vote => vote.userId === userData.id) ? "#fff" : Colors.primaryColor
+                                }]}>
+                                    Thumbs up
+                                </Text>
+                            </Animated.View>
+
                         </TouchableOpacity>
                     </View>
 
 
                     <View style={styles.productsContainer}>
 
+                        {
+                            isLoading && <ActivityIndicator size={'small'} color={Colors.primaryColor}/>
+                        }
+                        {
+                            !isLoading &&
+                           data && data?.data?.productSteps.length > 0 &&
+
 
                         <FlatList
 
-                            data={Products}
+                            data={data?.data?.productSteps}
                             keyExtractor={keyExtractor}
                             horizontal
                             pagingEnabled
@@ -453,6 +564,7 @@ const ProductView = ({navigation}: RootStackScreenProps<'ProductView'>) => {
                             showsHorizontalScrollIndicator={false}
                             renderItem={renderItem}
                         />
+                        }
                     </View>
 
 
@@ -460,15 +572,15 @@ const ProductView = ({navigation}: RootStackScreenProps<'ProductView'>) => {
                         <Text style={styles.sectionTitle}>
                             Shareable Link
                         </Text>
-                        <TouchableOpacity style={styles.copyBox}>
+                        <TouchableOpacity activeOpacity={0.9} onPress={copyToClipboard} style={styles.copyBox}>
 
                             <Text style={styles.copyLinkText}>
-                                https://gatewayapp.co/ether...
+                                {item.websiteUrl}
                             </Text>
 
-                            <Pressable style={styles.copyBtn}>
-                                <Text style={styles.copyBtnText}>Copy</Text>
-                            </Pressable>
+                            <TouchableOpacity activeOpacity={0.7} onPress={copyToClipboard} style={styles.copyBtn}>
+                                {copied ? <Text style={styles.copyBtnText}>Copied</Text> : <Text style={styles.copyBtnText}>Copy</Text>}
+                            </TouchableOpacity>
                         </TouchableOpacity>
 
 
@@ -481,12 +593,18 @@ const ProductView = ({navigation}: RootStackScreenProps<'ProductView'>) => {
                             <Text style={styles.tagTitle}>
                                 Tags
                             </Text>
-                            <View style={styles.tagItemContainer}>
-                                <View style={styles.tagItem}>
+
+
+                            <View  style={styles.tagItemContainer}>
+                                {item.categories.map((cat:{id:string,name:string})=>(
+                                <View key={cat.id} style={styles.tagItem}>
                                     <Text style={styles.tagItemText}>
-                                        SaaS
+                                        {cat.name}
                                     </Text>
                                 </View>
+                                ))}
+
+
                             </View>
                         </View>
 
@@ -495,42 +613,25 @@ const ProductView = ({navigation}: RootStackScreenProps<'ProductView'>) => {
                             <Text style={styles.tagTitle}>
                                 Supported Countries
                             </Text>
+                            {item.supportedCountries.length > 0 &&
                             <View style={styles.tagItemContainer}>
-                                <View style={styles.tagItem}>
-                                    <Image
-                                        source={{uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Flag_of_Egypt.svg/800px-Flag_of_Egypt.svg.png'}}
-                                        style={styles.flagIcon}/>
-                                    <Text style={styles.tagItemText}>
-                                        Egypt
-                                    </Text>
-                                </View>
+                                {
+                                    filteredCountries.map((country) =>(
+                                        <View key={item.phone} style={styles.tagItem}>
+                                            <Text>
+                                                {country.emoji}
+                                            </Text>
+                                      {/*      <Image
+                                                source={{uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Flag_of_Egypt.svg/800px-Flag_of_Egypt.svg.png'}}
+                                                style={styles.flagIcon}/>*/}
+                                            <Text style={styles.tagItemText}>
+                                                {country.name}
+                                            </Text>
+                                        </View>
 
-                                <View style={styles.tagItem}>
-                                    <Image
-                                        source={{uri: 'https://media.istockphoto.com/id/652740802/vector/nigeria.jpg?s=612x612&w=0&k=20&c=CzqO6nCnCM6KXJp-nZWBV3oxRI5963lwdnQ5TT4TN7Q='}}
-                                        style={styles.flagIcon}/>
-                                    <Text style={styles.tagItemText}>
-                                        Nigeria
-                                    </Text>
-                                </View>
+                                    ))
 
-                                <View style={styles.tagItem}>
-                                    <Image
-                                        source={{uri: 'https://cdn.britannica.com/15/15-004-B5D6BF80/Flag-Kenya.jpg'}}
-                                        style={styles.flagIcon}/>
-                                    <Text style={styles.tagItemText}>
-                                        Kenya
-                                    </Text>
-                                </View>
-
-                                <View style={styles.tagItem}>
-                                    <Image
-                                        source={{uri: 'https://cdn.britannica.com/27/4227-004-32423B42/Flag-South-Africa.jpg'}}
-                                        style={styles.flagIcon}/>
-                                    <Text style={styles.tagItemText}>
-                                        South Africa
-                                    </Text>
-                                </View>
+                                }
 
                                 <TouchableOpacity activeOpacity={0.8} style={[styles.tagItem, {
                                     backgroundColor: '#F2F2F2'
@@ -538,6 +639,7 @@ const ProductView = ({navigation}: RootStackScreenProps<'ProductView'>) => {
                                     <Text style={styles.seeMoreText}> See all</Text>
                                 </TouchableOpacity>
                             </View>
+                            }
                         </View>
 
                     </View>
@@ -545,19 +647,14 @@ const ProductView = ({navigation}: RootStackScreenProps<'ProductView'>) => {
 
                     <View style={styles.aboutBoxWrap}>
                         <Text style={styles.tagTitle}>
-                            About Ether Vault
+                            About {item.name}
                         </Text>
                         <Text style={styles.authorText}>
-                            by Declan Rice
+                            by {item.owner.fullName}
                         </Text>
 
                         <Text style={styles.aboutText}>
-                            EtherVault is a secure and user-friendly wallet designed for managing Ethereum and ERC-20
-                            tokens. It is built on the Ethereum blockchain and allows users to store, send, and receive
-                            transactions in a decentralized and trustless manner.
-                            One of the key features of EtherVault is its intuitive and easy-to-use interface, which
-                            makes it
-                            ideal for...
+                            {item.description}
                         </Text>
 
                         <TouchableOpacity activeOpacity={0.8} style={[styles.tagItem, {
@@ -802,7 +899,7 @@ const ProductView = ({navigation}: RootStackScreenProps<'ProductView'>) => {
                                 Thumbs up
                             </Text>
                             <Text style={styles.otherDetailsBoxNumber}>
-                                2000
+                                {item._count.upvotes}
                             </Text>
                         </View>
 
@@ -822,7 +919,7 @@ const ProductView = ({navigation}: RootStackScreenProps<'ProductView'>) => {
                                 All Time Ranking
                             </Text>
                             <Text style={styles.otherDetailsBoxNumber}>
-                                #9
+                                #{data?.data?.rank}
                             </Text>
                         </View>
 
@@ -1120,7 +1217,7 @@ const styles = StyleSheet.create({
     },
     productDashInfo: {
         width: '100%',
-        height: heightPixel(230),
+        minHeight: heightPixel(200),
         alignItems: 'center',
         justifyContent: 'space-evenly',
         paddingHorizontal: pixelSizeHorizontal(20),
@@ -1262,7 +1359,12 @@ const styles = StyleSheet.create({
         shadowRadius: 7.22,
         elevation: 3,
     },
-
+    imageUrl:{
+        width: widthPixel(320),
+        height: heightPixel(220),
+        resizeMode:'cover',
+        borderRadius:10,
+    },
     tagsBoxWrap: {
 
         marginTop: 40,

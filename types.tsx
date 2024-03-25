@@ -16,6 +16,33 @@ import VisualRepresentation from "./src/screens/discover/create/VisualRepresenta
 import ViewPoints from "./src/screens/wallets/ViewPoints";
 
 
+interface OwnerProps {
+    id: string;
+    avatar: string;
+    username: string;
+    fullName: string;
+}
+
+interface CategoryProps {
+    id: string;
+    name: string;
+    slug: string;
+}
+
+interface SocialMediaProps {
+    name: string;
+    url: string;
+}
+
+interface UpvoteProps {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    userId: string;
+    productId: string;
+}
+
+
 declare global {
     namespace ReactNavigation {
         interface RootParamList extends RootStackParamList {
@@ -42,7 +69,40 @@ export type RootStackParamList = {
     MoreInformation: undefined;
     VisualRepresentation: undefined;
     ProductView: {
-        id?:string
+        item: {
+            id: string;
+            slug: string;
+            name: string;
+            description: string;
+            websiteUrl: string;
+            appleStoreUrl: string;
+            googlePlayStoreUrl: string;
+            ownerWorkedOnProject: boolean;
+            tagline: string;
+            ownerId: string;
+            createdAt: string;
+            isDeleted: boolean;
+            updatedAt: string;
+            deletedAt: string | null;
+            isCountryLimited: boolean;
+            productLogo: string;
+            launchDate: string;
+            status: string;
+            supportedCountries: any[]; // Adjust the type as needed
+            commentCount: number;
+            owner: OwnerProps;
+            contributors: any[]; // Adjust the type as needed
+            categories: CategoryProps[];
+            upvotes: UpvoteProps[];
+            downvotes: any[]; // Adjust the type as needed
+            socialMedia: SocialMediaProps[];
+            _count: {
+                contributors: number;
+                upvotes: number;
+                downvotes: number;
+                comments: number;
+            };
+        }
     };
     Leaderboard: undefined;
     Badges: undefined;

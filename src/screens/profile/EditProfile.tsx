@@ -84,7 +84,7 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
     const [formattedValue, setFormattedValue] = useState("");
 
     const dataSlice = useAppSelector(state => state.data)
-    const {theme} = dataSlice
+    const {theme,productDetails} = dataSlice
     const backgroundColor = theme == 'light' ? "#fff" : Colors.dark.background
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
     const borderColor = theme == 'light' ? Colors.borderColor : '#313131'
@@ -203,7 +203,7 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
 
                 // alert(message)
                 setImage("")
-                updateImage(data.url)
+                updateImage(data.secure_url)
 
 
             },
@@ -237,8 +237,8 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
         });
 
 
-        if (!result.cancelled) {
-            const fileInfo = await getFileInfo(result?.uri)
+        if (!result.canceled) {
+            const fileInfo = await getFileInfo(result?.assets[0].uri)
             const isLessThan = isLessThanTheMB(fileInfo?.size, 8)
 
             if (Platform.OS == 'ios' && !isLessThan) {
@@ -249,7 +249,7 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
                 }))
             }
 
-                setImage(result?.uri);
+                setImage(result?.assets[0].uri);
 
 
 
@@ -336,6 +336,8 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
             clearTimeout(time)
         };
     }, [responseState, responseMessage])
+
+
 
 
     return (

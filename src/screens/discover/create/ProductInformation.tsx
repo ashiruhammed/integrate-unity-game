@@ -18,7 +18,7 @@ import TextInput from "../../../components/inputs/TextInput";
 import HorizontalLine from "../../../components/HorizontalLine";
 import CheckYesIcon from "../../../assets/images/svg/CheckYesIcon";
 import CheckNoIcon from "../../../assets/images/svg/CheckNoIcon";
-import {updateProductDetails} from "../../../app/slices/dataSlice";
+import {updateProduct, updateProductDetails} from "../../../app/slices/dataSlice";
 
 
 const formSchema = yup.object().shape({
@@ -96,11 +96,11 @@ const dispatch = useAppDispatch()
         onSubmit: (values) => {
             const {productName,productURL} = values;
             //     const body = JSON.stringify({email: email.toLowerCase()})
-dispatch(updateProductDetails({
+dispatch(updateProduct({
     name:productName,websiteUrl:productURL,
     ownerWorkedOnProject:checkOption == "Yes" ? true : false }))
 navigation.navigate('FundamentalData')
-
+console.log(productDetails)
         }
     });
 
@@ -180,7 +180,7 @@ navigation.navigate('FundamentalData')
                     </View>
 
                     <View style={styles.stepsBoxRight}>
-                        <Pressable onPress={()=>navigation.navigate('FundamentalData')} style={styles.nextStep}>
+                        <Pressable onPress={()=>handleSubmit()} style={styles.nextStep}>
                             <Text style={styles.nextStepText}>
                                 Next Step
                             </Text>

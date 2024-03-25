@@ -9,7 +9,7 @@ import {
     TouchableOpacity,
     Pressable,
     FlatList,
-    Image, StyleProp, ViewStyle,
+    Image, StyleProp, ViewStyle, ActivityIndicator,
 } from 'react-native';
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
 import {Fonts} from "../../constants/Fonts";
@@ -17,8 +17,8 @@ import Colors from "../../constants/Colors";
 import {AntDesign, Entypo, FontAwesome, Ionicons, Octicons} from "@expo/vector-icons";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {useAppSelector} from "../../app/hooks";
-import {useInfiniteQuery} from "@tanstack/react-query";
-import {userNotifications} from "../../action/action";
+import {useInfiniteQuery, useQuery} from "@tanstack/react-query";
+import {getApprovedProduct, getProductTrending, userNotifications} from "../../action/action";
 import {RootStackScreenProps} from "../../../types";
 import {LinearGradient} from 'expo-linear-gradient';
 import GradientText from "../../components/GradientText";
@@ -38,21 +38,76 @@ import AccordionData from "../../components/accordion/AccordionData";
 import Accordion from "../../components/accordion/Accordion";
 
 import MasonryList from '@react-native-seoul/masonry-list';
+import {truncate, useRefreshOnFocus} from "../../helpers";
 
 
+interface OwnerProps {
+    id: string;
+    avatar: string;
+    username: string;
+    fullName: string;
+}
 
+interface CategoryProps {
+    id: string;
+    name: string;
+    slug: string;
+}
 
+interface SocialMediaProps {
+    name: string;
+    url: string;
+}
 
-
+interface UpvoteProps {
+    id: string;
+    createdAt: string;
+    updatedAt: string;
+    userId: string;
+    productId: string;
+}
 
 
 interface props {
-    item:{
-
+    viewProduct:(item:{})=>void
+    item: {
+        id: string;
+        slug: string;
+        name: string;
+        description: string;
+        websiteUrl: string;
+        appleStoreUrl: string;
+        googlePlayStoreUrl: string;
+        ownerWorkedOnProject: boolean;
+        tagline: string;
+        ownerId: string;
+        createdAt: string;
+        isDeleted: boolean;
+        updatedAt: string;
+        deletedAt: string | null;
+        isCountryLimited: boolean;
+        productLogo: string;
+        launchDate: string;
+        status: string;
+        supportedCountries: any[]; // Adjust the type as needed
+        commentCount: number;
+        owner: OwnerProps;
+        contributors: any[]; // Adjust the type as needed
+        categories: CategoryProps[];
+        upvotes: UpvoteProps[];
+        downvotes: any[]; // Adjust the type as needed
+        socialMedia: SocialMediaProps[];
+        _count: {
+            contributors: number;
+            upvotes: number;
+            downvotes: number;
+            comments: number;
+        };
     }
+
 }
 
-const ProductCardItem = ({item}:props) => {
+const ProductCardItem = ({item,viewProduct}: props) => {
     const dataSlice = useAppSelector(state => state.data)
     const {theme} = dataSlice
     const backgroundColor = theme == 'light' ? "#FFFFFF" : "#141414"
@@ -61,14 +116,14 @@ const ProductCardItem = ({item}:props) => {
     const lightText = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
     const tintText = theme == 'light' ? "#AEAEAE" : Colors.dark.tintTextColor
     return (
-        <View style={styles.productsCard}>
+        <Pressable onPress={()=>viewProduct(item)} style={styles.productsCard}>
             <View style={styles.topCard}>
                 <View style={styles.topCardLeft}>
 
 
                     <View style={styles.productsCardImageWrap}>
                         <Image
-                            source={{uri: 'https://images.unsplash.com/photo-1611488006018-95b79a137ff5?q=80&w=2953&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'}}
+                            source={{uri: item.productLogo}}
                             style={styles.productsCardImage}
                         />
                     </View>
@@ -76,7 +131,7 @@ const ProductCardItem = ({item}:props) => {
                     <Text style={[styles.productsCardTitle, {
                         color: darkTextColor
                     }]}>
-                        Ether Vault
+                        {item.name}
                     </Text>
                 </View>
 
@@ -85,7 +140,7 @@ const ProductCardItem = ({item}:props) => {
                     <Text style={[styles.pointCardText, {
                         color: '#E01414'
                     }]}>
-                        1600
+                        {item._count.upvotes}
                     </Text>
                 </View>
 
@@ -105,41 +160,32 @@ const ProductCardItem = ({item}:props) => {
                 color: tintText,
                 alignSelf: 'flex-start'
             }]}>
-                A secure and easy-to-use wallet for managing your Ethereum and ERC-20...
+                {truncate(item.description, 72)}
             </Text>
 
             <View style={styles.productsCardBottom}>
                 <View style={styles.tinyAvatar}>
                     <Image
-                        source={{uri: 'https://pub-static.fotor.com/assets/projects/pages/bc0734b486094ec0b1dec9aa4148de39/fotor-45a3795d0c5b46bcadc381a82e81fae0.jpg'}}
+                        source={{uri: item.owner.avatar}}
                         style={styles.tinyAvatarImg}
                     />
                 </View>
                 <Text style={styles.productsCardBottomText}>
-                    Declan Rice
+                    {item.owner.fullName}
                 </Text>
             </View>
-        </View>
+        </Pressable>
     )
 }
 
-const Products = [
-    {
-        image: "Ether Vault",
-        id: '1'
-    },
-    {
-        image: "Tron Vault",
-        id: '2'
-    }
-]
 
 interface CardsImage {
     id: string;
     imageUrl: string;
     title: string;
 }
-const data:CardsImage[] = [
+
+const data: CardsImage[] = [
     {id: '0', title: 'Item 1', imageUrl: 'https://i.redd.it/irsfp5m03m081.jpg'},
     {
         id: '1',
@@ -182,6 +228,15 @@ const DiscoverProducts = ({navigation}: RootStackScreenProps<'DiscoverProducts'>
     const borderColor = theme == 'light' ? "#DEE5ED" : "#ccc"
 
 
+    const {data: trending, isLoading, refetch} = useQuery(['getProductTrending'], getProductTrending)
+    const {
+        data: products,
+        isLoading: loadingApproved,
+        refetch: fetchApproved
+    } = useQuery(['ApprovedProduct'], getApprovedProduct)
+
+
+
     const openNotifications = () => {
         navigation.navigate('Notifications')
     }
@@ -206,21 +261,21 @@ const DiscoverProducts = ({navigation}: RootStackScreenProps<'DiscoverProducts'>
 
     const keyExtractor = useCallback((item: { id: any; }) => item.id, [],)
     const renderItem = useCallback(({item}) => (
-        <ProductCardItem item={item}/>
+        <ProductCardItem viewProduct={viewProduct} item={item}/>
     ), [])
 
 
     const numColumns = 2;
 
     const create = () => {
-navigation.navigate('ProductInformation')
+        navigation.navigate('ProductInformation')
     }
-    const viewProduct = () => {
-navigation.navigate('ProductView')
+    const viewProduct = (item:{}) => {
+        navigation.navigate('ProductView',{
+            item
+        })
+
     }
-
-
-
 
 
     // ref
@@ -249,27 +304,27 @@ navigation.navigate('ProductView')
         []
     );
 
-    const MasonryCard: FC<{item: CardsImage; style: StyleProp<ViewStyle>}> = ({
-                                                                                   item,
-                                                                                   style,
-                                                                               },index) => {
+    const MasonryCard: FC<{ item: CardsImage; style: StyleProp<ViewStyle> }> = ({
+                                                                                    item,
+                                                                                    style,
+                                                                                }, index) => {
         const randomBool = useMemo(() => Math.random() < 0.5, []);
 
 
         return (
 
-                <View
-                    key={item.id}
-                    style={[styles.item,
-                        parseInt(item.id) % numColumns === 0 ? styles.leftItem : styles.rightItem,
-                        {
-                            // marginVertical: randomBool ? 10 : 5,
+            <View
+                key={item.id}
+                style={[styles.item,
+                    parseInt(item.id) % numColumns === 0 ? styles.leftItem : styles.rightItem,
+                    {
+                        // marginVertical: randomBool ? 10 : 5,
 
 
-                        },]}
-                >
-                    <Image source={{uri: item.imageUrl}} style={styles.itemImage}/>
-                </View>
+                    },]}
+            >
+                <Image source={{uri: item.imageUrl}} style={styles.itemImage}/>
+            </View>
 
         );
     };
@@ -278,7 +333,7 @@ navigation.navigate('ProductView')
         return (
             <MasonryCard item={item}
                          style={[
-               /* {marginLeft: i % 2 === 0 ? 0 : 12}*/
+                             /* {marginLeft: i % 2 === 0 ? 0 : 12}*/
 
                          ]}
             />
@@ -286,128 +341,129 @@ navigation.navigate('ProductView')
     };
 
 
+    useRefreshOnFocus(refetch)
 
     return (
         <>
 
-        <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
+            <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
 
-            <KeyboardAwareScrollView
+                <KeyboardAwareScrollView
 
-                style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {
-                backgroundColor
-            }]} scrollEnabled
-                showsVerticalScrollIndicator={false}>
+                    style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {
+                    backgroundColor
+                }]} scrollEnabled
+                    showsVerticalScrollIndicator={false}>
 
 
-                <View style={styles.topBar}>
+                    <View style={styles.topBar}>
 
-                    <View style={styles.leftButton}>
-                        <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.8}
-                                          style={styles.backButton}>
+                        <View style={styles.leftButton}>
+                            <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.8}
+                                              style={styles.backButton}>
 
-                            <AntDesign name="arrowleft" size={30} color="black"/>
-                        </TouchableOpacity>
-                        <View style={styles.pointWrap}>
-                            <Ionicons name="gift" size={16} color="#22BB33"/>
-                            <Text style={styles.pointsText}>20000</Text>
+                                <AntDesign name="arrowleft" size={30} color="black"/>
+                            </TouchableOpacity>
+                            <View style={styles.pointWrap}>
+                                <Ionicons name="gift" size={16} color="#22BB33"/>
+                                <Text style={styles.pointsText}>20000</Text>
+                            </View>
                         </View>
+
+                        <View style={styles.rightButton}>
+
+                            <ImageBackground style={styles.streaKIcon} resizeMode={'contain'}
+                                             source={require('../../assets/images/streakicon.png')}>
+                                <Text style={styles.streakText}> 200</Text>
+                            </ImageBackground>
+
+                            <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}
+                                              style={styles.roundTopBtn}>
+                                {
+                                    notifications?.pages[0]?.data?.result.length > 0 &&
+                                    <View style={styles.dot}/>
+                                }
+                                <Octicons name="bell-fill" size={22} color={"#000"}/>
+                            </TouchableOpacity>
+
+                        </View>
+
                     </View>
 
-                    <View style={styles.rightButton}>
-
-                        <ImageBackground style={styles.streaKIcon} resizeMode={'contain'}
-                                         source={require('../../assets/images/streakicon.png')}>
-                            <Text style={styles.streakText}> 200</Text>
-                        </ImageBackground>
-
-                        <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}
-                                          style={styles.roundTopBtn}>
-                            {
-                                notifications?.pages[0]?.data?.result.length > 0 &&
-                                <View style={styles.dot}/>
-                            }
-                            <Octicons name="bell-fill" size={22} color={"#000"}/>
-                        </TouchableOpacity>
-
-                    </View>
-
-                </View>
-
-                <View style={[styles.pageTitleWrap, {
-                    marginBottom: 25,
-                }]}>
-                    <Text style={[styles.pageTitle, {
-                        color: textColor
+                    <View style={[styles.pageTitleWrap, {
+                        marginBottom: 25,
                     }]}>
-                        Discover
-                    </Text>
-                </View>
-
-
-                <View style={styles.productDashboard}>
-
-                    <View style={styles.leftProductDash}>
-                        <Text style={styles.leftProductDashTitle}>
-                            #1 Top Ranked for the week
+                        <Text style={[styles.pageTitle, {
+                            color: textColor
+                        }]}>
+                            Discover
                         </Text>
-
-
-                        <View style={styles.productRow}>
-
-                            <View style={styles.productRowItem}>
-                                <Text style={styles.productRowItemText}>
-                                    NFTworld
-                                </Text>
-                            </View>
-
-                            <View style={[styles.productRowItem,
-                                {justifyContent: 'flex-end'}]}>
-                                <FontAwesome name="thumbs-up" size={12} color="white"/>
-                                <Text style={styles.productRowItemText}>
-                                    3000 Thumbs up
-                                </Text>
-                            </View>
-                        </View>
-
-                        <View style={styles.textBody}>
-                            <Text style={styles.leftProductDashDescription}>
-                                Generating of
-                            </Text>
-                            <GradientText style={styles.leftProductDashDescription}>NFT images
-                            </GradientText>
-                            <Text style={styles.leftProductDashDescription}> MADE
-                            </Text>
-                            <GradientText style={styles.leftProductDashDescription}>
-                                easy
-                                with AI
-                            </GradientText>
-                            <Text style={styles.leftProductDashDescription}>
-                                🔥
-                            </Text>
-                        </View>
-
-
-                        <Pressable style={styles.viewBtn}>
-                            <Text style={styles.viewBtnText}>
-                                View Product
-                            </Text>
-                        </Pressable>
                     </View>
 
 
-                    <View style={styles.rightProductDash}>
-                        <View style={styles.masonryWrap}>
-                            <MasonryList
-                                data={data}
-                                keyExtractor={(item: CardsImage): string => item.id}
-                                numColumns={2}
-                                showsVerticalScrollIndicator={false}
-                                renderItem={renderItemMasonry}
+                    <View style={styles.productDashboard}>
+
+                        <View style={styles.leftProductDash}>
+                            <Text style={styles.leftProductDashTitle}>
+                                #1 Top Ranked for the week
+                            </Text>
 
 
-                            />
-                 {/* <FlatList
+                            <View style={styles.productRow}>
+
+                                <View style={styles.productRowItem}>
+                                    <Text style={styles.productRowItemText}>
+                                        NFTworld
+                                    </Text>
+                                </View>
+
+                                <View style={[styles.productRowItem,
+                                    {justifyContent: 'flex-end'}]}>
+                                    <FontAwesome name="thumbs-up" size={12} color="white"/>
+                                    <Text style={styles.productRowItemText}>
+                                        3000 Thumbs up
+                                    </Text>
+                                </View>
+                            </View>
+
+                            <View style={styles.textBody}>
+                                <Text style={styles.leftProductDashDescription}>
+                                    Generating of
+                                </Text>
+                                <GradientText style={styles.leftProductDashDescription}>NFT images
+                                </GradientText>
+                                <Text style={styles.leftProductDashDescription}> MADE
+                                </Text>
+                                <GradientText style={styles.leftProductDashDescription}>
+                                    easy
+                                    with AI
+                                </GradientText>
+                                <Text style={styles.leftProductDashDescription}>
+                                    🔥
+                                </Text>
+                            </View>
+
+
+                            <Pressable style={styles.viewBtn}>
+                                <Text style={styles.viewBtnText}>
+                                    View Product
+                                </Text>
+                            </Pressable>
+                        </View>
+
+
+                        <View style={styles.rightProductDash}>
+                            <View style={styles.masonryWrap}>
+                                <MasonryList
+                                    data={data}
+                                    keyExtractor={(item: CardsImage): string => item.id}
+                                    numColumns={2}
+                                    showsVerticalScrollIndicator={false}
+                                    renderItem={renderItemMasonry}
+
+
+                                />
+                                {/* <FlatList
 
                             scrollEnabled
                             showsVerticalScrollIndicator={false}
@@ -426,178 +482,199 @@ navigation.navigate('ProductView')
                             )}
                             numColumns={numColumns}
                         />*/}
+                            </View>
+                        </View>
+
+
+                    </View>
+
+
+                    <View style={styles.wrap}>
+
+                        <View style={styles.tagPill}>
+                            <Text style={styles.tagPillText}>
+                                Trending
+                            </Text>
                         </View>
                     </View>
 
 
-                </View>
-
-
-
-
-                <View style={styles.wrap}>
-
-                    <View style={styles.tagPill}>
-                        <Text style={styles.tagPillText}>
-                            Trending
+                    <View style={[styles.pageTitleWrap, {}]}>
+                        <Text style={[styles.pageTitle, {
+                            color: darkTextColor,
+                            width: '70%'
+                        }]}>
+                            Trending Products for the week
                         </Text>
                     </View>
-                </View>
+
+                    <View style={styles.productsContainer}>
 
 
-                <View style={[styles.pageTitleWrap, {}]}>
-                    <Text style={[styles.pageTitle, {
-                        color: darkTextColor,
-                        width: '70%'
-                    }]}>
-                        Trending Products for the week
-                    </Text>
-                </View>
+                        {isLoading && <ActivityIndicator size={"small"} color={Colors.primaryColor}/>}
 
-                <View style={styles.productsContainer}>
+                        {
+                            !isLoading && trending && trending?.data?.productHuntProjects.length > 0 &&
 
 
-                    <FlatList
+                            <FlatList
 
-                        data={Products}
-                        keyExtractor={keyExtractor}
-                        horizontal
-                        pagingEnabled
-                        scrollEnabled
-                        snapToAlignment="center"
-                        scrollEventThrottle={16}
-                        decelerationRate={"fast"}
-                        showsHorizontalScrollIndicator={false}
-                        renderItem={renderItem}
-                    />
-                </View>
-
-
-                <View style={styles.wrapSearch}>
-                    <Text style={[styles.searchTitle, {
-                        color: darkTextColor
-                    }]}>
-                        Discover different <Text style={{color: Colors.primaryColor}}>products</Text>
-                    </Text>
-
-                    <View style={styles.searchBoxWrap}>
-                        <SearchInput placeholder={'Search products here'} value={searchValue}/>
-
-                        <View style={[styles.searchIcon, {
-                            borderColor
-                        }]}>
-
-                            <AntDesign name="search1" size={18} color="black"/>
-                        </View>
-
+                                data={trending?.data?.productHuntProjects}
+                                keyExtractor={keyExtractor}
+                                horizontal
+                                pagingEnabled
+                                scrollEnabled
+                                snapToAlignment="center"
+                                scrollEventThrottle={16}
+                                decelerationRate={"fast"}
+                                showsHorizontalScrollIndicator={false}
+                                renderItem={renderItem}
+                            />
+                        }
                     </View>
-                </View>
-
-                <TouchableOpacity onPress={create} activeOpacity={0.8} style={styles.createBtn}>
-                    <AntDesign name="pluscircle" size={14} color={Colors.primaryColor}/>
-                    <Text style={styles.createBtnText}>
-                        Launch a product
-                    </Text>
-                </TouchableOpacity>
 
 
-                <View style={styles.filterContainer}>
-
-                    <Pressable onPress={handlePresentModalPress} style={styles.filterCategoryBtn}>
-                        <Text style={[styles.filterBtnText,{
-                            color:textColor
+                    <View style={styles.wrapSearch}>
+                        <Text style={[styles.searchTitle, {
+                            color: darkTextColor
                         }]}>
-                            Categories
+                            Discover different <Text style={{color: Colors.primaryColor}}>products</Text>
                         </Text>
-                        <Entypo name="chevron-thin-down" size={16} color={textColor}/>
 
-                    </Pressable>
+                        <View style={styles.searchBoxWrap}>
+                            <SearchInput placeholder={'Search products here'} value={searchValue}/>
 
-                    <Pressable onPress={handlePresentModalPress} style={[styles.filterCategoryBtn,{
-                        marginLeft:15,
-                    }]}>
-                        <Text style={[styles.filterBtnText,{
-                            color:textColor
-                        }]}>
-                            Filters
-                        </Text>
-                        <Ionicons name="funnel-outline" size={16} color={textColor} />
+                            <View style={[styles.searchIcon, {
+                                borderColor
+                            }]}>
 
-                    </Pressable>
-
-                </View>
-
-
-
-                <View style={[styles.pageTitleWrap, {}]}>
-                    <Text style={[styles.pageTitle, {
-                        color: darkTextColor,
-                        width: '70%'
-                    }]}>
-                        Products
-                    </Text>
-                </View>
-
-
-
-
-
-                <Pressable onPress={viewProduct} style={styles.productsCardTwo}>
-                    <View style={styles.topCard}>
-                        <View style={styles.topCardLeft}>
-
-
-                            <View style={styles.productsCardImageWrap}>
-                                <Image
-                                    source={{uri: 'https://images.unsplash.com/photo-1611488006018-95b79a137ff5?q=80&w=2953&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'}}
-                                    style={styles.productsCardImage}
-                                />
+                                <AntDesign name="search1" size={18} color="black"/>
                             </View>
 
-                            <Text style={[styles.productsCardTitle, {
-                                color: darkTextColor
-                            }]}>
-                                Crypto Shield
-                            </Text>
                         </View>
+                    </View>
 
-                        <View style={styles.pointCardWrap}>
-                            <FontAwesome name="thumbs-up" size={19} color={"#E01414"}/>
-                            <Text style={[styles.pointCardText, {
-                                color: '#E01414'
+                    <TouchableOpacity onPress={create} activeOpacity={0.8} style={styles.createBtn}>
+                        <AntDesign name="pluscircle" size={14} color={Colors.primaryColor}/>
+                        <Text style={styles.createBtnText}>
+                            Launch a product
+                        </Text>
+                    </TouchableOpacity>
+
+
+                    <View style={styles.filterContainer}>
+
+                        <Pressable onPress={handlePresentModalPress} style={styles.filterCategoryBtn}>
+                            <Text style={[styles.filterBtnText, {
+                                color: textColor
                             }]}>
-                                1600
+                                Categories
                             </Text>
-                        </View>
+                            <Entypo name="chevron-thin-down" size={16} color={textColor}/>
 
+                        </Pressable>
+
+                        <Pressable onPress={handlePresentModalPress} style={[styles.filterCategoryBtn, {
+                            marginLeft: 15,
+                        }]}>
+                            <Text style={[styles.filterBtnText, {
+                                color: textColor
+                            }]}>
+                                Filters
+                            </Text>
+                            <Ionicons name="funnel-outline" size={16} color={textColor}/>
+
+                        </Pressable>
 
                     </View>
 
 
-
-                    <Text style={[styles.bodyText, {
-                        color: tintText,
-                        marginTop:10,
-                        alignSelf: 'flex-start'
-                    }]}>
-                        A secure and easy-to-use wallet for managing your Ethereum and ERC-20...
-                    </Text>
-
-                    <View style={[styles.tagPillTwo, {
-                        alignSelf: 'flex-start',
-                        marginTop:10,
-                        minWidth: 45,
-                    }]}>
-                        <Text style={[styles.tagPillText,{
-                            color: "#000"
+                    <View style={[styles.pageTitleWrap, {}]}>
+                        <Text style={[styles.pageTitle, {
+                            color: darkTextColor,
+                            width: '70%'
                         }]}>
-                            Earn
+                            Products
                         </Text>
                     </View>
-                </Pressable>
 
-            </KeyboardAwareScrollView>
-        </SafeAreaView>
+
+                    {loadingApproved && <ActivityIndicator size={"small"} color={Colors.primaryColor}/>}
+
+
+                    {!loadingApproved && products?.data && products?.data?.productHuntProjects.length > 0 &&
+
+                        products?.data?.productHuntProjects.map((item: any, index: number) => (
+                            <Pressable key={item.id} onPress={()=>viewProduct(item)} style={styles.productsCardTwo}>
+                                <View style={styles.topCard}>
+                                    <View style={styles.topCardLeft}>
+
+
+                                        <View style={styles.productsCardImageWrap}>
+                                            <Image
+                                                source={{uri:item.productLogo}}
+                                                style={styles.productsCardImage}
+                                            />
+                                        </View>
+
+                                        <Text style={[styles.productsCardTitle, {
+                                            color: darkTextColor
+                                        }]}>
+                                            {item.name}
+                                        </Text>
+                                    </View>
+
+                                    <View style={styles.pointCardWrap}>
+                                        <FontAwesome name="thumbs-up" size={19} color={"#E01414"}/>
+                                        <Text style={[styles.pointCardText, {
+                                            color: '#E01414'
+                                        }]}>
+                                            {item._count.upvotes}
+                                        </Text>
+                                    </View>
+
+
+                                </View>
+
+
+                                <Text style={[styles.bodyText, {
+                                    color: tintText,
+                                    marginTop: 10,
+                                    alignSelf: 'flex-start'
+                                }]}>
+                                    {truncate(item.description, 100)}
+                                </Text>
+
+
+                                <View style={styles.pillRow}>
+
+                                    {item.categories.map((cat:{id:string,name:string})=>(
+
+                                        <View key={cat.id} style={[styles.tagPillTwo, {
+                                            alignSelf: 'flex-start',
+                                            marginTop: 10,
+                                            marginRight: 10,
+                                            minWidth: 45,
+                                        }]}>
+                                            <Text style={[styles.tagPillText, {
+                                                color: "#000"
+                                            }]}>
+                                                {cat.name}
+                                            </Text>
+                                        </View>
+                                    ))}
+
+
+                                </View>
+
+                            </Pressable>
+                        ))
+
+                    }
+
+
+                </KeyboardAwareScrollView>
+            </SafeAreaView>
 
 
             <BottomSheetModalProvider>
@@ -618,24 +695,20 @@ navigation.navigate('ProductView')
                         <View style={[styles.sheetHead, {}]}>
 
 
-                        <TouchableOpacity onPress={handleClose}
-                                          style={[styles.dismiss, {
-
-                                          }]}>
-                            <Ionicons name="close-sharp" size={24} color={textColor} />
-                        </TouchableOpacity>
+                            <TouchableOpacity onPress={handleClose}
+                                              style={[styles.dismiss, {}]}>
+                                <Ionicons name="close-sharp" size={24} color={textColor}/>
+                            </TouchableOpacity>
 
 
                             <Text style={[styles.sheetTitle, {
 
-                                color:textColor
+                                color: textColor
                             }]}>
                                 Products
                             </Text>
 
-                            <Text style={[styles.resetText, {
-
-                            }]}>
+                            <Text style={[styles.resetText, {}]}>
                                 Reset
                             </Text>
                         </View>
@@ -643,7 +716,7 @@ navigation.navigate('ProductView')
                         <View style={styles.cardBody}>
 
                             {AccordionData.map((value, index) => {
-                                return <Accordion value={value} key={index} type={value.type} />;
+                                return <Accordion value={value} key={index} type={value.type}/>;
                             })}
                         </View>
 
@@ -652,7 +725,7 @@ navigation.navigate('ProductView')
 
             </BottomSheetModalProvider>
 
-            </>
+        </>
     );
 };
 
@@ -826,7 +899,7 @@ const styles = StyleSheet.create({
     item: {
 
         width: 70,
-       // marginVertical: 5,
+        // marginVertical: 5,
         height: 75, // Set your desired height here
         borderColor: '#fff',
         borderWidth: 1,
@@ -1036,7 +1109,7 @@ const styles = StyleSheet.create({
         borderRadius: 10
     },
     filterContainer: {
-        marginVertical:pixelSizeVertical(15),
+        marginVertical: pixelSizeVertical(15),
         width: '90%',
         height: 45,
         alignItems: 'center',
@@ -1045,8 +1118,8 @@ const styles = StyleSheet.create({
     },
     filterCategoryBtn: {
         minWidth: 80,
-        paddingHorizontal:pixelSizeHorizontal(10),
-        height:40,
+        paddingHorizontal: pixelSizeHorizontal(10),
+        height: 40,
         alignItems: 'center',
         justifyContent: 'space-evenly',
         flexDirection: 'row',
@@ -1054,15 +1127,11 @@ const styles = StyleSheet.create({
         borderColor: "#3D3D3D",
         borderWidth: 1,
     },
-    filterBtnText:{
+    filterBtnText: {
         fontSize: fontPixel(14),
 
         fontFamily: Fonts.quicksandSemiBold
     },
-
-
-
-
 
 
     productsCardTwo: {
@@ -1109,7 +1178,7 @@ const styles = StyleSheet.create({
     resetText: {
         fontSize: fontPixel(14),
         fontFamily: Fonts.quicksandMedium,
-color:Colors.primaryColor
+        color: Colors.primaryColor
     },
     dismiss: {
 
@@ -1141,6 +1210,13 @@ color:Colors.primaryColor
         backgroundColor: '#f0f0f0',
         overflow: 'hidden',
     },
+    pillRow:{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        flexWrap:'wrap',
+        width: '100%'
+    }
 
 })
 

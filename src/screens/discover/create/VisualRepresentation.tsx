@@ -1,25 +1,68 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 
-import {Text, View, StyleSheet, ImageBackground, TouchableOpacity, Pressable, ScrollView, Platform} from 'react-native';
+import {
+    Text,
+    View,
+    StyleSheet,
+    ImageBackground,
+    TouchableOpacity,
+    Pressable,
+    ScrollView,
+    Platform,
+    ActivityIndicator, Image, Button
+} from 'react-native';
 import {AntDesign, Ionicons, Octicons} from "@expo/vector-icons";
 import PushIcon from "../../../assets/images/svg/PushIcon";
 import Colors from "../../../constants/Colors";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {fontPixel, heightPixel, pixelSizeHorizontal, widthPixel} from "../../../helpers/normalize";
 import {Fonts} from "../../../constants/Fonts";
-import {useAppSelector} from "../../../app/hooks";
-import {useInfiniteQuery} from "@tanstack/react-query";
-import {userNotifications} from "../../../action/action";
+import {useAppDispatch, useAppSelector} from "../../../app/hooks";
+import {useInfiniteQuery, useMutation, useQueryClient} from "@tanstack/react-query";
+import {uploadToCloudinary, userNotifications} from "../../../action/action";
 import {RootStackScreenProps} from "../../../../types";
 import ImageIcon from "../../../assets/images/svg/imageIcon";
 import HorizontalLine from "../../../components/HorizontalLine";
 import ImagePic from "../../../assets/images/svg/ImagePic";
+import {setResponse, unSetResponse} from "../../../app/slices/userSlice";
+import {api_key, upload_preset} from "../../../constants";
+import FastImage from "react-native-fast-image";
+import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system";
+import {isLessThanTheMB} from "../../../helpers";
+import {IF} from "../../../helpers/ConditionJsx";
+import {addProductStep, updateProduct, updateProductDetails} from "../../../app/slices/dataSlice";
+import Toast from "../../../components/Toast";
+
+
+const getFileInfo = async (fileURI: string) => {
+    const fileInfo = await FileSystem.getInfoAsync(fileURI, {
+        size: true,
+
+    })
+
+    return fileInfo
+
+
+}
+
 
 const VisualRepresentation = ({navigation}: RootStackScreenProps<'VisualRepresentation'>) => {
 
-
+    const queryClient = useQueryClient();
     const dataSlice = useAppSelector(state => state.data)
-    const {theme} = dataSlice
+
+    const user = useAppSelector(state => state.user)
+    const {theme,productDetails} = dataSlice
+    const {responseMessage,responseType,responseState} = user
+
+    const dispatch = useAppDispatch()
+
+    const [image, setImage] = useState('');
+    const [imageLogo, setImageLogo] = useState('');
+
+    const [imageUrl, setImageUrl] = useState('');
+    const [imageLogoUrl, setImageLogoUrl] = useState('');
 
 
     const backgroundColor = theme == 'light' ? "#FFFFFF" : "#141414"
@@ -28,6 +71,175 @@ const VisualRepresentation = ({navigation}: RootStackScreenProps<'VisualRepresen
     const lightText = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
     const tintText = theme == 'light' ? "#AEAEAE" : Colors.dark.tintTextColor
     const borderColor = theme == 'light' ? "#DEE5ED" : "#ccc"
+
+
+    const {mutate: createImage, isLoading: creatingImage} = useMutation(['uploadToCloudinary'], uploadToCloudinary,
+        {
+            onSuccess: async data => {
+setImage('')
+                // alert(message)
+                dispatch(addProductStep({imageUrl: data.secure_url}))
+
+
+            },
+
+            onError: (err) => {
+
+                dispatch(setResponse({
+                    responseMessage: 'Something happened, please try again 😞',
+                    responseState: true,
+                    responseType: 'error',
+                }))
+
+
+            },
+            onSettled: () => {
+                queryClient.invalidateQueries(['uploadToCloudinary']);
+            }
+
+        })
+
+
+    const {
+        mutate: uploadLogo,
+        isLoading: uploadingLogoUrl
+    } = useMutation(['uploadLogoToCloudinary'], uploadToCloudinary,
+        {
+            onSuccess: async data => {
+
+                // alert(message)
+                setImageLogo("")
+                setImageLogoUrl(data.secure_url)
+                dispatch(updateProduct({productLogo: data.secure_url}))
+
+            },
+
+            onError: (err) => {
+
+                dispatch(setResponse({
+                    responseMessage: 'Something happened, please try again 😞',
+                    responseState: true,
+                    responseType: 'error',
+                }))
+
+
+            },
+            onSettled: () => {
+                queryClient.invalidateQueries(['uploadLogoToCloudinary']);
+            }
+
+        })
+
+
+    const pickImageLogo = async () => {
+        // requestPermission()
+        // No permissions request is necessary for launching the image library
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: false,
+            // base64:true,
+            //aspect: [4, 3],
+            quality: 1,
+        });
+
+
+        if (!result.canceled) {
+            const fileInfo = await getFileInfo(result?.assets[0].uri)
+            const isLessThan = isLessThanTheMB(fileInfo?.size, 8)
+
+            if (Platform.OS == 'ios' && !isLessThan) {
+                dispatch(setResponse({
+                    responseMessage: 'Image file too large, must be less than 4MB 🤨',
+                    responseState: true,
+                    responseType: 'error',
+                }))
+            }
+
+            setImageLogo(result?.assets[0].uri);
+
+
+        }
+    };
+    const pickImage = async () => {
+        // requestPermission()
+        // No permissions request is necessary for launching the image library
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: false,
+            // base64:true,
+            //aspect: [4, 3],
+            quality: 1,
+        });
+
+
+        if (!result.canceled) {
+            const fileInfo = await getFileInfo(result?.assets[0].uri)
+            const isLessThan = isLessThanTheMB(fileInfo?.size, 8)
+
+            if (Platform.OS == 'ios' && !isLessThan) {
+                dispatch(setResponse({
+                    responseMessage: 'Image file too large, must be less than 4MB 🤨',
+                    responseState: true,
+                    responseType: 'error',
+                }))
+            }
+
+            setImage(result?.assets[0].uri);
+
+
+        }
+    };
+
+
+
+    useEffect(() => {
+        if (!imageLogo) {
+            return;
+        } else if (imageLogo) {
+            (async () => {
+
+                const data = new FormData()
+
+
+                let type = await imageLogo?.substring(imageLogo.lastIndexOf(".") + 1);
+                let fileName = imageLogo.split('/').pop()
+
+                // data.append("file", image, "[PROXY]");
+                data.append("upload_preset", upload_preset);
+                data.append("api_key", api_key);
+                data.append('file', {uri: imageLogo, name: fileName, type: `image/${type}`} as any)
+
+
+                uploadLogo({body: data, resource_type: 'image'})
+
+            })()
+        }
+    }, [imageLogo]);
+
+
+    useEffect(() => {
+        if (!image) {
+            return;
+        } else if (image) {
+            (async () => {
+
+                const data = new FormData()
+
+
+                let type = await image?.substring(image.lastIndexOf(".") + 1);
+                let fileName = image.split('/').pop()
+
+                // data.append("file", image, "[PROXY]");
+                data.append("upload_preset", upload_preset);
+                data.append("api_key", api_key);
+                data.append('file', {uri: image, name: fileName, type: `image/${type}`} as any)
+
+
+                createImage({body: data, resource_type: 'image'})
+
+            })()
+        }
+    }, [image]);
 
 
     const openNotifications = () => {
@@ -53,9 +265,31 @@ const VisualRepresentation = ({navigation}: RootStackScreenProps<'VisualRepresen
         })
 
 
-    return (
-        <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
+    useEffect(() => {
+        // console.log(user)
+        let time: NodeJS.Timeout | undefined;
+        if (responseState || responseMessage) {
 
+            time = setTimeout(() => {
+                dispatch(unSetResponse())
+            }, 3000)
+
+        }
+        return () => {
+            clearTimeout(time)
+        };
+    }, [responseState, responseMessage])
+
+    const confirmSelect = () => {
+        navigation.navigate('MoreInformation')
+    }
+
+    return (
+        <>
+
+
+        <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
+            <Toast message={responseMessage} state={responseState} type={responseType}/>
             <ScrollView
 
                 style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {
@@ -108,6 +342,8 @@ const VisualRepresentation = ({navigation}: RootStackScreenProps<'VisualRepresen
 
                 </View>
 
+
+
                 <View style={styles.stepsBox}>
                     <View style={styles.stepsBoxLeft}>
 
@@ -128,7 +364,7 @@ const VisualRepresentation = ({navigation}: RootStackScreenProps<'VisualRepresen
                     </View>
 
                     <View style={styles.stepsBoxRight}>
-                        <Pressable onPress={()=>navigation.navigate('MoreInformation')} style={styles.nextStep}>
+                        <Pressable onPress={() => navigation.navigate('MoreInformation')} style={styles.nextStep}>
                             <Text style={styles.nextStepText}>
                                 Next Step
                             </Text>
@@ -158,18 +394,38 @@ const VisualRepresentation = ({navigation}: RootStackScreenProps<'VisualRepresen
                             </Text>
 
                             <View style={styles.imageBox}>
-                                <ImagePic/>
+                                <IF condition={imageLogoUrl !== ''}>
+
+                                    <FastImage
+                                        style={styles.imageLogoUrl}
+                                        source={{
+                                            uri: productDetails.productLogo,
+
+                                            cache: FastImage.cacheControl.web,
+                                            priority: FastImage.priority.normal,
+                                        }}
+                                        resizeMode={FastImage.resizeMode.cover}
+                                    />
+                                </IF>
+                                <IF condition={imageLogoUrl == ''}>
+                                    {
+                                        uploadingLogoUrl ? <ActivityIndicator color={Colors.primaryColor}/>
+                                            :
+
+                                            <ImagePic/>
+                                    }
+                                </IF>
                             </View>
                         </View>
 
 
                         <View style={styles.selectImageWrap}>
 
-                            <Pressable style={styles.selectImageBtn}>
+                            <TouchableOpacity activeOpacity={0.8} onPress={pickImageLogo} style={styles.selectImageBtn}>
                                 <Text style={styles.selectImageBtnText}>
                                     Select an image
                                 </Text>
-                            </Pressable>
+                            </TouchableOpacity>
 
                             <Text style={[styles.selectImageBtnText, {
                                 lineHeight: 22,
@@ -197,31 +453,69 @@ const VisualRepresentation = ({navigation}: RootStackScreenProps<'VisualRepresen
                     </View>
 
 
-                    <View style={styles.imageBigBox}>
-                        <ImagePic/>
+                    <Pressable onPress={pickImage} style={styles.imageBigBox}>
+                        {
+                            creatingImage ? <ActivityIndicator color={Colors.primaryColor} size={"small"}/>
+                                :
+
+                                <ImagePic/>
+                        }
+
 
                         <Text style={styles.browseImageText}>
-                            Browse files <Text style={{color:"#686868"}}>or</Text> paste image URL
+                            Browse files <Text style={{color: "#686868"}}>or</Text> paste image URL
                         </Text>
                         <Text style={[styles.selectImageBtnText, {
                             lineHeight: 22,
-                            marginTop:20,
-                            textAlign:'center',
-                            width:'80%'
+                            marginTop: 20,
+                            textAlign: 'center',
+                            width: '80%'
                         }]}>
                             Recommended size: 240x240 | JPG, PNG, GIF. Max size: 2MB
                         </Text>
+                    </Pressable>
+
+
+                    <View style={styles.productStepsWrap}>
+                        {
+                            productDetails?.productSteps &&
+                            productDetails.productSteps.length > 0 &&
+                            productDetails.productSteps.map((step, index) => (
+                                <View key={step.index} style={styles.stepsImageBox}>
+
+
+                                    <FastImage
+                                        style={styles.stepsImageLogo}
+                                        source={{
+                                            uri: step.imageUrl,
+
+                                            cache: FastImage.cacheControl.web,
+                                            priority: FastImage.priority.normal,
+                                        }}
+                                        resizeMode={FastImage.resizeMode.cover}
+                                    />
+
+                                </View>
+                            ))
+                        }
+
                     </View>
+
+
+
+
                 </View>
 
-
-
-
-
-        </ScrollView>
-</SafeAreaView>
-)
-    ;
+                <Pressable  onPress={confirmSelect} style={styles.claimBtn}>
+                    <Text style={styles.claimBtnText}>
+                        Next Step
+                    </Text>
+                </Pressable>
+            </ScrollView>
+        </SafeAreaView>
+        </>
+    )
+        ;
 };
 
 const styles = StyleSheet.create({
@@ -443,7 +737,7 @@ const styles = StyleSheet.create({
         color: "#686868"
     },
     authContainer: {
-marginBottom:40,
+        marginBottom: 40,
         justifyContent: 'center',
         width: '90%',
 
@@ -482,6 +776,42 @@ marginBottom:40,
         alignItems: 'center',
         justifyContent: 'center'
     },
+    imageLogoUrl: {
+        backgroundColor: "#CCCCCC",
+        width: 100,
+        height: 100,
+        resizeMode: 'cover',
+        borderRadius: 10,
+
+    },
+    stepsImageLogo: {
+        backgroundColor: "#CCCCCC",
+        width: 80,
+        height: 80,
+        resizeMode: 'cover',
+        borderRadius: 10,
+
+    },
+
+    productStepsWrap:{
+        marginTop:10,
+      flexDirection:'row',
+      flexWrap:"wrap",
+      width:'100%',
+      alignItems:'center' ,
+    },
+    stepsImageBox:{
+        margin: 10,
+        width: 90,
+        height: 90,
+        borderColor: "#CCCCCC",
+        borderStyle: 'dashed',
+        borderWidth: 1,
+        borderRadius: 10,
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+
     selectImageWrap: {
         paddingHorizontal: 15,
         paddingTop: 15,
@@ -518,12 +848,27 @@ marginBottom:40,
         justifyContent: 'center'
     },
 
-    browseImageText:{
-        marginTop:20,
-        color:"#E01414",
+    browseImageText: {
+        marginTop: 20,
+        color: "#E01414",
         fontFamily: Fonts.quicksandRegular,
         fontSize: fontPixel(14)
-    }
+    },
+    claimBtn: {
+        height: 45,
+
+        width: widthPixel(235),
+        borderRadius: 30,
+        backgroundColor: Colors.primaryColor,
+        alignItems: 'center',
+        marginVertical: 40,
+        justifyContent: 'center',
+    },
+    claimBtnText: {
+        fontSize: fontPixel(14),
+        color: "#fff",
+        fontFamily: Fonts.quicksandSemiBold
+    },
 })
 
 export default VisualRepresentation;

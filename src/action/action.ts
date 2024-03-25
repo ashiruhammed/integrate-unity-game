@@ -1,10 +1,8 @@
-//const BASE_URL = "https://gateway-api.onrender.com"
-//export const BASE_URL = "https://gateway-backend.onrender.com"
-//export const BASE_URL = "https://api.gatewayapp.co"
+
 import * as SecureStore from 'expo-secure-store';
 import { BASE_URL, ACCESS_TOKEN, DEV_BASE_URL} from "@env";
 //const access_token = 'JGFyZ29uMmlkJHY9MTkkbT00MDk2LHQ9MyxwPTEkWnJjNEVDR05JTEYzU3B2WUJLZVBZdyRtdnNacUl6VVg3SG1UV2gvdjhQZXZGUXJOa1hWYUFHRkVKV3dCd0NobDBV'
-//const BASE_URL = __DEV__ ? DEV_BASE_URL : 'https://api.gatewayapp.co'
+const BASE_URL_LIVE = __DEV__ ? DEV_BASE_URL : BASE_URL
 
 interface signupProps {
     "email": string,
@@ -32,7 +30,7 @@ export const loginUser = async (userData: {}) => {
     };
 
     return Promise.race([
-        fetch(`${BASE_URL}/auth/signin`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/auth/signin`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -71,7 +69,7 @@ export const userAppleOAuth = async (userData: {}) => {
     };
 
     return Promise.race([
-        fetch(`${BASE_URL}/auth/apple/callback`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/auth/apple/callback`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -108,7 +106,7 @@ export const userGoogleAuth = async (userData: {}) => {
     };
 
     return Promise.race([
-        fetch(`${BASE_URL}/auth/google/callback`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/auth/google/callback`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -142,7 +140,7 @@ export const userFBOAuth = async (userData: any) => {
     };
 
     return Promise.race([
-        fetch(`${BASE_URL}/auth/facebook/callback`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/auth/facebook/callback`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -175,7 +173,7 @@ export const createAccount = async (userdata: signupProps) => {
     };
 
     return Promise.race([
-        fetch(`${BASE_URL}/auth/signup`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/auth/signup`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -205,7 +203,7 @@ export const requestCode = async (userdata: signupProps) => {
     };
 
     return Promise.race([
-        fetch(`${BASE_URL}/auth/confirmation/request/email`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/auth/confirmation/request/email`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -233,7 +231,7 @@ export const reqPasswordResetCode = async (userdata: signupProps) => {
     };
 
     return Promise.race([
-        fetch(`${BASE_URL}/auth/password/reset`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/auth/password/reset`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -263,7 +261,7 @@ export const confirmEmail = async (userdata: signupProps) => {
     };
 
     return Promise.race([
-        fetch(`${BASE_URL}/auth/confirmation/email`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/auth/confirmation/email`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -298,7 +296,7 @@ export const verifyPhone = async (userdata: any) => {
     };
 
     return Promise.race([
-        fetch(`${BASE_URL}/user/phone/verify`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/user/phone/verify`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -333,7 +331,7 @@ export const updatePhoneNumberVerify = async (userdata: any) => {
     };
 
     return Promise.race([
-        fetch(`${BASE_URL}/user/phone/update`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/user/phone/update`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -368,7 +366,7 @@ export const getUserSettings = async () => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/preferences`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/preferences`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -400,7 +398,7 @@ export const userSettings = async (userdata: any) => {
     };
 
     return Promise.race([
-        fetch(`${BASE_URL}/preferences/update`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/preferences/update`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -435,7 +433,7 @@ export const requestPhoneVerification = async (userdata: any) => {
     };
 
     return Promise.race([
-        fetch(`${BASE_URL}/user/phone`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/user/phone`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -465,7 +463,7 @@ export const passwordReset = async (userdata: signupProps) => {
     };
 
     return Promise.race([
-        fetch(`${BASE_URL}/auth/password/reset`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/auth/password/reset`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -501,7 +499,7 @@ export const getUser = async () => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/user/me`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/user/me`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -538,7 +536,7 @@ export const updateUserImage = async (imageUrl: any) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/user/avatar`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/user/avatar`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -571,7 +569,7 @@ export const userNotifications = {
         };
 
         return Promise.race([
-            fetch(`${BASE_URL}/notification`, requestOptions)
+            fetch(`${BASE_URL_LIVE}/notification`, requestOptions)
                 .then(response => response.json()),
             new Promise((resolve, reject) => {
                 timeoutId = setTimeout(() => reject(new Error('Timeout')), 15000)
@@ -602,7 +600,7 @@ export const referralDashboard = {
         };
 
         return Promise.race([
-            fetch(`${BASE_URL}/referral/dashboard`, requestOptions)
+            fetch(`${BASE_URL_LIVE}/referral/dashboard`, requestOptions)
                 .then(response => response.json()),
             new Promise((resolve, reject) => {
                 timeoutId = setTimeout(() => reject(new Error('Timeout')), 15000)
@@ -634,7 +632,7 @@ export const userNFTs = {
         };
 
         return Promise.race([
-            fetch(`${BASE_URL}/nft/me?pageSize=10&pageNumber=${pageParam}`, requestOptions)
+            fetch(`${BASE_URL_LIVE}/nft/me?pageSize=10&pageNumber=${pageParam}`, requestOptions)
                 .then(response => response.json()),
             new Promise((resolve, reject) => {
                 timeoutId = setTimeout(() => reject(new Error('Timeout')), 15000)
@@ -665,7 +663,7 @@ export const userLeaderboards = {
         };
 
         return Promise.race([
-            fetch(`${BASE_URL}/point/leaderboard/top?pageSize=10&pageNumber=${pageParam}`, requestOptions)
+            fetch(`${BASE_URL_LIVE}/point/leaderboard/top?pageSize=10&pageNumber=${pageParam}`, requestOptions)
                 .then(response => response.json()),
             new Promise((resolve, reject) => {
                 timeoutId = setTimeout(() => reject(new Error('Timeout')), 15000)
@@ -700,7 +698,7 @@ export const getUserDashboard = async () => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/user/dashboard`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/user/dashboard`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -734,7 +732,7 @@ export const getUserRank = async () => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/point/rank`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/point/rank`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -765,9 +763,9 @@ export const uploadToCloudinary = async ({body, resource_type}: { body: any, res
         body
     };
 
-
+//https://api.cloudinary.com/v1_1/dijyr3tlg/${resource_type}/upload
     return Promise.race([
-        fetch(`https://api.cloudinary.com/v1_1/dijyr3tlg/${resource_type}/upload`, requestOptions)
+        fetch(`https://api.cloudinary.com/v1_1/demo/image/upload`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -802,7 +800,7 @@ export const updateCompleteProfile = async (body: {}) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/user/complete`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/user/complete`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -837,7 +835,7 @@ export const getUserWallets = async () => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/wallet`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/wallet`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -870,7 +868,7 @@ export const getUserTransaction = async () => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/transaction`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/transaction`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -903,7 +901,7 @@ export const getUserPoints = async () => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/wallet/point`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/wallet/point`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -936,7 +934,7 @@ export const getUserPointsExchangeRate = async () => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/point/exchange/rates`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/point/exchange/rates`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -970,7 +968,7 @@ export const redeemPoints = async (body: {}) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/point/redeem`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/point/redeem`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -1004,7 +1002,7 @@ export const getReferralLeaderboard = async () => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/referral/leaderboard`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/referral/leaderboard`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -1036,7 +1034,7 @@ export const getPointsLeaderboard = async () => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/point/leaderboard/bottom?pageSize=10`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/point/leaderboard/bottom?pageSize=10`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -1070,7 +1068,7 @@ export const generateReferralCode = async () => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/user/referral/code`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/user/referral/code`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -1104,7 +1102,7 @@ export const generateReferralHistory = async () => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/referral/history`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/referral/history`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -1140,7 +1138,7 @@ export const referralPoints = {
 
 
         return Promise.race([
-            fetch(`${BASE_URL}/referral/history`, requestOptions)
+            fetch(`${BASE_URL_LIVE}/referral/history`, requestOptions)
                 .then(response => response.json()),
             new Promise((resolve, reject) => {
                 timeoutId = setTimeout(() => reject(new Error('Timeout')), 25000)
@@ -1177,7 +1175,7 @@ export const withdrawFromWallet = async (body: {}) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/wallet/withdraw`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/wallet/withdraw`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -1210,7 +1208,7 @@ export const leaveAReview = async (body: {}) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/review`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/review`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -1244,7 +1242,7 @@ export const getUserCompletedAdventure = async () => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/adventure/enrollment/completed`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/adventure/enrollment/completed`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -1280,7 +1278,7 @@ export const getAllAdventure = {
 
 
         return Promise.race([
-            fetch(`${BASE_URL}/adventure`, requestOptions)
+            fetch(`${BASE_URL_LIVE}/adventure`, requestOptions)
                 .then(response => response.json()),
             new Promise((resolve, reject) => {
                 timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -1316,7 +1314,7 @@ export const getEnrolledAdventure = {
 
 
         return Promise.race([
-            fetch(`${BASE_URL}/adventure/enrollment`, requestOptions)
+            fetch(`${BASE_URL_LIVE}/adventure/enrollment`, requestOptions)
                 .then(response => response.json()),
             new Promise((resolve, reject) => {
                 timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -1350,7 +1348,7 @@ export const getInProgressAdventure = {
 
 
         return Promise.race([
-            fetch(`${BASE_URL}/adventure/enrollment/progress`, requestOptions)
+            fetch(`${BASE_URL_LIVE}/adventure/enrollment/progress`, requestOptions)
                 .then(response => response.json()),
             new Promise((resolve, reject) => {
                 timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -1385,7 +1383,7 @@ export const getAdventure = async (id: string) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/adventure/${id}`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/adventure/${id}`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -1417,7 +1415,7 @@ export const getAdventureReviews = async (id: string) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/review/adventure/${id}`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/review/adventure/${id}`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -1449,7 +1447,7 @@ export const getModuleByAdventure = async (id: string) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/module/adventure/${id}`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/module/adventure/${id}`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -1483,7 +1481,7 @@ export const getLessonsByModule = async (id: string) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/lesson/module/${id}`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/lesson/module/${id}`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -1517,7 +1515,7 @@ export const getLesson = async (id: string) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/lesson/${id}`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/lesson/${id}`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -1549,7 +1547,7 @@ export const getQuizByLesson = async (id: string) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/quiz/lesson/${id}`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/quiz/lesson/${id}`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -1582,7 +1580,7 @@ export const getBadges = async () => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/badge/user`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/badge/user`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -1614,7 +1612,7 @@ export const getUserBadges = async () => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/badge/user/dashboard`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/badge/user/dashboard`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -1650,7 +1648,7 @@ export const getAllBadges = {
 
 
             return Promise.race([
-                fetch(`${BASE_URL}/badge/user/dashboard`, requestOptions)
+                fetch(`${BASE_URL_LIVE}/badge/user/dashboard`, requestOptions)
                     .then(response => response.json()),
                 new Promise((resolve, reject) => {
                     timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -1686,7 +1684,7 @@ export const getFollowedCommunities = {
 
 
         return Promise.race([
-            fetch(`${BASE_URL}/community/following`, requestOptions)
+            fetch(`${BASE_URL_LIVE}/community/following`, requestOptions)
                 .then(response => response.json()),
             new Promise((resolve, reject) => {
                 timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -1720,7 +1718,7 @@ export const getMyCommunities = {
 
 
         return Promise.race([
-            fetch(`${BASE_URL}/community/user`, requestOptions)
+            fetch(`${BASE_URL_LIVE}/community/user`, requestOptions)
                 .then(response => response.json()),
             new Promise((resolve, reject) => {
                 timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -1756,7 +1754,7 @@ export const getPublicCommunities = {
 
 
         return Promise.race([
-            fetch(`${BASE_URL}/community`, requestOptions)
+            fetch(`${BASE_URL_LIVE}/community`, requestOptions)
                 .then(response => response.json()),
             new Promise((resolve, reject) => {
                 timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -1790,7 +1788,7 @@ export const getAllCommunities = {
 
 
         return Promise.race([
-            fetch(`${BASE_URL}/community/status?status=${status}`, requestOptions)
+            fetch(`${BASE_URL_LIVE}/community/status?status=${status}`, requestOptions)
                 .then(response => response.json()),
             new Promise((resolve, reject) => {
                 timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -1826,7 +1824,7 @@ export const getPrivateCommunities = {
 
 
         return Promise.race([
-            fetch(`${BASE_URL}/community/type?type=PRIVATE`, requestOptions)
+            fetch(`${BASE_URL_LIVE}/community/type?type=PRIVATE`, requestOptions)
                 .then(response => response.json()),
             new Promise((resolve, reject) => {
                 timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -1859,7 +1857,7 @@ export const getCommunityPosts = {
       //  https://api.gatewayapp.co/post/comment/replies/de9314a5-0507-43b3-987b-30ee30526942
 
         return Promise.race([
-            fetch(`${BASE_URL}/post/community/${id}`, requestOptions)
+            fetch(`${BASE_URL_LIVE}/post/community/${id}`, requestOptions)
                 .then(response => response.json()),
             new Promise((resolve, reject) => {
                 timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -1893,7 +1891,7 @@ export const getPostComments = {
 
 
         return Promise.race([
-            fetch(`${BASE_URL}/post/comment/${id}`, requestOptions)
+            fetch(`${BASE_URL_LIVE}/post/comment/${id}`, requestOptions)
                 .then(response => response.json()),
             new Promise((resolve, reject) => {
                 timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -1927,7 +1925,7 @@ export const getCommentReplies = {
 
 
         return Promise.race([
-            fetch(`${BASE_URL}/post/comment/replies/${id}`, requestOptions)
+            fetch(`${BASE_URL_LIVE}/post/comment/replies/${id}`, requestOptions)
                 .then(response => response.json()),
             new Promise((resolve, reject) => {
                 timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -1965,7 +1963,7 @@ export const replyToComment = async (body:any) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/post/comment`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/post/comment`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -1998,7 +1996,7 @@ export const commentOnAPost = async (body: any) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/post/comment`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/post/comment`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -2032,7 +2030,7 @@ export const likeAComment = async (id: string) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/post/comment/like/${id}`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/post/comment/like/${id}`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -2064,7 +2062,7 @@ export const likeAPost = async (id: string) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/post/like/${id}`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/post/like/${id}`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -2098,7 +2096,7 @@ export const getPostLike = async (id: string) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/post/likes/${id}`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/post/likes/${id}`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -2131,7 +2129,7 @@ export const postToCommunity = async ({body}: { body: any }) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/post/community`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/post/community`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -2165,7 +2163,7 @@ export const getCommunityPost = async (id: string) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/post/${id}`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/post/${id}`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -2200,7 +2198,7 @@ export const getCommunityFollowers = async (id: string) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/community/followers/${id}`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/community/followers/${id}`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -2234,7 +2232,7 @@ export const communityRequests = async (id: string) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/community/request/${id}`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/community/request/${id}`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -2269,7 +2267,7 @@ export const getCommunityInfo = async (id?: string | any) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/community/${id}/info`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/community/${id}/info`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -2301,7 +2299,7 @@ export const unFollowCommunity = async (id?: string | any) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/community/unfollow/${id}`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/community/unfollow/${id}`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -2334,7 +2332,7 @@ export const blockUser = async (body?: any) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/user/block`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/user/block`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -2367,7 +2365,7 @@ export const unblockUser = async (body?: any) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/user/unblock`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/user/unblock`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -2405,7 +2403,7 @@ export const blockedUsers = {
 
 
         return Promise.race([
-            fetch(`${BASE_URL}/user/blocked/list`, requestOptions)
+            fetch(`${BASE_URL_LIVE}/user/blocked/list`, requestOptions)
                 .then(response => response.json()),
             new Promise((resolve, reject) => {
                 timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -2439,7 +2437,7 @@ export const flagPost = async (body?: any) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/post/flag`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/post/flag`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -2473,7 +2471,7 @@ export const approveCommunityRequest = async (id?: string | any) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/community/request/accept/${id}`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/community/request/accept/${id}`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -2505,7 +2503,7 @@ export const declineCommunityRequest = async (id?: string | any) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/community/request/decline/${id}`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/community/request/decline/${id}`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -2539,7 +2537,7 @@ export const allAvailableBadges = async () => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/badge`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/badge`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -2571,7 +2569,7 @@ export const getSingleBadge = async (id: string) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/badge/${id}`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/badge/${id}`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -2603,7 +2601,7 @@ export const getModuleTask = async (id: string) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/task/module/${id}`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/task/module/${id}`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -2638,7 +2636,7 @@ export const submitTask = async ({id, body}: { id: string, body: any }) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/task/${id}/submit`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/task/${id}/submit`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -2669,7 +2667,7 @@ export const followACommunity = async (id :string) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/community/follow/${id}`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/community/follow/${id}`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -2702,7 +2700,7 @@ export const createCommunity = async (body) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/community`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/community`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -2737,7 +2735,7 @@ export const submitQuizAnswers = async ({body, id}: { id: string, body: string, 
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/quiz/${id}/submit`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/quiz/${id}/submit`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -2771,7 +2769,7 @@ export const startAdventure = async (id: string) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/adventure/${id}/start`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/adventure/${id}/start`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -2803,7 +2801,7 @@ export const updateVideoWatchCount = async (id: string) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/lesson/${id}/video-watch`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/lesson/${id}/video-watch`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -2815,6 +2813,7 @@ export const updateVideoWatchCount = async (id: string) => {
 
     ])
 }
+
 export const getNextAdventure = async (id: string) => {
 
     let Token = await SecureStore.getItemAsync('Gateway-Token');
@@ -2835,7 +2834,7 @@ export const getNextAdventure = async (id: string) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/adventure/${id}/next`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/adventure/${id}/next`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -2870,7 +2869,7 @@ export const changePassword = async (body: {}) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/auth/password/change`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/auth/password/change`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -2903,7 +2902,7 @@ export const requestDeleteAccount = async () => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/user/delete`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/user/delete`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -2936,7 +2935,7 @@ export const deleteAccountNow = async (body: any) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/user/delete/confirm`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/user/delete/confirm`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -2969,7 +2968,172 @@ export const getProductCategories = async () => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL}/product-hunt/categories`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/product-hunt/categories`, requestOptions)
+            .then(response => response.json()),
+        new Promise((resolve, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+            //  clearTimeout(timeoutId)
+        }).then(() => {
+            clearTimeout(timeoutId)
+        })
+
+    ])
+}
+
+
+export const getProductTrending = async () => {
+    let Token = await SecureStore.getItemAsync('Gateway-Token');
+    const myHeaders = {
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
+        'Authorization': `Bearer ${Token}`
+    }
+    let timeoutId: NodeJS.Timeout
+
+
+    const requestOptions = {
+        method: 'GET',
+        headers: myHeaders,
+
+    };
+
+    console.log(`${BASE_URL_LIVE}/product-hunt/trending`)
+
+    return Promise.race([
+        fetch(`${BASE_URL_LIVE}/product-hunt/trending`, requestOptions)
+            .then(response => response.json()),
+        new Promise((resolve, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+            //  clearTimeout(timeoutId)
+        }).then(() => {
+            clearTimeout(timeoutId)
+        })
+
+    ])
+}
+
+
+export const getApprovedProduct = async () => {
+    let Token = await SecureStore.getItemAsync('Gateway-Token');
+    const myHeaders = {
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
+        'Authorization': `Bearer ${Token}`
+    }
+    let timeoutId: NodeJS.Timeout
+
+
+    const requestOptions = {
+        method: 'GET',
+        headers: myHeaders,
+
+    };
+
+    console.log(`${BASE_URL_LIVE}/product-hunt/trending`)
+
+    return Promise.race([
+        fetch(`${BASE_URL_LIVE}/product-hunt`, requestOptions)
+            .then(response => response.json()),
+        new Promise((resolve, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+            //  clearTimeout(timeoutId)
+        }).then(() => {
+            clearTimeout(timeoutId)
+        })
+
+    ])
+}
+
+
+export const registerProductHunt = async ({body}:{body: any}) => {
+
+    let Token = await SecureStore.getItemAsync('Gateway-Token');
+
+    const myHeaders = {
+        'Authorization': `Bearer ${Token}`,
+        'x-access-token': ACCESS_TOKEN,
+        'Content-Type': 'application/json',
+        'x-client-type': 'web',
+    }
+    let timeoutId: NodeJS.Timeout
+
+
+    const requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body
+    };
+
+
+    return Promise.race([
+        fetch(`${BASE_URL_LIVE}/product-hunt/register`, requestOptions)
+            .then(response => response.json()),
+        new Promise((resolve, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+            //  clearTimeout(timeoutId)
+        }).then(() => {
+            clearTimeout(timeoutId)
+        })
+
+    ])
+}
+export const getSingleProduct = async (id :string) => {
+
+    let Token = await SecureStore.getItemAsync('Gateway-Token');
+
+    const myHeaders = {
+        'Authorization': `Bearer ${Token}`,
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
+    }
+    let timeoutId: NodeJS.Timeout
+
+
+    const requestOptions = {
+        method: 'GET',
+        headers: myHeaders,
+
+    };
+
+
+    return Promise.race([
+        fetch(`${BASE_URL_LIVE}/product-hunt/${id}`, requestOptions)
+            .then(response => response.json()),
+        new Promise((resolve, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+            //  clearTimeout(timeoutId)
+        }).then(() => {
+            clearTimeout(timeoutId)
+        })
+
+    ])
+}
+export const upVoteProduct = async (id :string) => {
+
+    let Token = await SecureStore.getItemAsync('Gateway-Token');
+
+    const myHeaders = {
+        'Authorization': `Bearer ${Token}`,
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
+    }
+    let timeoutId: NodeJS.Timeout
+
+
+    const requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+
+    };
+
+
+    return Promise.race([
+        fetch(`${BASE_URL_LIVE}/product-hunt/${id}/upvote`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)

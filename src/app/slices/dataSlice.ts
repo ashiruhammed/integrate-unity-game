@@ -3,6 +3,7 @@ import {UserState} from "./userSlice";
 import {array} from "yup";
 
 
+let nextIndex = 0;
 interface SubmissionProps {
     "questionId": string,
     "optionIds": string[]
@@ -16,8 +17,8 @@ interface SocialMediaProps {
 
 interface ProductStepsProps
 {
-    "index": 0,
-    "imageUrl": "www.img.com"
+    "index": number,
+    "imageUrl": string
 }
 
 
@@ -38,7 +39,7 @@ export interface DataState {
             "googlePlayStoreUrl": string,
             "appleStoreUrl": string,
             "contributors": [],
-            "isCountryLimited": true,
+            "isCountryLimited": boolean,
             "supportedCountries": CountryProps[],
             "productLogo": string,
             "launchDate": string,
@@ -127,7 +128,9 @@ export const dataSlice = createSlice({
 
 
         },
-
+        updateProduct: (state, action: PayloadAction<Partial<DataState['productDetails']>>) => {
+            state.productDetails = { ...state.productDetails, ...action.payload };
+        },
 
         updateProductDetails: (state, action: PayloadAction<DataState['productDetails']>) => {
             state.productDetails = action.payload;
@@ -136,6 +139,17 @@ export const dataSlice = createSlice({
             state.productDetails.name = action.payload;
         },
 
+
+        addProductStep: (state, action: PayloadAction<ProductStepsProps>) => {
+            if (!state.productDetails.productSteps) {
+                state.productDetails.productSteps = []; // Initialize productSteps if not already initialized
+            }
+
+            state.productDetails.productSteps.push({
+                ...action.payload,
+                index: nextIndex++
+            });
+        },
 
         UPDATE_SUBMISSIONS: (state, action) => {
 
@@ -150,6 +164,28 @@ export const dataSlice = createSlice({
             //  console.log(idx)
 
         },
+        clearProductInfo:(state,)=>{
+            state.productDetails = {
+                name: "",
+                description: "",
+                websiteUrl: "",
+                ownerWorkedOnProject: true,
+                tagline: "",
+                googlePlayStoreUrl: "",
+                appleStoreUrl: "",
+                contributors: [],
+                isCountryLimited: true,
+                supportedCountries: [],
+                productLogo: "",
+                launchDate: "",
+                categories: [],
+                productSteps: [],
+                socialMedia: []
+            }
+
+
+        },
+
         updateSubmissions: (state, action) => {
 
             //const newData = state.submissions.findIndex((game: { questionId: string }) => game.questionId === action.payload.questionId)
@@ -181,13 +217,16 @@ export const dataSlice = createSlice({
 
 // Action creators are generated for each case reducer function
 export const {
+    clearProductInfo,
+    updateProduct,
     toggleTheme, setCurrentCommunityId,
     cleanData,
     setAdventure,
     UPDATE_SUBMISSIONS,
     updateSubmissions,
     clearSubmissions,
-    updateProductDetails
+    updateProductDetails,
+    addProductStep
 } = dataSlice.actions
 
 export default dataSlice.reducer

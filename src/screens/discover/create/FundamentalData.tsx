@@ -21,7 +21,8 @@ import {
     BottomSheetDefaultBackdropProps
 } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
 import TextArea from "../../../components/inputs/TextArea";
-import {updateProductDetails} from "../../../app/slices/dataSlice";
+import {updateProduct, updateProductDetails} from "../../../app/slices/dataSlice";
+import {useRefreshOnFocus} from "../../../helpers";
 
 
 const formSchema = yup.object().shape({
@@ -29,7 +30,7 @@ const formSchema = yup.object().shape({
     //productName: yup.string().required('Product Name is required'),
     description: yup.string().required('Product description is required'),
     productTagline: yup.string().required('Product Tagline is required'),
-   // productURL: yup.string().url('Please enter a valid URL').required('Product URL is required'),
+    // productURL: yup.string().url('Please enter a valid URL').required('Product URL is required'),
 
 });
 
@@ -61,15 +62,15 @@ interface countryProps {
     item: {
         "name": string,
         "emoji": string,
-        shortName:string,
-        phone:string
+        shortName: string,
+        phone: string
     },
     addCountry: (details: {
 
         "name": string,
         "emoji": string,
-        shortName:string,
-        phone:string
+        shortName: string,
+        phone: string
 
     }) => void
     selectCountry: (symbol: {}) => void,
@@ -143,8 +144,8 @@ const CountryItem = ({item, selectedCountry, selectCountry, addCountry}: country
         <TouchableOpacity onPress={() => {
             selectCountry(item)
             addCountry({
-phone:item.phone,
-                shortName:item.shortName,
+                phone: item.phone,
+                shortName: item.shortName,
                 name: item.name,
                 emoji: item.emoji,
             })
@@ -182,7 +183,7 @@ const FundamentalData = ({navigation}: RootStackScreenProps<'FundamentalData'>) 
 
 
     const dataSlice = useAppSelector(state => state.data)
-    const {theme,productDetails} = dataSlice
+    const {theme, productDetails} = dataSlice
 
     const dispatch = useAppDispatch()
 
@@ -193,6 +194,11 @@ const FundamentalData = ({navigation}: RootStackScreenProps<'FundamentalData'>) 
     const tintText = theme == 'light' ? "#AEAEAE" : Colors.dark.tintTextColor
     const borderColor = theme == 'light' ? "#DEE5ED" : "#ccc"
 
+    const [description, setDescription] = useState(productDetails.description)
+    const [productTagline, setProductTagline] = useState(productDetails.tagline)
+    const [appleStoreUrl, setAppleStoreUrl] = useState(productDetails.appleStoreUrl)
+    const [googlePlayStoreUrl, setGooglePlayStoreUrl] = useState(productDetails.googlePlayStoreUrl)
+    const [productName, setProductNamel] = useState(productDetails.name)
 
     const [focusProductName, setFocusProductName] = useState(false)
     const [focusProductUrl, setFocusProductUrl] = useState(false)
@@ -207,8 +213,8 @@ const FundamentalData = ({navigation}: RootStackScreenProps<'FundamentalData'>) 
     const [country, setCountry] = useState<{
         "name": string,
         "emoji": string,
-shortName:string,
-        phone:string
+        shortName: string,
+        phone: string
     }>([]);
 
 
@@ -232,7 +238,7 @@ shortName:string,
     }
 
 
-    const {data,isLoading, refetch} =useQuery(['getProductCategories'],getProductCategories)
+    const {data, isLoading, refetch} = useQuery(['getProductCategories'], getProductCategories)
 
 
     const {
@@ -268,28 +274,37 @@ shortName:string,
         validationSchema: formSchema,
         initialValues: {
 
-            productName: '',
-            googlePlayStoreUrl: '',
-            appleStoreUrl: '',
-            description: '',
-            productTagline: '',
+            productName: productName,
+            googlePlayStoreUrl: googlePlayStoreUrl,
+            appleStoreUrl: appleStoreUrl,
+            description: description,
+            productTagline: productTagline,
             twitter: '',
             telegram: '',
             facebook: '',
 
         },
         onSubmit: (values) => {
-            const {productName,description,productTagline,googlePlayStoreUrl,appleStoreUrl,twitter,facebook,telegram} = values;
+            const {
+                productName,
+                description,
+                productTagline,
+                googlePlayStoreUrl,
+                appleStoreUrl,
+                twitter,
+                facebook,
+                telegram
+            } = values;
 
             const socialMedia = [{
-                name:"twitter",
-                url:twitter,
-            },{
-                name:"telegram",
-                url:telegram,
-            },{
-                name:"facebook",
-                url:facebook,
+                name: "twitter",
+                url: twitter,
+            }, {
+                name: "telegram",
+                url: telegram,
+            }, {
+                name: "facebook",
+                url: facebook,
             }]
 // Convert category object to an array of IDs
             const categories = Object.values(selectedCategory).map(item => item.id);
@@ -302,14 +317,23 @@ shortName:string,
             });
 
             //     const body = JSON.stringify({email: email.toLowerCase()})
-            dispatch(updateProductDetails({description,tagline:productTagline,googlePlayStoreUrl,appleStoreUrl,socialMedia:socialMedia,categories,supportedCountries}))
+            dispatch(updateProduct({
+                description,
+                tagline: productTagline,
+                googlePlayStoreUrl,
+                isCountryLimited: supportedCountries.length > 0,
+                appleStoreUrl,
+                socialMedia: socialMedia,
+                categories,
+                supportedCountries
+            }))
 
-           navigation.navigate('VisualRepresentation')
+            navigation.navigate('VisualRepresentation')
+
+
         }
     });
-
-
-
+    //console.log(productDetails)
 
     const snapPoints = useMemo(() => ["1%", "50%", "75%"], []);
 
@@ -345,12 +369,11 @@ shortName:string,
     }, [selectedCategory])
 
 
-
     const updateCountry = useCallback((payload: {
         "name": string,
         "emoji": string,
-        phone:string,
-        shortName:string,
+        phone: string,
+        shortName: string,
     }) => {
 
         const newData = selectedCountry.findIndex((country: { name: string }) => country.name === payload.name)
@@ -409,7 +432,9 @@ shortName:string,
         []
     );
 
-console.log(errors)
+
+    useRefreshOnFocus(refetch)
+
     return (
         <>
 
@@ -487,7 +512,8 @@ console.log(errors)
                         </View>
 
                         <View style={styles.stepsBoxRight}>
-                            <Pressable onPress={()=>navigation.navigate('VisualRepresentation')} style={styles.nextStep}>
+                            <Pressable onPress={() => navigation.navigate('VisualRepresentation')}
+                                       style={styles.nextStep}>
                                 <Text style={styles.nextStepText}>
                                     Next Step
                                 </Text>
@@ -513,7 +539,7 @@ console.log(errors)
                     <View style={styles.authContainer}>
 
 
-                       {/* <TextInput
+                        {/* <TextInput
 
                             placeholder="Gatewayapp"
                             keyboardType={"default"}
@@ -543,13 +569,13 @@ console.log(errors)
                             onFocus={() => setFocusProductTagline(true)}
                             onChangeText={(e) => {
                                 handleChange('productTagline')(e);
-
+                                setProductTagline(e)
                             }}
                             onBlur={(e) => {
                                 handleBlur('productTagline')(e);
                                 setFocusProductTagline(false);
                             }}
-
+                            defaultValue={productTagline}
                             focus={focusProductTagline}
                             value={values.productTagline}
                             label="Tagline"/>
@@ -564,18 +590,18 @@ console.log(errors)
 
                             onChangeText={(e) => {
                                 handleChange('googlePlayStoreUrl')(e);
-
+                                setGooglePlayStoreUrl(e)
                             }}
                             onBlur={(e) => {
                                 handleBlur('googlePlayStoreUrl')(e);
 
                             }}
 
-
+                            defaultValue={googlePlayStoreUrl}
                             value={values.googlePlayStoreUrl}
                             label="Google PlayStore  URL"/>
 
-<TextInput
+                        <TextInput
 
                             placeholder="https://"
                             keyboardType={"url"}
@@ -584,13 +610,13 @@ console.log(errors)
                             onFocus={() => setFocusProductUrl(true)}
                             onChangeText={(e) => {
                                 handleChange('appleStoreUrl')(e);
-
+                                setAppleStoreUrl(e)
                             }}
                             onBlur={(e) => {
                                 handleBlur('appleStoreUrl')(e);
                                 setFocusProductUrl(false);
                             }}
-
+                            defaultValue={appleStoreUrl}
                             focus={focusProductUrl}
                             value={values.appleStoreUrl}
                             label="AppleStore URL"/>
@@ -645,8 +671,6 @@ console.log(errors)
                             </View>
 
 
-
-
                             <View style={styles.inputRow}>
                                 <View style={styles.socialTagName}>
                                     <Text style={styles.textTag}>
@@ -673,7 +697,6 @@ console.log(errors)
                                     value={values.twitter}
                                     label=""/>
                             </View>
-
 
 
                             <View style={styles.inputRow}>
@@ -707,8 +730,7 @@ console.log(errors)
                         <HorizontalLine margin/>
 
 
-
-                     <TextArea
+                        <TextArea
 
                             placeholder="Cool product"
                             keyboardType={"default"}
@@ -717,13 +739,13 @@ console.log(errors)
 
                             onChangeText={(e) => {
                                 handleChange('description')(e);
-
+                                setDescription(e)
                             }}
                             onBlur={(e) => {
                                 handleBlur('description')(e);
 
                             }}
-
+                            defaultValue={description}
                             focus={focusProductUrl}
                             value={values.description}
                             label="Product description"/>
@@ -865,7 +887,7 @@ console.log(errors)
                 </View>
 
 
-                {!isLoading && data?.data.length > 0  &&
+                {!isLoading && data?.data.length > 0 &&
 
 
                     <BottomSheetFlatList scrollEnabled
