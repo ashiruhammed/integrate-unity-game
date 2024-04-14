@@ -119,6 +119,7 @@ const AllBadges = () => {
             getPreviousPageParam: (firstPage, allPages) => firstPage.prevCursor,
         })
 
+
     const loadMore = () => {
         if (hasNextPage) {
             fetchNextPageWallet();

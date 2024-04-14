@@ -229,6 +229,8 @@ const DiscoverProducts = ({navigation}: RootStackScreenProps<'DiscoverProducts'>
 
 
     const {data: trending, isLoading, refetch} = useQuery(['getProductTrending'], getProductTrending)
+
+
     const {
         data: products,
         isLoading: loadingApproved,

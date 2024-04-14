@@ -77,7 +77,6 @@ const MoreInformation = ({navigation}: RootStackScreenProps<'MoreInformation'>) 
     };
     const handleConfirm = (date: Date) => {
         //   setContentLauchDate(dayjs(date).format('YYYY-DD-MM'))
-        console.log(date)
         setContentLauchDate(date)
         dispatch(updateProduct({launchDate: contentLauchDate}))
         // setFieldValue('endDate', dayjs(date).format('YYYY-MM-DD'))

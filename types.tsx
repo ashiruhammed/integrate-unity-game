@@ -59,7 +59,7 @@ export type RootStackParamList = {
     CreatingAdventure: {
         adventureTitle:string
     };
-    Wallet: undefined;
+    MyWallet: undefined;
     DiscoverProducts: undefined;
     ProductInformation: undefined;
     FundamentalData: undefined;
@@ -103,6 +103,9 @@ export type RootStackParamList = {
                 comments: number;
             };
         }
+    };
+    MakeComment: {
+        id:string
     };
     Leaderboard: undefined;
     Badges: undefined;
@@ -270,7 +273,6 @@ export type RootTabParamList = {
    // Adventures: undefined;
     Learn: undefined;
     Games: undefined;
-
     Wallet: undefined;
     MarketPlace: undefined;
     Profile: undefined;

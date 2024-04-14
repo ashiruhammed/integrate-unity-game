@@ -153,7 +153,12 @@ action,
     );
 };
 
-const MyCard = () => {
+
+
+interface props {
+ totalPoint:string
+}
+const MyCard = ({totalPoint}:props) => {
 
 
     const navigation = useNavigation()
@@ -169,9 +174,9 @@ const MyCard = () => {
                     id={2}
                     title={"Gateway Points"}
                     tag={"Points"}
-                    value={"200"}
+                    value={totalPoint}
                     percentage={"4.0"}
-                    number={"5,000,000"}
+                    number={totalPoint}
                     color={"#D90429"}
                     priority={thirdPriority}
                     firstPriority={firstPriority}

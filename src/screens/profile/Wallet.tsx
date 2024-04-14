@@ -45,7 +45,7 @@ import AdvancedTextInput from "../../components/inputs/AdvancedTextInput";
 import RedeemForm from "../../components/wallets/RedeemForm";
 import dayjs from "dayjs";
 import Animated,
-    {Easing, FadeInDown, FadeOutDown, Layout} from "react-native-reanimated";
+{Easing, FadeInDown, FadeOutDown, Layout} from "react-native-reanimated";
 
 
 const formSchema = yup.object().shape({
@@ -67,70 +67,68 @@ interface props {
         "decimals": number,
         "address": string
     },
-    textColor:string,
-    lightTextColor:string,
-    openSheet:() =>void
-    openRedeem:() =>void
+    textColor: string,
+    lightTextColor: string,
+    openSheet: () => void
+    openRedeem: () => void
 }
 
-const WalletItem = ({item,textColor,lightTextColor,openSheet,openRedeem}: props) => {
+const WalletItem = ({item, textColor, lightTextColor, openSheet, openRedeem}: props) => {
     const {width} = useWindowDimensions()
 
     return (
         <>
 
-        <View style={[{width}, styles.WalletItem
-        ]}>
-            <View style={styles.walletItemBody}>
-                <Text style={[styles.walletName,{
-                    color: lightTextColor
-                }]}>
-                    {item.name}
-                </Text>
+            <View style={[{width}, styles.WalletItem
+            ]}>
+                <View style={styles.walletItemBody}>
+                    <Text style={[styles.walletName, {
+                        color: lightTextColor
+                    }]}>
+                        {item.name}
+                    </Text>
 
-                <Text style={[styles.walletBalance,{
-                    color: textColor
-                }]}>
+                    <Text style={[styles.walletBalance, {
+                        color: textColor
+                    }]}>
 
-                   {/* {parseFloat(String(item?.balance)).toFixed(8)}*/}
-                    {item?.balance}
-                </Text>
+                        {/* {parseFloat(String(item?.balance)).toFixed(8)}*/}
+                        {item?.balance}
+                    </Text>
 
-                <Text style={styles.walletName}>
-                    {item.amount}
-                </Text>
+                    <Text style={styles.walletName}>
+                        {item.amount}
+                    </Text>
+                </View>
+
             </View>
 
-        </View>
-
-<View style={styles.buttonWrap}>
+            <View style={styles.buttonWrap}>
 
 
-    {
-        item.name !== 'Points Balance' &&
-        <TouchableOpacity onPress={openSheet} style={styles.withdrawButton}>
-            <Text style={styles.btnText}>
-                Withdraw
-            </Text>
-        </TouchableOpacity>
-    }
-    {
-        item.name == 'Points Balance' &&
-        <TouchableOpacity onPress={openRedeem} style={styles.withdrawButton}>
-            <Text style={styles.btnText}>
-                Redeem
-            </Text>
-        </TouchableOpacity>
-    }
-</View>
+                {
+                    item.name !== 'Points Balance' &&
+                    <TouchableOpacity onPress={openSheet} style={styles.withdrawButton}>
+                        <Text style={styles.btnText}>
+                            Withdraw
+                        </Text>
+                    </TouchableOpacity>
+                }
+                {
+                    item.name == 'Points Balance' &&
+                    <TouchableOpacity onPress={openRedeem} style={styles.withdrawButton}>
+                        <Text style={styles.btnText}>
+                            Redeem
+                        </Text>
+                    </TouchableOpacity>
+                }
+            </View>
         </>
     )
 }
 
 
-
-
-export const getConversion = async (symbol:string,amount:string) => {
+export const getConversion = async (symbol: string, amount: string) => {
     let timeoutId: NodeJS.Timeout
     const requestOptions = {
         method: 'GET',
@@ -181,9 +179,9 @@ const Wallet = () => {
     }
     const handleClosePress = () => {
         Keyboard.dismiss()
-        if(Platform.OS == 'android') {
+        if (Platform.OS == 'android') {
             bottomSheetRef.current?.snapToIndex(0)
-        }else{
+        } else {
             bottomSheetRef.current?.close()
         }
 
@@ -198,17 +196,22 @@ const Wallet = () => {
     }
     const handleClosePressRedeem = () => {
         Keyboard.dismiss()
-        if(Platform.OS == 'android') {
+        if (Platform.OS == 'android') {
             redeemSheetRef.current?.snapToIndex(0)
-        }else{
+        } else {
             redeemSheetRef.current?.close()
         }
 
     }
 
 
-
-    const {isLoading: loadingWallets, data,isSuccess, isRefetching, refetch} = useQuery(['getUserWallets'], getUserWallets, {
+    const {
+        isLoading: loadingWallets,
+        data,
+        isSuccess,
+        isRefetching,
+        refetch
+    } = useQuery(['getUserWallets'], getUserWallets, {
 
         onSuccess: (data) => {
             if (data.success) {
@@ -220,9 +223,11 @@ const Wallet = () => {
 
     const nearBalance = data?.data?.find((wallet: { network: string; }) => wallet.network == 'near')
 
-    const {isLoading: loadingTransactions, data:transactions, refetch:getTransactions} = useQuery(['getUserTransaction'], getUserTransaction, {
-
-    })
+    const {
+        isLoading: loadingTransactions,
+        data: transactions,
+        refetch: getTransactions
+    } = useQuery(['getUserTransaction'], getUserTransaction, {})
 
     const {isLoading: loadingPoints, data: points, refetch: fetchPoints} = useQuery(['getUserPoints'], getUserPoints, {
 
@@ -249,7 +254,6 @@ const Wallet = () => {
     }, [data, points]);
 
 
-
     const {mutate, isLoading} = useMutation(['withdrawFromWallet'], withdrawFromWallet,
 
         {
@@ -257,7 +261,7 @@ const Wallet = () => {
             onSuccess: async (data) => {
 
                 if (data.success) {
-refetch()
+                    refetch()
                     handleClosePress()
                     getTransactions()
 
@@ -357,7 +361,9 @@ refetch()
 
     const viewConfig = useRef({viewAreaCoveragePercentThreshold: 50}).current;
 
-    const renderItem = useCallback(({item}) => (<WalletItem lightTextColor={lightTextColor} textColor={textColor} openRedeem={openRedeem} openSheet={openSheet} item={item}/>), [])
+    const renderItem = useCallback(({item}) => (
+        <WalletItem lightTextColor={lightTextColor} textColor={textColor} openRedeem={openRedeem} openSheet={openSheet}
+                    item={item}/>), [])
     const keyExtractor = useCallback((item: { id: any; }) =>
             item.id
         , [])
@@ -451,8 +457,8 @@ refetch()
 
 
     useEffect(() => {
-        getConversion('Near',amount).then((res)=>{
-            if(res.status.error_code == '0'){
+        getConversion('Near', amount).then((res) => {
+            if (res.status.error_code == '0') {
                 setUSDPrice(res.data[0].quote?.USD?.price.toFixed(2))
             }
 
@@ -463,7 +469,6 @@ refetch()
     return (
 
         <>
-
 
 
             <SafeAreaView style={[styles.safeArea, {
@@ -539,7 +544,7 @@ refetch()
 
                             }
 
-                           {/* {
+                            {/* {
                                 !loadingWallets && data && currentIndex !== 1 &&
                                 <TouchableOpacity onPress={openSheet} style={styles.withdrawButton}>
                                     <Text style={styles.btnText}>
@@ -574,7 +579,7 @@ refetch()
                     <View style={styles.transactions}>
                         {
                             !loadingTransactions && transactions && transactions?.data?.length > 0 &&
-                            transactions?.data.map((({hash,amount,network,type,createdAt}) =>(
+                            transactions?.data.map((({hash, amount, network, type, createdAt}) => (
                                 <Animated.View layout={Layout.easing(Easing.bounce).delay(20)}
                                                entering={FadeInDown} exiting={FadeOutDown}
                                                key={hash} style={styles.transactionCard}>
@@ -596,7 +601,7 @@ refetch()
                                             }]}>
                                                 {type}
                                             </Text>
-                                            <Text style={[styles.transactionCardDate,{
+                                            <Text style={[styles.transactionCardDate, {
                                                 color: lightTextColor
                                             }]}>
                                                 {dayjs(createdAt).format('DD/MM/YYYY h:mm A')}
@@ -607,7 +612,7 @@ refetch()
                             )))
 
                         }
-             {/*           <View style={styles.transactionCard}>
+                        {/*           <View style={styles.transactionCard}>
                             <View style={[styles.transactionCardIcon, {
                                 backgroundColor: "#59C965"
                             }]}>
@@ -639,7 +644,7 @@ refetch()
 
 
             <BottomSheet
-                handleIndicatorStyle={[{  backgroundColor: theme == 'light' ? "#121212" : '#cccccc'},Platform.OS == 'android' && {display: 'none'}]}
+                handleIndicatorStyle={[{backgroundColor: theme == 'light' ? "#121212" : '#cccccc'}, Platform.OS == 'android' && {display: 'none'}]}
                 ref={bottomSheetRef}
                 index={0}
                 snapPoints={snapPoints}
@@ -658,7 +663,7 @@ refetch()
                 <View style={styles.sheetHead}>
 
 
-                    <Text style={[styles.sheetTitle,{
+                    <Text style={[styles.sheetTitle, {
                         color: textColor
                     }]}>
                         Near Withdrawal
@@ -707,25 +712,25 @@ refetch()
                         }}
                         value={values.walletAddress}
                     />
-  {
-                USDPrice !== '' &&
-            <View style={styles.conversionRate}>
-                <Text style={[styles.label,{
-                    color: textColor
-                }]}>
-                    USD conversion:
-                </Text>
+                    {
+                        USDPrice !== '' &&
+                        <View style={styles.conversionRate}>
+                            <Text style={[styles.label, {
+                                color: textColor
+                            }]}>
+                                USD conversion:
+                            </Text>
 
-                {
-                        <Text style={[styles.label,{
-                           color: textColor
-                        }]}>
-                            {amount} Near = {currencyFormatter('en-US','USD').format(+USDPrice)}
-                        </Text>
-                }
+                            {
+                                <Text style={[styles.label, {
+                                    color: textColor
+                                }]}>
+                                    {amount} Near = {currencyFormatter('en-US', 'USD').format(+USDPrice)}
+                                </Text>
+                            }
 
-            </View>
-            }
+                        </View>
+                    }
 
                     <RectButton style={{marginTop: 30, width: widthPixel(200)}} onPress={() => handleSubmit()}>
                         {
@@ -756,7 +761,7 @@ refetch()
                 }}
                 handleIndicatorStyle={[{
                     backgroundColor: theme == 'light' ? "#121212" : '#cccccc'
-                },Platform.OS == 'android' && {display: 'none'}]}
+                }, Platform.OS == 'android' && {display: 'none'}]}
             >
                 {/*  <BottomSheetTextInput style={styles.input} />*/}
 
@@ -779,12 +784,12 @@ refetch()
                     </TouchableOpacity>}
                 </View>
 
-                <RedeemForm nearBalance={nearBalance?.balance} isLoading={redeeming} redeemNow={redeemPointsNow} pointBalance={points?.data?.totalPoint}/>
+                <RedeemForm nearBalance={nearBalance?.balance} isLoading={redeeming} redeemNow={redeemPointsNow}
+                            pointBalance={points?.data?.totalPoint}/>
             </BottomSheet>
         </>
     );
 };
-
 
 
 const styles = StyleSheet.create({
@@ -792,7 +797,7 @@ const styles = StyleSheet.create({
     safeArea: {
         width: '100%',
         flex: 1,
-        alignItems:'center',
+        alignItems: 'center',
         //  backgroundColor: "#fff",
         paddingBottom: Platform.OS === 'ios' ? -40 : 0
     },
@@ -859,13 +864,13 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.quickSandBold,
         fontSize: fontPixel(36),
     },
-    buttonWrap:{
-        width:'100%',
-        height:60,
-        position:'absolute',
-        bottom:0,
-        alignItems:'center',
-        justifyContent:'center'
+    buttonWrap: {
+        width: '100%',
+        height: 60,
+        position: 'absolute',
+        bottom: 0,
+        alignItems: 'center',
+        justifyContent: 'center'
     },
     withdrawButton: {
         backgroundColor: Colors.primaryColor,
@@ -951,9 +956,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between'
     },
-    label:{
-        fontFamily:Fonts.quicksandMedium,
-        fontSize:fontPixel(14)
+    label: {
+        fontFamily: Fonts.quicksandMedium,
+        fontSize: fontPixel(14)
     },
     redeemButton: {
         marginTop: 30,

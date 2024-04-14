@@ -1,16 +1,75 @@
-import React, {SetStateAction, useState} from 'react';
+import React, {SetStateAction, useCallback, useMemo, useRef, useState} from 'react';
 
-import {Text, View, StyleSheet, ImageBackground, TouchableOpacity, Platform, ScrollView, Pressable} from 'react-native';
+import {
+    Text,
+    View,
+    StyleSheet,
+    ImageBackground,
+    TouchableOpacity,
+    Platform,
+    ScrollView,
+    Pressable,
+    Keyboard, FlatList, Animated as MyAnimated, ActivityIndicator
+} from 'react-native';
 import {AntDesign, Entypo, Ionicons, Octicons} from "@expo/vector-icons";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
-import {useInfiniteQuery, useQueryClient} from "@tanstack/react-query";
+import {useInfiniteQuery, useQuery, useQueryClient} from "@tanstack/react-query";
 import Colors from "../../constants/Colors";
-import {userNotifications} from "../../action/action";
+import {getPointsHistory, getPublicCommunities, getUserPoints, userNotifications} from "../../action/action";
 import {RootStackScreenProps} from "../../../types";
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
 import {Fonts} from "../../constants/Fonts";
 import Animated, {FadeInDown, FadeOutDown} from 'react-native-reanimated';
+import BottomSheet, {BottomSheetBackdrop} from "@gorhom/bottom-sheet";
+import RedeemForm from "../../components/wallets/RedeemForm";
+import {
+    BottomSheetDefaultBackdropProps
+} from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
+import {setItem} from "expo-secure-store";
+
+
+interface props {
+    item: {}
+}
+
+const HistoryCard = ({item}: props) => {
+    return (
+        <Animated.View entering={FadeInDown.delay(200).randomDelay()} exiting={FadeOutDown}
+                       style={styles.breakDownCard}>
+            <View style={[styles.boxSign, {
+                backgroundColor: Colors.successTint
+            }]}>
+                <AntDesign name="arrowdown" size={20} style={{transform: [{rotate: "-130deg"}]}}
+                           color={Colors.success}/>
+            </View>
+
+            <View style={styles.boxTransactionBody}>
+
+                <View style={styles.boxTransactionBodyLeft}>
+                    <Text style={styles.transactionTitle}>
+                        Points Bought
+                    </Text>
+                    <Text style={styles.transactionDate}>
+                        Jan 6, 2024
+                    </Text>
+                </View>
+
+                <View style={[styles.boxTransactionBodyLeft, {
+                    alignItems: 'flex-end',
+                    justifyContent: 'flex-start'
+                }]}>
+                    <Text style={styles.transactionTitle}>
+                        -500 GP
+                    </Text>
+
+                </View>
+            </View>
+
+
+        </Animated.View>
+    )
+}
 
 const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
 
@@ -35,6 +94,11 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
     const darkTextColor = theme == 'light' ? Colors.light.darkText : Colors.dark.text
 
 
+    const redeemSheetRef = useRef<BottomSheet>(null);
+
+    // variables
+    const snapPoints = useMemo(() => ['1%', '60%'], []);
+
     const openNotifications = () => {
         navigation.navigate('Notifications')
     }
@@ -57,207 +121,300 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
 
         })
 
+    const {isLoading: loadingPoints, data: points, refetch: fetchPoints} = useQuery(['getUserPoints'], getUserPoints, {
 
+    })
+    const {
+        isLoading,
+        data,
+        hasNextPage,
+        fetchNextPage: fetchNextPageWallet,
+        isFetchingNextPage,
+        refetch,
+
+        isRefetching
+    } = useInfiniteQuery([`points-history`], ({pageParam = 1}) => getPointsHistory.history(pageParam),
+        {
+            networkMode: 'online',
+            getNextPageParam: lastPage => {
+                if (lastPage.next !== null) {
+                    return lastPage.next;
+                }
+
+                return lastPage;
+            },
+
+            getPreviousPageParam: (firstPage, allPages) => firstPage.prevCursor,
+        })
+
+    const loadMore = () => {
+        if (hasNextPage) {
+            fetchNextPageWallet();
+        }
+    };
+
+    const renderItemHeader = useCallback(() => (
+        <>
+
+
+            <View style={styles.dashboardBox}>
+                <Text style={styles.cardText}>
+                    GP
+                </Text>
+
+                <View style={[styles.bottomInfo, {
+                    height: 30,
+                }]}>
+                    <Text style={styles.cardTitle}>
+                        Gateway Points
+                    </Text>
+                    <Text style={styles.cardTitle}>
+                        {points?.data?.totalPoint}
+                    </Text>
+                </View>
+
+                <View style={[styles.bottomInfo, {
+                    height: 15,
+                }]}>
+                    <Text style={styles.cardText}>
+                        Value: 200
+                    </Text>
+
+                    <Text style={styles.cardText}>
+                        +4.0%
+                    </Text>
+                </View>
+            </View>
+
+
+            <View style={styles.buttonWrap}>
+
+                <Pressable style={[styles.dahButton, {
+                    backgroundColor: "#FDDCDC"
+                }]}>
+                    <Text style={[styles.buttonText, {
+                        color: "#E01414"
+                    }]}>
+                        Buy Points
+                    </Text>
+                </Pressable>
+
+
+                <Pressable onPress={openRedeem} style={[styles.dahButton, {
+                    backgroundColor: "#D90429"
+                }]}>
+                    <Text style={[styles.buttonText, {
+                        color: "#fff"
+                    }]}>
+                        Redeem Points
+                    </Text>
+                </Pressable>
+
+
+            </View>
+
+
+            <View style={styles.rowTitle}>
+                <Text style={[styles.titleTxt, {
+                    color: textColor
+                }]}>
+                    Transactions
+                </Text>
+
+                <Text>
+                    See all
+                </Text>
+            </View>
+        </>
+    ), [])
+
+    const renderItem = useCallback(({item}) => (
+        <HistoryCard item={item}/>
+    ), [])
+    const keyExtractor = useCallback((item: { id: any; }) =>
+            item.id
+        , [])
+
+    const handleClosePressRedeem = () => {
+        Keyboard.dismiss()
+        if (Platform.OS == 'android') {
+            redeemSheetRef.current?.snapToIndex(0)
+        } else {
+            redeemSheetRef.current?.close()
+        }
+
+    }
+    const openRedeem = () => {
+        redeemSheetRef.current?.snapToIndex(1)
+    }
+    // renders
+    const renderBackdrop = useCallback(
+        (props: React.JSX.IntrinsicAttributes & BottomSheetDefaultBackdropProps) => (
+            <BottomSheetBackdrop
+                {...props}
+                disappearsOnIndex={0}
+                appearsOnIndex={1}
+            />
+        ),
+        []
+    );
+
+//console.log(data?.pages[0].result)
     return (
+        <>
 
-        <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
+            <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
 
-            <ScrollView
+                <View
 
-                style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {
-                backgroundColor
-            }]} scrollEnabled
-                showsVerticalScrollIndicator={false}>
-                <View style={styles.topBar}>
+                    style={[styles.scrollView, {
+                        backgroundColor
+                    }]}
+                >
+                    <View style={styles.topBar}>
 
-                    <View style={styles.leftButton}>
+                        <View style={styles.leftButton}>
 
-                        <View style={styles.pointWrap}>
-                            <Ionicons name="gift" size={16} color="#22BB33"/>
-                            <Text style={styles.pointsText}>20000</Text>
+                            <View style={styles.pointWrap}>
+                                <Ionicons name="gift" size={16} color="#22BB33"/>
+                                <Text style={styles.pointsText}>20000</Text>
+                            </View>
                         </View>
+
+                        <View style={styles.rightButton}>
+
+                            <ImageBackground style={styles.streaKIcon} resizeMode={'contain'}
+                                             source={require('../../assets/images/streakicon.png')}>
+                                <Text style={styles.streakText}> 200</Text>
+                            </ImageBackground>
+
+                            <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}
+                                              style={styles.roundTopBtn}>
+                                {
+                                    notifications?.pages[0]?.data?.result.length > 0 &&
+                                    <View style={styles.dot}/>
+                                }
+                                <Octicons name="bell-fill" size={22} color={"#000"}/>
+                            </TouchableOpacity>
+
+                        </View>
+
                     </View>
 
-                    <View style={styles.rightButton}>
+                    <View style={styles.navButtonWrap}>
+                        <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.8}
+                                          style={styles.navButton}>
 
-                        <ImageBackground style={styles.streaKIcon} resizeMode={'contain'}
-                                         source={require('../../assets/images/streakicon.png')}>
-                            <Text style={styles.streakText}> 200</Text>
-                        </ImageBackground>
-
-                        <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}
-                                          style={styles.roundTopBtn}>
-                            {
-                                notifications?.pages[0]?.data?.result.length > 0 &&
-                                <View style={styles.dot}/>
-                            }
-                            <Octicons name="bell-fill" size={22} color={"#000"}/>
+                            <AntDesign name="arrowleft" size={24} color="black"/>
+                            <Text style={[styles.backText, {
+                                color: darkTextColor
+                            }]}>Gateway Points</Text>
                         </TouchableOpacity>
 
+
                     </View>
 
-                </View>
 
-                <View style={styles.navButtonWrap}>
-                    <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.8}
-                                      style={styles.navButton}>
+                    <View style={styles.transactions}>
 
-                        <AntDesign name="arrowleft" size={24} color="black"/>
-                        <Text style={[styles.backText, {
-                            color: darkTextColor
-                        }]}>Gateway Points</Text>
-                    </TouchableOpacity>
+                        <FlatList
+                            ListHeaderComponent={renderItemHeader}
+
+                            refreshing={isLoading}
+                            onRefresh={refetch}
+                            scrollEnabled
+                            showsVerticalScrollIndicator={false}
+                            data={data?.pages[0].data.result}
+                            renderItem={renderItem}
+                            onEndReached={loadMore}
+                            keyExtractor={keyExtractor}
+                            onEndReachedThreshold={0.3}
+                            ListFooterComponent={isFetchingNextPage ?
+                                <ActivityIndicator size="small" color={Colors.primaryColor}/> : null}
+                        />
 
 
-                </View>
+                        {/*           <Animated.View entering={FadeInDown.delay(200).randomDelay()} exiting={FadeOutDown} style={styles.breakDownCard}>
+                            <View style={[styles.boxSign, {
+                                backgroundColor: Colors.errorTint
+                            }]}>
+                                <AntDesign name="arrowdown" size={20} style={{transform: [{rotate: "40deg"}]}}
+                                           color={Colors.errorRed}/>
+                            </View>
+
+                            <View style={styles.boxTransactionBody}>
+
+                                <View style={styles.boxTransactionBodyLeft}>
+                                    <Text style={styles.transactionTitle}>
+                                        Withdrawal
+                                    </Text>
+                                    <Text style={styles.transactionDate}>
+                                        Jan 6, 2024
+                                    </Text>
+                                </View>
+
+                                <View style={[styles.boxTransactionBodyLeft, {
+                                    alignItems: 'flex-end',
+                                    justifyContent: 'flex-start'
+                                }]}>
+                                    <Text style={styles.transactionTitle}>
+                                        -500 GP
+                                    </Text>
+
+                                </View>
+                            </View>
 
 
-                <View style={styles.dashboardBox}>
-                    <Text style={styles.cardText}>
-                        GP
-                    </Text>
-
-                    <View style={[styles.bottomInfo, {
-                        height: 30,
-                    }]}>
-                        <Text style={styles.cardTitle}>
-                            Gateway Points
-                        </Text>
-                        <Text style={styles.cardTitle}>
-                            5,000,000
-                        </Text>
+                        </Animated.View>
+*/}
                     </View>
-
-                    <View style={[styles.bottomInfo, {
-                        height: 15,
-                    }]}>
-                        <Text style={styles.cardText}>
-                            Value: 200
-                        </Text>
-
-                        <Text style={styles.cardText}>
-                            +4.0%
-                        </Text>
-                    </View>
                 </View>
 
+            </SafeAreaView>
 
-                <View style={styles.buttonWrap}>
+            <BottomSheet
+                ref={redeemSheetRef}
+                index={0}
 
-                    <Pressable style={[styles.dahButton, {
-                        backgroundColor: "#FDDCDC"
-                    }]}>
-                        <Text style={[styles.buttonText, {
-                            color: "#E01414"
-                        }]}>
-                            Buy Points
-                        </Text>
-                    </Pressable>
+                snapPoints={snapPoints}
+                keyboardBehavior="interactive"
+                backdropComponent={renderBackdrop}
+                style={{
+                    paddingHorizontal: pixelSizeHorizontal(20)
+                }}
+                backgroundStyle={{
+                    backgroundColor,
+                }}
+                handleIndicatorStyle={[{
+                    backgroundColor: theme == 'light' ? "#121212" : '#cccccc'
+                }, Platform.OS == 'android' && {display: 'none'}]}
+            >
+                {/*  <BottomSheetTextInput style={styles.input} />*/}
 
-
-                    <Pressable style={[styles.dahButton, {
-                        backgroundColor: "#D90429"
-                    }]}>
-                        <Text style={[styles.buttonText, {
-                            color: "#fff"
-                        }]}>
-                            Redeem Points
-                        </Text>
-                    </Pressable>
-
-
-                </View>
+                <View style={styles.sheetHead}>
 
 
-                <View style={styles.rowTitle}>
-                    <Text style={[styles.titleTxt, {
+                    <Text style={[styles.sheetTitle, {
+                        fontFamily: Fonts.quickSandBold,
                         color: textColor
                     }]}>
-                        Transactions
+                        Redeem Points
                     </Text>
 
-                    <Text>
-                        See all
-                    </Text>
+
+                    {Platform.OS == 'android' && <TouchableOpacity onPress={handleClosePressRedeem}
+                                                                   style={[styles.dismiss, {
+                                                                       backgroundColor: theme == 'light' ? "#f8f8f8" : Colors.dark.background
+                                                                   }]}>
+                        <Ionicons name="close-sharp" size={20} color={textColor}/>
+                    </TouchableOpacity>}
                 </View>
 
-
-                <View style={styles.transactions}>
-                    <Animated.View entering={FadeInDown.delay(200)
-                        .randomDelay()
-                    } exiting={FadeOutDown} style={styles.breakDownCard}>
-                        <View style={[styles.boxSign, {
-                            backgroundColor: Colors.successTint
-                        }]}>
-                            <AntDesign name="arrowdown" size={20} style={{transform: [{rotate: "-130deg"}]}}
-                                       color={Colors.success}/>
-                        </View>
-
-                        <View style={styles.boxTransactionBody}>
-
-                            <View style={styles.boxTransactionBodyLeft}>
-                                <Text style={styles.transactionTitle}>
-                                    Points Bought
-                                </Text>
-                                <Text style={styles.transactionDate}>
-                                    Jan 6, 2024
-                                </Text>
-                            </View>
-
-                            <View style={[styles.boxTransactionBodyLeft, {
-                                alignItems: 'flex-end',
-                                justifyContent: 'flex-start'
-                            }]}>
-                                <Text style={styles.transactionTitle}>
-                                    -500 GP
-                                </Text>
-
-                            </View>
-                        </View>
-
-
-                    </Animated.View>
-
-
- <Animated.View entering={FadeInDown.delay(200)
-                        .randomDelay()
-                    } exiting={FadeOutDown} style={styles.breakDownCard}>
-                        <View style={[styles.boxSign, {
-                            backgroundColor: Colors.errorTint
-                        }]}>
-                            <AntDesign name="arrowdown" size={20} style={{transform: [{rotate: "40deg"}]}}
-                                       color={Colors.errorRed}/>
-                        </View>
-
-                        <View style={styles.boxTransactionBody}>
-
-                            <View style={styles.boxTransactionBodyLeft}>
-                                <Text style={styles.transactionTitle}>
-                                    Withdrawal
-                                </Text>
-                                <Text style={styles.transactionDate}>
-                                    Jan 6, 2024
-                                </Text>
-                            </View>
-
-                            <View style={[styles.boxTransactionBodyLeft, {
-                                alignItems: 'flex-end',
-                                justifyContent: 'flex-start'
-                            }]}>
-                                <Text style={styles.transactionTitle}>
-                                    -500 GP
-                                </Text>
-
-                            </View>
-                        </View>
-
-
-                    </Animated.View>
-
-                </View>
-            </ScrollView>
-
-        </SafeAreaView>
+                <RedeemForm nearBalance={10} isLoading={false} redeemNow={() => {
+                }}
+                            pointBalance={3}/>
+            </BottomSheet>
+        </>
 
     );
 };
@@ -391,7 +548,7 @@ const styles = StyleSheet.create({
     },
     dashboardBox: {
         backgroundColor: "#D90429",
-        width: '90%',
+        width: '100%',
         borderRadius: 15,
         height: heightPixel(100),
 
@@ -439,7 +596,7 @@ const styles = StyleSheet.create({
     },
     rowTitle: {
 
-        width: '90%',
+        width: '100%',
         alignItems: 'center',
         justifyContent: 'space-between',
         height: heightPixel(45),
@@ -502,7 +659,29 @@ const styles = StyleSheet.create({
         color: "#9C9C9C",
         fontFamily: Fonts.quicksandMedium,
         fontSize: fontPixel(12),
-    }
+    },
+    sheetHead: {
+        // paddingHorizontal: pixelSizeHorizontal(20),
+        height: 60,
+        width: '100%',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'row'
+    }, sheetTitle: {
+        fontSize: fontPixel(18),
+        fontFamily: Fonts.quickSandBold,
+        color: Colors.light.text
+    },
+    dismiss: {
+        position: 'absolute',
+        right: 10,
+        borderRadius: 30,
+        height: 30,
+        width: 30,
+        alignItems: 'center',
+        justifyContent: 'center',
+
+    },
 
 
 })

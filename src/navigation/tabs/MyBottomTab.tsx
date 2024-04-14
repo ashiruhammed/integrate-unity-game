@@ -11,21 +11,11 @@ import {fontPixel} from "../../helpers/normalize";
 
 import {Fonts} from "../../constants/Fonts";
 
-import {FontAwesome5, Ionicons, MaterialCommunityIcons, Octicons} from "@expo/vector-icons";
 
-import Adventures from "../../screens/Home/Adventures";
-import Community from "../../screens/Home/Community";
-import MarketPlace from "../../screens/Home/MarketPlace";
 import Profile from "../../screens/Home/Profile";
-import HomeFocused from "../../assets/images/tabs/home/HomeFocused";
-import AdventuresIcon from "../../assets/images/tabs/home/AdventuresIcon";
-import CommunityIcon from "../../assets/images/tabs/home/CommunityIcon";
-import MarketPlaceIcon from "../../assets/images/tabs/home/MarketPlaceIcon";
-import ProfileIcon from "../../assets/images/tabs/home/ProfileIcon";
+
 import Animated, {
-    RotateOutDownRight,
-    RotateInUpRight,
-    Keyframe, Easing, Layout, BounceIn, BounceOut
+    BounceIn, BounceOut
 } from 'react-native-reanimated';
 import {useAppSelector} from "../../app/hooks";
 import FastImage from "react-native-fast-image";

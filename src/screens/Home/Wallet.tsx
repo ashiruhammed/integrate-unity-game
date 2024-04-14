@@ -14,11 +14,11 @@ import {
 import {Ionicons, Octicons} from "@expo/vector-icons";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
-import {useInfiniteQuery, useQueryClient} from "@tanstack/react-query";
+import {useInfiniteQuery, useQuery, useQueryClient} from "@tanstack/react-query";
 import Colors from "../../constants/Colors";
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
 import {Fonts} from "../../constants/Fonts";
-import {userNotifications} from "../../action/action";
+import {getUserPoints, getUserWallets, userNotifications} from "../../action/action";
 import SegmentedControl from "../../components/segment-control/SegmentContol";
 import SegmentContolAlt from "../../components/segment-control/SegmentContolAlt";
 import MyCard from "../../components/wallets/cards/MyCard";
@@ -29,6 +29,45 @@ import {
     BottomSheetDefaultBackdropProps
 } from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types';
 import {Portal} from "@gorhom/portal";
+import {useRefreshOnFocus} from "../../helpers";
+import Animated, {Easing, FadeInDown, FadeInUp, FadeOutDown, Layout} from "react-native-reanimated";
+import MedalIcon from "../../assets/images/svg/MedalIcon";
+import HorizontalLine from "../../components/HorizontalLine";
+import StarIcon from "../../assets/images/svg/StarIcon";
+
+
+interface props {
+
+
+    imageUrl: string
+    amount: string,
+    id: string,
+}
+
+
+const BadgeItem = ({amount, id, imageUrl}: props) => {
+    return (
+
+        <Animated.View key={id} entering={FadeInUp.springify()} exiting={FadeOutDown}
+                       layout={Layout.easing(Easing.bounce).delay(20)}
+                       style={styles.badgeImageWrap}>
+            <View style={styles.badgeImageContainer}>
+                <Image
+                    source={{uri: imageUrl}}
+                    style={styles.badgeImage}/>
+            </View>
+
+
+            <View style={styles.badgeStreakScore}>
+                <Text style={styles.badgeStreakText}>
+                    x{amount}
+                </Text>
+            </View>
+        </Animated.View>
+
+
+    )
+}
 
 
 const Wallet = ({navigation}: RootTabScreenProps<'Learn'>) => {
@@ -40,6 +79,17 @@ const Wallet = ({navigation}: RootTabScreenProps<'Learn'>) => {
         //  setScreen(index === 0 ? 'Banks' : 'Wallets')
     };
 
+
+    const {
+        isLoading: loadingPoints,
+        data: points,
+        refetch: fetchPoints
+    } = useQuery(['getUserPoints'], getUserPoints, {})
+
+
+    const {isLoading: loadingWallets, data, isSuccess, isRefetching, refetch}
+        = useQuery(['get-User-Wallets'], getUserWallets, {})
+//console.log(data)
 
     // ref
     const bottomSheetRef = useRef<BottomSheet>(null);
@@ -104,6 +154,11 @@ const Wallet = ({navigation}: RootTabScreenProps<'Learn'>) => {
 
         })
 
+    const openScreen = (screen: 'AllBadges' | 'NFTs') => {
+        navigation.navigate(screen)
+    }
+    useRefreshOnFocus(refetch)
+
 
     return (
         <>
@@ -162,7 +217,84 @@ const Wallet = ({navigation}: RootTabScreenProps<'Learn'>) => {
                 </View>
 
                 <IF condition={tabIndex == 0}>
-                    <MyCard/>
+                    <MyCard totalPoint={points?.data?.totalPoint}/>
+                </IF>
+
+                <IF condition={tabIndex == 1}>
+<View style={styles.tabContainer}>
+
+
+                    <View style={styles.titleWrap}>
+                        <View style={styles.titleLeft}>
+                            <Text style={[styles.rowTitle,{
+                                marginRight: 10,
+                            }]}>
+                                Badges
+                            </Text>
+                            <MedalIcon/>
+                        </View>
+
+
+                        <Pressable onPress={() => openScreen('AllBadges')}>
+
+
+                            <Text style={[styles.rowTitle, {
+                                fontSize: fontPixel(14),
+                                color: Colors.primaryColor
+                            }]}>
+                                See details
+                            </Text>
+                        </Pressable>
+                    </View>
+
+                    <View style={styles.badgesContainer}>
+
+                        <Animated.View
+                            entering={FadeInDown.springify().delay(200)
+                                .randomDelay()
+                            } exiting={FadeOutDown}
+                            style={styles.badgeImageWrap}>
+                            <View style={styles.badgeImageContainer}>
+                                <Image
+                                    source={{uri: 'https://www.figma.com/file/YPXwVWl4FX4yagQyN7SyBr/Gateway-update-2?type=design&node-id=1138-7440&mode=design&t=7hkg8awonpin4Gel-4'}}
+                                    style={styles.badgeImage}/>
+                            </View>
+
+
+                            <View style={styles.badgeStreakScore}>
+                                <Text style={styles.badgeStreakText}>
+                                    x44
+                                </Text>
+                            </View>
+                        </Animated.View>
+                    </View>
+                    <HorizontalLine/>
+
+    <View style={[styles.titleWrap,{
+        marginTop:20,
+    }]}>
+        <View style={styles.titleLeft}>
+            <Text style={[styles.rowTitle, {
+                marginRight: 10,
+            }]}>
+                NFTs
+            </Text>
+           <StarIcon/>
+        </View>
+
+
+        <Pressable onPress={() => openScreen('NFTs')}>
+
+
+            <Text style={[styles.rowTitle, {
+                fontSize: fontPixel(14),
+                color: Colors.primaryColor
+            }]}>
+                See details
+            </Text>
+        </Pressable>
+    </View>
+</View>
                 </IF>
 
                 <IF condition={tabIndex == 2}>
@@ -171,7 +303,7 @@ const Wallet = ({navigation}: RootTabScreenProps<'Learn'>) => {
 
 
                         <Text style={styles.linkText}>
-                            Go to <Text style={{color:Colors.primaryColor}}>Marketplace</Text>
+                            Go to <Text style={{color: Colors.primaryColor}}>Marketplace</Text>
                         </Text>
                     </View>
                 </IF>
@@ -400,7 +532,98 @@ const styles = StyleSheet.create({
         fontSize: fontPixel(16),
         color: "#000",
         fontFamily: Fonts.quickSandBold
+    },
+    badgeImageWrap: {
+        height: heightPixel(110),
+        width: widthPixel(85),
+        alignItems: 'center',
+        margin: 10,
+        justifyContent: 'center',
+    },
+    badgeImageContainer: {
+        height: 80,
+        width: 80,
+        alignItems: 'center',
+        justifyContent: 'center'
+
+    },
+    badgeImage: {
+        height: '100%',
+        width: '100%',
+        resizeMode: 'contain',
+
+    },
+    badgeItemBody: {
+        marginLeft: 15,
+        height: '80%',
+        width: '75%',
+        alignItems: 'flex-start',
+        justifyContent: 'center'
+    },
+
+    badgeStreakScore: {
+        position: 'absolute',
+        bottom: 10,
+        right: 5,
+        borderRadius: 10,
+        backgroundColor: "#fff",
+        width: widthPixel(35),
+        height: heightPixel(18),
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: pixelSizeHorizontal(5),
+        shadowColor: "#212121",
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.12,
+        shadowRadius: 7.22,
+
+        elevation: 3,
+    },
+    badgeStreakText: {
+        color: Colors.light.text,
+        fontFamily: Fonts.quicksandMedium,
+        fontSize: fontPixel(12)
+    },
+    tabContainer:{
+        width: '90%',
+        alignItems: 'center',
+    },
+    titleWrap: {
+        width: '100%',
+        height: 45,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+
+
+    },
+    titleLeft: {
+        height: 45,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+
+    },
+    rowTitle: {
+
+        fontSize: fontPixel(16),
+        color: "#333333",
+        fontFamily: Fonts.quickSandBold
+    },
+    badgesContainer: {
+        marginTop: 15,
+        width: '100%',
+        height: heightPixel(260),
+        alignItems: 'flex-start',
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        flexWrap: 'wrap',
+
     }
+
 
 })
 

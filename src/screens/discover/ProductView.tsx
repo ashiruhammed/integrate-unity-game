@@ -17,7 +17,7 @@ import {SafeAreaView} from "react-native-safe-area-context";
 import {useAppSelector} from "../../app/hooks";
 import Colors from "../../constants/Colors";
 import {useInfiniteQuery, useQuery, useQueryClient,useMutation} from "@tanstack/react-query";
-import {getSingleProduct, upVoteProduct, userNotifications} from "../../action/action";
+import {getProductComment, getSingleProduct, upVoteProduct, userNotifications} from "../../action/action";
 import {RootStackScreenProps} from "../../../types";
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
 import {Fonts} from "../../constants/Fonts";
@@ -39,13 +39,15 @@ import TextInput from "../../components/inputs/TextInput";
 import * as Clipboard from 'expo-clipboard';
 import FastImage from "react-native-fast-image";
 import Animated, {
-    Extrapolate,
+    Easing,
+    Extrapolate, Extrapolation,
     interpolate, interpolateColor,
-    useAnimatedStyle,
-    useSharedValue,
-    withRepeat, withSequence,
+    useAnimatedStyle, useDerivedValue,
+    useSharedValue, withDelay,
+    withRepeat, withSequence, withSpring,
     withTiming
 } from "react-native-reanimated";
+import {useRefreshOnFocus} from "../../helpers";
 
 
 
@@ -241,6 +243,7 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
     };
 
 
+
     const rotation = useSharedValue(0);
 
 
@@ -255,6 +258,7 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
     });
 
     const {data,isLoading,refetch} = useQuery(['getSingleProduct',item.slug],()=>getSingleProduct(item.slug))
+    const {data:comments,isLoading:loadingComments,refetch:fetchComments} = useQuery(['ProductComments',item.id],()=>getProductComment(item.id))
 
     const {mutate,isLoading:upvoting} = useMutation(['upVoteProduct'],upVoteProduct,{
         onSuccess:(data)=>{
@@ -397,6 +401,9 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
     });
 
 
+    useRefreshOnFocus(refetch)
+    useRefreshOnFocus(fetchComments)
+
 
     return (
 
@@ -490,17 +497,17 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
 
                     </View>
                     <View style={styles.socialPlug}>
-                        <Pressable style={styles.shareBtn}>
+                        <Pressable onPress={()=>openLink(item.socialMedia.find(item => item.name === 'instagram')?.url)} style={styles.shareBtn}>
 
                             <Entypo name="instagram-with-circle" size={22} color="#BFBFBF" />
                         </Pressable>
 
 
-                        <Pressable style={styles.shareBtn}>
+                        <Pressable onPress={()=>openLink(item.socialMedia.find(item => item.name === 'twitter')?.url)} style={styles.shareBtn}>
                             <Fontisto name="twitter" size={20} color="#BFBFBF"/>
                         </Pressable>
 
-                        <Pressable style={styles.shareBtn}>
+                        <Pressable onPress={()=>openLink(item.socialMedia.find(item => item.name === 'facebook')?.url)} style={styles.shareBtn}>
 
                             <FontAwesome name="facebook" size={20} color="#BFBFBF"/>
                         </Pressable>
@@ -529,9 +536,9 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
                                 justifyContent: 'space-evenly',
                              width:'100%'
                             }]}>
-                                <FontAwesome name="thumbs-up" size={14} color={data.data.upvotes.find(vote => vote.userId === userData.id) ? "#fff" :Colors.primaryColor}/>
+                                <FontAwesome name="thumbs-up" size={14} color={data?.data?.upvotes.find(vote => vote.userId === userData.id) ? "#fff" :Colors.primaryColor}/>
                                 <Text style={[styles.buttonText, {
-                                    color: data.data.upvotes.find(vote => vote.userId === userData.id) ? "#fff" : Colors.primaryColor
+                                    color: data?.data?.upvotes.find(vote => vote.userId === userData.id) ? "#fff" : Colors.primaryColor
                                 }]}>
                                     Thumbs up
                                 </Text>
@@ -696,143 +703,97 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
                     </View>
 
 
-                    <View style={styles.wrapCommentBox}>
+                    <Pressable onPress={()=>navigation.navigate('MakeComment',{
+                        id:item.id
+                    })} style={styles.wrapCommentBox}>
 
                         <View style={styles.userAvatar}>
-                            <Image source={{uri: "https://cdn.artstation.com/p/thumbnails/000/550/238/thumb.jpg"}}
+                            <Image source={{uri: !userData.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : userData.avatar}}
                                    style={styles.userAvatarImage}/>
                         </View>
-                        <CommentInput placeholder={'Leave a comment...'} value={commentText}/>
+                        <View style={styles.commentBox}>
+                            <Text>
+                                Leave a comment...
+                            </Text>
+
+                            <TouchableOpacity onPress={()=>navigation.navigate('MakeComment',{
+                                id:item.id
+                            })} style={styles.passBtn}>
+
+                                <Ionicons name="paper-plane-outline" size={18} color="#333333" />
+
+                            </TouchableOpacity>
+                        </View>
+                       {/* <CommentInput  editable={false} placeholder={'Leave a comment...'} value={commentText}/>
+*/}
+
+                    </Pressable>
 
 
-                    </View>
+                    {
+                        !loadingComments && comments && comments?.data?.result.length > 0 &&
 
+                        comments?.data?.result.map((comment)=>(
+                            <View style={styles.commentCard}>
+                                <View style={styles.commentCardTop}>
+                                    <View style={styles.commentUserAvatar}>
+                                        <Image source={{uri: !comment.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : comment.avatar}}
+                                               style={styles.userAvatarImage}/>
+                                    </View>
 
-                    <View style={styles.commentCard}>
-                        <View style={styles.commentCardTop}>
-                            <View style={styles.commentUserAvatar}>
-                                <Image source={{uri: "https://cdn.artstation.com/p/thumbnails/000/550/238/thumb.jpg"}}
-                                       style={styles.userAvatarImage}/>
-                            </View>
+                                    <View style={styles.commentBody}>
 
-                            <View style={styles.commentBody}>
+                                        <View style={styles.commentDetails}>
+                                            <Text style={styles.userName}>
+                                                {comment.user.fullName}
+                                            </Text>
 
-                                <View style={styles.commentDetails}>
-                                    <Text style={styles.userName}>
-                                        @isabellachills
-                                    </Text>
+                                            <Entypo name="dots-three-horizontal" size={24} color="#D9D9D9"/>
+                                        </View>
 
-                                    <Entypo name="dots-three-horizontal" size={24} color="#D9D9D9"/>
+                                        <Text style={styles.commentBodyText}>
+
+                                            {comment.content}
+                                        </Text>
+
+                                    </View>
                                 </View>
 
-                                <Text style={styles.commentBodyText}>
+                                <View style={styles.commentCardBottom}>
+                                    <View style={styles.usersComment}>
 
-                                    As we all know, keeping your digital assets safe is crucial in the world of
-                                    cryptocurrencies. CryptoShield offers a simple and effective way to secure your
-                                    digital
-                                    assets, without relying on a centralized service. By storing your assets on the
-                                    Ethereum
-                                    blockchain, CryptoShield ensures that you have full control over your private keys
-                                    and
-                                    that your funds are stored in a trustless and decentralized manner.
-                                </Text>
+                                    </View>
 
-                            </View>
-                        </View>
-
-                        <View style={styles.commentCardBottom}>
-                            <View style={styles.usersComment}>
-
-                            </View>
-
-                            <Pressable style={styles.bottomBtn}>
-                                <CommentIcon/>
-                                <Text style={styles.bottomBtnText}>
-                                    Reply
-                                </Text>
-                            </Pressable>
+                                    <Pressable style={styles.bottomBtn}>
+                                        <CommentIcon/>
+                                        <Text style={styles.bottomBtnText}>
+                                            Reply
+                                        </Text>
+                                    </Pressable>
 
 
-                            <Pressable style={styles.bottomBtn}>
-                                <FontAwesome name="thumbs-up" size={18} color="#686868"/>
-                                <Text style={styles.bottomBtnText}>
-                                    Thumbs up (200)
-                                </Text>
-                            </Pressable>
-
-                            <Pressable style={styles.bottomBtn}>
-
-                                <Text style={styles.bottomBtnText}>
-                                    Share
-                                </Text>
-                            </Pressable>
-                        </View>
+                                    <Pressable style={styles.bottomBtn}>
+                                        <FontAwesome name="thumbs-up" size={18} color="#686868"/>
+                                        <Text style={styles.bottomBtnText}>
+                                            Thumbs up ({comment.commentLikesCount})
+                                        </Text>
+                                    </Pressable>
 
 
-                    </View>
-                    <View style={styles.commentCard}>
-                        <View style={styles.commentCardTop}>
-                            <View style={styles.commentUserAvatar}>
-                                <Image
-                                    source={{uri: "https://img.freepik.com/premium-photo/3d-rendering-zoom-call-avatar_23-2149556774.jpg"}}
-                                    style={styles.userAvatarImage}/>
-                            </View>
+                                    <Pressable onPress={()=>handlePress()} style={styles.bottomBtn}>
 
-                            <View style={styles.commentBody}>
-
-                                <View style={styles.commentDetails}>
-                                    <Text style={styles.userName}>
-                                        @destinykams
-                                    </Text>
-
-                                    <Entypo name="dots-three-horizontal" size={24} color="#D9D9D9"/>
+                                        <Text style={styles.bottomBtnText}>
+                                            Share
+                                        </Text>
+                                    </Pressable>
                                 </View>
 
-                                <Text style={styles.commentBodyText}>
-
-                                    As we all know, keeping your digital assets safe is crucial in the world of
-                                    cryptocurrencies. CryptoShield offers a simple and effective way to secure your
-                                    digital
-                                    assets, without relying on a centralized service. By storing your assets on the
-                                    Ethereum
-                                    blockchain, CryptoShield ensures that you have full control over your private keys
-                                    and
-                                    that your funds are stored in a trustless and decentralized manner.
-                                </Text>
 
                             </View>
-                        </View>
-
-                        <View style={styles.commentCardBottom}>
-                            <View style={styles.usersComment}>
-
-                            </View>
-
-                            <Pressable style={styles.bottomBtn}>
-                                <CommentIcon/>
-                                <Text style={styles.bottomBtnText}>
-                                    Reply
-                                </Text>
-                            </Pressable>
+                        ))
+                    }
 
 
-                            <Pressable style={styles.bottomBtn}>
-                                <FontAwesome name="thumbs-up" size={18} color="#686868"/>
-                                <Text style={styles.bottomBtnText}>
-                                    Thumbs up (200)
-                                </Text>
-                            </Pressable>
-
-                            <Pressable style={styles.bottomBtn}>
-
-                                <Text style={styles.bottomBtnText}>
-                                    Share
-                                </Text>
-                            </Pressable>
-                        </View>
-
-
-                    </View>
 
 
                     <View style={styles.statsVault}>
@@ -868,13 +829,13 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
 
 
                     <View style={styles.buttonContainer}>
-                        <TouchableOpacity style={styles.appStoreButton}>
+                        <TouchableOpacity activeOpacity={0.7} onPress={()=>openLink(item.appleStoreUrl)} style={styles.appStoreButton}>
                             <Image
                                 source={{uri: 'https://miro.medium.com/v2/resize:fit:1400/1*V9-OPWpauGEi-JMp05RC_A.png'}}
                                 style={styles.logo}/>
 
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.googlePlayButton}>
+                        <TouchableOpacity activeOpacity={0.8} onPress={()=>openLink(item.googlePlayStoreUrl)} style={styles.googlePlayButton}>
                             <Image
                                 source={{uri: 'https://contentgrid.thdstatic.com/hdus/en_US/DTCCOMNEW/fetch/NexGen/ContentPage/androidbadgesbox2.png'}}
                                 style={styles.logo}/>
@@ -956,7 +917,14 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
                     </View>
 
 
+
+
                 </KeyboardAwareScrollView>
+
+
+
+
+
             </SafeAreaView>
 
 
@@ -1370,7 +1338,7 @@ const styles = StyleSheet.create({
         marginTop: 40,
         paddingHorizontal: 20,
         paddingVertical: 25,
-        minHeight: heightPixel(260),
+        minHeight: heightPixel(160),
         borderRadius: 10,
         alignItems: 'flex-start',
         justifyContent: 'flex-start',
@@ -1440,7 +1408,7 @@ const styles = StyleSheet.create({
         marginTop: 40,
         paddingHorizontal: 20,
         paddingVertical: 25,
-        minHeight: heightPixel(260),
+        minHeight: heightPixel(160),
         borderRadius: 10,
         alignItems: 'flex-start',
         justifyContent: 'flex-start',
@@ -1514,6 +1482,30 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         flexDirection: 'row'
     },
+    commentBox:{
+        width:'80%',
+        borderRadius:  10,
+        borderColor: "#CCCCCC",
+        backgroundColor: 'transparent',
+        height:  heightPixel(55),
+        alignItems:'center',
+        justifyContent:'space-between',
+       paddingHorizontal:20,
+        borderWidth: 1,
+        flexDirection: 'row',
+    },
+    commentBoxText:{
+        color: '#131313',
+        fontSize: fontPixel(14),
+        fontFamily: Fonts.quicksandSemiBold,
+    },
+    passBtn: {
+        height: '100%',
+        width: '8%',
+        alignItems: 'center',
+        justifyContent: "center"
+    },
+
     userAvatar: {
         marginRight: 15,
         width: 36,
@@ -1908,7 +1900,7 @@ const styles = StyleSheet.create({
         fontSize: fontPixel(14),
         color: "#fff",
         fontFamily: Fonts.quicksandSemiBold
-    }
+    },
 
 })
 

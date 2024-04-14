@@ -645,6 +645,7 @@ export const userNFTs = {
     }
 }
 
+
 export const userLeaderboards = {
 
     leaderboard: async ({pageParam = 1}: { pageParam?: number }) => {
@@ -2998,7 +2999,7 @@ export const getProductTrending = async () => {
 
     };
 
-    console.log(`${BASE_URL_LIVE}/product-hunt/trending`)
+
 
     return Promise.race([
         fetch(`${BASE_URL_LIVE}/product-hunt/trending`, requestOptions)
@@ -3031,7 +3032,7 @@ export const getApprovedProduct = async () => {
 
     };
 
-    console.log(`${BASE_URL_LIVE}/product-hunt/trending`)
+
 
     return Promise.race([
         fetch(`${BASE_URL_LIVE}/product-hunt`, requestOptions)
@@ -3081,6 +3082,39 @@ export const registerProductHunt = async ({body}:{body: any}) => {
 
     ])
 }
+export const commentOnProduct = async ({body}:{body: any}) => {
+
+    let Token = await SecureStore.getItemAsync('Gateway-Token');
+
+    const myHeaders = {
+        'Authorization': `Bearer ${Token}`,
+        'x-access-token': ACCESS_TOKEN,
+        'Content-Type': 'application/json',
+        'x-client-type': 'web',
+    }
+    let timeoutId: NodeJS.Timeout
+
+
+    const requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body
+    };
+
+
+    return Promise.race([
+        fetch(`${BASE_URL_LIVE}/product-hunt/comment`, requestOptions)
+            .then(response => response.json()),
+        new Promise((resolve, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+            //  clearTimeout(timeoutId)
+        }).then(() => {
+            clearTimeout(timeoutId)
+        })
+
+    ])
+}
 export const getSingleProduct = async (id :string) => {
 
     let Token = await SecureStore.getItemAsync('Gateway-Token');
@@ -3102,6 +3136,38 @@ export const getSingleProduct = async (id :string) => {
 
     return Promise.race([
         fetch(`${BASE_URL_LIVE}/product-hunt/${id}`, requestOptions)
+            .then(response => response.json()),
+        new Promise((resolve, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+            //  clearTimeout(timeoutId)
+        }).then(() => {
+            clearTimeout(timeoutId)
+        })
+
+    ])
+}
+export const getProductComment = async (id :string) => {
+
+    let Token = await SecureStore.getItemAsync('Gateway-Token');
+
+    const myHeaders = {
+        'Authorization': `Bearer ${Token}`,
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
+    }
+    let timeoutId: NodeJS.Timeout
+
+
+    const requestOptions = {
+        method: 'GET',
+        headers: myHeaders,
+
+    };
+
+
+    return Promise.race([
+        fetch(`${BASE_URL_LIVE}/product-hunt/comment/${id}`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -3144,4 +3210,73 @@ export const upVoteProduct = async (id :string) => {
         })
 
     ])
+}
+
+
+
+
+
+export const aiAdventures = async () => {
+
+    let Token = await SecureStore.getItemAsync('Gateway-Token');
+
+    const myHeaders = {
+        'Authorization': `Bearer ${Token}`,
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
+    }
+    let timeoutId: NodeJS.Timeout
+
+
+    const requestOptions = {
+        method: 'GET',
+        headers: myHeaders,
+
+    };
+
+
+    return Promise.race([
+        fetch(`${BASE_URL_LIVE}/adventure/ai`, requestOptions)
+            .then(response => response.json()),
+        new Promise((resolve, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+            //  clearTimeout(timeoutId)
+        }).then(() => {
+            clearTimeout(timeoutId)
+        })
+
+    ])
+}
+
+
+export const getPointsHistory = {
+
+    history: async ({pageParam = 1}: { pageParam?: number }) => {
+        let Token = await SecureStore.getItemAsync('Gateway-Token');
+        // console.log(Token)
+        let timeoutId: NodeJS.Timeout
+        const myHeaders = {
+            'Authorization': `Bearer ${Token}`,
+            'x-access-token': ACCESS_TOKEN,
+            'x-client-type': 'web',
+        }
+
+        const requestOptions = {
+            method: 'GET',
+            headers: myHeaders,
+        };
+
+        return Promise.race([
+            fetch(`${BASE_URL_LIVE}/point/history?pageSize=10&pageNumber=${pageParam}`, requestOptions)
+                .then(response => response.json()),
+            new Promise((resolve, reject) => {
+                timeoutId = setTimeout(() => reject(new Error('Timeout')), 15000)
+
+            }).then(() => {
+                clearTimeout(timeoutId)
+            })
+
+        ])
+    }
 }

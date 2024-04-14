@@ -25,9 +25,7 @@ import {useAppDispatch, useAppSelector} from "../../app/hooks";
 import {useInfiniteQuery, useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {
     followACommunity,
-    getAllAdventure,
-    getBadge,
-    getCommunityFollowers,
+
     getPublicCommunities, getSingleBadge
 } from "../../action/action";
 import FastImage from "react-native-fast-image";

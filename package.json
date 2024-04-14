@@ -81,6 +81,7 @@
     "react-native-screens": "~3.29.0",
     "react-native-scroll-menu": "^1.1.1",
     "react-native-svg": "14.1.0",
+    "react-native-version-check": "^3.4.7",
     "react-native-video": "^5.2.1",
     "react-native-web": "~0.19.6",
     "react-native-webview": "13.6.4",

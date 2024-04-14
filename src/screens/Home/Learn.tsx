@@ -14,11 +14,11 @@ import {
 import {SafeAreaView} from "react-native-safe-area-context";
 import Colors from "../../constants/Colors";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
-import {useInfiniteQuery, useQueryClient} from "@tanstack/react-query";
+import {useInfiniteQuery, useQuery, useQueryClient} from "@tanstack/react-query";
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
 import {Fonts} from "../../constants/Fonts";
 import {AntDesign, Ionicons, Octicons} from "@expo/vector-icons";
-import {userNotifications} from "../../action/action";
+import {aiAdventures, getAllAdventure, userNotifications} from "../../action/action";
 import {RootTabScreenProps} from "../../../types";
 import ScrollingButtonMenu from "react-native-scroll-menu";
 import SegmentedControl from "../../components/segment-control/SegmentContol";
@@ -112,7 +112,7 @@ const LearnCardItem = ({item,theme}:props) =>{
                     <Text style={[styles.missionText,{
                         color:lightText
                     }]}>
-                        4 missions
+                        {item?._count?.modules} missions
                     </Text>
 
                     <Text style={[styles.titleText,{
@@ -135,7 +135,8 @@ const LearnCardItem = ({item,theme}:props) =>{
 
                 <TouchableOpacity style={styles.startBtn}>
                     <Text style={styles.startBtnText}>
-                        Start Adventure
+
+                        {item?.startedAdventure ? 'Continue' :  'Start Adventure' }
                     </Text>
                 </TouchableOpacity>
 
@@ -169,6 +170,41 @@ const Learn = ({navigation}: RootTabScreenProps<'Learn'>) => {
     const backgroundColor = theme == 'light' ? "#FFFFFF" : "#141414"
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
     const lightText = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
+
+
+    const {data,isLoading} = useQuery(['aiAdventures'], aiAdventures)
+
+
+    const {
+        isLoading:loadingAdventures,
+        data:allAdventure,
+        hasNextPage,
+        fetchNextPage,
+        isFetchingNextPage,
+        refetch,
+
+        isRefetching
+    } = useInfiniteQuery([`getAllAdventure`], ({pageParam = 1}) => getAllAdventure.adventures(pageParam),
+        {
+            networkMode: 'online',
+            refetchOnWindowFocus: true,
+
+            getNextPageParam: lastPage => {
+                if (lastPage.next !== null) {
+                    return lastPage.next;
+                }
+
+                return lastPage;
+            },
+            getPreviousPageParam: (firstPage, allPages) => firstPage.prevCursor,
+        })
+
+   console.log(allAdventure?.pages[0])
+    const loadMore = () => {
+        if (hasNextPage) {
+            fetchNextPage();
+        }
+    };
 
     const openNotifications = () => {
         navigation.navigate('Notifications')

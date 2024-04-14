@@ -345,7 +345,7 @@ const Profile = ({navigation}: RootTabScreenProps<'Profile'>) => {
 
 
                 <View style={styles.profileButtonsContainer}>
-                    <TouchableOpacity onPress={() => openScreen('EditProfile')} activeOpacity={0.9}
+                    <TouchableOpacity onPress={() => openScreen('Badges')} activeOpacity={0.9}
                                       style={styles.profileButton}>
 
                         <View style={[styles.profileButtonIcon, {

@@ -76,6 +76,7 @@ import MoreInformation from "../screens/discover/create/MoreInformation";
 import ViewPoints from "../screens/wallets/ViewPoints";
 import GatewayToken from "../screens/wallets/GatewayToken";
 import Concordium from "../screens/wallets/Concordium";
+import MakeComment from "../screens/discover/MakeComment";
 
 const styles = StyleSheet.create({
     displayPhoto: {
@@ -290,7 +291,7 @@ function RootNavigator() {
                         <Stack.Screen name="EditProfile" component={EditProfile}/>
                         <Stack.Screen name="BlockedUsers" component={BlockedUsers}/>
 
-                        <Stack.Screen name="Wallet" component={Wallet}/>
+                        <Stack.Screen name="MyWallet" component={Wallet}/>
                         <Stack.Screen name="Leaderboard" component={Leaderboard}/>
                         <Stack.Screen name="Badges" component={Badges}/>
                         <Stack.Screen name="Settings" component={Settings}/>
@@ -356,6 +357,7 @@ function RootNavigator() {
                         <Stack.Screen name="CreatingAdventure" component={CreatingAdventure}/>
                         <Stack.Screen name="DiscoverProducts" component={DiscoverProducts}/>
                         <Stack.Screen name="ProductView" component={ProductView}/>
+                        <Stack.Screen name="MakeComment" component={MakeComment}/>
                         <Stack.Screen name="ProductInformation" component={ProductInformation}/>
                         <Stack.Screen name="FundamentalData" component={FundamentalData}/>
                         <Stack.Screen name="VisualRepresentation" component={VisualRepresentation}/>

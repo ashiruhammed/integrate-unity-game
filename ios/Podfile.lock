@@ -1154,6 +1154,8 @@ PODS:
     - React-Core
   - react-native-slider (4.4.2):
     - React-Core
+  - react-native-version-check (3.4.7):
+    - React-Core
   - react-native-video (5.2.1):
     - React-Core
     - react-native-video/Video (= 5.2.1)
@@ -1453,6 +1455,7 @@ DEPENDENCIES:
   - react-native-fbsdk-next (from `../node_modules/react-native-fbsdk-next`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - "react-native-slider (from `../node_modules/@react-native-community/slider`)"
+  - react-native-version-check (from `../node_modules/react-native-version-check`)
   - react-native-video (from `../node_modules/react-native-video`)
   - react-native-webview (from `../node_modules/react-native-webview`)
   - React-nativeconfig (from `../node_modules/react-native/ReactCommon`)
@@ -1650,6 +1653,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-safe-area-context"
   react-native-slider:
     :path: "../node_modules/@react-native-community/slider"
+  react-native-version-check:
+    :path: "../node_modules/react-native-version-check"
   react-native-video:
     :path: "../node_modules/react-native-video"
   react-native-webview:
@@ -1810,6 +1815,7 @@ SPEC CHECKSUMS:
   react-native-fbsdk-next: 16e652b5f1236492631185c58ec2ae15b029119d
   react-native-safe-area-context: 0ee144a6170530ccc37a0fd9388e28d06f516a89
   react-native-slider: 33b8d190b59d4f67a541061bb91775d53d617d9d
+  react-native-version-check: 6cd36aad4e30b8e3216747e3b4ddeb09e0647af8
   react-native-video: c26780b224543c62d5e1b2a7244a5cd1b50e8253
   react-native-webview: f95eb7d4d6a7ca45d04d861d99f628241b2aff83
   React-nativeconfig: d7af5bae6da70fa15ce44f045621cf99ed24087c

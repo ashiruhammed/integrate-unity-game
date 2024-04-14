@@ -1,6 +1,6 @@
 import {StatusBar} from 'expo-status-bar';
 import React, {useEffect, useRef, useState} from "react";
-import {PermissionsAndroid, TouchableOpacity, View,Text,StyleSheet} from 'react-native'
+import {PermissionsAndroid, TouchableOpacity, View, Text, StyleSheet, Alert, Linking} from 'react-native'
 import 'react-native-gesture-handler';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import * as SecureStore from 'expo-secure-store';
@@ -42,7 +42,7 @@ import {Colors} from "react-native/Libraries/NewAppScreen";
 import {Fonts} from "./src/constants/Fonts";
 import ErrorBoundary from "react-native-error-boundary";
 import {GestureHandlerRootView} from "react-native-gesture-handler";
-
+import VersionCheck from 'react-native-version-check';
 Settings.initializeSDK();
 Settings.setAppID(AppID);
 enableScreens()
@@ -160,6 +160,55 @@ export default function App() {
 
     }, [fcmToken, generatedToken]);
 */
+
+
+    useEffect(() => {
+        const checkAppVersion = async () => {
+            try {
+                const latestVersion = Platform.OS === 'ios'? await fetch(`https://itunes.apple.com/in/lookup?bundleId=com.gatewaymobile.app`)
+                        .then(r => r.json())
+                        .then((res) => { return res?.results[0]?.version })
+                    : await VersionCheck.getLatestVersion({
+                        provider: 'playStore',
+                        packageName: 'com.gatewaymobile.app',
+                        ignoreErrors: true,
+                    });
+            const urlGoogle = await VersionCheck.getPlayStoreUrl({ appID: 'com.gatewaymobile.app' })
+            const urlApple = await VersionCheck.getAppStoreUrl({ appID: 'com.gatewaymobile.app' })
+
+                const currentVersion = VersionCheck.getCurrentVersion();
+
+                if (latestVersion > currentVersion) {
+                    Alert.alert(
+                        'Update Required',
+                        'A new version of the app is available. Please update to continue using the app.',
+                        [
+                            {
+                                text: 'Update Now',
+                                onPress: () => {
+                                    Linking.openURL(
+                                        Platform.OS === 'ios'
+                                            ? urlApple
+                                            : urlGoogle
+                                    );
+                                },
+                            },
+                        ],
+                        { cancelable: false }
+                    );
+                } else {
+                    // App is up-to-date; proceed with the app
+                }
+            } catch (error) {
+                // Handle error while checking app version
+                console.error('Error checking app version:', error);
+            }
+        };
+
+        checkAppVersion();
+    }, []);
+
+
     useEffect(() => {
         const fetchToken = async () => {
             const token = await getFcmToken();
