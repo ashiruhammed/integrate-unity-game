@@ -18,7 +18,7 @@ import {useInfiniteQuery, useQuery, useQueryClient} from "@tanstack/react-query"
 import Colors from "../../constants/Colors";
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
 import {Fonts} from "../../constants/Fonts";
-import {getUserPoints, getUserWallets, userNotifications} from "../../action/action";
+import {getCCDWallet, getUserPoints, getUserWallets, userNotifications} from "../../action/action";
 import SegmentedControl from "../../components/segment-control/SegmentContol";
 import SegmentContolAlt from "../../components/segment-control/SegmentContolAlt";
 import MyCard from "../../components/wallets/cards/MyCard";
@@ -94,19 +94,12 @@ const Wallet = ({navigation}: RootTabScreenProps<'Learn'>) => {
     // ref
     const bottomSheetRef = useRef<BottomSheet>(null);
 
-    useEffect(() => {
-        if (tabIndex == 0) {
-            bottomSheetRef?.current?.expand()
-        }
-
-
-    }, [tabIndex])
 
     const handleClose = () => {
         bottomSheetRef?.current?.close()
     }
     // variables
-    const snapPoints = useMemo(() => ["1", "45%"], []);
+    const snapPoints = useMemo(() => ["1%", "45%"], []);
 
 // renders
     const renderBackdrop = useCallback(
@@ -136,6 +129,21 @@ const Wallet = ({navigation}: RootTabScreenProps<'Learn'>) => {
         navigation.navigate('Notifications')
     }
 
+
+    const {data: ccdWallet,isLoading} = useQuery(['getCCDWallet'], getCCDWallet)
+    useEffect(() => {
+        if(!isLoading ) {
+            if (!data?.success) {
+                bottomSheetRef?.current?.expand()
+            }
+
+        }
+    }, [tabIndex,data])
+
+    const startCCDWallet = () => {
+        handleClose()
+        navigation.navigate('Concordium')
+    }
     const {
         data: notifications,
 
@@ -221,80 +229,80 @@ const Wallet = ({navigation}: RootTabScreenProps<'Learn'>) => {
                 </IF>
 
                 <IF condition={tabIndex == 1}>
-<View style={styles.tabContainer}>
+                    <View style={styles.tabContainer}>
 
 
-                    <View style={styles.titleWrap}>
-                        <View style={styles.titleLeft}>
-                            <Text style={[styles.rowTitle,{
-                                marginRight: 10,
-                            }]}>
-                                Badges
-                            </Text>
-                            <MedalIcon/>
+                        <View style={styles.titleWrap}>
+                            <View style={styles.titleLeft}>
+                                <Text style={[styles.rowTitle, {
+                                    marginRight: 10,
+                                }]}>
+                                    Badges
+                                </Text>
+                                <MedalIcon/>
+                            </View>
+
+
+                            <Pressable onPress={() => openScreen('AllBadges')}>
+
+
+                                <Text style={[styles.rowTitle, {
+                                    fontSize: fontPixel(14),
+                                    color: Colors.primaryColor
+                                }]}>
+                                    See details
+                                </Text>
+                            </Pressable>
                         </View>
 
+                        <View style={styles.badgesContainer}>
 
-                        <Pressable onPress={() => openScreen('AllBadges')}>
-
-
-                            <Text style={[styles.rowTitle, {
-                                fontSize: fontPixel(14),
-                                color: Colors.primaryColor
-                            }]}>
-                                See details
-                            </Text>
-                        </Pressable>
-                    </View>
-
-                    <View style={styles.badgesContainer}>
-
-                        <Animated.View
-                            entering={FadeInDown.springify().delay(200)
-                                .randomDelay()
-                            } exiting={FadeOutDown}
-                            style={styles.badgeImageWrap}>
-                            <View style={styles.badgeImageContainer}>
-                                <Image
-                                    source={{uri: 'https://www.figma.com/file/YPXwVWl4FX4yagQyN7SyBr/Gateway-update-2?type=design&node-id=1138-7440&mode=design&t=7hkg8awonpin4Gel-4'}}
-                                    style={styles.badgeImage}/>
-                            </View>
+                            <Animated.View
+                                entering={FadeInDown.springify().delay(200)
+                                    .randomDelay()
+                                } exiting={FadeOutDown}
+                                style={styles.badgeImageWrap}>
+                                <View style={styles.badgeImageContainer}>
+                                    <Image
+                                        source={{uri: 'https://www.figma.com/file/YPXwVWl4FX4yagQyN7SyBr/Gateway-update-2?type=design&node-id=1138-7440&mode=design&t=7hkg8awonpin4Gel-4'}}
+                                        style={styles.badgeImage}/>
+                                </View>
 
 
-                            <View style={styles.badgeStreakScore}>
-                                <Text style={styles.badgeStreakText}>
-                                    x44
+                                <View style={styles.badgeStreakScore}>
+                                    <Text style={styles.badgeStreakText}>
+                                        x44
+                                    </Text>
+                                </View>
+                            </Animated.View>
+                        </View>
+                        <HorizontalLine/>
+
+                        <View style={[styles.titleWrap, {
+                            marginTop: 20,
+                        }]}>
+                            <View style={styles.titleLeft}>
+                                <Text style={[styles.rowTitle, {
+                                    marginRight: 10,
+                                }]}>
+                                    NFTs
                                 </Text>
+                                <StarIcon/>
                             </View>
-                        </Animated.View>
+
+
+                            <Pressable onPress={() => openScreen('NFTs')}>
+
+
+                                <Text style={[styles.rowTitle, {
+                                    fontSize: fontPixel(14),
+                                    color: Colors.primaryColor
+                                }]}>
+                                    See details
+                                </Text>
+                            </Pressable>
+                        </View>
                     </View>
-                    <HorizontalLine/>
-
-    <View style={[styles.titleWrap,{
-        marginTop:20,
-    }]}>
-        <View style={styles.titleLeft}>
-            <Text style={[styles.rowTitle, {
-                marginRight: 10,
-            }]}>
-                NFTs
-            </Text>
-           <StarIcon/>
-        </View>
-
-
-        <Pressable onPress={() => openScreen('NFTs')}>
-
-
-            <Text style={[styles.rowTitle, {
-                fontSize: fontPixel(14),
-                color: Colors.primaryColor
-            }]}>
-                See details
-            </Text>
-        </Pressable>
-    </View>
-</View>
                 </IF>
 
                 <IF condition={tabIndex == 2}>
@@ -311,14 +319,14 @@ const Wallet = ({navigation}: RootTabScreenProps<'Learn'>) => {
 
             </SafeAreaView>
 
-            <Portal>
+{/*            <Portal>
                 <BottomSheet
                     backdropComponent={renderBackdrop}
                     ref={bottomSheetRef}
                     snapPoints={snapPoints}
                     // add bottom inset to elevate the sheet
                     bottomInset={66}
-                    index={1}
+                    index={0}
                     // set `detached` to true
                     detached={true}
                     style={styles.sheetContainer}
@@ -344,7 +352,7 @@ const Wallet = ({navigation}: RootTabScreenProps<'Learn'>) => {
                             Gateway Points, Tokens & NFTs as you explore. Necessary to prevent fraud.
                         </Text>
 
-                        <Pressable style={styles.claimBtn}>
+                        <Pressable onPress={startCCDWallet} style={styles.claimBtn}>
                             <Text style={styles.claimBtnText}>
                                 Start (1min)
                             </Text>
@@ -352,7 +360,7 @@ const Wallet = ({navigation}: RootTabScreenProps<'Learn'>) => {
                     </BottomSheetView>
                 </BottomSheet>
 
-            </Portal>
+            </Portal>*/}
 
         </>
     );
@@ -587,7 +595,7 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.quicksandMedium,
         fontSize: fontPixel(12)
     },
-    tabContainer:{
+    tabContainer: {
         width: '90%',
         alignItems: 'center',
     },

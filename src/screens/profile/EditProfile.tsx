@@ -101,7 +101,7 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
 
 
     const [focusFullName, setFocusFullName] = useState(false);
-    const [contentFullName, setContentFullName] = useState(userData?.fullName);
+    const [contentFullName, setContentFullName] = useState(userData?.fullName ? '' : userData?.fullName);
 
     const [focusEmail, setFocusEmail] = useState(false);
     const [contentEmail, setContentEmail] = useState(data?.data?.email);
@@ -393,7 +393,7 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
                                 {
                                     !updating &&
                                     <TouchableOpacity onPress={pickImage} style={styles.cameraBtn}>
-                                        <Ionicons name="md-camera-outline" size={22} color="#000"/>
+                                        <Ionicons name="camera-outline" size={22} color="#000"/>
                                     </TouchableOpacity>
                                 }
                             </View>

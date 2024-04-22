@@ -887,7 +887,7 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
                     </View>
 
 
-                    <View style={[styles.pageTitleWrap, {
+                    {/*<View style={[styles.pageTitleWrap, {
                         marginTop: 50,
                     }]}>
                         <Text style={[styles.pageTitle, {
@@ -896,9 +896,9 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
                         }]}>
                             Similar Products
                         </Text>
-                    </View>
+                    </View>*/}
 
-                    <View style={[styles.productsContainer, {}]}>
+                 {/*   <View style={[styles.productsContainer, {}]}>
 
 
                         <FlatList
@@ -914,7 +914,7 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
                             showsHorizontalScrollIndicator={false}
                             renderItem={renderSimilarProductItem}
                         />
-                    </View>
+                    </View>*/}
 
 
 

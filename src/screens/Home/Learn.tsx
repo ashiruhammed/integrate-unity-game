@@ -199,7 +199,7 @@ const Learn = ({navigation}: RootTabScreenProps<'Learn'>) => {
             getPreviousPageParam: (firstPage, allPages) => firstPage.prevCursor,
         })
 
-   console.log(allAdventure?.pages[0])
+  // console.log(allAdventure?.pages[0])
     const loadMore = () => {
         if (hasNextPage) {
             fetchNextPage();

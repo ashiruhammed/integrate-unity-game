@@ -216,7 +216,10 @@ const Profile = ({navigation}: RootTabScreenProps<'Profile'>) => {
                     <Text style={[styles.fullName, {
                         color: textColor
                     }]}>
-                        {userData.fullName}
+                        {userData.fullName ? <Text onPress={() => openScreen('EditProfile')} style={{
+                            textDecorationLine:'underline',
+                            fontSize:12,
+                        }}>Update profile</Text> : userData?.fullName}
                     </Text>
                 </View>
 
@@ -345,7 +348,7 @@ const Profile = ({navigation}: RootTabScreenProps<'Profile'>) => {
 
 
                 <View style={styles.profileButtonsContainer}>
-                    <TouchableOpacity onPress={() => openScreen('Badges')} activeOpacity={0.9}
+                    <TouchableOpacity onPress={() => openScreen('EditProfile')} activeOpacity={0.9}
                                       style={styles.profileButton}>
 
                         <View style={[styles.profileButtonIcon, {

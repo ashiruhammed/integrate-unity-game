@@ -14,9 +14,15 @@ import {
 import {AntDesign, Entypo, Ionicons, Octicons} from "@expo/vector-icons";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
-import {useInfiniteQuery, useQuery, useQueryClient} from "@tanstack/react-query";
+import {useInfiniteQuery, useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import Colors from "../../constants/Colors";
-import {getPointsHistory, getPublicCommunities, getUserPoints, userNotifications} from "../../action/action";
+import {
+    getPointsHistory,
+    getPublicCommunities,
+    getUserPoints,
+    getUserWallets, redeemPoints,
+    userNotifications
+} from "../../action/action";
 import {RootStackScreenProps} from "../../../types";
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
 import {Fonts} from "../../constants/Fonts";
@@ -27,6 +33,8 @@ import {
     BottomSheetDefaultBackdropProps
 } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
 import {setItem} from "expo-secure-store";
+import {setResponse} from "../../app/slices/userSlice";
+import Toast from "../../components/Toast";
 
 
 interface props {
@@ -124,6 +132,9 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
     const {isLoading: loadingPoints, data: points, refetch: fetchPoints} = useQuery(['getUserPoints'], getUserPoints, {
 
     })
+
+
+
     const {
         isLoading,
         data,
@@ -146,6 +157,59 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
 
             getPreviousPageParam: (firstPage, allPages) => firstPage.prevCursor,
         })
+
+
+    const {mutate: redeemPointsNow, isLoading: redeeming} = useMutation(['redeemPoints'], redeemPoints,
+
+        {
+
+            onSuccess: async (data) => {
+
+                if (data.success) {
+                    refetch()
+                    fetchPoints()
+                    refetch()
+                    handleClosePressRedeem()
+                    dispatch(setResponse({
+                        responseMessage: data.message,
+                        responseState: true,
+                        responseType: 'success',
+                    }))
+
+
+                } else {
+                    handleClosePressRedeem()
+                    dispatch(setResponse({
+                        responseMessage: data.message,
+                        responseState: true,
+                        responseType: 'error',
+                    }))
+
+                    /*  navigation.navigate('EmailConfirm', {
+                          email:contentEmail
+                      })*/
+
+
+                }
+            },
+
+            onError: (err) => {
+                dispatch(setResponse({
+                    responseMessage: err.message,
+                    responseState: true,
+                    responseType: 'error',
+                }))
+
+
+            },
+            onSettled: () => {
+                queryClient.invalidateQueries(['redeemPoints']);
+            }
+
+        })
+
+
+
 
     const loadMore = () => {
         if (hasNextPage) {
@@ -259,12 +323,23 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
         []
     );
 
-//console.log(data?.pages[0].result)
+
+    const {
+        isLoading: loadingWallets,
+        data:wallet,
+        isSuccess,
+        refetch:fetchWallet
+    } = useQuery(['getUserWallets'], getUserWallets, {
+
+    })
+
+    const nearBalance = wallet?.data?.find((wallet: { network: string; }) => wallet.network == 'near')
+
     return (
         <>
 
             <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
-
+                <Toast message={responseMessage} state={responseState} type={responseType}/>
                 <View
 
                     style={[styles.scrollView, {
@@ -410,9 +485,8 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
                     </TouchableOpacity>}
                 </View>
 
-                <RedeemForm nearBalance={10} isLoading={false} redeemNow={() => {
-                }}
-                            pointBalance={3}/>
+                <RedeemForm nearBalance={nearBalance?.balance} isLoading={redeeming} redeemNow={redeemPointsNow}
+                            pointBalance={points?.data?.totalPoint}/>
             </BottomSheet>
         </>
 

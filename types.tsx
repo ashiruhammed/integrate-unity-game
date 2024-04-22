@@ -59,6 +59,9 @@ export type RootStackParamList = {
     CreatingAdventure: {
         adventureTitle:string
     };
+    BrowserView: {
+        url:string
+    };
     MyWallet: undefined;
     DiscoverProducts: undefined;
     ProductInformation: undefined;

@@ -1,6 +1,5 @@
-
 import * as SecureStore from 'expo-secure-store';
-import { BASE_URL, ACCESS_TOKEN, DEV_BASE_URL} from "@env";
+import {BASE_URL, ACCESS_TOKEN, DEV_BASE_URL} from "@env";
 //const access_token = 'JGFyZ29uMmlkJHY9MTkkbT00MDk2LHQ9MyxwPTEkWnJjNEVDR05JTEYzU3B2WUJLZVBZdyRtdnNacUl6VVg3SG1UV2gvdjhQZXZGUXJOa1hWYUFHRkVKV3dCd0NobDBV'
 const BASE_URL_LIVE = __DEV__ ? DEV_BASE_URL : BASE_URL
 
@@ -554,7 +553,7 @@ export const userNotifications = {
 
     notifications: async ({pageParam = 1}: { pageParam?: number }) => {
         let Token = await SecureStore.getItemAsync('Gateway-Token');
-        // console.log(Token)
+        //console.log(Token)
         let timeoutId: NodeJS.Timeout
         const myHeaders = {
             'Content-Type': 'application/json',
@@ -562,6 +561,7 @@ export const userNotifications = {
             'x-access-token': ACCESS_TOKEN,
             'x-client-type': 'web',
         }
+
 
         const requestOptions = {
             method: 'GET',
@@ -1629,39 +1629,39 @@ export const getUserBadges = async () => {
 
 export const getAllBadges = {
 
-        badges: async (pageParam: string) => {
+    badges: async (pageParam: string) => {
 
-            let Token = await SecureStore.getItemAsync('Gateway-Token');
+        let Token = await SecureStore.getItemAsync('Gateway-Token');
 
-            const myHeaders = {
-                'x-access-token': ACCESS_TOKEN,
-                'x-client-type': 'web',
-                'Authorization': `Bearer ${Token}`
-            }
-            let timeoutId: NodeJS.Timeout
-
-
-            const requestOptions = {
-                method: 'GET',
-                headers: myHeaders,
-
-            };
-
-
-            return Promise.race([
-                fetch(`${BASE_URL_LIVE}/badge/user/dashboard`, requestOptions)
-                    .then(response => response.json()),
-                new Promise((resolve, reject) => {
-                    timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
-
-                    //  clearTimeout(timeoutId)
-                }).then(() => {
-                    clearTimeout(timeoutId)
-                })
-
-            ])
+        const myHeaders = {
+            'x-access-token': ACCESS_TOKEN,
+            'x-client-type': 'web',
+            'Authorization': `Bearer ${Token}`
         }
+        let timeoutId: NodeJS.Timeout
+
+
+        const requestOptions = {
+            method: 'GET',
+            headers: myHeaders,
+
+        };
+
+
+        return Promise.race([
+            fetch(`${BASE_URL_LIVE}/badge/user/dashboard`, requestOptions)
+                .then(response => response.json()),
+            new Promise((resolve, reject) => {
+                timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+                //  clearTimeout(timeoutId)
+            }).then(() => {
+                clearTimeout(timeoutId)
+            })
+
+        ])
     }
+}
 
 
 export const getFollowedCommunities = {
@@ -1770,7 +1770,7 @@ export const getPublicCommunities = {
 }
 export const getAllCommunities = {
 
-    communities: async ( status:'DECLINED'|'PENDING') => {
+    communities: async (status: 'DECLINED' | 'PENDING') => {
 
         let Token = await SecureStore.getItemAsync('Gateway-Token');
 
@@ -1855,7 +1855,7 @@ export const getCommunityPosts = {
             method: 'GET',
             headers: myHeaders,
         };
-      //  https://api.gatewayapp.co/post/comment/replies/de9314a5-0507-43b3-987b-30ee30526942
+        //  https://api.gatewayapp.co/post/comment/replies/de9314a5-0507-43b3-987b-30ee30526942
 
         return Promise.race([
             fetch(`${BASE_URL_LIVE}/post/community/${id}`, requestOptions)
@@ -1941,7 +1941,7 @@ export const getCommentReplies = {
 }
 
 
-export const replyToComment = async (body:any) => {
+export const replyToComment = async (body: any) => {
 
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
@@ -1952,9 +1952,9 @@ export const replyToComment = async (body:any) => {
         'Authorization': `Bearer ${Token}`
     }
     let timeoutId: NodeJS.Timeout
- /*   content:"yea"
-    parentId:"a7f152f3-3c1b-4ff8-92d9-a5311c6b5a0e"
-    postId:"9c065ab3-f150-4693-9c9a-9d64af8a1213"*/
+    /*   content:"yea"
+       parentId:"a7f152f3-3c1b-4ff8-92d9-a5311c6b5a0e"
+       postId:"9c065ab3-f150-4693-9c9a-9d64af8a1213"*/
 
     const requestOptions = {
         method: 'POST',
@@ -2380,8 +2380,6 @@ export const unblockUser = async (body?: any) => {
 }
 
 
-
-
 export const blockedUsers = {
 
     blockedList: async (pageParam: string) => {
@@ -2649,7 +2647,7 @@ export const submitTask = async ({id, body}: { id: string, body: any }) => {
 
     ])
 }
-export const followACommunity = async (id :string) => {
+export const followACommunity = async (id: string) => {
 
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
@@ -3000,7 +2998,6 @@ export const getProductTrending = async () => {
     };
 
 
-
     return Promise.race([
         fetch(`${BASE_URL_LIVE}/product-hunt/trending`, requestOptions)
             .then(response => response.json()),
@@ -3033,7 +3030,6 @@ export const getApprovedProduct = async () => {
     };
 
 
-
     return Promise.race([
         fetch(`${BASE_URL_LIVE}/product-hunt`, requestOptions)
             .then(response => response.json()),
@@ -3049,7 +3045,7 @@ export const getApprovedProduct = async () => {
 }
 
 
-export const registerProductHunt = async ({body}:{body: any}) => {
+export const registerProductHunt = async ({body}: { body: any }) => {
 
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
@@ -3082,7 +3078,7 @@ export const registerProductHunt = async ({body}:{body: any}) => {
 
     ])
 }
-export const commentOnProduct = async ({body}:{body: any}) => {
+export const commentOnProduct = async ({body}: { body: any }) => {
 
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
@@ -3115,7 +3111,7 @@ export const commentOnProduct = async ({body}:{body: any}) => {
 
     ])
 }
-export const getSingleProduct = async (id :string) => {
+export const getSingleProduct = async (id: string) => {
 
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
@@ -3147,7 +3143,7 @@ export const getSingleProduct = async (id :string) => {
 
     ])
 }
-export const getProductComment = async (id :string) => {
+export const getProductComment = async (id: string) => {
 
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
@@ -3179,7 +3175,7 @@ export const getProductComment = async (id :string) => {
 
     ])
 }
-export const upVoteProduct = async (id :string) => {
+export const upVoteProduct = async (id: string) => {
 
     let Token = await SecureStore.getItemAsync('Gateway-Token');
 
@@ -3211,9 +3207,6 @@ export const upVoteProduct = async (id :string) => {
 
     ])
 }
-
-
-
 
 
 export const aiAdventures = async () => {
@@ -3248,6 +3241,115 @@ export const aiAdventures = async () => {
 
     ])
 }
+export const createAIAdventure = async ({body}: { body: any }) => {
+
+    let Token = await SecureStore.getItemAsync('Gateway-Token');
+
+    const myHeaders = {
+        'Authorization': `Bearer ${Token}`,
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
+        'Content-Type': 'application/json',
+    }
+    let timeoutId: NodeJS.Timeout
+
+
+    const requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body
+    };
+
+
+    return Promise.race([
+        fetch(`${BASE_URL_LIVE}/magic/create`, requestOptions)
+            .then(response => response.json()),
+        new Promise((resolve, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+            //  clearTimeout(timeoutId)
+        }).then(() => {
+            clearTimeout(timeoutId)
+        })
+
+    ])
+}
+
+
+
+export const createWalletIdentity = async () => {
+
+    let Token = await SecureStore.getItemAsync('Gateway-Token');
+
+    const myHeaders = {
+        'Authorization': `Bearer ${Token}`,
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
+    }
+
+
+    let timeoutId: NodeJS.Timeout
+
+
+    const requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+
+    };
+
+
+    return Promise.race([
+        fetch(`${BASE_URL_LIVE}/wallet/create-identity`, requestOptions)
+            .then(response => response.json()),
+        new Promise((resolve, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+            //  clearTimeout(timeoutId)
+        }).then(() => {
+            clearTimeout(timeoutId)
+        })
+
+    ])
+}
+export const getCCDWallet= async () => {
+
+    let Token = await SecureStore.getItemAsync('Gateway-Token');
+
+    const myHeaders = {
+        'Authorization': `Bearer ${Token}`,
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
+    }
+
+
+    let timeoutId: NodeJS.Timeout
+
+
+    const requestOptions = {
+        method: 'GET',
+        headers: myHeaders,
+
+    };
+
+
+    return Promise.race([
+        fetch(`${BASE_URL_LIVE}/wallet/concordium-wallet`, requestOptions)
+            .then(response => response.json()),
+        new Promise((resolve, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+            //  clearTimeout(timeoutId)
+        }).then(() => {
+            clearTimeout(timeoutId)
+        })
+
+    ])
+}
+
+
+
+
+
 
 
 export const getPointsHistory = {

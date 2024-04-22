@@ -139,7 +139,7 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance, nearBalance}: props) =>
                 defaultValue={defaultPointsConvertValue}
                 keyboardType={"number-pad"}
 
-                balanceText={`${nearBalance} Near`}
+                balanceText={`${nearBalance} CCD`}
                 onChangeText={(e) => {
                     handleChange('walletAmount')(e);
                 }}

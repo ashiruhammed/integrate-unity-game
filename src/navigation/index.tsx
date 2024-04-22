@@ -77,6 +77,7 @@ import ViewPoints from "../screens/wallets/ViewPoints";
 import GatewayToken from "../screens/wallets/GatewayToken";
 import Concordium from "../screens/wallets/Concordium";
 import MakeComment from "../screens/discover/MakeComment";
+import BrowserView from "../screens/wallets/BrowserView";
 
 const styles = StyleSheet.create({
     displayPhoto: {
@@ -292,6 +293,7 @@ function RootNavigator() {
                         <Stack.Screen name="BlockedUsers" component={BlockedUsers}/>
 
                         <Stack.Screen name="MyWallet" component={Wallet}/>
+                        <Stack.Screen name="BrowserView" component={BrowserView}/>
                         <Stack.Screen name="Leaderboard" component={Leaderboard}/>
                         <Stack.Screen name="Badges" component={Badges}/>
                         <Stack.Screen name="Settings" component={Settings}/>
