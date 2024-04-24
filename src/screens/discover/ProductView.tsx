@@ -47,7 +47,7 @@ import Animated, {
     withRepeat, withSequence, withSpring,
     withTiming
 } from "react-native-reanimated";
-import {useRefreshOnFocus} from "../../helpers";
+import {truncateString, useRefreshOnFocus} from "../../helpers";
 
 
 
@@ -404,7 +404,7 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
     useRefreshOnFocus(refetch)
     useRefreshOnFocus(fetchComments)
 
-
+//console.log(item)
     return (
 
         <>
@@ -801,7 +801,7 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
                         <Text style={[styles.friendsOnlineTitle, {
                             color: textColor
                         }]}>
-                            Statistics on Ether Vault
+                            Statistics on {item.name}
                         </Text>
 
 
@@ -810,18 +810,23 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
 
                             <View style={styles.vaultBoxImageWrap}>
                                 <Image
-                                    source={{uri: 'https://images.unsplash.com/photo-1611488006018-95b79a137ff5?q=80&w=2953&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'}}
+                                    source={{uri:item.productLogo}}
                                     style={styles.productsCardImage}
                                 />
                             </View>
 
                             <View style={styles.vaultBoxBody}>
                                 <Text style={styles.vaultTitleBody}>
-                                    Ether Vault
+                                    {item.name}
                                 </Text>
                                 <Text style={styles.vaultTextBody}>
-                                    A secure and easy-to-use wallet for managing your Ethereum and ERC-20...
+                                {truncateString(item.description,25)}
                                 </Text>
+
+
+                             {/*   <Text style={styles.vaultTextBody}>
+                                    A secure and easy-to-use wallet for managing your Ethereum and ERC-20...
+                                </Text>*/}
                             </View>
                         </View>
 
@@ -843,14 +848,14 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
                         </TouchableOpacity>
                     </View>
 
-                    <View style={styles.noticeTextWrap}>
+                    {/*<View style={styles.noticeTextWrap}>
                         <Text style={styles.commentBodyText}>
                             Ether Vault by Declan Rice was hunted by David in SaaS, NFTs, DeFi. Made by Tosin, Emmanuel,
                             David, Osazee, Joy, Susan, Richard. Featured on April 8th, 2023. Ether Vault is rated 5/5★
                             by 12
                             users. This is Ether vault first launch.
                         </Text>
-                    </View>
+                    </View>*/}
 
 
                     <View style={styles.otherDetails}>
@@ -865,7 +870,7 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
                         </View>
 
 
-                        <View style={styles.otherDetailsBox}>
+                     {/*   <View style={styles.otherDetailsBox}>
                             <Text style={styles.otherDetailsBoxTitle}>
                                 Product of the week
                             </Text>
@@ -873,7 +878,7 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
                                 x4
                             </Text>
                         </View>
-
+*/}
 
                         <View style={styles.otherDetailsBox}>
                             <Text style={styles.otherDetailsBoxTitle}>
@@ -986,7 +991,7 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
                                     This is a verification process to know if you really own <Text style={{
                                         fontFamily:Fonts.quickSandBold,
                                     color:'#000'
-                                }}>GATEWAYAPP</Text>
+                                }}>{item.name}</Text>
                                 </Text>
 
 
@@ -999,7 +1004,7 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
                                 Please enter an email address that matches the product domain <Text style={{
                                 fontFamily:Fonts.quickSandBold,
                                 color:'#000'
-                            }}>(gatewayapp.co).</Text>
+                            }}>({item.websiteUrl}).</Text>
                             </Text>
                             <TextInput
 

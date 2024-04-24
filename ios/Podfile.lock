@@ -142,9 +142,9 @@ PODS:
     - GoogleUtilities/Logger (~> 7.8)
   - FirebaseCoreExtension (10.7.0):
     - FirebaseCore (~> 10.0)
-  - FirebaseCoreInternal (10.23.0):
+  - FirebaseCoreInternal (10.24.0):
     - "GoogleUtilities/NSData+zlib (~> 7.8)"
-  - FirebaseInstallations (10.23.0):
+  - FirebaseInstallations (10.24.0):
     - FirebaseCore (~> 10.0)
     - GoogleUtilities/Environment (~> 7.8)
     - GoogleUtilities/UserDefaults (~> 7.8)
@@ -283,7 +283,7 @@ PODS:
     - FBLazyVector (= 0.73.6)
     - RCTRequired (= 0.73.6)
     - React-Core (= 0.73.6)
-  - ReachabilitySwift (5.2.1)
+  - ReachabilitySwift (5.2.2)
   - React (0.73.6):
     - React-Core (= 0.73.6)
     - React-Core/DevSupport (= 0.73.6)
@@ -1773,8 +1773,8 @@ SPEC CHECKSUMS:
   FirebaseAnalytics: f8133442ee6f8512e28ff19e62ce15398bfaeace
   FirebaseCore: e317665b9d744727a97e623edbbed009320afdd7
   FirebaseCoreExtension: f17247ba8c61e4d3c8d136b5e2de3cb4ac6a85b6
-  FirebaseCoreInternal: 6a292e6f0bece1243a737e81556e56e5e19282e3
-  FirebaseInstallations: 42d6ead4605d6eafb3b6683674e80e18eb6f2c35
+  FirebaseCoreInternal: bcb5acffd4ea05e12a783ecf835f2210ce3dc6af
+  FirebaseInstallations: 8f581fca6478a50705d2bd2abd66d306e0f5736e
   FirebaseMessaging: ac9062bcc35ed56e15a0241d8fd317022499baf8
   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
   glog: c5d68082e772fa1c511173d6b30a9de2c05a69a2
@@ -1791,7 +1791,7 @@ SPEC CHECKSUMS:
   RCT-Folly: 7169b2b1c44399c76a47b5deaaba715eeeb476c0
   RCTRequired: ca1d7414aba0b27efcfa2ccd37637edb1ab77d96
   RCTTypeSafety: 678e344fb976ff98343ca61dc62e151f3a042292
-  ReachabilitySwift: 5ae15e16814b5f9ef568963fb2c87aeb49158c66
+  ReachabilitySwift: 2128f3a8c9107e1ad33574c6e58e8285d460b149
   React: e296bcebb489deaad87326067204eb74145934ab
   React-callinvoker: d0b7015973fa6ccb592bb0363f6bc2164238ab8c
   React-Codegen: 627cd02719674bfc5612f2f8394b4da2bf03a7b2
@@ -1858,4 +1858,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: f1e32abc199f8b6e5e62177c57d6d2b6b138f23d
 
-COCOAPODS: 1.12.1
+COCOAPODS: 1.15.2

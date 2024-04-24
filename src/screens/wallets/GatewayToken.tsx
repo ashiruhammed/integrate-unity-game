@@ -4,9 +4,9 @@ import {Text, View, StyleSheet, ImageBackground, TouchableOpacity, Platform, Scr
 import {AntDesign, Entypo, Ionicons, Octicons} from "@expo/vector-icons";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
-import {useInfiniteQuery, useQueryClient} from "@tanstack/react-query";
+import {useInfiniteQuery, useQuery, useQueryClient} from "@tanstack/react-query";
 import Colors from "../../constants/Colors";
-import {userNotifications} from "../../action/action";
+import {getUserDashboard, userNotifications} from "../../action/action";
 import {RootStackScreenProps} from "../../../types";
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
 import {Fonts} from "../../constants/Fonts";
@@ -34,6 +34,7 @@ const GatewayToken = ({navigation}: RootStackScreenProps<'GatewayToken'>) => {
     const lightText = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
     const darkTextColor = theme == 'light' ? Colors.light.darkText : Colors.dark.text
 
+    const {isLoading: loadingUser,data:userDashboard, refetch:fetchDashboard} = useQuery(['getUserDashboard'], getUserDashboard, {})
 
     const openNotifications = () => {
         navigation.navigate('Notifications')
@@ -74,7 +75,7 @@ const GatewayToken = ({navigation}: RootStackScreenProps<'GatewayToken'>) => {
 
                         <View style={styles.pointWrap}>
                             <Ionicons name="gift" size={16} color="#22BB33"/>
-                            <Text style={styles.pointsText}>20000</Text>
+                            <Text style={styles.pointsText}>{userDashboard?.data?.totalPoint}</Text>
                         </View>
                     </View>
 
@@ -82,7 +83,7 @@ const GatewayToken = ({navigation}: RootStackScreenProps<'GatewayToken'>) => {
 
                         <ImageBackground style={styles.streaKIcon} resizeMode={'contain'}
                                          source={require('../../assets/images/streakicon.png')}>
-                            <Text style={styles.streakText}> 200</Text>
+                            <Text style={styles.streakText}> {userDashboard?.data?.currentDayStreak}</Text>
                         </ImageBackground>
 
                         <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}

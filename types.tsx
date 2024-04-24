@@ -71,6 +71,7 @@ export type RootStackParamList = {
     GatewayToken: undefined;
     MoreInformation: undefined;
     VisualRepresentation: undefined;
+    SearchUser: undefined;
     ProductView: {
         item: {
             id: string;

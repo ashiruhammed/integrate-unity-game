@@ -18,7 +18,7 @@ import {useInfiniteQuery, useMutation, useQuery, useQueryClient} from "@tanstack
 import Colors from "../../constants/Colors";
 import {
     getPointsHistory,
-    getPublicCommunities,
+    getPublicCommunities, getUserDashboard,
     getUserPoints,
     getUserWallets, redeemPoints,
     userNotifications
@@ -133,6 +133,7 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
 
     })
 
+    const {isLoading: loadingUser,data:userDashboard, refetch:fetchDashboard} = useQuery(['getUserDashboard'], getUserDashboard, {})
 
 
     const {
@@ -352,7 +353,7 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
 
                             <View style={styles.pointWrap}>
                                 <Ionicons name="gift" size={16} color="#22BB33"/>
-                                <Text style={styles.pointsText}>20000</Text>
+                                <Text style={styles.pointsText}>{userDashboard?.data?.totalPoint}</Text>
                             </View>
                         </View>
 
@@ -360,7 +361,7 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
 
                             <ImageBackground style={styles.streaKIcon} resizeMode={'contain'}
                                              source={require('../../assets/images/streakicon.png')}>
-                                <Text style={styles.streakText}> 200</Text>
+                                <Text style={styles.streakText}> {userDashboard?.data?.currentDayStreak}</Text>
                             </ImageBackground>
 
                             <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}

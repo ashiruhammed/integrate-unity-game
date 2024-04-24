@@ -491,33 +491,36 @@ const DiscoverProducts = ({navigation}: RootStackScreenProps<'DiscoverProducts'>
                     </View>
 
 
-                    <View style={styles.wrap}>
-
-                        <View style={styles.tagPill}>
-                            <Text style={styles.tagPillText}>
-                                Trending
-                            </Text>
-                        </View>
-                    </View>
 
 
-                    <View style={[styles.pageTitleWrap, {}]}>
-                        <Text style={[styles.pageTitle, {
-                            color: darkTextColor,
-                            width: '70%'
-                        }]}>
-                            Trending Products for the week
-                        </Text>
-                    </View>
 
-                    <View style={styles.productsContainer}>
+
+
 
 
                         {isLoading && <ActivityIndicator size={"small"} color={Colors.primaryColor}/>}
 
                         {
                             !isLoading && trending && trending?.data?.productHuntProjects.length > 0 &&
+                            <>
 
+                                <View style={styles.wrap}>
+
+                                    <View style={styles.tagPill}>
+                                        <Text style={styles.tagPillText}>
+                                            Trending
+                                        </Text>
+                                    </View>
+                                </View>
+                            <View style={[styles.pageTitleWrap, {}]}>
+                                <Text style={[styles.pageTitle, {
+                                    color: darkTextColor,
+                                    width: '70%'
+                                }]}>
+                                    Trending Products for the week
+                                </Text>
+                            </View>
+                            <View style={styles.productsContainer}>
 
                             <FlatList
 
@@ -532,8 +535,10 @@ const DiscoverProducts = ({navigation}: RootStackScreenProps<'DiscoverProducts'>
                                 showsHorizontalScrollIndicator={false}
                                 renderItem={renderItem}
                             />
+                            </View>
+                            </>
                         }
-                    </View>
+
 
 
                     <View style={styles.wrapSearch}>

@@ -18,7 +18,7 @@ import {useInfiniteQuery, useQuery, useQueryClient} from "@tanstack/react-query"
 import Colors from "../../constants/Colors";
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
 import {Fonts} from "../../constants/Fonts";
-import {getCCDWallet, getUserPoints, getUserWallets, userNotifications} from "../../action/action";
+import {getCCDWallet, getUserDashboard, getUserPoints, getUserWallets, userNotifications} from "../../action/action";
 import SegmentedControl from "../../components/segment-control/SegmentContol";
 import SegmentContolAlt from "../../components/segment-control/SegmentContolAlt";
 import MyCard from "../../components/wallets/cards/MyCard";
@@ -86,6 +86,7 @@ const Wallet = ({navigation}: RootTabScreenProps<'Learn'>) => {
         refetch: fetchPoints
     } = useQuery(['getUserPoints'], getUserPoints, {})
 
+    const {isLoading: loadingUser,data:userDashboard, refetch:fetchDashboard} = useQuery(['getUserDashboard'], getUserDashboard, {})
 
     const {isLoading: loadingWallets, data, isSuccess, isRefetching, refetch}
         = useQuery(['get-User-Wallets'], getUserWallets, {})
@@ -178,7 +179,7 @@ const Wallet = ({navigation}: RootTabScreenProps<'Learn'>) => {
 
                         <View style={styles.pointWrap}>
                             <Ionicons name="gift" size={16} color="#22BB33"/>
-                            <Text style={styles.pointsText}>20000</Text>
+                            <Text style={styles.pointsText}>{userDashboard?.data?.totalPoint}</Text>
                         </View>
                     </View>
 
@@ -186,7 +187,7 @@ const Wallet = ({navigation}: RootTabScreenProps<'Learn'>) => {
 
                         <ImageBackground style={styles.streaKIcon} resizeMode={'contain'}
                                          source={require('../../assets/images/streakicon.png')}>
-                            <Text style={styles.streakText}> 200</Text>
+                            <Text style={styles.streakText}> {userDashboard?.data?.currentDayStreak}</Text>
                         </ImageBackground>
 
                         <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}
@@ -225,7 +226,7 @@ const Wallet = ({navigation}: RootTabScreenProps<'Learn'>) => {
                 </View>
 
                 <IF condition={tabIndex == 0}>
-                    <MyCard totalPoint={points?.data?.totalPoint}/>
+                    <MyCard ccdBalance={ccdWallet?.success ? ccdWallet?.data?.data?.ccdBalance : '0'} totalPoint={points?.data?.totalPoint}/>
                 </IF>
 
                 <IF condition={tabIndex == 1}>

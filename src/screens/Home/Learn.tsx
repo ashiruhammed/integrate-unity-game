@@ -9,7 +9,7 @@ import {
     ImageBackground,
     Pressable,
     Image,
-    RefreshControl
+    RefreshControl, ActivityIndicator
 } from 'react-native';
 import {SafeAreaView} from "react-native-safe-area-context";
 import Colors from "../../constants/Colors";
@@ -18,65 +18,17 @@ import {useInfiniteQuery, useQuery, useQueryClient} from "@tanstack/react-query"
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
 import {Fonts} from "../../constants/Fonts";
 import {AntDesign, Ionicons, Octicons} from "@expo/vector-icons";
-import {aiAdventures, getAllAdventure, userNotifications} from "../../action/action";
+import {aiAdventures, getAllAdventure, getUserDashboard, userNotifications} from "../../action/action";
 import {RootTabScreenProps} from "../../../types";
 import ScrollingButtonMenu from "react-native-scroll-menu";
 import SegmentedControl from "../../components/segment-control/SegmentContol";
 import CircularProgress from "../../components/ProgressBar";
 import {FlashList} from "@shopify/flash-list";
 import {IF} from "../../helpers/ConditionJsx";
+import AIAdventures from "../learn/AIAdvenrures";
 
 
-const adventures = [
-    {
-        "id": "1f31d430-58a1-46c0-ab1b-aa24c6948387",
-        "name": "Test Adventure 2",
-        "imageUrl": "https://images.unsplash.com/photo-1682687982167-d7fb3ed8541d?q=80&w=2971&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-        "description": "Test 2 Adventure Description",
-        "expectations": "You go sha learn",
-        "gains": "You'll learn",
-        "earnings": "You no go see shege. You will earn some cool reward if you complete this adventure",
-        "difficultyLevel": "BEGINNER",
-        "enrollments": 1,
-        "rewardPoint": 0,
-        "isDeleted": false,
-        "creatorId": "28890375-4206-4494-ba49-fdee59fc035f",
-        "createdAt": "2022-11-28T23:51:38.403Z",
-        "updatedAt": "2022-12-04T14:26:21.645Z",
-        "deletedAt": null,
-        "creator": {
-            "id": "28890375-4206-4494-ba49-fdee59fc035f",
-            "avatar": "",
-            "username": null,
-            "fullName": "Test Yusuf"
-        },
-        "startedAdventure": true
-    },
-    {
-        "id": "aaf2a242-d678-4fe0-a3b8-db467cbd2b7c",
-        "name": "Test Adventure 2",
-        "imageUrl": "https://images.unsplash.com/photo-1523961131990-5ea7c61b2107?q=80&w=2048&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-        "description": "Test 2 Adventure Description",
-        "expectations": "You go sha learn",
-        "gains": "You'll learn",
-        "earnings": "You no go see shege. You will earn some cool reward if you complete this adventure",
-        "difficultyLevel": "BEGINNER",
-        "enrollments": 1,
-        "rewardPoint": 0,
-        "isDeleted": false,
-        "creatorId": "28890375-4206-4494-ba49-fdee59fc035f",
-        "createdAt": "2022-11-28T23:49:14.264Z",
-        "updatedAt": "2022-12-04T15:09:23.339Z",
-        "deletedAt": null,
-        "creator": {
-            "id": "28890375-4206-4494-ba49-fdee59fc035f",
-            "avatar": "",
-            "username": null,
-            "fullName": "Test Yusuf"
-        },
-        "startedAdventure": false
-    },
-]
+
 
 interface props {
     item:{
@@ -84,9 +36,11 @@ interface props {
         name:string,
         rewardPoint:number,
         startedAdventure:boolean,
+
 },
     theme:string
 }
+
 const LearnCardItem = ({item,theme}:props) =>{
     const backgroundColor = theme == 'light' ? "#FFFFFF" : "#141414"
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
@@ -173,6 +127,10 @@ const Learn = ({navigation}: RootTabScreenProps<'Learn'>) => {
 
 
     const {data,isLoading} = useQuery(['aiAdventures'], aiAdventures)
+    const {isLoading: loadingUser,data:userDashboard, refetch:fetchDashboard} = useQuery(['getUserDashboard'], getUserDashboard, {
+
+
+    })
 
 
     const {
@@ -237,9 +195,10 @@ const Learn = ({navigation}: RootTabScreenProps<'Learn'>) => {
     ), [theme])
 
 
-    const create = () => {
-      navigation.navigate('CreateAIAdventure')
-    }
+
+
+
+
 
     return (
         <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
@@ -249,7 +208,7 @@ const Learn = ({navigation}: RootTabScreenProps<'Learn'>) => {
 
                     <View style={styles.pointWrap}>
                         <Ionicons name="gift" size={16} color="#22BB33"/>
-                        <Text style={styles.pointsText}>20000</Text>
+                        <Text style={styles.pointsText}>{userDashboard?.data?.totalPoint}</Text>
                     </View>
                 </View>
 
@@ -257,7 +216,7 @@ const Learn = ({navigation}: RootTabScreenProps<'Learn'>) => {
 
                     <ImageBackground style={styles.streaKIcon} resizeMode={'contain'}
                                      source={require('../../assets/images/streakicon.png')}>
-                        <Text style={styles.streakText}> 200</Text>
+                        <Text style={styles.streakText}> {userDashboard?.data?.currentDayStreak}</Text>
                     </ImageBackground>
 
                     <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}
@@ -297,6 +256,8 @@ const Learn = ({navigation}: RootTabScreenProps<'Learn'>) => {
 
             <IF condition={tabIndex === 0}>
                 <View style={styles.flatList}>
+                    {loadingAdventures && <ActivityIndicator size={"small"} color={Colors.primaryColor}/>}
+                    {loadingAdventures &&
                     <FlashList
                         estimatedItemSize={200}
                         // refreshing={isLoading}
@@ -304,10 +265,12 @@ const Learn = ({navigation}: RootTabScreenProps<'Learn'>) => {
 
                         scrollEnabled
                         showsVerticalScrollIndicator={false}
-                        data={adventures}
+                        data={allAdventure?.pages[0]?.data.result}
                         renderItem={renderItem}
                         keyExtractor={keyExtractor}
                         onEndReachedThreshold={0.3}
+                        ListFooterComponent={isFetchingNextPage ?
+                            <ActivityIndicator size="small" color={Colors.primaryColor}/> : null}
                         /*refreshControl={
                             <RefreshControl
                                 tintColor={Colors.primary}
@@ -318,39 +281,15 @@ const Learn = ({navigation}: RootTabScreenProps<'Learn'>) => {
 
 
                     />
+                    }
                 </View>
             </IF>
 
             <IF condition={tabIndex === 1}>
                 <View style={styles.flatList}>
 
-                    <TouchableOpacity onPress={create} activeOpacity={0.8} style={styles.createBtn}>
-                        <AntDesign name="pluscircle" size={14} color={Colors.primaryColor} />
-                        <Text style={styles.createBtnText}>
-                            Create an adventure with AI
-                        </Text>
-                    </TouchableOpacity>
-                    <FlashList
-                        estimatedItemSize={200}
-                        // refreshing={isLoading}
-                        //  ListHeaderComponent={renderHeader}
+                   <AIAdventures/>
 
-                        scrollEnabled
-                        showsVerticalScrollIndicator={false}
-                        data={adventures}
-                        renderItem={renderItem}
-                        keyExtractor={keyExtractor}
-                        onEndReachedThreshold={0.3}
-                        /*refreshControl={
-                            <RefreshControl
-                                tintColor={Colors.primary}
-                                refreshing={refreshing}
-                                onRefresh={refresh}
-                            />
-                        }*/
-
-
-                    />
                 </View>
             </IF>
 

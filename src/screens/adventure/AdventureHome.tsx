@@ -32,7 +32,7 @@ import {
     getModuleByAdventure, getModuleTask, getNextAdventure, getQuizByLesson,
     startAdventure, submitTask
 } from "../../action/action";
-import {useRefreshOnFocus} from "../../helpers";
+import {truncate, useRefreshOnFocus} from "../../helpers";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
 import dayjs from "dayjs";
 import Animated, {
@@ -157,7 +157,8 @@ const MissionCard = ({
 
                         <View style={styles.nameStars}>
                             <Text style={styles.missionTitle}>
-                                {name}
+
+                                {name ? truncate(name,35) : ''}
                             </Text>
                             <Entypo name="dot-single" size={24} color="#fff"/>
 
@@ -167,7 +168,7 @@ const MissionCard = ({
 
                         </View>
                         <Text style={styles.reviewBodyText}>
-                            {description}
+                            {description ? truncate(description,45) : ''}
                         </Text>
 
                     </TouchableOpacity>
@@ -409,20 +410,13 @@ useRefreshOnFocus(refetch)
                     </View>
 
                 </View>
-                {/*
-          {
-                    isFetching && <ActivityIndicator size="large" color={Colors.primaryColor}
-                                                     style={[StyleSheet.absoluteFill, {
-                                                         zIndex: 10,
-                                                         backgroundColor: 'rgba(0,0,0,0.5)'
-                                                     }]}/>
-                }*/}
+
 
 
                 <View style={styles.container}>
 
 <View style={{
-    height:50,
+
     width:'100%'
 }}>
 
@@ -608,7 +602,7 @@ const styles = StyleSheet.create({
         height: '100%'
     },
     container: {
-        top: -30,
+        top: -50,
         zIndex: 3,
         borderTopRightRadius: 50,
         borderTopLeftRadius: 50,
@@ -664,7 +658,7 @@ const styles = StyleSheet.create({
 
         width: '100%',
         backgroundColor: "#ccc",
-        height: heightPixel(280),
+        height: heightPixel(300),
         alignItems: 'center',
 
     },

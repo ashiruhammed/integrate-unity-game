@@ -14,16 +14,20 @@ import {SafeAreaView} from "react-native-safe-area-context";
 import Colors from "../../constants/Colors";
 import {RootTabScreenProps} from "../../../types";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
-import {useInfiniteQuery, useQueryClient} from "@tanstack/react-query";
-import {wait} from "../../helpers";
+import {useInfiniteQuery, useQuery, useQueryClient} from "@tanstack/react-query";
+import {useRefreshOnFocus, wait} from "../../helpers";
 import {Ionicons, Octicons} from "@expo/vector-icons";
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
-import {userNotifications} from "../../action/action";
+import {getUserDashboard, userNotifications} from "../../action/action";
 import {Fonts} from "../../constants/Fonts";
 
 import GameIconLarge from "../../assets/images/svg/GameIconLarge";
 import {FlatListExtra} from "../../components/flatlist-extra";
 import {BlurView} from "expo-blur";
+import {updateUserDashboard} from "../../app/slices/userSlice";
+import LearnSVG from "../../assets/images/svg/LearnSVG";
+import ProductIcon from "../../assets/images/svg/ProductIcon";
+import StreakIcon from "../../assets/images/svg/StreakIcon";
 
 
 const users = [
@@ -74,33 +78,6 @@ const Games = [{
     category:"Single-player"
 }]
 
-const Achievements = [
-    {
-        title: 'Games',
-        subText: '200 Played',
-        id: '1',
-        bg: '#FFE8EC',
-        color: Colors.primaryColor
-    }, {
-        title: 'Learn',
-        subText: '60 Courses Completed',
-        id: '2',
-        bg: "#ECFFEE",
-        color: '#22BB33'
-    }, {
-        title: 'Products',
-        subText: '9,000 Products',
-        id: '3',
-        bg: '#FFF1EB',
-        color: '#FFAA88'
-    }, {
-        title: 'Highest Streak',
-        subText: '600 Daily Streaks',
-        id: '4',
-        bg: '#F0F3FF',
-        color: '#325AE8'
-    },
-]
 
 interface AchievementsProps {
     item: {
@@ -108,7 +85,7 @@ interface AchievementsProps {
         subText: string,
         bg: string,
         color: string,
-
+icon:React.JSX.Element
 
     }
 
@@ -193,9 +170,11 @@ const AchievementsItem = ({item}: AchievementsProps) => {
                 </Text>
             </View>
 
-            <View style={styles.iconWrap}>
+            <View style={[styles.iconWrap,{
+                backgroundColor: item.color
+            }]}>
 
-                <GameIconLarge/>
+                {item.icon}
             </View>
 
         </Pressable>
@@ -227,6 +206,47 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
     const openNotifications = () => {
         navigation.navigate('Notifications')
     }
+
+    const {isLoading: loadingUser,data:userDashboard, isRefetching, refetch} = useQuery(['getUserDashboard'], getUserDashboard, {
+
+
+    })
+
+
+
+    const Achievements = [
+        {
+            icon:<GameIconLarge/>,
+            title: 'Games',
+            subText: `${!userDashboard?.data?.gamesPlayed ? '0' : userDashboard?.data?.gamesPlayed} Played`,
+            id: '1',
+            bg: '#FFE8EC',
+            color: Colors.primaryColor
+        }, {
+        icon:<LearnSVG/>,
+            title: 'Learn',
+            subText: `${!userDashboard?.data?.completedAdventures ? '0': userDashboard?.data?.completedAdventures} Courses Completed`,
+            id: '2',
+            bg: "#ECFFEE",
+            color: '#22BB33'
+        }, {
+            icon:<ProductIcon/>,
+            title: 'Products',
+            subText: `${!userDashboard?.data?.totalDiscoveryProduct ? '0' : userDashboard?.data?.totalDiscoveryProduct} Products`,
+            id: '3',
+            bg: '#FFF1EB',
+            color: '#FFAA88'
+        }, {
+            icon:<StreakIcon/>,
+            title: 'Highest Streak',
+            subText: `${!userDashboard?.data?.currentDayStreak ? '0' : userDashboard?.data?.currentDayStreak} Daily Streaks`,
+            id: '4',
+            bg: '#F0F3FF',
+            color: '#325AE8'
+        },
+    ]
+
+
 
     const {
         data: notifications,
@@ -260,6 +280,10 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
         [],
     );
 
+//console.log(userDashboard)
+
+useRefreshOnFocus(refetch)
+
     return (
         <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
             <ScrollView
@@ -277,7 +301,7 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
 
                         <View style={styles.pointWrap}>
                             <Ionicons name="gift" size={16} color="#22BB33"/>
-                            <Text style={styles.pointsText}>20000</Text>
+                            <Text style={styles.pointsText}>{userDashboard?.data?.totalPoint}</Text>
                         </View>
                     </View>
 

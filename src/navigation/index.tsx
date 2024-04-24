@@ -78,6 +78,7 @@ import GatewayToken from "../screens/wallets/GatewayToken";
 import Concordium from "../screens/wallets/Concordium";
 import MakeComment from "../screens/discover/MakeComment";
 import BrowserView from "../screens/wallets/BrowserView";
+import SearchUser from "../screens/discover/create/SearchUser";
 
 const styles = StyleSheet.create({
     displayPhoto: {
@@ -294,6 +295,10 @@ function RootNavigator() {
 
                         <Stack.Screen name="MyWallet" component={Wallet}/>
                         <Stack.Screen name="BrowserView" component={BrowserView}/>
+                        <Stack.Screen name="SearchUser" options={{
+                            animation:'fade_from_bottom',
+                            presentation:'modal'
+                        }} component={SearchUser}/>
                         <Stack.Screen name="Leaderboard" component={Leaderboard}/>
                         <Stack.Screen name="Badges" component={Badges}/>
                         <Stack.Screen name="Settings" component={Settings}/>

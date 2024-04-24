@@ -12,8 +12,8 @@ import Colors from "../../constants/Colors";
 import Animated, {useAnimatedStyle, useSharedValue, withRepeat, withSpring, withTiming} from "react-native-reanimated";
 import {fontPixel, heightPixel, pixelSizeVertical} from "../../helpers/normalize";
 import {Fonts} from "../../constants/Fonts";
-const BASE_URL_LIVE = __DEV__ ? DEV_BASE_URL : BASE_URL
-
+//const BASE_URL_LIVE = __DEV__ ? DEV_BASE_URL : BASE_URL
+const BASE_URL_LIVE = DEV_BASE_URL
 
 
 

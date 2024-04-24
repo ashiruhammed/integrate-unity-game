@@ -37,8 +37,8 @@ import * as SecureStore from "expo-secure-store";
 import {setResponse} from "../../app/slices/userSlice";
 import {BASE_URL, ACCESS_TOKEN, DEV_BASE_URL} from "@env";
 //const access_token = 'JGFyZ29uMmlkJHY9MTkkbT00MDk2LHQ9MyxwPTEkWnJjNEVDR05JTEYzU3B2WUJLZVBZdyRtdnNacUl6VVg3SG1UV2gvdjhQZXZGUXJOa1hWYUFHRkVKV3dCd0NobDBV'
-const BASE_URL_LIVE = __DEV__ ? DEV_BASE_URL : BASE_URL
-
+//const BASE_URL_LIVE = __DEV__ ? DEV_BASE_URL : BASE_URL
+const BASE_URL_LIVE = DEV_BASE_URL
 import EventSource, { EventSourceListener } from "react-native-sse";
 //import "react-native-url-polyfill/auto"; // Use URL polyfill in React Native
 
@@ -128,7 +128,7 @@ const CreateAIAdventure = ({navigation}: RootStackScreenProps<'CreateAIAdventure
 
 
 
- /*   const generateAdventure = async (courseTitle:string) => {
+   const generateAdventure = async (courseTitle:string) => {
         try {
 
             setIsAdLoading(true)
@@ -177,10 +177,10 @@ console.log(value)
                         adventureId = parsedData?.adventureId
                         progress = parsedData?.progress
 
-                       /!* dispatch({
+                        dispatch({
                             type: 'SET_PROGRESS',
                             payload: progress,
-                        });*!/
+                        });
 
 
                         console.log({ adventureId, progress })
@@ -226,7 +226,7 @@ console.log(value)
         // } finally {
         //   setLoadingToFalse();
         // }
-    };*/
+    };
 
 
 

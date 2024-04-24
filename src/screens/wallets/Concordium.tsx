@@ -16,7 +16,13 @@ import {SafeAreaView} from "react-native-safe-area-context";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
 import {useInfiniteQuery, useQuery, useQueryClient, useMutation} from "@tanstack/react-query";
 import Colors from "../../constants/Colors";
-import {createWalletIdentity, getCCDWallet, userNotifications, withdrawFromWallet} from "../../action/action";
+import {
+    createWalletIdentity,
+    getCCDWallet, getUserDashboard,
+    userNotifications,
+    walletTransactions,
+    withdrawFromWallet
+} from "../../action/action";
 import {RootStackScreenProps} from "../../../types";
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
 import {Fonts} from "../../constants/Fonts";
@@ -38,6 +44,7 @@ import * as yup from "yup";
 import AdvancedTextInput from "../../components/inputs/AdvancedTextInput";
 import TextInput from "../../components/inputs/TextInput";
 import {setResponse} from "../../app/slices/userSlice";
+import Toast from "../../components/Toast";
 
 
 const formSchema = yup.object().shape({
@@ -238,10 +245,16 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
                 "token": "near"
             })
 
-            withdrawNow({body})
+            withdrawNow(body)
 
         }
     });
+
+   const {data:transactions,isLoading:loadingTransactions} = useQuery(['walletTransactions'],walletTransactions)
+
+    const {isLoading: loadingUser,data:userDashboard, refetch:fetchDashboard} = useQuery(['getUserDashboard'], getUserDashboard, {})
+
+
 
     const startNow = () => {
         mutate()
@@ -260,7 +273,7 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
     return (
 
         <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
-
+            <Toast message={responseMessage} state={responseState} type={responseType}/>
             <ScrollView
 
                 style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {
@@ -273,7 +286,7 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
 
                         <View style={styles.pointWrap}>
                             <Ionicons name="gift" size={16} color="#22BB33"/>
-                            <Text style={styles.pointsText}>20000</Text>
+                            <Text style={styles.pointsText}>{userDashboard?.data?.totalPoint}</Text>
                         </View>
                     </View>
 
@@ -281,7 +294,7 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
 
                         <ImageBackground style={styles.streaKIcon} resizeMode={'contain'}
                                          source={require('../../assets/images/streakicon.png')}>
-                            <Text style={styles.streakText}> 200</Text>
+                            <Text style={styles.streakText}> {userDashboard?.data?.currentDayStreak}</Text>
                         </ImageBackground>
 
                         <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}

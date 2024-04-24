@@ -31,6 +31,8 @@ import {BottomSheetBackdrop, BottomSheetModal, BottomSheetModalProvider, BottomS
 import {
     BottomSheetDefaultBackdropProps
 } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
+import dayjs from "dayjs";
+import FastImage from "react-native-fast-image";
 
 
 const MoreInformation = ({navigation}: RootStackScreenProps<'MoreInformation'>) => {
@@ -217,6 +219,10 @@ const MoreInformation = ({navigation}: RootStackScreenProps<'MoreInformation'>) 
     }
 
 
+    const openSearch = () =>{
+        navigation.navigate('SearchUser')
+    }
+
     return (
         <>
 
@@ -296,12 +302,23 @@ const MoreInformation = ({navigation}: RootStackScreenProps<'MoreInformation'>) 
 
                 </View>
                 <View style={styles.stepsBoxRight}>
+                    <View style={styles.stepsBoxRightWrap}>
+
+
+
+
                     <TouchableOpacity onPress={showDatePicker} activeOpacity={0.8} style={styles.createBtn}>
                         <AntDesign name="pluscircle" size={14} color={Colors.primaryColor}/>
                         <Text style={styles.createBtnText}>
                             Schedule a Launch Date
                         </Text>
                     </TouchableOpacity>
+
+                        <Text style={styles.contentLauchDate}>
+                            {dayjs(contentLauchDate).format('ddd, DD MMM YYYY')}
+                        </Text>
+                    </View>
+
                 </View>
 
                 <View style={styles.productBanner}>
@@ -342,8 +359,8 @@ const MoreInformation = ({navigation}: RootStackScreenProps<'MoreInformation'>) 
                     </Text>
                 </View>
 
-                <View style={styles.searchBoxWrap}>
-                    <SearchInput placeholder={'Search products here'} value={searchValue}/>
+                <Pressable onPress={openSearch} style={styles.searchBoxWrap}>
+                    <SearchInput  placeholder={'Search username here'} value={searchValue}/>
 
                     <View style={[styles.searchIcon, {
                         borderColor
@@ -352,7 +369,9 @@ const MoreInformation = ({navigation}: RootStackScreenProps<'MoreInformation'>) 
                         <AntDesign name="search1" size={18} color="black"/>
                     </View>
 
-                </View>
+                </Pressable>
+
+
 
 
                 <Pressable onPress={launchProduct} style={[styles.claimBtn, {
@@ -600,6 +619,13 @@ const styles = StyleSheet.create({
         alignItems: 'flex-start',
         justifyContent: 'flex-end',
     },
+    stepsBoxRightWrap: {
+
+        height: heightPixel(65),
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+        justifyContent: 'flex-start',
+    },
     iconBox: {
         backgroundColor: "#FFEDED",
         borderRadius: 100,
@@ -609,7 +635,13 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
 
     },
+    contentLauchDate: {
+        marginTop:8,
+        fontSize: fontPixel(12),
+        fontFamily: Fonts.quicksandSemiBold,
+        color: "#181818",
 
+    },
     mainInfo: {
 
         borderRadius: 100,
@@ -786,7 +818,8 @@ const styles = StyleSheet.create({
         color: "#000",
         fontSize: fontPixel(14),
         fontFamily: Fonts.quickSandBold
-    }
+    },
+
 
 
 })

@@ -35,7 +35,7 @@ import {
 } from './notification';
 import { Settings } from 'react-native-fbsdk-next'
 import appsFlyer from 'react-native-appsflyer';
-import {BASE_URL,AppID} from "@env";
+import {BASE_URL,AppID,DEV_BASE_URL,ACCESS_TOKEN} from "@env";
 import {logoutUser} from "./src/app/slices/userSlice";
 import {fontPixel, heightPixel} from "./src/helpers/normalize";
 import {Colors} from "react-native/Libraries/NewAppScreen";
@@ -46,6 +46,8 @@ import VersionCheck from 'react-native-version-check';
 Settings.initializeSDK();
 Settings.setAppID(AppID);
 enableScreens()
+
+const BASE_URL_LIVE = DEV_BASE_URL
 
 appsFlyer.initSdk(
     {
@@ -221,6 +223,7 @@ export default function App() {
                })
                const myHeaders = {
                    'Content-Type': 'application/json',
+                   'x-access-token': ACCESS_TOKEN,
                    'Authorization': `Bearer ${BearerToken}`
                }
                const requestOptions = {
@@ -229,7 +232,7 @@ export default function App() {
                    body: body,
                };
                const promise = Promise.race([
-                   fetch(`${BASE_URL}/preferences/update`, requestOptions)
+                   fetch(`${BASE_URL_LIVE}/preferences/update`, requestOptions)
                        .then(response => response.json()),
                    new Promise((resolve, reject) => {
                        //  clearTimeout(timeoutId)
