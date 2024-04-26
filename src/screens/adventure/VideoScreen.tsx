@@ -742,14 +742,14 @@ const styles = StyleSheet.create({
 
         paddingHorizontal: pixelSizeHorizontal(15),
         width: '100%',
-        height: heightPixel(100)
+        minHeight: heightPixel(100)
     },
     title: {
         fontFamily: Fonts.quickSandBold,
         fontSize: fontPixel(20)
     },
     videoContainer: {
-
+marginBottom:30,
         width: '100%',
         alignItems: 'center',
     },

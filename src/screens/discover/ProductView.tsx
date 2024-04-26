@@ -340,7 +340,7 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
     });
 
 
-    const keyExtractor = useCallback((item: { id: any; }) => item.id, [],)
+    const keyExtractor = useCallback((item: { id: string; }) => item.id, [],)
     const renderItem = useCallback(({item}) => (
         <ProductCardItem item={item}/>
     ), [])
@@ -413,7 +413,7 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
     useRefreshOnFocus(refetch)
     useRefreshOnFocus(fetchComments)
 
-//console.log(comments?.data?.result)
+//console.log(comments?.data?.result[0])
     return (
 
         <>
@@ -612,7 +612,7 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
 
 
                             <View  style={styles.tagItemContainer}>
-                                {item.categories.map((cat:{id:string,name:string})=>(
+                                {item?.categories.map((cat:{id:string,name:string})=>(
                                 <View key={cat.id} style={styles.tagItem}>
                                     <Text style={styles.tagItemText}>
                                         {cat.name}
@@ -743,7 +743,7 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
                         !loadingComments && comments && comments?.data?.result.length > 0 &&
 
                         comments?.data?.result.map((comment)=>(
-                            <View style={styles.commentCard}>
+                            <View key={comment.id} style={styles.commentCard}>
                                 <View style={styles.commentCardTop}>
                                     <View style={styles.commentUserAvatar}>
                                         <Image source={{uri: !comment.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : comment.avatar}}
