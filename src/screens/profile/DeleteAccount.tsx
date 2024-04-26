@@ -24,7 +24,8 @@ import PhoneInputText from "../../components/inputs/PhoneInputText";
 import {useFormik} from "formik";
 import * as yup from "yup";
 import PinInput from "../../components/inputs/PinInput";
-import {cleanData} from "../../app/slices/dataSlice";
+import {addNotificationItem, cleanData} from "../../app/slices/dataSlice";
+import SwipeAnimatedToast from "../../components/toasty";
 
 
 const formSchema = yup.object().shape({
@@ -93,24 +94,24 @@ const DeleteAccount = () => {
         onSuccess: async (data) => {
 
             if (data.success) {
-                dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'success',
-                }))
 
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'success',
+                    body:  data.message,
+                }))
                 openSheet()
 
             } else {
 
 
                 await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
-                dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'error',
-                }))
 
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body:  data.message,
+                }))
 
                 /*  navigation.navigate('EmailConfirm', {
                       email:contentEmail
@@ -121,12 +122,12 @@ const DeleteAccount = () => {
         },
 
         onError: (err) => {
-            dispatch(setResponse({
-                responseMessage: err.message,
-                responseState: true,
-                responseType: 'error',
-            }))
 
+            dispatch(addNotificationItem({
+                id: Math.random(),
+                type: 'error',
+                body:  err.message,
+            }))
 
         },
         onSettled: () => {
@@ -145,13 +146,12 @@ const DeleteAccount = () => {
 
 
                 await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
-                dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'error',
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body:  data.message,
                 }))
-
-
                 /*  navigation.navigate('EmailConfirm', {
                       email:contentEmail
                   })*/
@@ -161,12 +161,12 @@ const DeleteAccount = () => {
         },
 
         onError: (err) => {
-            dispatch(setResponse({
-                responseMessage: err.message,
-                responseState: true,
-                responseType: 'error',
-            }))
 
+            dispatch(addNotificationItem({
+                id: Math.random(),
+                type: 'error',
+                body:  err.message,
+            }))
 
         },
         onSettled: () => {
@@ -213,20 +213,7 @@ const DeleteAccount = () => {
         mutate()
     }
 
-    useEffect(() => {
-        // console.log(user)
-        let time: NodeJS.Timeout | undefined;
-        if (responseState || responseMessage) {
 
-            time = setTimeout(() => {
-                dispatch(unSetResponse())
-            }, 3000)
-
-        }
-        return () => {
-            clearTimeout(time)
-        };
-    }, [responseState, responseMessage])
 
 
     return (
@@ -234,7 +221,7 @@ const DeleteAccount = () => {
 
 
             <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
-                <Toast message={responseMessage} state={responseState} type={responseType}/>
+                <SwipeAnimatedToast/>
                 <KeyboardAwareScrollView
                     style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {
                     backgroundColor

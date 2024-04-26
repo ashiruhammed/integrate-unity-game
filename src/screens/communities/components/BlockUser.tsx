@@ -9,11 +9,14 @@ import {fontPixel, heightPixel, pixelSizeHorizontal, widthPixel} from "../../../
 import {Fonts} from "../../../constants/Fonts";
 import NavBar from "../../../components/layout/NavBar";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
-import {blockUser, unFollowCommunity} from "../../../action/action";
-import {setResponse} from "../../../app/slices/userSlice";
-import {CommunityStackScreenProps, RootStackScreenProps} from "../../../../types";
+import {blockUser} from "../../../action/action";
+
+import {RootStackScreenProps} from "../../../../types";
 import {RectButton} from "../../../components/RectButton";
-import Toast from "../../../components/Toast";
+
+import SwipeAnimatedToast from "../../../components/toasty";
+import {addNotificationItem} from "../../../app/slices/dataSlice";
+
 
 const BlockUser = ({navigation, route}: RootStackScreenProps<'BlockUser'>) => {
 
@@ -37,10 +40,12 @@ const {userId} = route.params
         onSuccess: async (data) => {
             if (data.success) {
 
-                dispatch(setResponse({
-                    responseMessage: "User blocked, thank you for keeping the community clean",
-                    responseState: true,
-                    responseType: 'success',
+
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'success',
+                    body: "User blocked, thank you for keeping the community clean",
                 }))
                 navigation.navigate('Dashboard', {
                     screen: 'Community'
@@ -49,12 +54,12 @@ const {userId} = route.params
 
             } else {
 
-                dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'error',
-                }))
 
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body:data.message,
+                }))
                 /*  navigation.navigate('EmailConfirm', {
                       email:contentEmail
                   })*/
@@ -64,10 +69,12 @@ const {userId} = route.params
         },
         onError: (error) => {
 
-            dispatch(setResponse({
-                responseMessage: error.message,
-                responseState: true,
-                responseType: 'error',
+
+
+            dispatch(addNotificationItem({
+                id: Math.random(),
+                type: 'error',
+                body:error.message,
             }))
         },
         onSettled: () => {
@@ -116,7 +123,7 @@ const body = JSON.stringify({
             backgroundColor
         }]}>
             <NavBar title={"What went wrong?"}/>
-            <Toast message={responseMessage} state={responseState} type={responseType}/>
+            <SwipeAnimatedToast/>
             <View style={{
                 flex:1,
                 width:'100%',

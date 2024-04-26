@@ -25,6 +25,8 @@ import {blockedUsers, blockUser, getAllBadges, unblockUser} from "../../action/a
 import {useRefreshOnFocus} from "../../helpers";
 import {Fonts} from "../../constants/Fonts";
 import {setResponse} from "../../app/slices/userSlice";
+import SwipeAnimatedToast from "../../components/toasty";
+import {addNotificationItem} from "../../app/slices/dataSlice";
 
 
 interface cardProps {
@@ -38,10 +40,10 @@ interface cardProps {
         "isDeleted": false,
         "updatedAt": string,
         "user":  {
-    "avatar": "https://res.cloudinary.com/dj0rcdagd/image/upload/v1672831475/qrnsqbcke3e4ofuycz01.jpg",
-        "fullName": "Joy joe",
-        "id": "3b1cf0b2-13e5-4301-8513-c789760637c5",
-        "username": "gold",
+    "avatar": string,
+        "fullName":string,
+        "id": string,
+        "username": string,
 },
     },
 
@@ -143,22 +145,23 @@ const BlockedUsers = ({navigation}: RootStackScreenProps<'BlockedUsers'>) => {
         onSuccess: async (data) => {
             if (data.success) {
 
-                dispatch(setResponse({
-                    responseMessage: "User unblocked",
-                    responseState: true,
-                    responseType: 'success',
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'success',
+                    body: data.message,
                 }))
                 refetch()
 
 
             } else {
 
-                dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'error',
-                }))
 
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body: data.message,
+                }))
                 /*  navigation.navigate('EmailConfirm', {
                       email:contentEmail
                   })*/
@@ -168,10 +171,11 @@ const BlockedUsers = ({navigation}: RootStackScreenProps<'BlockedUsers'>) => {
         },
         onError: (error) => {
 
-            dispatch(setResponse({
-                responseMessage: error.message,
-                responseState: true,
-                responseType: 'error',
+
+            dispatch(addNotificationItem({
+                id: Math.random(),
+                type: 'error',
+                body: error.message,
             }))
         },
         onSettled: () => {
@@ -202,7 +206,7 @@ const body = JSON.stringify({
 
 
             <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
-                <Toast message={responseMessage} state={responseState} type={responseType}/>
+                <SwipeAnimatedToast/>
                 <NavBar title={"Blocked Users"}/>
                 <View style={styles.flatlist}>
 

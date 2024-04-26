@@ -12,15 +12,18 @@ import {RectButton} from "../../../components/RectButton";
 import * as Clipboard from "expo-clipboard";
 import {useQuery} from "@tanstack/react-query";
 import {generateReferralCode} from "../../../action/action";
-import {useAppSelector} from "../../../app/hooks";
+import {useAppDispatch, useAppSelector} from "../../../app/hooks";
 import {truncate, truncateString} from "../../../helpers";
 import Toast from "../../../components/Toast";
 import {unSetResponse} from "../../../app/slices/userSlice";
+import SwipeAnimatedToast from "../../../components/toasty";
+import {addNotificationItem} from "../../../app/slices/dataSlice";
 
 
 const ReferAFriend = () => {
 
 
+    const dispatch = useAppDispatch()
     const dataSlice = useAppSelector(state => state.data)
     const user = useAppSelector(state => state.user)
     const {theme} = dataSlice
@@ -40,6 +43,12 @@ const ReferAFriend = () => {
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
     const copyToClipboard = async (content: string) => {
         await Clipboard.setStringAsync(content);
+
+        dispatch(addNotificationItem({
+            id: Math.random(),
+            type: 'info',
+            body:  "Referral code copied",
+        }))
         setCopied(true)
     };
 
@@ -63,27 +72,14 @@ const ReferAFriend = () => {
     };
 
 
-    useEffect(() => {
 
-        let time: NodeJS.Timeout | undefined;
-        if (copied) {
-
-            time = setTimeout(() => {
-                setCopied(false)
-            }, 3000)
-
-        }
-        return () => {
-            clearTimeout(time)
-        };
-    }, [copied])
 
 
     return (
         <SafeAreaView style={[styles.safeArea, {
             backgroundColor
         }]}>
-            <Toast message={"Referral link copied"} state={copied} type={'info'}/>
+            <SwipeAnimatedToast/>
             <ScrollView
                 style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {
                 backgroundColor

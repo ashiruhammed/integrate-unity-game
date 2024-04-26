@@ -14,7 +14,6 @@ import {SafeAreaView} from "react-native-safe-area-context";
 import {useAppDispatch, useAppSelector} from "../../../app/hooks";
 import {useQueryClient} from "@tanstack/react-query";
 
-import Toast from "../../../components/Toast";
 import {AntDesign, Ionicons, Octicons} from "@expo/vector-icons";
 import {RootStackScreenProps} from "../../../../types";
 import {fontPixel, heightPixel, pixelSizeHorizontal, widthPixel} from "../../../helpers/normalize";
@@ -29,6 +28,7 @@ import FastImage from "react-native-fast-image";
 import Animated, {FadeInDown, FadeOutDown} from "react-native-reanimated";
 import Colors from "../../../constants/Colors";
 import {updateProduct} from "../../../app/slices/dataSlice";
+import SwipeAnimatedToast from "../../../components/toasty";
 
 
 interface props {
@@ -123,7 +123,7 @@ const SearchUser = ({navigation}: RootStackScreenProps<'SearchUser'>) => {
     const dataSlice = useAppSelector(state => state.data)
     const user = useAppSelector(state => state.user)
     const {theme, productDetails} = dataSlice
-    const {responseMessage, responseState, responseType} = user
+
     const queryClient = useQueryClient();
 
     const [isLoading, setIsLoading] = useState(false)
@@ -225,8 +225,7 @@ navigation.goBack()
 
     return (
         <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
-            <Toast message={responseMessage} state={responseType == 'error' ? responseState : false}
-                   type={responseType}/>
+            <SwipeAnimatedToast/>
 
             <View style={styles.navButtonWrap}>
                 <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.8}

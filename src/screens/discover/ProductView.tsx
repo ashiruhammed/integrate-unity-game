@@ -17,7 +17,13 @@ import {SafeAreaView} from "react-native-safe-area-context";
 import {useAppSelector} from "../../app/hooks";
 import Colors from "../../constants/Colors";
 import {useInfiniteQuery, useQuery, useQueryClient,useMutation} from "@tanstack/react-query";
-import {getProductComment, getSingleProduct, upVoteProduct, userNotifications} from "../../action/action";
+import {
+    getProductComment,
+    getSingleProduct,
+    getUserDashboard,
+    upVoteProduct,
+    userNotifications
+} from "../../action/action";
 import {RootStackScreenProps} from "../../../types";
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
 import {Fonts} from "../../constants/Fonts";
@@ -347,7 +353,10 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
         <SimilarProductCardItem item={item}/>
     ), [])
 
+    const {isLoading: loadingUser,data:userDashboard, isRefetching, refetch:fetchDashboard} = useQuery(['getUserDashboard'], getUserDashboard, {
 
+
+    })
     // ref
     const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
@@ -424,7 +433,7 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
 
                             <View style={styles.pointWrap}>
                                 <Ionicons name="gift" size={16} color="#22BB33"/>
-                                <Text style={styles.pointsText}>20000</Text>
+                                <Text style={styles.pointsText}>{userDashboard?.data?.totalPoint}</Text>
                             </View>
                         </View>
 
@@ -432,7 +441,7 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
 
                             <ImageBackground style={styles.streaKIcon} resizeMode={'contain'}
                                              source={require('../../assets/images/streakicon.png')}>
-                                <Text style={styles.streakText}> 200</Text>
+                                <Text style={styles.streakText}> {userDashboard?.data?.currentDayStreak}</Text>
                             </ImageBackground>
 
                             <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}
@@ -1320,7 +1329,7 @@ const styles = StyleSheet.create({
         marginTop: 40,
         width: widthPixel(320),
         height: heightPixel(220),
-        backgroundColor: Colors.primaryColor,
+        backgroundColor: Colors.borderColor,
         shadowColor: "#212121",
         marginHorizontal: pixelSizeHorizontal(10),
         borderRadius: 10,

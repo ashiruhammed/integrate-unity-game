@@ -15,12 +15,12 @@ import TextInput from "../../components/inputs/TextInput";
 import {RectButton} from "../../components/RectButton";
 import {useSelector} from "react-redux";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
-import {toggleTheme} from "../../app/slices/dataSlice";
+import {addNotificationItem, toggleTheme} from "../../app/slices/dataSlice";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {changePassword, getUserSettings} from "../../action/action";
-import Toast from "../../components/Toast";
-import {setResponse, unSetResponse} from "../../app/slices/userSlice";
+
 import {RootStackScreenProps} from "../../../types";
+import SwipeAnimatedToast from "../../components/toasty";
 
 
 const formSchema = yup.object().shape({
@@ -106,16 +106,18 @@ const Settings = ({navigation}: RootStackScreenProps<'Settings'>) => {
     const {mutate, isLoading} = useMutation(['changePassword'], changePassword, {
         onSuccess: (data) => {
             if (data.success) {
-                dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'success',
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'success',
+                    body: data.message,
                 }))
             } else {
-                dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'error',
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body: data.message,
                 }))
             }
 
@@ -158,26 +160,13 @@ const Settings = ({navigation}: RootStackScreenProps<'Settings'>) => {
     const blockList = () => {
         navigation.navigate('BlockedUsers')
     }
-    useEffect(() => {
-        // console.log(user)
-        let time: NodeJS.Timeout | undefined;
-        if (responseState || responseMessage) {
 
-            time = setTimeout(() => {
-                dispatch(unSetResponse())
-            }, 3000)
-
-        }
-        return () => {
-            clearTimeout(time)
-        };
-    }, [responseState, responseMessage])
 
 
     return (
         <>
 
-            <Toast message={responseMessage} state={responseState} type={responseType}/>
+            <SwipeAnimatedToast/>
             <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
                 <KeyboardAwareScrollView
                     style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {

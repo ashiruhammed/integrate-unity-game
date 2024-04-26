@@ -40,6 +40,8 @@ import {isLessThanTheMB} from "../../helpers";
 import FastImage from "react-native-fast-image";
 import Constants from "expo-constants";
 import {api_key, upload_preset} from "../../constants";
+import SwipeAnimatedToast from "../../components/toasty";
+import {addNotificationItem} from "../../app/slices/dataSlice";
 
 
 const formSchema = yup.object().shape({
@@ -117,21 +119,21 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
                 if (data.success) {
 
                     refetch()
-                    dispatch(setResponse({
-                        responseMessage: data.message,
-                        responseState: true,
-                        responseType: 'success',
-                    }))
 
+                    dispatch(addNotificationItem({
+                        id: Math.random(),
+                        type: 'success',
+                        body: data.message,
+                    }))
 
                 } else {
 
-                    dispatch(setResponse({
-                        responseMessage: data.message,
-                        responseState: true,
-                        responseType: 'error',
-                    }))
 
+                    dispatch(addNotificationItem({
+                        id: Math.random(),
+                        type: 'error',
+                        body: data.message,
+                    }))
                     /*  navigation.navigate('EmailConfirm', {
                           email:contentEmail
                       })*/
@@ -141,13 +143,12 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
             },
 
             onError: (err) => {
-                dispatch(setResponse({
-                    responseMessage: err.message,
-                    responseState: true,
-                    responseType: 'error',
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body:  err.message,
                 }))
-
-
             },
             onSettled: () => {
                 queryClient.invalidateQueries(['complete-profile']);
@@ -163,33 +164,32 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
                 if (data.success) {
                     // alert(message)
                     refetch()
-                    dispatch(setResponse({
-                        responseMessage: data.message,
-                        responseState: true,
-                        responseType: 'success',
-                    }))
 
+                    dispatch(addNotificationItem({
+                        id: Math.random(),
+                        type: 'success',
+                        body:  data.message,
+                    }))
                 } else {
 
 
-                    dispatch(setResponse({
-                        responseMessage: 'Something happened, please try again 😞',
-                        responseState: true,
-                        responseType: 'error',
+                    dispatch(addNotificationItem({
+                        id: Math.random(),
+                        type: 'error',
+                        body:  data.message,
                     }))
-
                 }
 
             },
 
             onError: (err) => {
-                dispatch(setResponse({
-                    responseMessage: 'Something happened, please try again 😞',
-                    responseState: true,
-                    responseType: 'error',
+
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body:  'Something happened, please try again 😞',
                 }))
-
-
             },
             onSettled: () => {
                 queryClient.invalidateQueries(['updateUserImage']);
@@ -210,13 +210,13 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
             },
 
             onError: (err) => {
-                console.log(err)
-                dispatch(setResponse({
-                    responseMessage: 'Something happened, please try again 😞',
-                    responseState: true,
-                    responseType: 'error',
-                }))
+                //console.log(err)
 
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body:  'Something happened, please try again 😞',
+                }))
 
             },
             onSettled: () => {
@@ -243,10 +243,12 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
             const isLessThan = isLessThanTheMB(fileInfo?.size, 8)
 
             if (Platform.OS == 'ios' && !isLessThan) {
-                dispatch(setResponse({
-                    responseMessage: 'Image file too large, must be less than 4MB 🤨',
-                    responseState: true,
-                    responseType: 'error',
+
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body:  'Image file too large, must be less than 4MB 🤨',
                 }))
             }
 
@@ -323,23 +325,6 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
     });
 
 
-    useEffect(() => {
-        // console.log(user)
-        let time: NodeJS.Timeout | undefined;
-        if (responseState || responseMessage) {
-
-            time = setTimeout(() => {
-                dispatch(unSetResponse())
-            }, 3000)
-
-        }
-        return () => {
-            clearTimeout(time)
-        };
-    }, [responseState, responseMessage])
-
-
-
 
     return (
 
@@ -347,7 +332,7 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
 
 
             <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
-                <Toast message={responseMessage} state={responseState} type={responseType}/>
+                <SwipeAnimatedToast/>
                 {
                     creatingImage &&
                     <ActivityIndicator color={Colors.primaryColor} size={"small"}

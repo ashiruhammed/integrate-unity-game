@@ -48,7 +48,7 @@ import GroupSettings from "../screens/communities/GroupSettings";
 import LeaveCommunity from "../screens/communities/LeaveCommunity";
 import CommentOnPost from "../screens/communities/components/CommentOnPost";
 import RequestsScreen from "../screens/communities/RequestsScreen";
-import VideoTest from "../screens/VideoTest";
+
 import {useRef} from "react";
 import analytics from '@react-native-firebase/analytics';
 import {
@@ -79,6 +79,8 @@ import Concordium from "../screens/wallets/Concordium";
 import MakeComment from "../screens/discover/MakeComment";
 import BrowserView from "../screens/wallets/BrowserView";
 import SearchUser from "../screens/discover/create/SearchUser";
+import ConcordiumTransactions from "../screens/wallets/ConcordiumTransactions";
+import GateTokenTransactions from "../screens/wallets/GateTokenTransactions";
 
 const styles = StyleSheet.create({
     displayPhoto: {
@@ -372,6 +374,8 @@ function RootNavigator() {
                         <Stack.Screen name="ViewPoints" component={ViewPoints}/>
                         <Stack.Screen name="GatewayToken" component={GatewayToken}/>
                         <Stack.Screen name="Concordium" component={Concordium}/>
+                        <Stack.Screen name="ConcordiumTransactions" component={ConcordiumTransactions}/>
+                        <Stack.Screen name="GateTokenTransactions" component={GateTokenTransactions}/>
 
 
                         <Stack.Screen name="Notifications" options={{

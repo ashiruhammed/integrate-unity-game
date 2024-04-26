@@ -18,7 +18,7 @@ import {AntDesign, Entypo, FontAwesome, Ionicons, Octicons} from "@expo/vector-i
 import {SafeAreaView} from "react-native-safe-area-context";
 import {useAppSelector} from "../../app/hooks";
 import {useInfiniteQuery, useQuery} from "@tanstack/react-query";
-import {getApprovedProduct, getProductTrending, userNotifications} from "../../action/action";
+import {getApprovedProduct, getProductTrending, getUserDashboard, userNotifications} from "../../action/action";
 import {RootStackScreenProps} from "../../../types";
 import {LinearGradient} from 'expo-linear-gradient';
 import GradientText from "../../components/GradientText";
@@ -278,7 +278,10 @@ const DiscoverProducts = ({navigation}: RootStackScreenProps<'DiscoverProducts'>
         })
 
     }
+    const {isLoading: loadingUser,data:userDashboard, isRefetching, refetch:fetchDashboard} = useQuery(['getUserDashboard'], getUserDashboard, {
 
+
+    })
 
     // ref
     const bottomSheetModalRef = useRef<BottomSheetModal>(null);
@@ -368,7 +371,7 @@ const DiscoverProducts = ({navigation}: RootStackScreenProps<'DiscoverProducts'>
                             </TouchableOpacity>
                             <View style={styles.pointWrap}>
                                 <Ionicons name="gift" size={16} color="#22BB33"/>
-                                <Text style={styles.pointsText}>20000</Text>
+                                <Text style={styles.pointsText}>{userDashboard?.data?.totalPoint}</Text>
                             </View>
                         </View>
 
@@ -376,7 +379,7 @@ const DiscoverProducts = ({navigation}: RootStackScreenProps<'DiscoverProducts'>
 
                             <ImageBackground style={styles.streaKIcon} resizeMode={'contain'}
                                              source={require('../../assets/images/streakicon.png')}>
-                                <Text style={styles.streakText}> 200</Text>
+                                <Text style={styles.streakText}>  {userDashboard?.data?.currentDayStreak}</Text>
                             </ImageBackground>
 
                             <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}

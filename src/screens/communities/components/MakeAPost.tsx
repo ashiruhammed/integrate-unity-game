@@ -37,6 +37,8 @@ import TextInput from "../../../components/inputs/TextInput";
 import {useFormik} from "formik";
 import * as yup from "yup";
 import Toast from "../../../components/Toast";
+import SwipeAnimatedToast from "../../../components/toasty";
+import {addNotificationItem} from "../../../app/slices/dataSlice";
 
 
 const getFileInfo = async (fileURI: string) => {
@@ -159,19 +161,20 @@ const MakeAPost = ({navigation, route}: RootStackScreenProps<'MakeAPost'>) => {
                 if (data.success) {
 
                     navigation.goBack()
-                    dispatch(setResponse({
-                        responseMessage: data.message,
-                        responseState: true,
-                        responseType: 'success',
+
+
+                    dispatch(addNotificationItem({
+                        id: Math.random(),
+                        type: 'success',
+                        body: data.message,
                     }))
-
-
                 } else {
 
-                    dispatch(setResponse({
-                        responseMessage: data.message,
-                        responseState: true,
-                        responseType: 'error',
+
+                    dispatch(addNotificationItem({
+                        id: Math.random(),
+                        type: 'error',
+                        body: data.message,
                     }))
 
                     /*  navigation.navigate('EmailConfirm', {
@@ -183,12 +186,12 @@ const MakeAPost = ({navigation, route}: RootStackScreenProps<'MakeAPost'>) => {
             },
 
             onError: (err) => {
-                dispatch(setResponse({
-                    responseMessage: err.message,
-                    responseState: true,
-                    responseType: 'error',
-                }))
 
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body: err.message,
+                }))
 
             },
             onSettled: () => {
@@ -220,12 +223,12 @@ const MakeAPost = ({navigation, route}: RootStackScreenProps<'MakeAPost'>) => {
 
             onError: (err) => {
 
-                dispatch(setResponse({
-                    responseMessage: 'Something happened, please try again 😞',
-                    responseState: true,
-                    responseType: 'error',
-                }))
 
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body:  'Something happened, please try again 😞',
+                }))
 
             },
             onSettled: () => {
@@ -252,10 +255,11 @@ const MakeAPost = ({navigation, route}: RootStackScreenProps<'MakeAPost'>) => {
             const isLessThan = isLessThanTheMB(result?.assets[0]?.fileSize, 8)
             if (!isLessThan) {
                 if (Platform.OS == 'ios') {
-                    dispatch(setResponse({
-                        responseMessage: 'Image file too large, must be less than 4MB 🤨',
-                        responseState: true,
-                        responseType: 'error',
+
+                    dispatch(addNotificationItem({
+                        id: Math.random(),
+                        type: 'error',
+                        body: 'Image file too large, must be less than 4MB 🤨',
                     }))
                 }
             }
@@ -280,14 +284,15 @@ const selectVideo = async () => {
     });
 
 
-    if (!result.cancelled) {
+    if (!result.canceled) {
         const fileInfo = await getFileInfo(result.assets[0]?.uri)
         const isLessThan = isLessThanTheMB(result.assets[0]?.fileSize, 8)
         if (!isLessThan) {
-            dispatch(setResponse({
-                responseMessage: 'Image file too large, must be less than 4MB 🤨',
-                responseState: true,
-                responseType: 'error',
+
+            dispatch(addNotificationItem({
+                id: Math.random(),
+                type: 'error',
+                body: 'Image file too large, must be less than 4MB 🤨',
             }))
         } else {
 
@@ -395,21 +400,6 @@ useEffect(() => {
 }, [video]);
 
 
-useEffect(() => {
-    // console.log(user)
-    let time: NodeJS.Timeout | undefined;
-    if (responseState || responseMessage) {
-
-        time = setTimeout(() => {
-            dispatch(unSetResponse())
-        }, 3000)
-
-    }
-    return () => {
-        clearTimeout(time)
-    };
-}, [responseState, responseMessage])
-
 
 return (
 
@@ -417,7 +407,7 @@ return (
 
 
         <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
-            <Toast message={responseMessage} state={responseState} type={responseType}/>
+            <SwipeAnimatedToast/>
             <View style={styles.topBar}>
                 <TouchableOpacity onPress={goBack}>
                     <Text style={[styles.btnText, {

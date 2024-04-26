@@ -37,7 +37,7 @@ import Checkbox from 'expo-checkbox';
 import viewCommunity from "../communities/ViewCommunity";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
 import AdventuresIcon from "../../assets/images/tabs/home/AdventuresIcon";
-import Toast from "../../components/Toast";
+
 import {unSetResponse} from "../../app/slices/userSlice";
 import {useInfiniteQuery, useQuery} from "@tanstack/react-query";
 import {getAllCommunities, getFollowedCommunities, getMyCommunities, getPublicCommunities} from "../../action/action";
@@ -45,6 +45,7 @@ import {titleCase, useRefreshOnFocus} from "../../helpers";
 import CardPublicCommunity from "../../components/community/PublicCard";
 import {setCurrentCommunityId} from "../../app/slices/dataSlice";
 import InActiveCard from "../../components/community/InActiveCard";
+import SwipeAnimatedToast from "../../components/toasty";
 
 
 const wait = (timeout: number) => {
@@ -278,20 +279,7 @@ const Community = ({navigation, route}: RootTabScreenProps<'Community'>) => {
     const joinModal = () => {
 
     }
-    useEffect(() => {
-        // console.log(user)
-        let time: NodeJS.Timeout | undefined;
-        if (responseState || responseMessage) {
 
-            time = setTimeout(() => {
-                dispatch(unSetResponse())
-            }, 3000)
-
-        }
-        return () => {
-            clearTimeout(time)
-        };
-    }, [responseState, responseMessage])
 
     let filteredCommunity, filteredOwnCommunity: readonly any[] | null | undefined = []
 
@@ -325,7 +313,7 @@ const Community = ({navigation, route}: RootTabScreenProps<'Community'>) => {
         <>
 
             <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
-
+                <SwipeAnimatedToast/>
                 <ScrollView
                     refreshControl={<RefreshControl tintColor={Colors.borderColor}
                                                     refreshing={refreshing} onRefresh={refresh}/>}
@@ -549,7 +537,7 @@ const Community = ({navigation, route}: RootTabScreenProps<'Community'>) => {
                     }
 
                 </ScrollView>
-                <Toast message={responseMessage} state={responseState} type={responseType}/>
+
             </SafeAreaView>
 
 

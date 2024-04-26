@@ -22,7 +22,7 @@ import Colors from "../../constants/Colors";
 import {Fonts} from "../../constants/Fonts";
 import {IF} from "../../helpers/ConditionJsx";
 import {RectButton} from "../../components/RectButton";
-import BottomSheet, {BottomSheetBackdrop, BottomSheetView} from "@gorhom/bottom-sheet";
+
 
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {
@@ -45,11 +45,12 @@ import Animated, {
     Layout
 } from 'react-native-reanimated';
 
-import {setResponse, unSetResponse} from "../../app/slices/userSlice";
-import Toast from "../../components/Toast";
+
 import FastImage from "react-native-fast-image";
 import Constants from "expo-constants";
-import * as WebBrowser from 'expo-web-browser';
+
+import SwipeAnimatedToast from "../../components/toasty";
+import {addNotificationItem} from "../../app/slices/dataSlice";
 
 
 const dimensionsForScreen = Dimensions.get('screen');
@@ -280,10 +281,11 @@ const AdventureHome = ({navigation}: RootStackScreenProps<'AdventureHome'>) => {
                 })
 
             } else {
-                dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'error',
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body: data.message,
                 }))
             }
         },
@@ -360,20 +362,6 @@ useRefreshOnFocus(refetch)
     }
 
 
-    useEffect(() => {
-        // console.log(user)
-        let time: NodeJS.Timeout | undefined;
-        if (responseState || responseMessage) {
-
-            time = setTimeout(() => {
-                dispatch(unSetResponse())
-            }, 3000)
-
-        }
-        return () => {
-            clearTimeout(time)
-        };
-    }, [responseState, responseMessage])
 
 
     return (
@@ -381,7 +369,7 @@ useRefreshOnFocus(refetch)
         <>
 
             <SafeAreaView style={styles.safeArea}>
-                <Toast message={responseMessage} state={responseState} type={responseType}/>
+                <SwipeAnimatedToast/>
                 <StatusBar style={'light'}/>
                 <View style={styles.topViewWrap}>
                     <View style={[styles.navBar, {

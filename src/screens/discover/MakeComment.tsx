@@ -50,6 +50,8 @@ import {setResponse, unSetResponse} from "../../app/slices/userSlice";
 import Toast from "../../components/Toast";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {commentOnProduct, registerProductHunt} from "../../action/action";
+import SwipeAnimatedToast from "../../components/toasty";
+import {addNotificationItem} from "../../app/slices/dataSlice";
 
 
 const formSchema = yup.object().shape({
@@ -113,33 +115,33 @@ const MakeComment = ({navigation, route}: RootStackScreenProps<'MakeComment'>) =
                     // alert(message)
                     navigation.goBack()
 
-                    dispatch(setResponse({
-                        responseMessage: data.message,
-                        responseState: true,
-                        responseType: 'success',
-                    }))
 
+                    dispatch(addNotificationItem({
+                        id: Math.random(),
+                        type: 'success',
+                        body: data.message,
+                    }))
                 } else {
 
 
-                    dispatch(setResponse({
-                        responseMessage: `${data.message} 😞`,
-                        responseState: true,
-                        responseType: 'error',
-                    }))
 
+                    dispatch(addNotificationItem({
+                        id: Math.random(),
+                        type: 'error',
+                        body: `${data.message} 😞`,
+                    }))
                 }
 
             },
 
             onError: (err) => {
-                console.log(err)
-                dispatch(setResponse({
-                    responseMessage: 'Something happened, please try again 😞',
-                    responseState: true,
-                    responseType: 'error',
-                }))
+               // console.log(err)
 
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body: 'Something happened, please try again 😞',
+                }))
 
             },
             onSettled: () => {
@@ -257,21 +259,6 @@ const MakeComment = ({navigation, route}: RootStackScreenProps<'MakeComment'>) =
     }
 
 
-    useEffect(() => {
-        // console.log(user)
-        let time: NodeJS.Timeout | undefined;
-        if (responseState || responseMessage) {
-
-
-            time = setTimeout(() => {
-                dispatch(unSetResponse())
-            }, 3500)
-
-        }
-        return () => {
-            clearTimeout(time)
-        };
-    }, [responseState, responseMessage])
 
 
     return (
@@ -294,7 +281,7 @@ const MakeComment = ({navigation, route}: RootStackScreenProps<'MakeComment'>) =
             }
 
             <SafeAreaView style={styles.safeArea}>
-                <Toast message={responseMessage} type={responseType} state={responseState}/>
+                <SwipeAnimatedToast/>
                 <View style={[styles.authNavBar, {}]}>
                     <TouchableOpacity style={styles.backBtn} onPress={goBack}>
                         <Ionicons name={'arrow-back'} color={"#000"} size={heightPixel(24)}/>

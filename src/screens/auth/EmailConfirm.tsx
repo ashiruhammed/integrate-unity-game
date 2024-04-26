@@ -17,10 +17,12 @@ import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {confirmEmail, getUser, requestCode} from "../../action/action";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
 
-import {setAuthenticated, setResponse, unSetResponse, updateUserInfo} from "../../app/slices/userSlice";
-import Toast from "../../components/Toast";
+import {setAuthenticated, updateUserInfo} from "../../app/slices/userSlice";
+
 import * as SecureStore from "expo-secure-store";
 import * as Haptics from "expo-haptics";
+import SwipeAnimatedToast from "../../components/toasty";
+import {addNotificationItem} from "../../app/slices/dataSlice";
 
 
 const height = Dimensions.get('window').height
@@ -60,18 +62,20 @@ const EmailConfirm = ({route, navigation}: AuthStackScreenProps<'EmailConfirm'>)
         onSuccess: (data) => {
 
             if (data.success) {
-                dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'success',
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'success',
+                    body: data.message,
                 }))
 
-
             } else {
-                dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'error',
+
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body: data.message,
                 }))
             }
         },
@@ -83,10 +87,11 @@ const EmailConfirm = ({route, navigation}: AuthStackScreenProps<'EmailConfirm'>)
         onSuccess: async (data) => {
 
             if (data.success) {
-                dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'success',
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'success',
+                    body: data.message,
                 }))
                  SecureStore.setItemAsync('Gateway-Token', data.data.token).then(() => {
                     fetchUser()
@@ -94,10 +99,12 @@ const EmailConfirm = ({route, navigation}: AuthStackScreenProps<'EmailConfirm'>)
 
             } else {
                 await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
-                dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'error',
+
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body: data.message,
                 }))
             }
         },
@@ -140,6 +147,8 @@ const EmailConfirm = ({route, navigation}: AuthStackScreenProps<'EmailConfirm'>)
     }
 
 
+
+
     useEffect(() => {
         const timer =
             counter > 0 && setInterval(() => setCounter(counter - 1), 1000);
@@ -155,20 +164,8 @@ const EmailConfirm = ({route, navigation}: AuthStackScreenProps<'EmailConfirm'>)
     }
 
 
-    useEffect(() => {
-        // console.log(user)
-        let time: NodeJS.Timeout | undefined;
-        if (responseState || responseMessage) {
 
-            time = setTimeout(() => {
-                dispatch(unSetResponse())
-            }, 3000)
 
-        }
-        return () => {
-            clearTimeout(time)
-        };
-    }, [responseState, responseMessage])
 
 
     return (
@@ -177,7 +174,7 @@ const EmailConfirm = ({route, navigation}: AuthStackScreenProps<'EmailConfirm'>)
 
             <SafeAreaView style={styles.safeArea}>
 
-                <Toast message={responseMessage} state={responseState} type={responseType}/>
+                <SwipeAnimatedToast/>
 
                 {
                     loadingUser &&
@@ -281,9 +278,10 @@ const EmailConfirm = ({route, navigation}: AuthStackScreenProps<'EmailConfirm'>)
 
                         <View style={styles.resendMessage}>
                             <Text style={styles.resendMessageTxt}>
-                                I haven’t received a code <Text disabled={counter !== 0} onPress={resend} style={{
+                                I haven’t received a code <Text disabled={counter !== 0} onPress={resend} style={[{
+                                    color:counter == 0 ? Colors.primaryColor : "#000",
                                 fontFamily: Fonts.quickSandBold
-                            }}>Resend </Text>
+                            }]}>Resend </Text>
                                 (0:{counter})
                             </Text>
                         </View>

@@ -18,7 +18,14 @@ import {useInfiniteQuery, useQuery, useQueryClient} from "@tanstack/react-query"
 import Colors from "../../constants/Colors";
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
 import {Fonts} from "../../constants/Fonts";
-import {getCCDWallet, getUserDashboard, getUserPoints, getUserWallets, userNotifications} from "../../action/action";
+import {
+    getAllBadges,
+    getCCDWallet,
+    getUserDashboard,
+    getUserPoints,
+    getUserWallets, userNFTs,
+    userNotifications
+} from "../../action/action";
 import SegmentedControl from "../../components/segment-control/SegmentContol";
 import SegmentContolAlt from "../../components/segment-control/SegmentContolAlt";
 import MyCard from "../../components/wallets/cards/MyCard";
@@ -29,7 +36,7 @@ import {
     BottomSheetDefaultBackdropProps
 } from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types';
 import {Portal} from "@gorhom/portal";
-import {useRefreshOnFocus} from "../../helpers";
+import {isWhatPercentOf, useRefreshOnFocus} from "../../helpers";
 import Animated, {Easing, FadeInDown, FadeInUp, FadeOutDown, Layout} from "react-native-reanimated";
 import MedalIcon from "../../assets/images/svg/MedalIcon";
 import HorizontalLine from "../../components/HorizontalLine";
@@ -145,6 +152,7 @@ const Wallet = ({navigation}: RootTabScreenProps<'Learn'>) => {
         handleClose()
         navigation.navigate('Concordium')
     }
+
     const {
         data: notifications,
 
@@ -163,11 +171,66 @@ const Wallet = ({navigation}: RootTabScreenProps<'Learn'>) => {
 
         })
 
+
+
+    const {
+        isLoading:loadingNFTs,
+        data:allUserNFTs,
+
+        fetchNextPage: fetchNextPage,
+
+        refetch:fetchNFTs,
+
+
+    } = useInfiniteQuery([`all-user-nfts`], ({pageParam = 1}) => userNFTs.NFTs(pageParam),
+        {
+            networkMode: 'online',
+            getNextPageParam: lastPage => {
+                if (lastPage.next !== null) {
+                    return lastPage.next;
+                }
+
+                return lastPage;
+            },
+            getPreviousPageParam: (firstPage, allPages) => firstPage.prevCursor,
+        })
+
+
+
+
+
+    const {
+        isLoading:loadingBadge,
+        data:badges,
+        hasNextPage,
+        fetchNextPage: fetchNextPageWallet,
+        isFetchingNextPage,
+        refetch:fetchBadge,
+
+
+    } = useInfiniteQuery([`all-user-badges`], ({pageParam = 1}) => getAllBadges.badges(pageParam),
+        {
+            networkMode: 'online',
+            getNextPageParam: lastPage => {
+                if (lastPage.next !== null) {
+                    return lastPage.next;
+                }
+
+                return lastPage;
+            },
+            getPreviousPageParam: (firstPage, allPages) => firstPage.prevCursor,
+        })
+
+
+
     const openScreen = (screen: 'AllBadges' | 'NFTs') => {
         navigation.navigate(screen)
     }
-    useRefreshOnFocus(refetch)
 
+
+
+    useRefreshOnFocus(refetch)
+//console.log(ccdWallet)
 
     return (
         <>
@@ -270,31 +333,35 @@ const Wallet = ({navigation}: RootTabScreenProps<'Learn'>) => {
                         </View>
 
                         <View style={styles.badgesContainer}>
+                            {
+                                !loadingBadge && badges?.pages[0].data.slice(0,6).map((badge: { id: string; imageUrl: any; amount: string  })=>(
+
 
                             <Animated.View
+                                key={badge.id}
                                 entering={FadeInDown.springify().delay(200)
                                     .randomDelay()
                                 } exiting={FadeOutDown}
                                 style={styles.badgeImageWrap}>
                                 <View style={styles.badgeImageContainer}>
                                     <Image
-                                        source={{uri: 'https://www.figma.com/file/YPXwVWl4FX4yagQyN7SyBr/Gateway-update-2?type=design&node-id=1138-7440&mode=design&t=7hkg8awonpin4Gel-4'}}
+                                        source={{uri:badge.imageUrl}}
                                         style={styles.badgeImage}/>
                                 </View>
 
 
                                 <View style={styles.badgeStreakScore}>
                                     <Text style={styles.badgeStreakText}>
-                                        x44
+                                        x{badge.amount}
                                     </Text>
                                 </View>
                             </Animated.View>
+                                ))
+                            }
                         </View>
                         <HorizontalLine/>
 
-                        <View style={[styles.titleWrap, {
-                            marginTop: 20,
-                        }]}>
+                        <View style={[styles.titleWrap, {marginTop: 20,}]}>
                             <View style={styles.titleLeft}>
                                 <Text style={[styles.rowTitle, {
                                     marginRight: 10,
@@ -315,6 +382,41 @@ const Wallet = ({navigation}: RootTabScreenProps<'Learn'>) => {
                                     See details
                                 </Text>
                             </Pressable>
+                        </View>
+
+
+                        <View style={styles.badgesContainer}>
+
+
+                            {!loadingNFTs && allUserNFTs && allUserNFTs?.pages[0]?.data?.result.slice(0,6).map((item)=>(
+                                <Animated.View key={item.metadata.media_hash} entering={FadeInDown} exiting={FadeOutDown}
+                                               style={[styles.badgeItem,{
+                                                   backgroundColor,
+                                                   borderBottomColor: theme == 'light' ? Colors.borderColor : '#313131',
+                                               }]}>
+                                    <View style={styles.nftImageWrap}>
+                                        <Image
+                                            source={{uri:item?.metadata?.media}}
+                                            style={styles.badgeImage}/>
+
+
+                                    </View>
+
+                                    <View style={styles.nftItemBody}>
+                                        <Text style={[styles.badgeTitle,{
+                                            color:textColor
+                                        }]}>
+                                            {item.metadata.title}
+                                        </Text>
+                                        <Text style={styles.badgeSubText}>
+                                            {item.metadata.description}
+                                        </Text>
+
+
+                                    </View>
+                                </Animated.View>
+                            ))}
+
                         </View>
                     </View>
                 </IF>
@@ -644,9 +746,49 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-start',
         flexWrap: 'wrap',
 
-    }
+    },
 
+    badgeItem: {
 
+        width: '100%',
+        alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        height: heightPixel(120),
+
+        borderBottomWidth: 1,
+    },
+    nftImageWrap: {
+        height: heightPixel(110),
+        width: widthPixel(85),
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    nftImage: {
+        height: '100%',
+        width: '100%',
+        resizeMode: 'center',
+
+    },
+    nftItemBody: {
+        marginLeft: 15,
+        height: '80%',
+        width: '75%',
+        alignItems: 'flex-start',
+        justifyContent: 'center'
+    },
+    badgeTitle: {
+
+        fontSize: fontPixel(16),
+        fontFamily: Fonts.quicksandSemiBold
+    },
+    badgeSubText: {
+
+        color: Colors.light.lightTextColor,
+        fontSize: fontPixel(14),
+        lineHeight: heightPixel(18),
+        fontFamily: Fonts.quicksandMedium
+    },
 })
 
 export default Wallet;

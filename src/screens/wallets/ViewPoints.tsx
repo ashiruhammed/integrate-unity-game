@@ -32,9 +32,9 @@ import RedeemForm from "../../components/wallets/RedeemForm";
 import {
     BottomSheetDefaultBackdropProps
 } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
-import {setItem} from "expo-secure-store";
-import {setResponse} from "../../app/slices/userSlice";
-import Toast from "../../components/Toast";
+
+import SwipeAnimatedToast from "../../components/toasty";
+import {addNotificationItem} from "../../app/slices/dataSlice";
 
 
 interface props {
@@ -171,21 +171,21 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
                     fetchPoints()
                     refetch()
                     handleClosePressRedeem()
-                    dispatch(setResponse({
-                        responseMessage: data.message,
-                        responseState: true,
-                        responseType: 'success',
-                    }))
 
+                    dispatch(addNotificationItem({
+                        id: Math.random(),
+                        type: 'success',
+                        body:  data.message,
+                    }))
 
                 } else {
                     handleClosePressRedeem()
-                    dispatch(setResponse({
-                        responseMessage: data.message,
-                        responseState: true,
-                        responseType: 'error',
-                    }))
 
+                    dispatch(addNotificationItem({
+                        id: Math.random(),
+                        type: 'error',
+                        body:  data.message,
+                    }))
                     /*  navigation.navigate('EmailConfirm', {
                           email:contentEmail
                       })*/
@@ -195,12 +195,12 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
             },
 
             onError: (err) => {
-                dispatch(setResponse({
-                    responseMessage: err.message,
-                    responseState: true,
-                    responseType: 'error',
-                }))
 
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body:  err.message,
+                }))
 
             },
             onSettled: () => {
@@ -340,7 +340,7 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
         <>
 
             <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
-                <Toast message={responseMessage} state={responseState} type={responseType}/>
+                <SwipeAnimatedToast/>
                 <View
 
                     style={[styles.scrollView, {

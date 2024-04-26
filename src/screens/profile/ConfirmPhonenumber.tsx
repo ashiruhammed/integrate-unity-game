@@ -1,9 +1,9 @@
 import React, {useEffect} from 'react';
 
 import {Text, View, StyleSheet, Platform, ActivityIndicator} from 'react-native';
-import Toast from "../../components/Toast";
+
 import {SafeAreaView} from "react-native-safe-area-context";
-import {setResponse, unSetResponse, updateUserInfo} from "../../app/slices/userSlice";
+import { updateUserInfo} from "../../app/slices/userSlice";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import Colors from "../../constants/Colors";
@@ -17,6 +17,8 @@ import {Fonts} from "../../constants/Fonts";
 import {RootStackScreenProps} from "../../../types";
 import {RectButton} from "../../components/RectButton";
 import {getUser, requestPhoneVerification, verifyPhone} from "../../action/action";
+import SwipeAnimatedToast from "../../components/toasty";
+import {addNotificationItem} from "../../app/slices/dataSlice";
 
 
 const formSchema = yup.object().shape({
@@ -57,17 +59,18 @@ const ConfirmPhonenumber = ({navigation, route}: RootStackScreenProps<'ConfirmPh
                 if (data.success) {
                     fetchUser()
 
-                    dispatch(setResponse({
-                        responseMessage: data.message,
-                        responseState: true,
-                        responseType: 'success',
+                    dispatch(addNotificationItem({
+                        id: Math.random(),
+                        type: 'success',
+                        body: data.message,
                     }))
                     navigation.navigate('Dashboard')
                 } else {
-                    dispatch(setResponse({
-                        responseMessage: data.message,
-                        responseState: true,
-                        responseType: 'error',
+
+                    dispatch(addNotificationItem({
+                        id: Math.random(),
+                        type: 'error',
+                        body: data.message,
                     }))
                 }
 
@@ -82,16 +85,18 @@ const ConfirmPhonenumber = ({navigation, route}: RootStackScreenProps<'ConfirmPh
     const {isLoading: loading, mutate: resendCodeNow} = useMutation(['requestPhoneVerification'],requestPhoneVerification,{
         onSuccess: (data) => {
             if (data.success) {
-                dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'success',
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'success',
+                    body: data.message,
                 }))
             } else {
-                dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'error',
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body: data.message,
                 }))
             }
         },
@@ -149,25 +154,11 @@ const ConfirmPhonenumber = ({navigation, route}: RootStackScreenProps<'ConfirmPh
     }, [counter]);
 
 
-    useEffect(() => {
-        // console.log(user)
-        let time: NodeJS.Timeout | undefined;
-        if (responseState || responseMessage) {
-
-            time = setTimeout(() => {
-                dispatch(unSetResponse())
-            }, 3000)
-
-        }
-        return () => {
-            clearTimeout(time)
-        };
-    }, [responseState, responseMessage])
 
 
     return (
         <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
-            <Toast message={responseMessage} state={responseState} type={responseType}/>
+            <SwipeAnimatedToast/>
             <KeyboardAwareScrollView
                 style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {
                 backgroundColor

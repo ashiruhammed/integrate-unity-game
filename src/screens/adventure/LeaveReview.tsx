@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 
-import {Text, View, StyleSheet, ScrollView, ActivityIndicator} from 'react-native';
-import Toast from "../../components/Toast";
+import {Text, View, StyleSheet, ActivityIndicator} from 'react-native';
+
 import {SafeAreaView} from "react-native-safe-area-context";
 import Colors from "../../constants/Colors";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
@@ -19,7 +19,9 @@ import TextInput from "../../components/inputs/TextInput";
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {leaveAReview} from "../../action/action";
-import {setResponse, unSetResponse} from "../../app/slices/userSlice";
+
+import SwipeAnimatedToast from "../../components/toasty";
+import {addNotificationItem} from "../../app/slices/dataSlice";
 
 
 
@@ -60,23 +62,23 @@ const LeaveReview = ({navigation,route}: RootStackScreenProps<'LeaveReview'>) =>
       onSuccess: async (data) => {
 
           if (data.success) {
-              dispatch(setResponse({
-                  responseMessage: data.message,
-                  responseState: true,
-                  responseType: 'success',
-              }))
 
+              dispatch(addNotificationItem({
+                  id: Math.random(),
+                  type: 'success',
+                  body: data.message,
+              }))
              navigation.navigate('AdventureHome')
 
 
           } else {
 
-              dispatch(setResponse({
-                  responseMessage: data.message,
-                  responseState: true,
-                  responseType: 'error',
-              }))
 
+              dispatch(addNotificationItem({
+                  id: Math.random(),
+                  type: 'error',
+                  body: data.message,
+              }))
               /*  navigation.navigate('EmailConfirm', {
                     email:contentEmail
                 })*/
@@ -86,12 +88,12 @@ const LeaveReview = ({navigation,route}: RootStackScreenProps<'LeaveReview'>) =>
       },
 
       onError: (err) => {
-          dispatch(setResponse({
-              responseMessage: err.message,
-              responseState: true,
-              responseType: 'error',
-          }))
 
+          dispatch(addNotificationItem({
+              id: Math.random(),
+              type: 'error',
+              body: err.message,
+          }))
 
       },
       onSettled: () => {
@@ -130,20 +132,6 @@ const LeaveReview = ({navigation,route}: RootStackScreenProps<'LeaveReview'>) =>
     });
 
 
-    useEffect(() => {
-        // console.log(user)
-        let time: NodeJS.Timeout | undefined;
-        if (responseState || responseMessage) {
-
-            time = setTimeout(() => {
-                dispatch(unSetResponse())
-            }, 3000)
-
-        }
-        return () => {
-            clearTimeout(time)
-        };
-    }, [responseState, responseMessage])
 
 
 
@@ -155,7 +143,7 @@ const LeaveReview = ({navigation,route}: RootStackScreenProps<'LeaveReview'>) =>
             <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
 
                 <StatusBar style={theme == 'light' ? 'dark' : 'light'}/>
-                <Toast message={responseMessage} state={responseState} type={responseType}/>
+                <SwipeAnimatedToast/>
                 <KeyboardAwareScrollView style={{width: '100%',}} contentContainerStyle={styles.scrollView} scrollEnabled
                             showsVerticalScrollIndicator={false}>
 

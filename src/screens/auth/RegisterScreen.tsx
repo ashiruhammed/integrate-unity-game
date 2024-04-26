@@ -22,14 +22,14 @@ import * as yup from "yup";
 import {RectButton} from "../../components/RectButton";
 import Rectangle from "../../assets/images/svg/Rectangle";
 import BottomSheet, {BottomSheetBackdrop} from '@gorhom/bottom-sheet';
-import {LoginButton, AccessToken} from 'react-native-fbsdk-next';
+
 import Animated, {Easing, FadeInDown, FadeOutDown, Layout} from 'react-native-reanimated';
 import TextInput from "../../components/inputs/TextInput";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {createAccount, getUser, userAppleOAuth, userFBOAuth, userGoogleAuth} from "../../action/action";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
 import * as SecureStore from 'expo-secure-store';
-import {setAuthenticated, setResponse, unSetResponse, updateUserInfo} from "../../app/slices/userSlice";
+import {setAuthenticated, updateUserInfo} from "../../app/slices/userSlice";
 import PhoneInputText from "../../components/inputs/PhoneInputText";
 import Toast from "../../components/Toast";
 import GoogleIcon from "../../components/GoogleIcon";
@@ -38,6 +38,8 @@ import HorizontalLine from "../../components/HorizontalLine";
 import * as Haptics from "expo-haptics";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
+import {addNotificationItem} from "../../app/slices/dataSlice";
+import SwipeAnimatedToast from "../../components/toasty";
 
 
 const height = Dimensions.get('window').height
@@ -54,8 +56,9 @@ const formSchema = yup.object().shape({
     email: yup.string().email('Please provide a valid email').required('Email is required'),
     password: yup.string().required('Password is required').matches(
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#.-:;()_?\$%\^&\*])(?=.{8,})/,
-        "Must Contain 8 Characters, Uppercase, Lowercase & Number"
+        "Check Password"
     ),
+   // password:yup.string().required("Password is required"),
     confirmPass: yup.string().oneOf([yup.ref('password'), null], 'Passwords must match').required("Password is Required"),
 });
 
@@ -73,6 +76,13 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
 
     const [value, setValue] = useState("");
     const [formattedValue, setFormattedValue] = useState("");
+
+
+    const [validLowercase, setValidLowercase] = useState(false);
+    const [validUppercase, setValidUppercase] = useState(false);
+    const [validNumber, setValidNumber] = useState(false);
+    const [validSpecialChar, setValidSpecialChar] = useState(false);
+    const [validLength, setValidLength] = useState(false);
 
     const [focusFullName, setFocusFullName] = useState<boolean>(false);
     const [contentFullName, setContentFullName] = useState<string>('');
@@ -137,24 +147,24 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
 
             } else {
                 await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
-                dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'error',
+
+
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body:  data.message,
                 }))
-
-
             }
         },
 
         onError: (err) => {
-            dispatch(setResponse({
-                responseMessage: err.message,
-                responseState: true,
-                responseType: 'error',
+
+            dispatch(addNotificationItem({
+                id: Math.random(),
+                type: 'error',
+                body:  err.message,
             }))
-
-
         },
         onSettled: () => {
             queryClient.invalidateQueries(['userFBOAuth']);
@@ -182,21 +192,23 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
 
                 } else {
 
-                    dispatch(setResponse({
-                        responseMessage: data.message,
-                        responseState: true,
-                        responseType: 'error',
+
+
+                    dispatch(addNotificationItem({
+                        id: Math.random(),
+                        type: 'error',
+                        body:  data.message,
                     }))
-
-
                 }
             },
 
             onError: (err) => {
-                dispatch(setResponse({
-                    responseMessage: err.message,
-                    responseState: true,
-                    responseType: 'error',
+
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body:  err.message,
                 }))
                 console.log(err)
 
@@ -223,24 +235,24 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
             } else {
 
                 await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
-                dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'error',
+
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body:  data.message,
                 }))
-
-
             }
         },
 
         onError: (err) => {
-            dispatch(setResponse({
-                responseMessage: err.message,
-                responseState: true,
-                responseType: 'error',
+
+
+            dispatch(addNotificationItem({
+                id: Math.random(),
+                type: 'error',
+                body:  err.message,
             }))
-
-
         },
         onSettled: () => {
             queryClient.invalidateQueries(['userAppleOAuth']);
@@ -267,12 +279,12 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
                     })
                 } else {
                     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
-                    dispatch(setResponse({
-                        responseMessage: data.message,
-                        responseState: true,
-                        responseType: 'error',
-                    }))
 
+                    dispatch(addNotificationItem({
+                        id: Math.random(),
+                        type: 'error',
+                        body:  data.message,
+                    }))
                 }
                 /*  navigation.navigate('EmailConfirm', {
                       email:contentEmail
@@ -283,12 +295,12 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
         },
 
         onError: (err) => {
-            dispatch(setResponse({
-                responseMessage: err.message,
-                responseState: true,
-                responseType: 'error',
-            }))
 
+            dispatch(addNotificationItem({
+                id: Math.random(),
+                type: 'error',
+                body:  err.message,
+            }))
 
         },
         onSettled: () => {
@@ -298,9 +310,22 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
     })
 
 
-    const handleClosePress = () => {
+    const  handleValidation  = (number: string) => {
 
-    }
+
+        // Test each rule sequentially
+        setValidLowercase(/[a-z]/.test(number));
+        setValidUppercase(/[A-Z]/.test(number));
+        setValidNumber(/\d/.test(number));
+
+        const testSpecialChar = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/.test(number)
+        setValidLength(number.length >= 8);
+
+
+        setValidSpecialChar(testSpecialChar)
+
+    };
+
 
     const {
         resetForm,
@@ -366,20 +391,6 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
         navigation.goBack()
     }
 
-    useEffect(() => {
-        // console.log(user)
-        let time: NodeJS.Timeout | undefined;
-        if (responseState || responseMessage) {
-
-            time = setTimeout(() => {
-                dispatch(unSetResponse())
-            }, 3000)
-
-        }
-        return () => {
-            clearTimeout(time)
-        };
-    }, [responseState, responseMessage])
 
 
     return (
@@ -388,7 +399,7 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
 
 
             <SafeAreaView style={styles.safeArea}>
-                <Toast message={responseMessage} state={responseState} type={responseType}/>
+              <SwipeAnimatedToast/>
                 {
                     googleAuthenticating &&
                     <ActivityIndicator size="large" color={Colors.primaryColor}
@@ -577,7 +588,7 @@ style={styles.fbButtonSignUp}
                             onChangeText={(e) => {
                                 handleChange('password')(e);
                                 setContentPassword(e);
-
+                                handleValidation(e)
                             }}
                             onBlur={(e) => {
                                 handleBlur('password')(e);
@@ -587,6 +598,65 @@ style={styles.fbButtonSignUp}
                             focus={focusPassword}
                             value={values.password}
                             label="Password *"/>
+
+
+
+
+                        <View style={styles.passwordCheckWrap}>
+                            <Animated.View style={[styles.passwordCheckBox,{
+                                backgroundColor:validLowercase ? Colors.successTint : "#eee"
+                            }]}>
+                                <Text style={[styles.passwordCheckText,{
+                                    color:validLowercase? Colors.success : "#000"
+                                }]}>
+                                    1 Lowercase
+                                </Text>
+                            </Animated.View>
+
+
+                            <View style={[styles.passwordCheckBox,{
+                                backgroundColor:validUppercase ? Colors.successTint :"#eee"
+                            }]}>
+                                <Text style={[styles.passwordCheckText,{
+                                    color:validUppercase? Colors.success :"#000"
+                                }]}>
+                                    1 Uppercase
+                                </Text>
+                            </View>
+
+
+                            <View style={[styles.passwordCheckBox,{
+                                backgroundColor:validNumber? Colors.successTint :"#eee"
+                            }]}>
+                                <Text style={[styles.passwordCheckText,{
+                                    color:validNumber? Colors.success : "#000"
+                                }]}>
+                                    1 Number
+                                </Text>
+                            </View>
+
+                            <View style={[styles.passwordCheckBox,{
+                                backgroundColor:validLength ? Colors.successTint :"#eee"
+                            }]}>
+                                <Text style={[styles.passwordCheckText,{
+                                    color:validLength ? Colors.success : "#000"
+                                }]}>
+                                    8 Characters
+                                </Text>
+                            </View>
+
+
+                            <View style={[styles.passwordCheckBox,{
+                                backgroundColor:validSpecialChar ? Colors.successTint : "#eee"
+                            }]}>
+                                <Text style={[styles.passwordCheckText,{
+                                    color:validSpecialChar ? Colors.success : "#000"
+                                }]}>
+                                    1 Special character
+                                </Text>
+                            </View>
+                        </View>
+
 
 
                         <TextInput
@@ -611,7 +681,6 @@ style={styles.fbButtonSignUp}
                             focus={focusConfirmPassword}
                             value={values.confirmPass}
                             label="Confirm Password *"/>
-
 
                         <TextInput
 
@@ -967,7 +1036,32 @@ const styles = StyleSheet.create({
         fontSize: fontPixel(14),
         color:Colors.light.text,
         fontFamily: Fonts.quicksandRegular
-    }
+    },
+
+    passwordCheckWrap:{
+        marginBottom:20,
+        flexDirection:'row',
+        alignItems:'center',
+        justifyContent:'flex-start',
+        flexWrap:'wrap',
+        width:'100%',
+        height:heightPixel(60),
+    },
+    passwordCheckBox:{
+        marginRight:8,
+        marginBottom:8,
+        paddingHorizontal:10,
+        height:25,
+        borderRadius:15,
+        minWidth:50,
+        alignItems:'center',
+        justifyContent:'center',
+    },
+    passwordCheckText:{
+
+        fontSize: fontPixel(12),
+        fontFamily: Fonts.clashDisplayRegular
+    },
 
 })
 

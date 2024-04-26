@@ -30,6 +30,8 @@ import BottomSheet, {BottomSheetBackdrop, BottomSheetView} from "@gorhom/bottom-
 import {
     BottomSheetDefaultBackdropProps
 } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
+import SwipeAnimatedToast from "../../../components/toasty";
+import {addNotificationItem} from "../../../app/slices/dataSlice";
 
 var relativeTime = require('dayjs/plugin/relativeTime')
 dayjs.extend(relativeTime)
@@ -101,19 +103,19 @@ const ReplyComment = ({navigation, route}: RootStackScreenProps<'ReplyComment'>)
                 if (data.success) {
 
                     navigation.goBack()
-                    dispatch(setResponse({
-                        responseMessage: data.message,
-                        responseState: true,
-                        responseType: 'success',
+
+                    dispatch(addNotificationItem({
+                        id: Math.random(),
+                        type: 'success',
+                        body: data.message,
                     }))
-
-
                 } else {
 
-                    dispatch(setResponse({
-                        responseMessage: data.message,
-                        responseState: true,
-                        responseType: 'error',
+
+                    dispatch(addNotificationItem({
+                        id: Math.random(),
+                        type: 'error',
+                        body: data.message,
                     }))
 
                     /*  navigation.navigate('EmailConfirm', {
@@ -125,13 +127,12 @@ const ReplyComment = ({navigation, route}: RootStackScreenProps<'ReplyComment'>)
             },
 
             onError: (err) => {
-                dispatch(setResponse({
-                    responseMessage: err.message,
-                    responseState: true,
-                    responseType: 'error',
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body: err.message,
                 }))
-
-
             },
             onSettled: () => {
                 queryClient.invalidateQueries(['replyToComment']);
@@ -186,20 +187,7 @@ const ReplyComment = ({navigation, route}: RootStackScreenProps<'ReplyComment'>)
         navigation.goBack()
     }
 
-    useEffect(() => {
-        // console.log(user)
-        let time: NodeJS.Timeout | undefined;
-        if (responseState || responseMessage) {
 
-            time = setTimeout(() => {
-                dispatch(unSetResponse())
-            }, 3000)
-
-        }
-        return () => {
-            clearTimeout(time)
-        };
-    }, [responseState, responseMessage])
 
     return (
 
@@ -207,7 +195,7 @@ const ReplyComment = ({navigation, route}: RootStackScreenProps<'ReplyComment'>)
         <>
 
             <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
-                <Toast message={responseMessage} state={responseState} type={responseType}/>
+                <SwipeAnimatedToast/>
 
                 <View style={styles.topBar}>
                     <TouchableOpacity onPress={goBack}>

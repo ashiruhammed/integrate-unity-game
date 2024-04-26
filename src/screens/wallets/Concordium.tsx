@@ -43,9 +43,11 @@ import {useFormik} from "formik";
 import * as yup from "yup";
 import AdvancedTextInput from "../../components/inputs/AdvancedTextInput";
 import TextInput from "../../components/inputs/TextInput";
-import {setResponse} from "../../app/slices/userSlice";
-import Toast from "../../components/Toast";
+
 import dayjs from "dayjs";
+import * as Clipboard from "expo-clipboard";
+import SwipeAnimatedToast from "../../components/toasty";
+import {addNotificationItem} from "../../app/slices/dataSlice";
 
 
 const formSchema = yup.object().shape({
@@ -110,6 +112,11 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
     // variables
     const snapPoints = useMemo(() => ["1", "45%"], []);
 
+    const [copied, setCopied] = useState(false)
+    const copyToClipboard = async (copyText:string) => {
+        await Clipboard.setStringAsync(copyText);
+        setCopied(true)
+    };
 
     const openNotifications = () => {
         navigation.navigate('Notifications')
@@ -166,21 +173,21 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
                     handleClosePressWithdraw()
                   //  getTransactions()
 
-                    dispatch(setResponse({
-                        responseMessage: data.message,
-                        responseState: true,
-                        responseType: 'success',
-                    }))
 
+                    dispatch(addNotificationItem({
+                        id: Math.random(),
+                        type: 'success',
+                        body:  data.message,
+                    }))
 
                 } else {
                     handleClosePressWithdraw()
-                    dispatch(setResponse({
-                        responseMessage: data.message,
-                        responseState: true,
-                        responseType: 'error',
-                    }))
 
+                    dispatch(addNotificationItem({
+                        id: Math.random(),
+                        type: 'error',
+                        body:  data.message,
+                    }))
                     /*  navigation.navigate('EmailConfirm', {
                           email:contentEmail
                       })*/
@@ -190,13 +197,12 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
             },
 
             onError: (err) => {
-                dispatch(setResponse({
-                    responseMessage: err.message,
-                    responseState: true,
-                    responseType: 'error',
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body:  err.message,
                 }))
-
-
             },
             onSettled: () => {
                 queryClient.invalidateQueries(['withdrawFromWallet']);
@@ -273,11 +279,15 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
         setFieldValue('points', ccdWallet?.data?.ccdBalance.toString())
     }
     useRefreshOnFocus(refetch)
+
+    const openTransactions= () => {
+        navigation.navigate('ConcordiumTransactions')
+    }
 //console.log( JSON.stringify(transactions.data, null, 2))
     return (
 
         <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
-            <Toast message={responseMessage} state={responseState} type={responseType}/>
+            <SwipeAnimatedToast/>
             <ScrollView
 
                 style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {
@@ -391,11 +401,11 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
                                 {truncateString(ccdWallet?.data?.address,30)}
                             </Text>
 
-                            <TouchableOpacity activeOpacity={0.8} style={styles.copyBtn}>
+                            <TouchableOpacity onPress={()=>copyToClipboard(ccdWallet?.data?.address)} activeOpacity={0.8} style={styles.copyBtn}>
                                 <Ionicons name="copy-outline" size={16} color={Colors.primaryColor} />
-                                <Text style={styles.copyText}>
-                                    Copy
-                                </Text>
+                                {copied ? <Text style={styles.copyText}>
+                                    Copied
+                                </Text>: <Text style={styles.copyText}>Copy</Text>}
                             </TouchableOpacity>
                         </View>
 
@@ -415,7 +425,7 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
                         </View>
 
 
-                        <View style={styles.rowTitle}>
+                        <Pressable onPress={openTransactions} style={styles.rowTitle}>
                             <Text style={[styles.titleTxt, {
                                 color: textColor
                             }]}>
@@ -425,14 +435,14 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
                             <Text>
                                 See all
                             </Text>
-                        </View>
+                        </Pressable>
 
 
                         <View style={styles.transactions}>
 
 
                             {!loadingTransactions && transactions &&
-                                transactions.data.filter(transaction => transaction.token === 'CCD').map((({token,hash,type,createdAt,amount})=>(
+                                transactions.data.filter((transact) => transact.token === 'CCD').map((({token,hash,type,createdAt,amount})=>(
                                     <Animated.View key={hash} entering={FadeInDown.delay(200).randomDelay()} exiting={FadeOutDown} style={styles.breakDownCard}>
                                         <View style={[styles.boxSign, {
                                             backgroundColor: Colors.errorTint

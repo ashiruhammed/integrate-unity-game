@@ -36,6 +36,11 @@ import GoogleIcon from "../../components/GoogleIcon";
 import HorizontalLine from "../../components/HorizontalLine";
 import {LoginButton, AccessToken, AuthenticationToken} from 'react-native-fbsdk-next';
 import Recaptcha, {RecaptchaHandles} from 'react-native-recaptcha-that-works';
+import {addNotificationItem} from "../../app/slices/dataSlice";
+import SwipeAnimatedToast from "../../components/toasty";
+
+
+
 
 
 WebBrowser.maybeCompleteAuthSession();
@@ -166,23 +171,25 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
             } else {
                 setToken('')
                 await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
-                dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'error',
-                }))
 
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body:  data.message,
+                }))
 
             }
         },
 
         onError: (err) => {
-            dispatch(setResponse({
-                responseMessage: err.message,
-                responseState: true,
-                responseType: 'error',
-            }))
 
+
+            dispatch(addNotificationItem({
+                id: Math.random(),
+                type: 'error',
+                body:  err.message,
+            }))
 
         },
         onSettled: () => {
@@ -207,24 +214,26 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
             } else {
                 setToken('')
                 await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
-                dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'error',
+
+
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body:  data.message,
                 }))
-
-
             }
         },
 
         onError: (err) => {
-            dispatch(setResponse({
-                responseMessage: err.message,
-                responseState: true,
-                responseType: 'error',
+
+
+
+            dispatch(addNotificationItem({
+                id: Math.random(),
+                type: 'error',
+                body:  err.message,
             }))
-
-
         },
         onSettled: () => {
             queryClient.invalidateQueries(['userFBOAuth']);
@@ -248,12 +257,13 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
             } else {
                 setToken('')
                 await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
-                dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'error',
-                }))
 
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body:  data.message,
+                }))
             }
             /*  navigation.navigate('EmailConfirm', {
                   email:contentEmail
@@ -291,11 +301,12 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
 
 
             } else {
-                console.log(data)
-                dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'error',
+
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body:  data.message,
                 }))
                 if (data.message == 'Your email is not verified, kindly verify your email to continue.') {
                     navigation.navigate('EmailConfirm', {
@@ -305,12 +316,12 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
 
                     setToken('')
                     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
-                    dispatch(setResponse({
-                        responseMessage: data.message,
-                        responseState: true,
-                        responseType: 'error',
-                    }))
 
+                    dispatch(addNotificationItem({
+                        id: Math.random(),
+                        type: 'error',
+                        body:  data.message,
+                    }))
                 }
                 /*  navigation.navigate('EmailConfirm', {
                       email:contentEmail
@@ -321,12 +332,12 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
         },
 
         onError: (err) => {
-
-            dispatch(setResponse({
-                responseMessage: err.message,
-                responseState: true,
-                responseType: 'error',
+            dispatch(addNotificationItem({
+                id: Math.random(),
+                type: 'error',
+                body:  err.message,
             }))
+
 
 
         },
@@ -380,20 +391,6 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
     }
 
 
-    useEffect(() => {
-
-        let time: NodeJS.Timeout | undefined;
-        if (responseState || responseMessage) {
-
-            time = setTimeout(() => {
-                dispatch(unSetResponse())
-            }, 3000)
-
-        }
-        return () => {
-            clearTimeout(time)
-        };
-    }, [responseState, responseMessage])
 
 
     return (
@@ -408,6 +405,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
 
             />*/}
             <SafeAreaView style={styles.safeArea}>
+   <SwipeAnimatedToast/>
                 <Recaptcha
                     ref={$recaptcha}
                     lang="eng"
@@ -479,7 +477,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                     </View>
 
 
-                    <Toast message={responseMessage} state={responseState} type={responseType}/>
+
                     <View style={styles.authContainer}>
                         {/* <View style={styles.topBar}>
                         <TouchableOpacity onPress={goBack} style={styles.backBtn}>

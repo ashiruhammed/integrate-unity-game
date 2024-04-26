@@ -37,13 +37,11 @@ import Animated, {
 } from 'react-native-reanimated';
 import {isWhatPercentOf, useRefreshOnFocus} from "../../helpers";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
-import {clearSubmissions, UPDATE_SUBMISSIONS, updateSubmissions} from "../../app/slices/dataSlice";
-import {setResponse, unSetResponse} from "../../app/slices/userSlice";
-import Toast from "../../components/Toast";
-import AdventuresIcon from "../../assets/images/tabs/home/AdventuresIcon";
+import {addNotificationItem, clearSubmissions, UPDATE_SUBMISSIONS, updateSubmissions} from "../../app/slices/dataSlice";
+
 import {RectButton} from "../../components/RectButton";
 import LottieView from "lottie-react-native";
-import {IF} from "../../helpers/ConditionJsx";
+
 import {StatusBar} from "expo-status-bar";
 import BottomSheet, {BottomSheetBackdrop, BottomSheetView} from "@gorhom/bottom-sheet";
 import BottomSheetTextInput from "../../components/inputs/BottomSheetTextInput";
@@ -56,6 +54,7 @@ import {
 import * as Haptics from "expo-haptics";
 
 import VideoPlayer from 'react-native-media-console';
+import SwipeAnimatedToast from "../../components/toasty";
 
 
 const _handlePressButtonAsync = async (url:string) => {
@@ -174,10 +173,12 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
 
                 navigation.navigate('AdventureHome')
 
-                dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'error',
+
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body: data.message,
                 }))
             }
 
@@ -231,10 +232,11 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
               setBadgeModalVisible(true)
             } else {
-                dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'error',
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body: data.message,
                 }))
             }
         },
@@ -259,17 +261,20 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
 
 
                 nextLevel(adventure.id)
-                dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'success',
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'success',
+                    body: data.message,
                 }))
             } else {
                 nextLevel(adventure.id)
-                dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'error',
+
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body: data.message,
                 }))
             }
         },
@@ -394,20 +399,6 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
     );
 
 
-    useEffect(() => {
-        // console.log(user)
-        let time: NodeJS.Timeout | undefined;
-        if (responseState || responseMessage) {
-
-            time = setTimeout(() => {
-                dispatch(unSetResponse())
-            }, 3000)
-
-        }
-        return () => {
-            clearTimeout(time)
-        };
-    }, [responseState, responseMessage])
 
 
     useRefreshOnFocus(refetch)
@@ -420,7 +411,7 @@ const QuizScreen = ({navigation, route}: RootStackScreenProps<'QuizScreen'>) => 
 
             <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
                 <StatusBar style={theme == 'light' ? 'dark' : 'light'} />
-                <Toast message={responseMessage} state={responseState} type={responseType}/>
+                <SwipeAnimatedToast/>
                 {
                     submitting &&
                     <ActivityIndicator size="large" color={Colors.primaryColor}

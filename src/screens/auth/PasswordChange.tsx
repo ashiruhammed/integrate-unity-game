@@ -4,7 +4,7 @@ import {Text, View, StyleSheet, TouchableOpacity, Dimensions, Image, ActivityInd
 import {SafeAreaView} from "react-native-safe-area-context";
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 import {AntDesign} from "@expo/vector-icons";
-import PhoneInput from "react-native-phone-number-input";
+
 import Colors from "../../constants/Colors";
 import {Fonts} from "../../constants/Fonts";
 import {fontPixel, heightPixel, pixelSizeHorizontal, widthPixel} from "../../helpers/normalize";
@@ -16,11 +16,10 @@ import {AuthStackScreenProps} from "../../../types";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {confirmEmail, passwordReset, requestCode} from "../../action/action";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
-import {Simulate} from "react-dom/test-utils";
-import contextMenu = Simulate.contextMenu;
-import {setResponse, unSetResponse} from "../../app/slices/userSlice";
-import Toast from "../../components/Toast";
+
 import TextInput from "../../components/inputs/TextInput";
+import SwipeAnimatedToast from "../../components/toasty";
+import {addNotificationItem} from "../../app/slices/dataSlice";
 
 
 const height = Dimensions.get('window').height
@@ -48,16 +47,19 @@ const PasswordChange = ({route, navigation}: AuthStackScreenProps<'PasswordChang
     const {mutate: resendCodeNow, isLoading: sending} = useMutation(['requestCode'], requestCode, {
         onSuccess: (data) => {
             if (data.success) {
-                dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'success',
+
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'success',
+                    body: data.message,
                 }))
             } else {
-                dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'error',
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body: data.message,
                 }))
             }
         },
@@ -69,17 +71,19 @@ const PasswordChange = ({route, navigation}: AuthStackScreenProps<'PasswordChang
         onSuccess: (data) => {
 
             if (data.success) {
-                dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'success',
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'success',
+                    body: data.message,
                 }))
                 navigation.navigate('LoginNow')
             } else {
-                dispatch(setResponse({
-                    responseMessage: data.message,
-                    responseState: true,
-                    responseType: 'error',
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body: data.message,
                 }))
             }
         },
@@ -138,20 +142,6 @@ const PasswordChange = ({route, navigation}: AuthStackScreenProps<'PasswordChang
     }
 
 
-    useEffect(() => {
-        // console.log(user)
-        let time: NodeJS.Timeout | undefined;
-        if (responseState || responseMessage) {
-
-            time = setTimeout(() => {
-                dispatch(unSetResponse())
-            }, 3000)
-
-        }
-        return () => {
-            clearTimeout(time)
-        };
-    }, [responseState, responseMessage])
 
 
     return (
@@ -162,7 +152,7 @@ const PasswordChange = ({route, navigation}: AuthStackScreenProps<'PasswordChang
 
             <SafeAreaView style={styles.safeArea}>
 
-
+<SwipeAnimatedToast/>
                 <KeyboardAwareScrollView scrollEnabled
                                          style={{
                                              width: '100%',
@@ -185,7 +175,7 @@ const PasswordChange = ({route, navigation}: AuthStackScreenProps<'PasswordChang
                     </View>
 
 
-                    <Toast message={responseMessage} state={responseState} type={responseType}/>
+
 
                     <View style={styles.authContainer}>
                         <View style={styles.topBar}>
@@ -287,6 +277,7 @@ const PasswordChange = ({route, navigation}: AuthStackScreenProps<'PasswordChang
                         <View style={styles.resendMessage}>
                             <Text style={styles.resendMessageTxt}>
                                 I haven’t received a code <Text disabled={counter !== 0} onPress={resend} style={{
+                                color:counter == 0 ? Colors.primaryColor : "#000",
                                 fontFamily: Fonts.quickSandBold
                             }}>Resend </Text>
                                 (0:{counter})

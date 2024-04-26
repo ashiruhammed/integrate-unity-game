@@ -28,7 +28,17 @@ interface CountryProps{
     "countryCode": string
 }
 
+
+interface TaskInterface {
+    index: number;
+    id: string;
+    type: 'error' | 'success' | 'info';
+    body: string;
+}
+
+
 export interface DataState {
+    notificationData: [TaskInterface],
     productDetails:
         {
             "name": string,
@@ -73,6 +83,8 @@ export interface DataState {
 
 const initialState: DataState = {
     theme: 'light',
+
+    notificationData: [],
     productDetails: {
         name: "",
         description: "",
@@ -139,7 +151,27 @@ export const dataSlice = createSlice({
             state.productDetails.name = action.payload;
         },
 
+        removeSingleNotification: (state, action) => {
+            state.notificationData = state.notificationData.filter((item: {
+                index: any;
+            }) => item.index !== action.payload.index)
+        },
 
+        removeNotificationItem: (state, action) => {
+            //  const { index,id } = action.payload.notification;
+            const newData = state.notificationData.filter((item, index) => index !== action.payload.notification.index);
+
+            state.notificationData = newData
+
+        },
+
+        clearNotification: (state) => {
+            state.notificationData = []
+
+        },
+        addNotificationItem: (state, action) => {
+            state.notificationData = [action.payload, ...state.notificationData,]
+        },
         addProductStep: (state, action: PayloadAction<ProductStepsProps>) => {
             if (!state.productDetails.productSteps) {
                 state.productDetails.productSteps = []; // Initialize productSteps if not already initialized
@@ -226,7 +258,11 @@ export const {
     updateSubmissions,
     clearSubmissions,
     updateProductDetails,
-    addProductStep
+    addProductStep,
+    removeSingleNotification,
+    removeNotificationItem,
+    clearNotification,
+    addNotificationItem
 } = dataSlice.actions
 
 export default dataSlice.reducer

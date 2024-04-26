@@ -14,6 +14,7 @@ import ProductView from "./src/screens/discover/ProductView";
 import FundamentalData from "./src/screens/discover/create/FundamentalData";
 import VisualRepresentation from "./src/screens/discover/create/VisualRepresentation";
 import ViewPoints from "./src/screens/wallets/ViewPoints";
+import ConcordiumTransactions from "./src/screens/wallets/ConcordiumTransactions";
 
 
 interface OwnerProps {
@@ -72,6 +73,8 @@ export type RootStackParamList = {
     MoreInformation: undefined;
     VisualRepresentation: undefined;
     SearchUser: undefined;
+    GateTokenTransactions: undefined;
+    ConcordiumTransactions: undefined;
     ProductView: {
         item: {
             id: string;

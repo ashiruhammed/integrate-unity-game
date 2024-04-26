@@ -742,7 +742,7 @@ const styles = StyleSheet.create({
 
         paddingHorizontal: pixelSizeHorizontal(15),
         width: '100%',
-        height: heightPixel(80)
+        height: heightPixel(100)
     },
     title: {
         fontFamily: Fonts.quickSandBold,

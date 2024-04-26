@@ -17,22 +17,33 @@ import Colors from "../../../constants/Colors";
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {useAppDispatch, useAppSelector} from "../../../app/hooks";
-import {useInfiniteQuery, useMutation, useQueryClient} from "@tanstack/react-query";
-import {getApprovedProduct, registerProductHunt, updateUserImage, userNotifications} from "../../../action/action";
+import {useInfiniteQuery, useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
+import {
+    getApprovedProduct,
+    getUserDashboard,
+    registerProductHunt,
+    updateUserImage,
+    userNotifications
+} from "../../../action/action";
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../../helpers/normalize";
 import {Fonts} from "../../../constants/Fonts";
 import OpenBoxIcon from "../../../assets/images/svg/OpenBoxIcon";
-import SearchInput from "../../../components/inputs/SearchInput";
-import Toast from "../../../components/Toast";
-import {setResponse, unSetResponse} from "../../../app/slices/userSlice";
+
+
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import {clearProductInfo, updateProduct, updateProductDetails} from "../../../app/slices/dataSlice";
+import {
+    addNotificationItem,
+    clearProductInfo,
+    updateProduct,
+    updateProductDetails
+} from "../../../app/slices/dataSlice";
 import {BottomSheetBackdrop, BottomSheetModal, BottomSheetModalProvider, BottomSheetView} from "@gorhom/bottom-sheet";
 import {
     BottomSheetDefaultBackdropProps
 } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
 import dayjs from "dayjs";
 import FastImage from "react-native-fast-image";
+import SwipeAnimatedToast from "../../../components/toasty";
 
 
 const MoreInformation = ({navigation}: RootStackScreenProps<'MoreInformation'>) => {
@@ -62,6 +73,11 @@ const MoreInformation = ({navigation}: RootStackScreenProps<'MoreInformation'>) 
 
     // ref
     const bottomSheetRef = useRef<BottomSheetModal>(null);
+
+    const {isLoading: loadingUser,data:userDashboard, isRefetching, refetch:fetchDashboard} = useQuery(['getUserDashboard'], getUserDashboard, {
+
+
+    })
 
 
     const handleClose = () => {
@@ -98,34 +114,33 @@ const MoreInformation = ({navigation}: RootStackScreenProps<'MoreInformation'>) 
                     // alert(message)
                     bottomSheetRef.current?.present()
 
-                    dispatch(setResponse({
-                        responseMessage: data.message,
-                        responseState: true,
-                        responseType: 'success',
-                    }))
 
+                    dispatch(addNotificationItem({
+                        id: Math.random(),
+                        type: 'success',
+                        body: `${data.message} 👍`,
+                    }))
                 } else {
 
 
-                    dispatch(setResponse({
-                        responseMessage: `${data.message} 😞`,
-                        responseState: true,
-                        responseType: 'error',
-                    }))
 
+                    dispatch(addNotificationItem({
+                        id: Math.random(),
+                        type: 'error',
+                        body: `${data.message} 😞`,
+                    }))
                 }
 
             },
 
             onError: (err) => {
-                console.log(err)
-                dispatch(setResponse({
-                    responseMessage: 'Something happened, please try again 😞',
-                    responseState: true,
-                    responseType: 'error',
+              //  console.log(err)
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body: 'Something happened, please try again 😞',
                 }))
-
-
             },
             onSettled: () => {
                 queryClient.invalidateQueries(['registerProductHunt']);
@@ -183,20 +198,6 @@ const MoreInformation = ({navigation}: RootStackScreenProps<'MoreInformation'>) 
     }
 
 
-    useEffect(() => {
-        // console.log(user)
-        let time: NodeJS.Timeout | undefined;
-        if (responseState || responseMessage) {
-
-            time = setTimeout(() => {
-                dispatch(unSetResponse())
-            }, 3000)
-
-        }
-        return () => {
-            clearTimeout(time)
-        };
-    }, [responseState, responseMessage])
 
 
 
@@ -228,7 +229,7 @@ const MoreInformation = ({navigation}: RootStackScreenProps<'MoreInformation'>) 
         <>
 
         <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
-            <Toast message={responseMessage} state={responseType == 'error' ? responseState : false} type={responseType}/>
+<SwipeAnimatedToast/>
             <KeyboardAwareScrollView
 
                 style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {
@@ -243,7 +244,7 @@ const MoreInformation = ({navigation}: RootStackScreenProps<'MoreInformation'>) 
 
                         <View style={styles.pointWrap}>
                             <Ionicons name="gift" size={16} color="#22BB33"/>
-                            <Text style={styles.pointsText}>20000</Text>
+                            <Text style={styles.pointsText}>{userDashboard?.data?.totalPoint}</Text>
                         </View>
                     </View>
 
@@ -251,7 +252,7 @@ const MoreInformation = ({navigation}: RootStackScreenProps<'MoreInformation'>) 
 
                         <ImageBackground style={styles.streaKIcon} resizeMode={'contain'}
                                          source={require('../../../assets/images/streakicon.png')}>
-                            <Text style={styles.streakText}> 200</Text>
+                            <Text style={styles.streakText}> {userDashboard?.data?.currentDayStreak}</Text>
                         </ImageBackground>
 
                         <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}

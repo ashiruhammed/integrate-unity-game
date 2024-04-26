@@ -18,8 +18,8 @@ import {SafeAreaView} from "react-native-safe-area-context";
 import {fontPixel, heightPixel, pixelSizeHorizontal, widthPixel} from "../../../helpers/normalize";
 import {Fonts} from "../../../constants/Fonts";
 import {useAppDispatch, useAppSelector} from "../../../app/hooks";
-import {useInfiniteQuery, useMutation, useQueryClient} from "@tanstack/react-query";
-import {uploadToCloudinary, userNotifications} from "../../../action/action";
+import {useInfiniteQuery, useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
+import {getUserDashboard, uploadToCloudinary, userNotifications} from "../../../action/action";
 import {RootStackScreenProps} from "../../../../types";
 import ImageIcon from "../../../assets/images/svg/imageIcon";
 import HorizontalLine from "../../../components/HorizontalLine";
@@ -31,8 +31,9 @@ import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 import {isLessThanTheMB} from "../../../helpers";
 import {IF} from "../../../helpers/ConditionJsx";
-import {addProductStep, updateProduct, updateProductDetails} from "../../../app/slices/dataSlice";
-import Toast from "../../../components/Toast";
+import {addNotificationItem, addProductStep, updateProduct, updateProductDetails} from "../../../app/slices/dataSlice";
+import SwipeAnimatedToast from "../../../components/toasty";
+
 
 
 const getFileInfo = async (fileURI: string) => {
@@ -71,6 +72,10 @@ const VisualRepresentation = ({navigation}: RootStackScreenProps<'VisualRepresen
     const lightText = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
     const tintText = theme == 'light' ? "#AEAEAE" : Colors.dark.tintTextColor
     const borderColor = theme == 'light' ? "#DEE5ED" : "#ccc"
+    const {isLoading: loadingUser,data:userDashboard, isRefetching, refetch:fetchDashboard} = useQuery(['getUserDashboard'], getUserDashboard, {
+
+
+    })
 
 
     const {mutate: createImage, isLoading: creatingImage} = useMutation(['uploadToCloudinary'], uploadToCloudinary,
@@ -80,17 +85,21 @@ setImage('')
                 // alert(message)
                 dispatch(addProductStep({imageUrl: data.secure_url}))
 
-
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'success',
+                    body:  'Image added 👍',
+                }))
             },
 
             onError: (err) => {
 
-                dispatch(setResponse({
-                    responseMessage: 'Something happened, please try again 😞',
-                    responseState: true,
-                    responseType: 'error',
-                }))
 
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body:  'Something happened, please try again 😞',
+                }))
 
             },
             onSettled: () => {
@@ -116,10 +125,11 @@ setImage('')
 
             onError: (err) => {
 
-                dispatch(setResponse({
-                    responseMessage: 'Something happened, please try again 😞',
-                    responseState: true,
-                    responseType: 'error',
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body:  'Something happened, please try again 😞',
                 }))
 
 
@@ -148,11 +158,14 @@ setImage('')
             const isLessThan = isLessThanTheMB(fileInfo?.size, 8)
 
             if (Platform.OS == 'ios' && !isLessThan) {
-                dispatch(setResponse({
-                    responseMessage: 'Image file too large, must be less than 4MB 🤨',
-                    responseState: true,
-                    responseType: 'error',
+
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body:  'Image file too large, must be less than 4MB 🤨',
                 }))
+
             }
 
             setImageLogo(result?.assets[0].uri);
@@ -177,10 +190,13 @@ setImage('')
             const isLessThan = isLessThanTheMB(fileInfo?.size, 8)
 
             if (Platform.OS == 'ios' && !isLessThan) {
-                dispatch(setResponse({
-                    responseMessage: 'Image file too large, must be less than 4MB 🤨',
-                    responseState: true,
-                    responseType: 'error',
+
+
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body:  'Image file too large, must be less than 4MB 🤨',
                 }))
             }
 
@@ -265,21 +281,6 @@ setImage('')
         })
 
 
-    useEffect(() => {
-        // console.log(user)
-        let time: NodeJS.Timeout | undefined;
-        if (responseState || responseMessage) {
-
-            time = setTimeout(() => {
-                dispatch(unSetResponse())
-            }, 3000)
-
-        }
-        return () => {
-            clearTimeout(time)
-        };
-    }, [responseState, responseMessage])
-
     const confirmSelect = () => {
         navigation.navigate('MoreInformation')
     }
@@ -289,7 +290,7 @@ setImage('')
 
 
         <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
-            <Toast message={responseMessage} state={responseState} type={responseType}/>
+         <SwipeAnimatedToast/>
             <ScrollView
 
                 style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {
@@ -304,7 +305,7 @@ setImage('')
 
                         <View style={styles.pointWrap}>
                             <Ionicons name="gift" size={16} color="#22BB33"/>
-                            <Text style={styles.pointsText}>20000</Text>
+                            <Text style={styles.pointsText}>{userDashboard?.data?.totalPoint}</Text>
                         </View>
                     </View>
 
@@ -312,7 +313,7 @@ setImage('')
 
                         <ImageBackground style={styles.streaKIcon} resizeMode={'contain'}
                                          source={require('../../../assets/images/streakicon.png')}>
-                            <Text style={styles.streakText}> 200</Text>
+                            <Text style={styles.streakText}> {userDashboard?.data?.currentDayStreak}</Text>
                         </ImageBackground>
 
                         <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}

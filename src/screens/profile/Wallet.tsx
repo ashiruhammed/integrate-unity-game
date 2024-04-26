@@ -36,16 +36,16 @@ import {
     redeemPoints,
     withdrawFromWallet
 } from "../../action/action";
-import {setResponse, unSetResponse, updateUserInfo} from "../../app/slices/userSlice";
+
 import {currencyFormatter, useRefreshOnFocus} from "../../helpers";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
-import * as SecureStore from "expo-secure-store";
-import Toast from "../../components/Toast";
-import AdvancedTextInput from "../../components/inputs/AdvancedTextInput";
+
 import RedeemForm from "../../components/wallets/RedeemForm";
 import dayjs from "dayjs";
 import Animated,
 {Easing, FadeInDown, FadeOutDown, Layout} from "react-native-reanimated";
+import SwipeAnimatedToast from "../../components/toasty";
+import {addNotificationItem} from "../../app/slices/dataSlice";
 
 
 const formSchema = yup.object().shape({
@@ -231,12 +231,7 @@ const Wallet = () => {
 
     const {isLoading: loadingPoints, data: points, refetch: fetchPoints} = useQuery(['getUserPoints'], getUserPoints, {
 
-        onSuccess: (data) => {
-            if (data.success) {
 
-
-            }
-        },
     })
 
 
@@ -265,21 +260,22 @@ const Wallet = () => {
                     handleClosePress()
                     getTransactions()
 
-                    dispatch(setResponse({
-                        responseMessage: data.message,
-                        responseState: true,
-                        responseType: 'success',
-                    }))
 
+                    dispatch(addNotificationItem({
+                        id: Math.random(),
+                        type: 'success',
+                        body:  data.message,
+                    }))
 
                 } else {
                     handleClosePress()
-                    dispatch(setResponse({
-                        responseMessage: data.message,
-                        responseState: true,
-                        responseType: 'error',
-                    }))
 
+
+                    dispatch(addNotificationItem({
+                        id: Math.random(),
+                        type: 'error',
+                        body:  data.message,
+                    }))
                     /*  navigation.navigate('EmailConfirm', {
                           email:contentEmail
                       })*/
@@ -289,13 +285,12 @@ const Wallet = () => {
             },
 
             onError: (err) => {
-                dispatch(setResponse({
-                    responseMessage: err.message,
-                    responseState: true,
-                    responseType: 'error',
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body:  err.message,
                 }))
-
-
             },
             onSettled: () => {
                 queryClient.invalidateQueries(['withdrawFromWallet']);
@@ -315,21 +310,19 @@ const Wallet = () => {
                     fetchPoints()
                     getTransactions()
                     handleClosePressRedeem()
-                    dispatch(setResponse({
-                        responseMessage: data.message,
-                        responseState: true,
-                        responseType: 'success',
+                    dispatch(addNotificationItem({
+                        id: Math.random(),
+                        type: 'success',
+                        body:  data.message,
                     }))
-
-
                 } else {
                     handleClosePressRedeem()
-                    dispatch(setResponse({
-                        responseMessage: data.message,
-                        responseState: true,
-                        responseType: 'error',
-                    }))
 
+                    dispatch(addNotificationItem({
+                        id: Math.random(),
+                        type: 'error',
+                        body:  data.message,
+                    }))
                     /*  navigation.navigate('EmailConfirm', {
                           email:contentEmail
                       })*/
@@ -339,12 +332,12 @@ const Wallet = () => {
             },
 
             onError: (err) => {
-                dispatch(setResponse({
-                    responseMessage: err.message,
-                    responseState: true,
-                    responseType: 'error',
-                }))
 
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body:  err.message,
+                }))
 
             },
             onSettled: () => {
@@ -440,20 +433,7 @@ const Wallet = () => {
     useRefreshOnFocus(refetch)
     useRefreshOnFocus(getTransactions)
 
-    useEffect(() => {
-        // console.log(user)
-        let time: NodeJS.Timeout | undefined;
-        if (responseState || responseMessage) {
 
-            time = setTimeout(() => {
-                dispatch(unSetResponse())
-            }, 3000)
-
-        }
-        return () => {
-            clearTimeout(time)
-        };
-    }, [responseState, responseMessage])
 
 
     useEffect(() => {
@@ -475,7 +455,7 @@ const Wallet = () => {
                 backgroundColor
             }
             ]}>
-                <Toast message={responseMessage} state={responseState} type={responseType}/>
+                <SwipeAnimatedToast/>
                 <ScrollView
                     style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {
                     backgroundColor

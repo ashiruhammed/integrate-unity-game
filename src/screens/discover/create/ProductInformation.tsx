@@ -5,8 +5,8 @@ import {AntDesign, Ionicons, MaterialIcons, Octicons} from "@expo/vector-icons";
 import Colors from "../../../constants/Colors";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
-import {useInfiniteQuery} from "@tanstack/react-query";
-import {userNotifications} from "../../../action/action";
+import {useInfiniteQuery, useQuery} from "@tanstack/react-query";
+import {getUserDashboard, userNotifications} from "../../../action/action";
 import {RootStackScreenProps} from "../../../../types";
 import {useAppDispatch, useAppSelector} from "../../../app/hooks";
 import {fontPixel, heightPixel, pixelSizeHorizontal, widthPixel} from "../../../helpers/normalize";
@@ -51,6 +51,13 @@ const dispatch = useAppDispatch()
     const [focusProductUrl, setFocusProductUrl] = useState(false)
 
     const [checkOption, setCheckOption] = useState<'Yes'|'No'>('No')
+
+
+    const {isLoading: loadingUser,data:userDashboard, isRefetching, refetch:fetchDashboard} = useQuery(['getUserDashboard'], getUserDashboard, {
+
+
+    })
+
 
     const openNotifications = () => {
         navigation.navigate('Notifications')
@@ -121,7 +128,7 @@ console.log(productDetails)
 
                         <View style={styles.pointWrap}>
                             <Ionicons name="gift" size={16} color="#22BB33"/>
-                            <Text style={styles.pointsText}>20000</Text>
+                            <Text style={styles.pointsText}>{userDashboard?.data?.totalPoint}</Text>
                         </View>
                     </View>
 
@@ -129,7 +136,7 @@ console.log(productDetails)
 
                         <ImageBackground style={styles.streaKIcon} resizeMode={'contain'}
                                          source={require('../../../assets/images/streakicon.png')}>
-                            <Text style={styles.streakText}> 200</Text>
+                            <Text style={styles.streakText}> {userDashboard?.data?.currentDayStreak}</Text>
                         </ImageBackground>
 
                         <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}

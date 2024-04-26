@@ -14,10 +14,11 @@ import {RectButton} from "../../components/RectButton";
 import Animated, {Easing, FadeInDown, FadeOutDown, Layout} from "react-native-reanimated";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
-import {setAuthenticated, setResponse, unSetResponse, updateUserInfo} from "../../app/slices/userSlice";
-import * as SecureStore from 'expo-secure-store';
+
 import {getUser, loginUser, reqPasswordResetCode} from "../../action/action";
 import Toast from "../../components/Toast";
+import SwipeAnimatedToast from "../../components/toasty";
+import {addNotificationItem} from "../../app/slices/dataSlice";
 
 
 const formSchema = yup.object().shape({
@@ -47,9 +48,6 @@ const ForgotPassword = ({navigation}: AuthStackScreenProps<'ForgotPassword'>) =>
     const [focusPassword, setFocusPassword] = useState<boolean>(false);
     const [contentPassword, setContentPassword] = useState<string>('');
 
-    const signupNow = () => {
-        navigation.navigate('RegisterScreen')
-    }
 
 
 
@@ -69,12 +67,12 @@ const ForgotPassword = ({navigation}: AuthStackScreenProps<'ForgotPassword'>) =>
 
                 } else {
 
-                        dispatch(setResponse({
-                            responseMessage: data.message,
-                            responseState: true,
-                            responseType: 'error',
-                        }))
 
+                    dispatch(addNotificationItem({
+                        id: Math.random(),
+                        type: 'error',
+                        body:  data.message,
+                    }))
                     /*  navigation.navigate('EmailConfirm', {
                           email:contentEmail
                       })*/
@@ -84,13 +82,13 @@ const ForgotPassword = ({navigation}: AuthStackScreenProps<'ForgotPassword'>) =>
             },
 
             onError: (err) => {
-                dispatch(setResponse({
-                    responseMessage: err.message,
-                    responseState: true,
-                    responseType: 'error',
+
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body:  err.message,
                 }))
-
-
             },
             onSettled: () => {
                 queryClient.invalidateQueries(['reqPasswordResetCode']);
@@ -129,21 +127,6 @@ const ForgotPassword = ({navigation}: AuthStackScreenProps<'ForgotPassword'>) =>
     }
 
 
-    useEffect(() => {
-        // console.log(user)
-        let time: NodeJS.Timeout | undefined;
-        if (responseState || responseMessage) {
-
-            time = setTimeout(() => {
-                dispatch(unSetResponse())
-            }, 3000)
-
-        }
-        return () => {
-            clearTimeout(time)
-        };
-    }, [responseState, responseMessage])
-
 
 
 
@@ -151,7 +134,7 @@ const ForgotPassword = ({navigation}: AuthStackScreenProps<'ForgotPassword'>) =>
         <>
 
             <SafeAreaView style={styles.safeArea}>
-                <Toast message={responseMessage} state={responseState} type={responseType}/>
+                <SwipeAnimatedToast/>
 
                 <KeyboardAwareScrollView scrollEnabled
                                          style={{
