@@ -33,7 +33,7 @@ import Animated, {FadeInDown, FadeOutDown} from 'react-native-reanimated';
 import {useAppSelector} from "../../app/hooks";
 
 interface Props extends TextInputProps {
-    onChangeText: (text: string, code: string) => void,
+    onChangeText: (text: string, code: string,country:string) => void,
     errorMessage: string,
     placeholder: string,
     inputBg?: string,
@@ -54,7 +54,7 @@ interface Props extends TextInputProps {
     rightAction?: () => void;
     value: string;
     action?: () => void;
-    onChangePhoneNumber?: (code: string) => void;
+    onChangePhoneNumber?: (code: string,country:string) => void;
     passState?: boolean
     labelColor?: boolean
 
@@ -102,6 +102,7 @@ const FullPhoneNumber = ({
     let phoneUtil = null
 
 
+    const [country, setCountry] = useState('')
     const [list, setList] = useState([]);
     const [con, setCon] = useState([]);
     const [isVisible, setIsVisible] = useState(false);
@@ -122,11 +123,11 @@ const FullPhoneNumber = ({
     }
     const closeOverlay = () => setIsVisible(false)
 
-    const selectedCountry = (item: { emoji: any; phone: any }) => {
+    const selectedCountry = (item: { emoji: any; phone: any,name:string }) => {
         setIsVisible(false)
         setEmoji(item.emoji)
         setCode(item.phone)
-
+setCountry(item.name)
     }
     const keyExtractor = useCallback((item, index) => index.toString(), [],);
 
@@ -176,7 +177,7 @@ const FullPhoneNumber = ({
 
     const inputTextChange = (text: string) => {
         const number = code + text
-        onChangeText(number, code)
+        onChangeText(number, code,country)
     }
 
 

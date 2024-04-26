@@ -218,7 +218,7 @@ const FundamentalData = ({navigation}: RootStackScreenProps<'FundamentalData'>) 
     }>([]);
 
 
-    const [selectedCategory, setSelectedCategory] = useState<CategoryProps[][]>([]);
+    const [selectedCategory, setSelectedCategory] = useState<CategoryProps[]>([]);
     const [selectedCountry, setSelectedCountry] = useState<any[]>([]);
 
 

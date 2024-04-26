@@ -68,7 +68,7 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
     const user = useAppSelector(state => state.user)
     const {responseMessage, responseType, responseState} = user
     const [phoneNumber, setPhoneNumber] = useState('');
-
+    const [country, setCountry] = useState('')
     const [referralCode, setReferralCode] = useState('');
 
     const [value, setValue] = useState("");
@@ -332,11 +332,13 @@ const RegisterScreen = ({navigation}: AuthStackScreenProps<'RegisterScreen'>) =>
                 countryCode,
                 password,
                 referralCode,
+                country:country
             })
 
             mutate(data)
         }
     });
+
 
     useEffect(() => {
 
@@ -549,9 +551,11 @@ style={styles.fbButtonSignUp}
                             error={errors.phoneNumber}
                             defaultValue={phoneNumber}
                             label="Phone number"
-                            onChangeText={(text, code) => {
+                            onChangeText={(text, code,country) => {
                                 handleChange('phoneNumber')(text);
                                 setCountryCode(code)
+                                setCountry(country)
+
 
                             }}
                             value={values.phoneNumber}

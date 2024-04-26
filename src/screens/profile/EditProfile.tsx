@@ -106,6 +106,7 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
     const [focusEmail, setFocusEmail] = useState(false);
     const [contentEmail, setContentEmail] = useState(data?.data?.email);
 
+    console.log(userData)
 
     const {mutate, isLoading} = useMutation(['complete-profile'], updateCompleteProfile,
 
@@ -482,7 +483,11 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
                             value={values.userName}
                             label="Username"/>
 
+{/*
+TODO!
+Lock phone number if it exits
 
+*/}
                         <PhoneInputText
                             error={errors.phoneNumber}
                             defaultValue={userData?.phone}
@@ -497,7 +502,8 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
                             errorMessage=''
                             placeholder="Phone number"/>
                         <TextInput
-
+editable={false}
+inputBg={"#eee"}
                             placeholder="Email address"
                             keyboardType={"email-address"}
                             touched={touched.email}

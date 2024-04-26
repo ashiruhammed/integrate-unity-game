@@ -1,14 +1,14 @@
 PODS:
-  - AppsFlyerFramework (6.13.0):
-    - AppsFlyerFramework/Main (= 6.13.0)
-  - AppsFlyerFramework/Main (6.13.0)
+  - AppsFlyerFramework (6.13.1):
+    - AppsFlyerFramework/Main (= 6.13.1)
+  - AppsFlyerFramework/Main (6.13.1)
   - boost (1.83.0)
   - BVLinearGradient (2.8.3):
     - React-Core
   - DoubleConversion (1.1.6)
   - EASClient (0.11.2):
     - ExpoModulesCore
-  - EXApplication (5.8.3):
+  - EXApplication (5.8.4):
     - ExpoModulesCore
   - EXAV (13.10.6):
     - ExpoModulesCore
@@ -41,7 +41,7 @@ PODS:
     - ExpoModulesCore
   - ExpoDevice (5.9.4):
     - ExpoModulesCore
-  - ExpoFileSystem (16.0.6):
+  - ExpoFileSystem (16.0.9):
     - ExpoModulesCore
   - ExpoHaptics (12.8.1):
     - ExpoModulesCore
@@ -1128,8 +1128,8 @@ PODS:
   - React-Mapbuffer (0.73.6):
     - glog
     - React-debug
-  - react-native-appsflyer (6.13.0):
-    - AppsFlyerFramework (= 6.13.0)
+  - react-native-appsflyer (6.13.1):
+    - AppsFlyerFramework (= 6.13.1)
     - React
   - react-native-config (1.5.1):
     - react-native-config/App (= 1.5.1)
@@ -1727,12 +1727,12 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
-  AppsFlyerFramework: cb54b4f27d2da2b3e2b286800476ce3b2007c75f
+  AppsFlyerFramework: 971521cf5b890c2afeab2f2c91734547b8b169ca
   boost: d3f49c53809116a5d38da093a8aa78bf551aed09
   BVLinearGradient: 880f91a7854faff2df62518f0281afb1c60d49a3
   DoubleConversion: fea03f2699887d960129cc54bba7e52542b6f953
   EASClient: a42ee8bf36c93b3128352faf2ae49405ab4f80bd
-  EXApplication: 137189a3f149b4e8e546884629392c3efc94cbd3
+  EXApplication: 16bcea16789221bd566e64b5ea2608cf7756b005
   EXAV: e4f6137431ddc4cb025895046bfefa9612025c35
   EXConstants: a5f6276e565d98f9eb4280f81241fc342d641590
   EXFont: f20669cb266ef48b004f1eb1f2b20db96cd1df9f
@@ -1747,7 +1747,7 @@ SPEC CHECKSUMS:
   ExpoClipboard: b597982124f067ff9f5b89093eb3d97898d5d877
   ExpoCrypto: b6428f48599c007676dc81a9b5f72c07e62fdccc
   ExpoDevice: 97307196d8cab694e245752b8a7afacc35c14e03
-  ExpoFileSystem: a9273932e69a9a1e1a8d01b6ba895bb8294bbea2
+  ExpoFileSystem: 74cc0fae916f9f044248433971dcfc8c3befd057
   ExpoHaptics: 28a771b630353cd6e8dcf1b1e3e693e38ad7c3c3
   ExpoImagePicker: 66970181d1c838f444e5e1f81b804ab2d5ff49bd
   ExpoKeepAwake: 0f5cad99603a3268e50af9a6eb8b76d0d9ac956c
@@ -1810,7 +1810,7 @@ SPEC CHECKSUMS:
   React-jsinspector: 85583ef014ce53d731a98c66a0e24496f7a83066
   React-logger: 3eb80a977f0d9669468ef641a5e1fabbc50a09ec
   React-Mapbuffer: d81d930c1b7f4db284e1d721fe7fdc99230ca108
-  react-native-appsflyer: c8a9afac66f178f0ca634159abeb204b2430717e
+  react-native-appsflyer: 2cc1f96348065fc23e976fc7a27e371789fb349e
   react-native-config: 86038147314e2e6d10ea9972022aa171e6b1d4d8
   react-native-fbsdk-next: 16e652b5f1236492631185c58ec2ae15b029119d
   react-native-safe-area-context: 0ee144a6170530ccc37a0fd9388e28d06f516a89

@@ -8,7 +8,7 @@ import {
     ImageBackground,
     TouchableOpacity,
     FlatList,
-    ActivityIndicator
+    ActivityIndicator, Pressable
 } from 'react-native';
 import {SafeAreaView} from "react-native-safe-area-context";
 import {useAppDispatch, useAppSelector} from "../../../app/hooks";
@@ -28,6 +28,7 @@ import _ from 'lodash';
 import FastImage from "react-native-fast-image";
 import Animated, {FadeInDown, FadeOutDown} from "react-native-reanimated";
 import Colors from "../../../constants/Colors";
+import {updateProduct} from "../../../app/slices/dataSlice";
 
 
 interface props {
@@ -36,12 +37,32 @@ interface props {
         "username": string,
         "fullName": string,
         "avatar":string
-    }
+    },
+    selectedItem: any[],
+    addUser: (details: {
+        "id": string,
+
+        "name": string,
+
+    }) => void
+    selectUser: (symbol: {}) => void,
 }
 
-const UserItem = ({item}: props) => {
+const UserItem = ({item,addUser,selectUser,selectedItem}: props) => {
     return (
-        <Animated.View key={item.id} entering={FadeInDown} exiting={FadeOutDown} style={styles.favList}>
+        <Animated.View key={item.id} entering={FadeInDown} exiting={FadeOutDown}>
+            <Pressable
+                onPress={() => {
+                    selectUser(item)
+           /* addUser({
+            id: item.id,
+
+            name: item.fullName,
+        })*/
+            }}
+            style={styles.favList}>
+
+
             <View style={[styles.listIcon, {
                 //  backgroundColor: Colors.secondary,
             }]}>
@@ -76,14 +97,22 @@ const UserItem = ({item}: props) => {
 
             </TouchableOpacity>
             <View style={styles.listBodyRight}>
+                {selectedItem.find(selected => selected.id == item.id) ?
                 <AntDesign name="star" size={14} color={Colors.success}/>
+                    :
+                    <AntDesign name="star" size={14} color={Colors.borderColor}/>
+                }
             </View>
+        </Pressable>
         </Animated.View>
 
     )
 }
 
-
+interface UserProps {
+    "id": string,
+    "fullName": string,
+}
 const SearchUser = ({navigation}: RootStackScreenProps<'SearchUser'>) => {
 
 
@@ -106,6 +135,33 @@ const SearchUser = ({navigation}: RootStackScreenProps<'SearchUser'>) => {
     const lightText = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
     const tintText = theme == 'light' ? "#AEAEAE" : Colors.dark.tintTextColor
     const borderColor = theme == 'light' ? "#DEE5ED" : "#ccc"
+
+
+
+    const [selectedUser, setSelectedUser] = useState<UserProps[]>([]);
+
+
+    const updateSelectUser = useCallback((payload: {
+        "id": string,
+        "name": string,
+
+    }) => {
+
+        const newData = selectedUser.findIndex((cat: { id: string }) => cat.id === payload.id)
+
+        if (newData >= 0) {
+            setSelectedUser((prevSelectedCats) => {
+                return prevSelectedCats.filter(
+                    (cat) => cat.id !== payload.id
+                );
+            });
+        } else {
+
+            setSelectedUser(selectedCats => [...selectedCats, {...payload}])
+        }
+    }, [selectedUser])
+
+
 
     const searchUsers = async (query: string) => {
         setIsLoading(true);
@@ -132,7 +188,7 @@ const SearchUser = ({navigation}: RootStackScreenProps<'SearchUser'>) => {
             const response = await fetch(`${BASE_URL_LIVE}/user/search/${query}`, requestOptions);
             const data = await response.json();
             setSearchResults(data.data);
-            console.log(data)
+
         } catch (error) {
             console.error('Error fetching data:', error);
         } finally {
@@ -153,9 +209,19 @@ const SearchUser = ({navigation}: RootStackScreenProps<'SearchUser'>) => {
     const keyExtractor = useCallback((item: { id: any; }) => item.id, [],);
 
     const renderItem = useCallback(({item}) => (
-            <UserItem item={item}/>
+            <UserItem item={item} selectUser={updateSelectUser} selectedItem={selectedUser}/>
         )
-        , [])
+        , [selectedUser])
+
+
+    const confirmSelection  = ()=>{
+        const contributors = Object.values(selectedUser).map(item => item.id);
+        dispatch(updateProduct({
+            contributors
+        }))
+navigation.goBack()
+       // console.log(contributors)
+    }
 
     return (
         <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
@@ -169,7 +235,7 @@ const SearchUser = ({navigation}: RootStackScreenProps<'SearchUser'>) => {
                     <AntDesign name="arrowleft" size={24} color="black"/>
                     <Text style={[styles.backText, {
                         color: darkTextColor
-                    }]}>Back</Text>
+                    }]}>Cancel</Text>
                 </TouchableOpacity>
 
 
@@ -208,6 +274,15 @@ const SearchUser = ({navigation}: RootStackScreenProps<'SearchUser'>) => {
 
             )}
             </View>
+
+            <Pressable disabled={!selectedUser} onPress={confirmSelection} style={[styles.claimBtn, selectedUser.length > 0 ? {
+                backgroundColor: Colors.primaryColor,
+            } : { backgroundColor: Colors.borderColor,}]}>
+
+                <Text style={styles.claimBtnText}>
+              Confirm selection
+                </Text>
+            </Pressable>
         </SafeAreaView>
     );
 };
@@ -318,6 +393,22 @@ const styles = StyleSheet.create({
         fontSize: fontPixel(12),
         fontFamily: Fonts.quickSandBold,
         color: "#9CA3AF"
+    },
+    claimBtn: {
+        height: 45,
+position:'absolute',
+        bottom:50,
+        width: widthPixel(235),
+        borderRadius: 30,
+
+        alignItems: 'center',
+        marginVertical: 40,
+        justifyContent: 'center',
+    },
+    claimBtnText: {
+        fontSize: fontPixel(14),
+        color: "#fff",
+        fontFamily: Fonts.quicksandSemiBold
     },
 
 

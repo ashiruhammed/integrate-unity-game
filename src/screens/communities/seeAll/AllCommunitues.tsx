@@ -15,7 +15,7 @@ import {SafeAreaView} from "react-native-safe-area-context";
 import NavBar from "../../../components/layout/NavBar";
 import SearchValue from "../../../components/inputs/SearchInput";
 import {Entypo, Ionicons, MaterialIcons} from "@expo/vector-icons";
-import SegmentedControl from "../../../components/SegmentContol";
+
 import Colors from "../../../constants/Colors";
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../../helpers/normalize";
 import {Fonts} from "../../../constants/Fonts";

@@ -10,6 +10,7 @@ interface CircularProgressProps {
     strokeWidth: number;
     active: boolean;
     locked: boolean;
+
 }
 const CircularProgress = ({ size, progress, strokeWidth ,active,locked}:CircularProgressProps) => {
     const radius = (size - strokeWidth) / 2;
@@ -55,7 +56,7 @@ const CircularProgress = ({ size, progress, strokeWidth ,active,locked}:Circular
                 :
                 <View style={styles.iconContainer}>
 
-                <SimpleLineIcons name="lock-open" size={15} color="#DADADA" />
+
                 </View>
             }
             </IF>

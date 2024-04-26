@@ -58,9 +58,9 @@ const Card: FC<CardProps> = ({id, style, title, percentage, value, number, tag, 
                             Value: {value}
                         </Text>
 
-                        <Text style={cardStyle.cardText}>
+                      {/*  <Text style={cardStyle.cardText}>
                             +{percentage}%
-                        </Text>
+                        </Text>*/}
                     </View>
                 </View>
 

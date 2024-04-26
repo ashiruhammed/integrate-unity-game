@@ -157,10 +157,13 @@ action,
 
 interface props {
  totalPoint:string,
+    ccdValue:string,
     ccdBalance:string,
+    gateValue:string,
+    gateBalance:string,
 
 }
-const MyCard = ({totalPoint,ccdBalance}:props) => {
+const MyCard = ({totalPoint,ccdBalance,ccdValue,gateBalance,gateValue}:props) => {
 
 
     const navigation = useNavigation()
@@ -190,9 +193,9 @@ const MyCard = ({totalPoint,ccdBalance}:props) => {
                     action={()=>navigation.navigate('GatewayToken')}
                     title={"Gateway Token"}
                     tag={"$GATE"}
-                    value={"200"}
+                    value={gateValue}
                     percentage={"4.0"}
-                    number={"0.00"}
+                    number={gateBalance}
                     color={"#D9049D"}
                     priority={secondPriority}
                     firstPriority={firstPriority}
@@ -203,7 +206,7 @@ const MyCard = ({totalPoint,ccdBalance}:props) => {
                     id={0}
                     action={()=>navigation.navigate('Concordium')}
                     title={"Concordium"}
-                    value={ccdBalance}
+                    value={ccdValue}
                     number={ccdBalance}
                     tag={"$CCD"}
                     percentage={"4.0"}

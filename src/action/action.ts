@@ -1177,7 +1177,40 @@ export const withdrawFromWallet = async (body: {}) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL_LIVE}/wallet/withdraw`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/wallet/withdraw-ccd`, requestOptions)
+            .then(response => response.json()),
+        new Promise((resolve, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+            //  clearTimeout(timeoutId)
+        }).then(() => {
+            clearTimeout(timeoutId)
+        })
+
+    ])
+}
+export const withdrawFromGateWallet = async (body: {}) => {
+
+    let Token = await SecureStore.getItemAsync('Gateway-Token');
+
+    const myHeaders = {
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
+        "Content-Type": "application/json",
+        'Authorization': `Bearer ${Token}`
+    }
+    let timeoutId: NodeJS.Timeout
+
+
+    const requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body
+    };
+
+
+    return Promise.race([
+        fetch(`${BASE_URL_LIVE}/wallet/withdraw-gate`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)

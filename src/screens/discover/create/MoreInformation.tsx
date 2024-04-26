@@ -163,14 +163,15 @@ const MoreInformation = ({navigation}: RootStackScreenProps<'MoreInformation'>) 
             "tagline": productDetails.tagline,
             "googlePlayStoreUrl": productDetails.googlePlayStoreUrl,
             "appleStoreUrl": productDetails.appleStoreUrl,
-            "contributors": [],
+            "contributors": productDetails.contributors,
             "isCountryLimited": productDetails.isCountryLimited,
             "supportedCountries": productDetails.supportedCountries,
             "productLogo": productDetails.productLogo,
             "launchDate": productDetails.launchDate,
             "categories": productDetails.categories,
             "productSteps": productDetails.productSteps,
-            "socialMedia": productDetails.socialMedia
+            "socialMedia": productDetails.socialMedia,
+
         })
 
 
@@ -360,8 +361,12 @@ const MoreInformation = ({navigation}: RootStackScreenProps<'MoreInformation'>) 
                 </View>
 
                 <Pressable onPress={openSearch} style={styles.searchBoxWrap}>
-                    <SearchInput  placeholder={'Search username here'} value={searchValue}/>
-
+                 {/*   <SearchInput  placeholder={'Search username here'} value={searchValue}/>*/}
+<View style={styles.searchBox}>
+    <Text style={styles.searchBoxText}>
+        Search username here
+    </Text>
+</View>
                     <View style={[styles.searchIcon, {
                         borderColor
                     }]}>
@@ -703,11 +708,27 @@ const styles = StyleSheet.create({
     },
 
     searchBoxWrap: {
+        marginTop:10,
 
         width: '90%',
         flexDirection: "row",
         alignItems: 'center',
         justifyContent: 'space-between'
+    },
+    searchBox:{
+       width:'85%',
+        height:40,
+       borderRadius:10,
+       borderWidth:1,
+        alignItems:'flex-start',
+        paddingHorizontal:pixelSizeHorizontal(10),
+        justifyContent:'center',
+       borderColor:Colors.borderColor
+    },
+    searchBoxText:{
+        fontSize: fontPixel(14),
+        fontFamily: Fonts.quicksandMedium,
+        color: "#686868"
     },
     searchIcon: {
         height: 40,

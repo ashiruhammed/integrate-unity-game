@@ -38,13 +38,14 @@ import {
 } from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
 import {IF} from "../../helpers/ConditionJsx";
 import {WebView} from 'react-native-webview';
-import {useRefreshOnFocus} from "../../helpers";
+import {truncateString, useRefreshOnFocus} from "../../helpers";
 import {useFormik} from "formik";
 import * as yup from "yup";
 import AdvancedTextInput from "../../components/inputs/AdvancedTextInput";
 import TextInput from "../../components/inputs/TextInput";
 import {setResponse} from "../../app/slices/userSlice";
 import Toast from "../../components/Toast";
+import dayjs from "dayjs";
 
 
 const formSchema = yup.object().shape({
@@ -101,6 +102,9 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
 
 
     const handleClose = () => {
+        bottomSheetRef?.current?.present()
+    }
+    const handleOpen = () => {
         bottomSheetRef?.current?.close()
     }
     // variables
@@ -242,7 +246,7 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
             const body = JSON.stringify({
                 amount: points,
                 "recipient": walletAddress,
-                "token": "near"
+                "token": "ccd"
             })
 
             withdrawNow(body)
@@ -265,11 +269,11 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
 
 
     const maxAmount = () => {
-        setPoints(ccdWallet?.data?.data?.ccdBalance)
-        setFieldValue('points', ccdWallet?.data?.data?.ccdBalance)
+        setPoints(ccdWallet?.data?.ccdBalance.toString())
+        setFieldValue('points', ccdWallet?.data?.ccdBalance.toString())
     }
     useRefreshOnFocus(refetch)
-
+//console.log( JSON.stringify(transactions.data, null, 2))
     return (
 
         <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
@@ -327,8 +331,8 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
                 {isLoadingWallet &&
                     <ActivityIndicator color={Colors.primaryColor} size='small'/>}
 
-                {!isLoadingWallet &&
-                    <IF condition={ccdWallet?.success}>
+            {!isLoadingWallet &&
+                    <IF condition={Object.keys(ccdWallet?.data).length > 0}>
 
 
                         <View style={styles.dashboardBox}>
@@ -343,7 +347,7 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
                                     Concordium
                                 </Text>
                                 <Text style={styles.cardTitle}>
-                                    {ccdWallet?.data?.data?.ccdBalance}
+                                    {ccdWallet?.data?.ccdBalance}
 
                                 </Text>
                             </View>
@@ -352,17 +356,17 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
                                 height: 15,
                             }]}>
                                 <Text style={styles.cardText}>
-                                    Value: {ccdWallet?.data?.data?.ccdValue}
+                                    Value: {ccdWallet?.data?.ccdValue}
                                 </Text>
 
-                                <Text style={styles.cardText}>
+                             {/*   <Text style={styles.cardText}>
                                     +4.0%
-                                </Text>
+                                </Text>*/}
                             </View>
                         </View>
 
 
-                        {/*     <Pressable onPress={handleOpen} style={styles.copyWrap}>
+                          {/*   <Pressable onPress={handleOpen} style={styles.copyWrap}>
                     <Text style={[styles.copyText, {
                         color: Colors.primaryColor,
                         fontFamily: Fonts.quicksandMedium
@@ -376,6 +380,24 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
                         <AntDesign name="arrowright" size={16} color={Colors.primaryColor}/>
                     </TouchableOpacity>
                 </Pressable>*/}
+
+
+
+                        <View style={styles.copyWrap}>
+                            <Text style={[styles.copyText,{
+                                color: "#333333",
+                                fontFamily: Fonts.quicksandMedium
+                            }]}>
+                                {truncateString(ccdWallet?.data?.address,30)}
+                            </Text>
+
+                            <TouchableOpacity activeOpacity={0.8} style={styles.copyBtn}>
+                                <Ionicons name="copy-outline" size={16} color={Colors.primaryColor} />
+                                <Text style={styles.copyText}>
+                                    Copy
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
 
                         <View style={styles.buttonWrap}>
 
@@ -409,40 +431,42 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
                         <View style={styles.transactions}>
 
 
-                            <Animated.View entering={FadeInDown.delay(200)
-                                .randomDelay()
-                            } exiting={FadeOutDown} style={styles.breakDownCard}>
-                                <View style={[styles.boxSign, {
-                                    backgroundColor: Colors.errorTint
-                                }]}>
-                                    <AntDesign name="arrowdown" size={20} style={{transform: [{rotate: "40deg"}]}}
-                                               color={Colors.errorRed}/>
-                                </View>
+                            {!loadingTransactions && transactions &&
+                                transactions.data.filter(transaction => transaction.token === 'CCD').map((({token,hash,type,createdAt,amount})=>(
+                                    <Animated.View key={hash} entering={FadeInDown.delay(200).randomDelay()} exiting={FadeOutDown} style={styles.breakDownCard}>
+                                        <View style={[styles.boxSign, {
+                                            backgroundColor: Colors.errorTint
+                                        }]}>
+                                            <AntDesign name="arrowdown" size={20} style={{transform: [{rotate: "40deg"}]}}
+                                                       color={Colors.errorRed}/>
+                                        </View>
 
-                                <View style={styles.boxTransactionBody}>
+                                        <View style={styles.boxTransactionBody}>
 
-                                    <View style={styles.boxTransactionBodyLeft}>
-                                        <Text style={styles.transactionTitle}>
-                                            Withdrawal
-                                        </Text>
-                                        <Text style={styles.transactionDate}>
-                                            Jan 6, 2024
-                                        </Text>
-                                    </View>
+                                            <View style={styles.boxTransactionBodyLeft}>
+                                                <Text style={styles.transactionTitle}>
+                                                    {type}
+                                                </Text>
+                                                <Text style={styles.transactionDate}>
+                                                    {dayjs(createdAt).format('ddd, DD MMM YYYY')}
+                                                </Text>
+                                            </View>
 
-                                    <View style={[styles.boxTransactionBodyLeft, {
-                                        alignItems: 'flex-end',
-                                        justifyContent: 'flex-start'
-                                    }]}>
-                                        <Text style={styles.transactionTitle}>
-                                            -500 GP
-                                        </Text>
+                                            <View style={[styles.boxTransactionBodyLeft, {
+                                                alignItems: 'flex-end',
+                                                justifyContent: 'flex-start'
+                                            }]}>
+                                                <Text style={styles.transactionTitle}>
+                                                    {amount} {token}
+                                                </Text>
 
-                                    </View>
-                                </View>
+                                            </View>
+                                        </View>
 
 
-                            </Animated.View>
+                                    </Animated.View>
+                                )))
+                            }
 
                         </View>
 
@@ -451,8 +475,8 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
                 }
 
 
-                {!isLoadingWallet &&
-                    <IF condition={!ccdWallet?.success}>
+      {!isLoadingWallet &&
+                    <IF condition={Object.keys(ccdWallet?.data).length < 1 }>
 
                         <View style={styles.walletContentContainer}>
 

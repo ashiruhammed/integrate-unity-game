@@ -68,9 +68,11 @@ const AdventureAICardItem = ({item, theme,setAdventure}: propsAi) => {
             setAdventure(item)
 
         }} style={[styles.learnCard, !item.startedAdventure && {
-            opacity: 0.7
+
         }]}>
-            <CircularProgress active={item.startedAdventure} locked={true} size={44} progress={85} strokeWidth={4}/>
+            <CircularProgress active={item.startedAdventure}
+
+                              locked={false} size={44} progress={85} strokeWidth={4}/>
 
             <Pressable onPress={() => {
                 setAdventure(item)

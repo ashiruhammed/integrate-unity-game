@@ -404,7 +404,7 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
     useRefreshOnFocus(refetch)
     useRefreshOnFocus(fetchComments)
 
-//console.log(item)
+//console.log(comments?.data?.result)
     return (
 
         <>

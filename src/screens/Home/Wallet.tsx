@@ -9,7 +9,7 @@ import {
     Platform,
     Dimensions,
     Pressable,
-    Image
+    Image, ActivityIndicator
 } from 'react-native';
 import {Ionicons, Octicons} from "@expo/vector-icons";
 import {SafeAreaView} from "react-native-safe-area-context";
@@ -226,7 +226,20 @@ const Wallet = ({navigation}: RootTabScreenProps<'Learn'>) => {
                 </View>
 
                 <IF condition={tabIndex == 0}>
-                    <MyCard ccdBalance={ccdWallet?.success ? ccdWallet?.data?.data?.ccdBalance : '0'} totalPoint={points?.data?.totalPoint}/>
+
+                    {
+                        loadingWallets && <ActivityIndicator size={'small'} color={Colors.primaryColor}/>
+                    }
+                    {
+                        !loadingWallets && ccdWallet &&
+
+                    <MyCard
+                        gateBalance={Object.keys(ccdWallet?.data).length > 0 ? ccdWallet?.data?.gateBalance : '0'}
+                        gateValue={Object.keys(ccdWallet?.data).length > 0 ? ccdWallet?.data?.gateValue : '0'}
+                        ccdBalance={Object.keys(ccdWallet?.data).length > 0 ? ccdWallet?.data?.ccdBalance : '0'}
+                            ccdValue={Object.keys(ccdWallet?.data).length > 0 ? ccdWallet?.data?.ccdValue : '0'}
+                            totalPoint={points?.data?.totalPoint}/>
+                    }
                 </IF>
 
                 <IF condition={tabIndex == 1}>

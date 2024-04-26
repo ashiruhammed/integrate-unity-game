@@ -1,16 +1,51 @@
-import React, {SetStateAction, useState} from 'react';
+import React, {SetStateAction, useCallback, useMemo, useRef, useState} from 'react';
 
-import {Text, View, StyleSheet, ImageBackground, TouchableOpacity, Platform, ScrollView, Pressable} from 'react-native';
+import {
+    Text,
+    View,
+    StyleSheet,
+    ImageBackground,
+    TouchableOpacity,
+    Platform,
+    ScrollView,
+    Pressable,
+    ActivityIndicator, Keyboard
+} from 'react-native';
 import {AntDesign, Entypo, Ionicons, Octicons} from "@expo/vector-icons";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
-import {useInfiniteQuery, useQuery, useQueryClient} from "@tanstack/react-query";
+import {useInfiniteQuery, useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import Colors from "../../constants/Colors";
-import {getUserDashboard, userNotifications} from "../../action/action";
+import {
+    getCCDWallet,
+    getUserDashboard,
+    userNotifications, walletTransactions,
+    withdrawFromGateWallet,
+    withdrawFromWallet
+} from "../../action/action";
 import {RootStackScreenProps} from "../../../types";
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
 import {Fonts} from "../../constants/Fonts";
 import Animated, {FadeInDown, FadeOutDown} from 'react-native-reanimated';
+import BottomSheet, {BottomSheetBackdrop} from "@gorhom/bottom-sheet";
+import AdvancedTextInput from "../../components/inputs/AdvancedTextInput";
+import TextInput from "../../components/inputs/TextInput";
+import {setResponse} from "../../app/slices/userSlice";
+import {
+    BottomSheetDefaultBackdropProps
+} from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types";
+import {useFormik} from "formik";
+import * as yup from "yup";
+import dayjs from "dayjs";
+
+
+const formSchema = yup.object().shape({
+    points: yup.number().required('Points amount is required'),
+    walletAddress: yup.string().required('Wallet address is required'),
+
+
+});
+
 
 const GatewayToken = ({navigation}: RootStackScreenProps<'GatewayToken'>) => {
 
@@ -33,8 +68,138 @@ const GatewayToken = ({navigation}: RootStackScreenProps<'GatewayToken'>) => {
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
     const lightText = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
     const darkTextColor = theme == 'light' ? Colors.light.darkText : Colors.dark.text
+    const [points, setPoints] = useState('')
+    const [walletAddress, setWalletAddress] = useState('')
 
-    const {isLoading: loadingUser,data:userDashboard, refetch:fetchDashboard} = useQuery(['getUserDashboard'], getUserDashboard, {})
+
+    const withdrawSheetRef = useRef<BottomSheet>(null);
+    // variables
+    const snapPointsRedeem = useMemo(() => ['1%', '65%'], []);
+
+    const handleOpenWithdraw = () => {
+        withdrawSheetRef.current?.snapToIndex(1)
+    }
+    const handleClosePressWithdraw = () => {
+        Keyboard.dismiss()
+        if (Platform.OS == 'android') {
+            withdrawSheetRef.current?.snapToIndex(0)
+        } else {
+            withdrawSheetRef.current?.close()
+        }
+
+    }
+
+
+    const {
+        mutate: withdrawNow,
+        isLoading: loadingWithdraw
+    } = useMutation(['withdrawFromGateWallet'], withdrawFromGateWallet,
+
+        {
+
+            onSuccess: async (data) => {
+
+                if (data.success) {
+                    refetch()
+                    handleClosePressWithdraw()
+                    //  getTransactions()
+
+                    dispatch(setResponse({
+                        responseMessage: data.message,
+                        responseState: true,
+                        responseType: 'success',
+                    }))
+
+
+                } else {
+                    handleClosePressWithdraw()
+                    dispatch(setResponse({
+                        responseMessage: data.message,
+                        responseState: true,
+                        responseType: 'error',
+                    }))
+
+                    /*  navigation.navigate('EmailConfirm', {
+                          email:contentEmail
+                      })*/
+
+
+                }
+            },
+
+            onError: (err) => {
+                dispatch(setResponse({
+                    responseMessage: err.message,
+                    responseState: true,
+                    responseType: 'error',
+                }))
+
+
+            },
+            onSettled: () => {
+                queryClient.invalidateQueries(['withdrawFromGateWallet']);
+            }
+
+        })
+
+
+    //   console.log(ccdWallet)
+
+    const renderBackdrop = useCallback(
+        (props: React.JSX.IntrinsicAttributes & BottomSheetDefaultBackdropProps) => (
+            <BottomSheetBackdrop
+                {...props}
+                disappearsOnIndex={0}
+                appearsOnIndex={1}
+            />
+        ),
+        []
+    );
+
+
+    const {
+        resetForm,
+        handleChange, handleSubmit, handleBlur,
+        setFieldValue,
+        isSubmitting,
+        setSubmitting,
+        values,
+        errors,
+        touched,
+        isValid
+    } = useFormik({
+        validationSchema: formSchema,
+        initialValues: {
+
+            points: '',
+            walletAddress: '',
+
+
+        },
+        onSubmit: (values) => {
+            const {points, walletAddress} = values;
+
+            const body = JSON.stringify({
+                amount: points,
+                "recipient": walletAddress,
+                "token": "ccd"
+            })
+
+            withdrawNow(body)
+
+        }
+    });
+
+
+    const {data: transactions, isLoading: loadingTransactions} = useQuery(['walletTransactions'], walletTransactions)
+
+    const {data: ccdWallet, isLoading: isLoadingWallet, refetch} = useQuery(['getCCDwallet'], getCCDWallet)
+
+    const {
+        isLoading: loadingUser,
+        data: userDashboard,
+        refetch: fetchDashboard
+    } = useQuery(['getUserDashboard'], getUserDashboard, {})
 
     const openNotifications = () => {
         navigation.navigate('Notifications')
@@ -58,184 +223,281 @@ const GatewayToken = ({navigation}: RootStackScreenProps<'GatewayToken'>) => {
 
         })
 
-
+    const maxAmount = () => {
+        setPoints(ccdWallet?.data?.gateBalance.toString())
+        setFieldValue('points', ccdWallet?.data?.gateBalance)
+    }
     return (
+        <>
+            <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
 
-        <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
+                <ScrollView
 
-            <ScrollView
+                    style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {
+                    backgroundColor
+                }]} scrollEnabled
+                    showsVerticalScrollIndicator={false}>
+                    <View style={styles.topBar}>
 
-                style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {
-                backgroundColor
-            }]} scrollEnabled
-                showsVerticalScrollIndicator={false}>
-                <View style={styles.topBar}>
+                        <View style={styles.leftButton}>
 
-                    <View style={styles.leftButton}>
-
-                        <View style={styles.pointWrap}>
-                            <Ionicons name="gift" size={16} color="#22BB33"/>
-                            <Text style={styles.pointsText}>{userDashboard?.data?.totalPoint}</Text>
+                            <View style={styles.pointWrap}>
+                                <Ionicons name="gift" size={16} color="#22BB33"/>
+                                <Text style={styles.pointsText}>{userDashboard?.data?.totalPoint}</Text>
+                            </View>
                         </View>
+
+                        <View style={styles.rightButton}>
+
+                            <ImageBackground style={styles.streaKIcon} resizeMode={'contain'}
+                                             source={require('../../assets/images/streakicon.png')}>
+                                <Text style={styles.streakText}> {userDashboard?.data?.currentDayStreak}</Text>
+                            </ImageBackground>
+
+                            <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}
+                                              style={styles.roundTopBtn}>
+                                {
+                                    notifications?.pages[0]?.data?.result.length > 0 &&
+                                    <View style={styles.dot}/>
+                                }
+                                <Octicons name="bell-fill" size={22} color={"#000"}/>
+                            </TouchableOpacity>
+
+                        </View>
+
                     </View>
 
-                    <View style={styles.rightButton}>
+                    <View style={styles.navButtonWrap}>
+                        <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.8}
+                                          style={styles.navButton}>
 
-                        <ImageBackground style={styles.streaKIcon} resizeMode={'contain'}
-                                         source={require('../../assets/images/streakicon.png')}>
-                            <Text style={styles.streakText}> {userDashboard?.data?.currentDayStreak}</Text>
-                        </ImageBackground>
-
-                        <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}
-                                          style={styles.roundTopBtn}>
-                            {
-                                notifications?.pages[0]?.data?.result.length > 0 &&
-                                <View style={styles.dot}/>
-                            }
-                            <Octicons name="bell-fill" size={22} color={"#000"}/>
+                            <AntDesign name="arrowleft" size={24} color="black"/>
+                            <Text style={[styles.backText, {
+                                color: darkTextColor
+                            }]}>
+                                Gateway Token
+                            </Text>
                         </TouchableOpacity>
 
+
                     </View>
 
-                </View>
 
-                <View style={styles.navButtonWrap}>
-                    <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.8}
-                                      style={styles.navButton}>
+                    <View style={styles.dashboardBox}>
+                        <Text style={styles.cardText}>
+                            $GATE
+                        </Text>
 
-                        <AntDesign name="arrowleft" size={24} color="black"/>
-                        <Text style={[styles.backText, {
-                            color: darkTextColor
+                        <View style={[styles.bottomInfo, {
+                            height: 30,
                         }]}>
-                            Gateway Token
-                        </Text>
-                    </TouchableOpacity>
+                            <Text style={styles.cardTitle}>
+                                Gateway Token
+                            </Text>
+                            <Text style={styles.cardTitle}>
+                                {ccdWallet?.data?.gateBalance}
+                            </Text>
+                        </View>
 
+                        <View style={[styles.bottomInfo, {
+                            height: 15,
+                        }]}>
+                            <Text style={styles.cardText}>
+                                Value: {ccdWallet?.data?.gateValue}
+                            </Text>
 
-                </View>
-
-
-                <View style={styles.dashboardBox}>
-                    <Text style={styles.cardText}>
-                        $GATE
-                    </Text>
-
-                    <View style={[styles.bottomInfo, {
-                        height: 30,
-                    }]}>
-                        <Text style={styles.cardTitle}>
-                            Gateway Token
-                        </Text>
-                        <Text style={styles.cardTitle}>
-                            58,000
-                        </Text>
-                    </View>
-
-                    <View style={[styles.bottomInfo, {
-                        height: 15,
-                    }]}>
-                        <Text style={styles.cardText}>
-                            Value: 200
-                        </Text>
-
-                        <Text style={styles.cardText}>
+                            {/* <Text style={styles.cardText}>
                             +4.0%
+                        </Text>*/}
+                        </View>
+                    </View>
+
+
+                    <View style={styles.copyWrap}>
+                        <Text style={[styles.copyText, {
+                            color: "#333333",
+                            fontFamily: Fonts.quicksandMedium
+                        }]}>
+                            x08978vfb9278g783632e5gs...
+                        </Text>
+
+                        <TouchableOpacity activeOpacity={0.8} style={styles.copyBtn}>
+                            <Ionicons name="copy-outline" size={16} color={Colors.primaryColor}/>
+                            <Text style={styles.copyText}>
+                                Copy
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    <View style={styles.buttonWrap}>
+
+                        <Pressable onPress={handleOpenWithdraw} style={[styles.dahButton, {
+                            backgroundColor: "#FDDCDC"
+                        }]}>
+                            <Text style={[styles.buttonText, {
+                                color: "#E01414"
+                            }]}>
+                                Withdraw
+                            </Text>
+                        </Pressable>
+
+
+                    </View>
+
+
+                    <View style={styles.rowTitle}>
+                        <Text style={[styles.titleTxt, {
+                            color: textColor
+                        }]}>
+                            Transactions
+                        </Text>
+
+                        <Text>
+                            See all
                         </Text>
                     </View>
-                </View>
 
 
-                <View style={styles.copyWrap}>
-                    <Text style={[styles.copyText,{
-                        color: "#333333",
-                        fontFamily: Fonts.quicksandMedium
-                    }]}>
-                        x08978vfb9278g783632e5gs...
-                    </Text>
+                    <View style={styles.transactions}>
 
-                    <TouchableOpacity activeOpacity={0.8} style={styles.copyBtn}>
-                        <Ionicons name="copy-outline" size={16} color={Colors.primaryColor} />
-                        <Text style={styles.copyText}>
-                            Copy
-                        </Text>
-                    </TouchableOpacity>
-                </View>
+                        {!loadingTransactions && transactions &&
+                            transactions.data.filter(transaction => transaction.token === 'GATE').map((({token,hash,type,createdAt,amount})=>(
+                        <Animated.View key={hash} entering={FadeInDown.delay(200)
+                            .randomDelay()
+                        } exiting={FadeOutDown} style={styles.breakDownCard}>
+                            <View style={[styles.boxSign, {
+                                backgroundColor: Colors.errorTint
+                            }]}>
+                                <AntDesign name="arrowdown" size={20} style={{transform: [{rotate: "40deg"}]}}
+                                           color={Colors.errorRed}/>
+                            </View>
 
-                <View style={styles.buttonWrap}>
+                            <View style={styles.boxTransactionBody}>
 
-                    <Pressable style={[styles.dahButton, {
-                        backgroundColor: "#FDDCDC"
-                    }]}>
-                        <Text style={[styles.buttonText, {
-                            color: "#E01414"
-                        }]}>
-                    Withdraw
-                        </Text>
-                    </Pressable>
+                                <View style={styles.boxTransactionBodyLeft}>
+                                    <Text style={styles.transactionTitle}>
+                                        {type}
+                                    </Text>
+                                    <Text style={styles.transactionDate}>
+                                        {dayjs(createdAt).format('ddd, DD MMM YYYY')}
+                                    </Text>
+                                </View>
+
+                                <View style={[styles.boxTransactionBodyLeft, {
+                                    alignItems: 'flex-end',
+                                    justifyContent: 'flex-start'
+                                }]}>
+                                    <Text style={styles.transactionTitle}>
+                                        {amount} {token}
+                                    </Text>
+
+                                </View>
+                            </View>
 
 
+                        </Animated.View>
+                                )))
+                        }
+                    </View>
+                </ScrollView>
+
+            </SafeAreaView>
+
+            <BottomSheet
+                ref={withdrawSheetRef}
+                index={0}
+
+                snapPoints={snapPointsRedeem}
+                keyboardBehavior="interactive"
+                backdropComponent={renderBackdrop}
+                style={{
+                    paddingHorizontal: pixelSizeHorizontal(20)
+                }}
+                backgroundStyle={{
+                    backgroundColor,
+                }}
+                handleIndicatorStyle={[{
+                    backgroundColor: theme == 'light' ? "#121212" : '#cccccc'
+                }, Platform.OS == 'android' && {display: 'none'}]}
+            >
 
 
-                </View>
+                <View style={styles.sheetHead}>
 
 
-                <View style={styles.rowTitle}>
-                    <Text style={[styles.titleTxt, {
+                    <Text style={[styles.sheetTitle, {
+                        fontFamily: Fonts.quickSandBold,
                         color: textColor
                     }]}>
-                        Transactions
+                        Withdraw Token
                     </Text>
 
-                    <Text>
-                        See all
-                    </Text>
+
+                    <TouchableOpacity onPress={handleClosePressWithdraw}
+                                      style={[styles.dismiss, {
+                                          backgroundColor: theme == 'light' ? "#f8f8f8" : Colors.dark.background
+                                      }]}>
+                        <Ionicons name="close-sharp" size={20} color={textColor}/>
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.sheetContainer}>
+                    <AdvancedTextInput
+
+                        placeholder="0.00"
+                        label={"Amount"}
+                        keyboardType={"number-pad"}
+                        touched={touched.points}
+                        error={touched.points && errors.points}
+                        balanceText={`${ccdWallet?.data?.data?.ccdBalance} Points`}
+                        onChangeText={(e) => {
+                            handleChange('points')(e);
+                            setPoints(e)
+                        }}
+                        defaultValue={points}
+                        actionMax={maxAmount}
+                        onBlur={(e) => {
+                            handleBlur('points')(e);
+
+                        }}
+                        value={values.points}
+                    />
+
+
+                    <TextInput placeholder={'Address to withdraw to'} value={values.walletAddress}
+                               onBlur={(e) => {
+                                   handleBlur('walletAddress')(e);
+
+                               }}
+                               touched={touched.walletAddress}
+                               error={touched.walletAddress && errors.walletAddress}
+                               onChangeText={(e) => {
+                                   handleChange('walletAddress')(e);
+                                   setWalletAddress(e)
+                               }}/>
+
+
                 </View>
 
 
-                <View style={styles.transactions}>
+                <TouchableOpacity disabled={loadingWithdraw || !isValid} style={[styles.redeemButton, {
+                    backgroundColor: isValid ? Colors.primaryColor : Colors.border
+                }]} onPress={() => handleSubmit()}>
+                    {
+                        loadingWithdraw ? <ActivityIndicator size="small" color={"#fff"}/> :
 
-
-
-
- <Animated.View entering={FadeInDown.delay(200)
-                        .randomDelay()
-                    } exiting={FadeOutDown} style={styles.breakDownCard}>
-                        <View style={[styles.boxSign, {
-                            backgroundColor: Colors.errorTint
-                        }]}>
-                            <AntDesign name="arrowdown" size={20} style={{transform: [{rotate: "40deg"}]}}
-                                       color={Colors.errorRed}/>
-                        </View>
-
-                        <View style={styles.boxTransactionBody}>
-
-                            <View style={styles.boxTransactionBodyLeft}>
-                                <Text style={styles.transactionTitle}>
-                                    Withdrawal
-                                </Text>
-                                <Text style={styles.transactionDate}>
-                                    Jan 6, 2024
-                                </Text>
-                            </View>
-
-                            <View style={[styles.boxTransactionBodyLeft, {
-                                alignItems: 'flex-end',
-                                justifyContent: 'flex-start'
+                            <Text style={[styles.buttonText, {
+                                color: "#fff"
                             }]}>
-                                <Text style={styles.transactionTitle}>
-                                    -500 GP
-                                </Text>
+                                Withdraw
 
-                            </View>
-                        </View>
+                            </Text>
+                    }
+                </TouchableOpacity>
 
 
-                    </Animated.View>
+            </BottomSheet>
 
-                </View>
-            </ScrollView>
-
-        </SafeAreaView>
+        </>
 
     );
 };
@@ -396,30 +658,30 @@ const styles = StyleSheet.create({
 
     },
     copyWrap: {
-        marginTop:30,
+        marginTop: 30,
         width: widthPixel(350),
         height: 50,
-        borderRadius:15,
-        backgroundColor:"#eee",
+        borderRadius: 15,
+        backgroundColor: "#eee",
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal:pixelSizeHorizontal(20),
+        paddingHorizontal: pixelSizeHorizontal(20),
         flexDirection: 'row'
     },
-    copyBtn:{
-        width:45,
+    copyBtn: {
+        width: 45,
         alignItems: 'center',
         justifyContent: 'center',
         flexDirection: 'row'
     },
-    copyText:{
-        marginLeft:5,
+    copyText: {
+        marginLeft: 5,
         fontSize: fontPixel(14),
         fontFamily: Fonts.quicksandRegular,
-        color:Colors.primaryColor
+        color: Colors.primaryColor
     },
     buttonWrap: {
-        marginVertical:pixelSizeVertical(15),
+        marginVertical: pixelSizeVertical(15),
         width: '100%',
         height: 50,
         alignItems: 'center',
@@ -504,8 +766,52 @@ const styles = StyleSheet.create({
         color: "#9C9C9C",
         fontFamily: Fonts.quicksandMedium,
         fontSize: fontPixel(12),
+    },
+    sheetHead: {
+        // paddingHorizontal: pixelSizeHorizontal(20),
+        height: 60,
+        width: '100%',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexDirection: 'row'
     }
+    ,
+    sheetTitle: {
 
+        fontSize: fontPixel(18),
+        fontFamily: Fonts.quickSandBold,
+        color: Colors.light.text
+    },
+    sheetContentText: {
+        color: "#000000",
+        fontSize: fontPixel(16),
+        lineHeight: 25,
+        fontFamily: Fonts.quicksandMedium,
+    },
+    sheetContainer: {
+        width: '100%',
+        alignItems: 'center',
+        marginTop: 40,
+    },
+    dismiss: {
+
+
+        borderRadius: 30,
+        height: 30,
+        width: 30,
+        alignItems: "center",
+        justifyContent: "center"
+
+    },
+    redeemButton: {
+        marginTop: 30,
+        width: '100%',
+        height: 50,
+        justifyContent: 'center',
+        borderRadius: 10,
+        alignItems: 'center',
+
+    },
 
 })
 
