@@ -107,7 +107,7 @@ const AdvancedTextInput: FC<Props> = ({
                                 <Text style={[styles.label,{
                                     color:textColor,
                                 }]}>
-                                    Near  <Entypo name="chevron-down" size={14} color={textColor} />
+                                    Gate  <Entypo name="chevron-down" size={14} color={textColor} />
                                 </Text>
 
                             </TouchableOpacity>

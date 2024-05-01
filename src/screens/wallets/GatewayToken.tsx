@@ -37,6 +37,8 @@ import {
 import {useFormik} from "formik";
 import * as yup from "yup";
 import dayjs from "dayjs";
+import {truncateString} from "../../helpers";
+import * as Clipboard from "expo-clipboard";
 
 
 const formSchema = yup.object().shape({
@@ -72,6 +74,7 @@ const GatewayToken = ({navigation}: RootStackScreenProps<'GatewayToken'>) => {
     const [walletAddress, setWalletAddress] = useState('')
 
 
+
     const withdrawSheetRef = useRef<BottomSheet>(null);
     // variables
     const snapPointsRedeem = useMemo(() => ['1%', '65%'], []);
@@ -89,6 +92,11 @@ const GatewayToken = ({navigation}: RootStackScreenProps<'GatewayToken'>) => {
 
     }
 
+       const [copied, setCopied] = useState(false)
+    const copyToClipboard = async (copyText: string) => {
+        await Clipboard.setStringAsync(copyText);
+        setCopied(true)
+    };
 
     const {
         mutate: withdrawNow,
@@ -314,23 +322,26 @@ const GatewayToken = ({navigation}: RootStackScreenProps<'GatewayToken'>) => {
                         </View>
                     </View>
 
+                    {
+                        !isLoadingWallet && ccdWallet?.data !== null &&
 
                     <View style={styles.copyWrap}>
                         <Text style={[styles.copyText, {
                             color: "#333333",
                             fontFamily: Fonts.quicksandMedium
                         }]}>
-                            x08978vfb9278g783632e5gs...
+                            {ccdWallet?.data?.address ? truncateString(ccdWallet?.data?.address, 30) : ''}
                         </Text>
 
-                        <TouchableOpacity activeOpacity={0.8} style={styles.copyBtn}>
+                        <TouchableOpacity onPress={() => copyToClipboard(ccdWallet?.data?.address)}
+                                          activeOpacity={0.8} style={styles.copyBtn}>
                             <Ionicons name="copy-outline" size={16} color={Colors.primaryColor}/>
-                            <Text style={styles.copyText}>
-                                Copy
-                            </Text>
+                            {copied ? <Text style={styles.copyText}>
+                                Copied
+                            </Text> : <Text style={styles.copyText}>Copy</Text>}
                         </TouchableOpacity>
                     </View>
-
+                    }
                     <View style={styles.buttonWrap}>
 
                         <Pressable onPress={handleOpenWithdraw} style={[styles.dahButton, {
@@ -671,7 +682,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row'
     },
     copyBtn: {
-        width: 45,
+        width: 55,
         alignItems: 'center',
         justifyContent: 'center',
         flexDirection: 'row'

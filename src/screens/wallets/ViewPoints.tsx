@@ -335,7 +335,7 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
     })
 
     const nearBalance = wallet?.data?.find((wallet: { network: string; }) => wallet.network == 'near')
-
+//console.log(wallet?.data)
     return (
         <>
 

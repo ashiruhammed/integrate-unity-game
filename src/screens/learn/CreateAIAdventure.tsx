@@ -69,7 +69,7 @@ const CustomProgressBar = ({ progress, width, height }) => {
 
 const formSchema = yup.object().shape({
 
-    contract: yup.string().required('Course Title is required'),
+    contract: yup.string().required('Title is required'),
 
 });
 
@@ -130,206 +130,9 @@ const CreateAIAdventure = ({navigation}: RootStackScreenProps<'CreateAIAdventure
 
 
 
-   const generateAdventure = async (courseTitle:string) => {
-        try {
-
-            setIsAdLoading(true)
-
-            let adventureId = '';
-            let progress = 0;
-            let Token = await SecureStore.getItemAsync('Gateway-Token');
-           // const encodedToken = window.localStorage.getItem(gatewayToken);
-           // const accessToken = decode(encodedToken);
-
-
-            const body = JSON.stringify({
-                courseTitle: courseTitle
-            })
-             console.log(body)
-            const response = await fetch(`${BASE_URL_LIVE}/magic/create`, {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                    "x-client-type": "web",
-                    "x-access-token": ACCESS_TOKEN,
-                    Authorization: `Bearer ${Token}`,
-                },
-                body
-            })
-
-console.log(response)
-            const reader = response.body.pipeThrough(new TextDecoderStream()).getReader()
-            while (true) {
-                const {value, done} = await reader.read();
-console.log(value)
-                if (value) {
-                    // const data = JSON.parse(value)
-
-                    const dataString = value;
-
-                    //  console.log({dataString})
-                    const jsonStartIndex = dataString.indexOf('{'); // Find the index where the JSON data starts
-                    console.log({jsonStartIndex})
-                    if(jsonStartIndex > 0 ) {
-                        const jsonData = dataString.slice(jsonStartIndex); // Extract the JSON data
-                        //  console.log({jsonData})
-                        const parsedData = JSON.parse(jsonData);
-                        //  console.log({parsedData})
-                        adventureId = parsedData?.adventureId
-                        progress = parsedData?.progress
-
-                        dispatch({
-                            type: 'SET_PROGRESS',
-                            payload: progress,
-                        });
-
-
-                        console.log({ adventureId, progress })
-
-
-                        if(adventureId){
-                            dispatch(setResponse({
-                                responseMessage: "Adventure created successfully.",
-                                responseState: true,
-                                responseType: 'error',
-                            }))
-
-                            break;
-                        }
-                    }
-
-
-                }
-                if (done) break;
-
-            }
-
-            return adventureId
-        }catch (error) {
-            const errorMsg = error?.response?.data?.message;
-            //dispatchErrorMessage(errorMsg);
-            dispatch(setResponse({
-                responseMessage: errorMsg,
-                responseState: true,
-                responseType: 'error',
-            }))
-
-        } finally {
-            setIsAdLoading(false);
-        }
-
-        // try {
-        //   const response = await instance.post(`/magic/create`, courseTitle);
-        //   return response?.data?.data.id;
-        // } catch (error) {
-        //   const errorMsg = error?.response?.data?.message;
-        //   dispatchErrorMessage(errorMsg);
-        // } finally {
-        //   setLoadingToFalse();
-        // }
-    };
 
 
 
-
-    const fetchEvents = async (courseTitle:string) => {
-        let Token = await SecureStore.getItemAsync('Gateway-Token');
-        try {
-            const response = await fetch('https://gateway-backend.onrender.com/magic/create', {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                    "x-client-type": "web",
-                    "x-access-token": ACCESS_TOKEN,
-                    Authorization: `Bearer ${Token}`,
-                },
-                body: JSON.stringify({ courseTitle })
-            });
-console.log(response.body)
-            const reader = response.body && response.body.getReader();
-            if (!reader) {
-                console.error('Error fetching events: Response body is undefined');
-                return;
-            }
-
-            let decoder = new TextDecoder();
-            let result = '';
-console.log(reader)
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                result += decoder.decode(value, { stream: true });
-                const lines = result.split('\n');
-                if (lines.length > 1) {
-                    const newEvents = lines.slice(0, -1).map(line => JSON.parse(line));
-                    setEvents(prevEvents => [...prevEvents, ...newEvents]);
-                    result = lines.slice(-1)[0];
-                }
-            }
-        } catch (error) {
-            console.error('Error fetching events:', error);
-        }
-    };
-
-
-    const createAiAd = async (courseTitle:string) =>{
-        let Token = await SecureStore.getItemAsync('Gateway-Token');
-
-        const body = JSON.stringify({
-            courseTitle: courseTitle
-        })
-
-        const es = new EventSource(`${BASE_URL_LIVE}/magic/create`, {
-           method:"POST",
-            body,
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                "x-client-type": "web",
-                "x-access-token": ACCESS_TOKEN,
-                Authorization: `Bearer ${Token}`,
-            },
-        });
-
-//console.log(es)
-        es.addEventListener("open", (event) => {
-            console.log("Open SSE connection.",event);
-        });
-        es.addEventListener("message", (event) => {
-            console.log("New message event:", event.data);
-        });
-
-        es.addEventListener("error", (event) => {
-            if (event.type === "error") {
-               // console.error("Connection error:", event.message);
-                dispatch(addNotificationItem({
-                    id: Math.random(),
-                    type: 'error',
-                    body: `Connection error: ${event.message}`,
-                }))
-
-            } else if (event.type === "exception") {
-                dispatch(addNotificationItem({
-                    id: Math.random(),
-                    type: 'success',
-                    body: `Connection error: ${event.message}`,
-                }))
-                dispatch(addNotificationItem({
-                    id: Math.random(),
-                    type: 'success',
-                    body: `Connection error: ${event.error}`,
-                }))
-                //console.error("Error:", event.message, event.error);
-            }
-        });
-
-        es.addEventListener("close", (event) => {
-            console.log("Close SSE connection.");
-        });
-
-    }
 
 
 
@@ -337,7 +140,7 @@ console.log(reader)
 
     useEffect(() => {
         const interval = setInterval(() => {
-            setProgress((prevProgress) => (prevProgress >= 100 ? 0 : prevProgress + 1));
+            setProgress((prevProgress) => (prevProgress >= 1 ? 0 : prevProgress + 0.1));
         }, 1000);
 
         return () => clearInterval(interval);
@@ -369,6 +172,17 @@ console.log(reader)
 
 
 
+    const {mutate,isLoading,data,} = useMutation(['createAIAdventure'],createAIAdventure,{
+        onSuccess:(data)=>{
+
+            console.log("createAIAdventure")
+            console.log(data)
+
+
+        }
+
+    })
+
     const {
         resetForm,
         handleChange, handleSubmit, handleBlur,
@@ -388,11 +202,11 @@ console.log(reader)
         },
         onSubmit: (values) => {
             const {contract} = values;
-         //const body = JSON.stringify({courseTitle: contract})
+         const body = JSON.stringify({courseTitle: contract, disableEventEmit:true})
 
 
 
-            createAiAd(contract)
+            mutate({body})
         }
     });
 
@@ -408,9 +222,9 @@ console.log(reader)
     return (
         <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
             <SwipeAnimatedToast/>
+<IF condition={isLoading}>
 
-
-    {/*<Animated.View   entering={FadeInDown}
+    <Animated.View   entering={FadeInDown}
                      exiting={FadeOutDown} style={styles.progressContainer}>
 
 
@@ -447,10 +261,11 @@ console.log(reader)
 
 
     </ImageBackground>
-    </Animated.View>*/}
+    </Animated.View>
+</IF>
 
 
-
+<IF condition={!data?.success && !isLoading}>
 
 
             <KeyboardAwareScrollView style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {backgroundColor}]} scrollEnabled showsVerticalScrollIndicator={false}>
@@ -499,7 +314,7 @@ console.log(reader)
 
                     <TextInput
 
-                        placeholder="e.g What are smart contracts?"
+                        placeholder="What are smart contracts?"
                         keyboardType={"default"}
                         touched={touched.contract}
                         error={touched.contract && errors.contract}
@@ -518,13 +333,13 @@ console.log(reader)
                         label=""/>
 
 
-                    <RectButton disabled={!isValid || isAdLoading} style={{
+                    <RectButton disabled={!isValid || isLoading} style={{
 
                         width: widthPixel(250)
                     }} onPress={() => handleSubmit()}>
 
 
-                        {isAdLoading ? <ActivityIndicator size={"small"} color={"#fff"}/>
+                        {isLoading ? <ActivityIndicator size={"small"} color={"#fff"}/>
                             :
                         <Text style={styles.buttonText}>
                             Create new adventure
@@ -538,7 +353,7 @@ console.log(reader)
 
             </KeyboardAwareScrollView>
 
-
+</IF>
 
 
         </SafeAreaView>

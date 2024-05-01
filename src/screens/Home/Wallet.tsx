@@ -31,7 +31,12 @@ import SegmentContolAlt from "../../components/segment-control/SegmentContolAlt"
 import MyCard from "../../components/wallets/cards/MyCard";
 import {IF} from "../../helpers/ConditionJsx";
 import {RootTabScreenProps} from "../../../types";
-import BottomSheet, {BottomSheetBackdrop, BottomSheetView} from "@gorhom/bottom-sheet";
+import BottomSheet, {
+    BottomSheetBackdrop,
+    BottomSheetModal,
+    BottomSheetModalProvider,
+    BottomSheetView
+} from "@gorhom/bottom-sheet";
 import {
     BottomSheetDefaultBackdropProps
 } from '@gorhom/bottom-sheet/lib/typescript/components/bottomSheetBackdrop/types';
@@ -87,6 +92,7 @@ const Wallet = ({navigation}: RootTabScreenProps<'Learn'>) => {
         //  setScreen(index === 0 ? 'Banks' : 'Wallets')
     };
 
+    const {data: ccdWallet,isLoading} = useQuery(['getCCDWallet'], getCCDWallet)
 
     const {
         isLoading: loadingPoints,
@@ -101,12 +107,22 @@ const Wallet = ({navigation}: RootTabScreenProps<'Learn'>) => {
 //console.log(data)
 
     // ref
-    const bottomSheetRef = useRef<BottomSheet>(null);
+    const bottomSheetRef = useRef<BottomSheetModal>(null);
 
 
     const handleClose = () => {
         bottomSheetRef?.current?.close()
     }
+
+
+
+    useEffect(() => {
+        if(!loadingWallets) {
+            if (!ccdWallet?.data) {
+                bottomSheetRef?.current?.present()
+            }
+        }
+    }, [ccdWallet,loadingWallets]);
     // variables
     const snapPoints = useMemo(() => ["1%", "45%"], []);
 
@@ -138,8 +154,6 @@ const Wallet = ({navigation}: RootTabScreenProps<'Learn'>) => {
         navigation.navigate('Notifications')
     }
 
-
-    const {data: ccdWallet,isLoading} = useQuery(['getCCDWallet'], getCCDWallet)
     useEffect(() => {
         if(!isLoading ) {
             if (!data?.success) {
@@ -148,6 +162,7 @@ const Wallet = ({navigation}: RootTabScreenProps<'Learn'>) => {
 
         }
     }, [tabIndex,data])
+
 
 
 
@@ -470,14 +485,16 @@ const visitMarketPlace =async () =>{
 
             </SafeAreaView>
 
-{/*            <Portal>
-                <BottomSheet
+            <Portal>
+
+               <BottomSheetModalProvider>
+                <BottomSheetModal
                     backdropComponent={renderBackdrop}
                     ref={bottomSheetRef}
                     snapPoints={snapPoints}
                     // add bottom inset to elevate the sheet
                     bottomInset={66}
-                    index={0}
+                    index={1}
                     // set `detached` to true
                     detached={true}
                     style={styles.sheetContainer}
@@ -509,9 +526,9 @@ const visitMarketPlace =async () =>{
                             </Text>
                         </Pressable>
                     </BottomSheetView>
-                </BottomSheet>
-
-            </Portal>*/}
+                </BottomSheetModal>
+               </BottomSheetModalProvider>
+            </Portal>
 
         </>
     );
