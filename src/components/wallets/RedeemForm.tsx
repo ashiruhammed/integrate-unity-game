@@ -1,14 +1,14 @@
 import React, {useEffect, useState} from 'react';
 
-import {Text, View, StyleSheet, ActivityIndicator, TouchableOpacity} from 'react-native';
+import {Text, View, StyleSheet, ActivityIndicator, TouchableOpacity, Modal} from 'react-native';
 import {useFormik} from "formik";
 import * as yup from "yup";
 import AdvancedTextInput from "../inputs/AdvancedTextInput";
 import {RectButton} from "../RectButton";
-import {fontPixel, widthPixel} from "../../helpers/normalize";
+import {fontPixel, pixelSizeHorizontal, widthPixel} from "../../helpers/normalize";
 import {Fonts} from "../../constants/Fonts";
 import {useQuery} from "@tanstack/react-query";
-import {getUserPointsExchangeRate} from "../../action/action";
+import {getCCDWallet, getUserPointsExchangeRate, getUserWallets} from "../../action/action";
 import Colors from "../../constants/Colors";
 import {MaterialCommunityIcons} from "@expo/vector-icons";
 import {useAppSelector} from "../../app/hooks";
@@ -39,6 +39,18 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance, nearBalance}: props) =>
 
     const [points, setPoints] = useState('');
 
+    const [isModalVisible, setModalVisible] = useState(false);
+    const [walletOption, setWalletOption] = useState('GATE')
+    const toggleModal = () => {
+        setModalVisible(!isModalVisible);
+    };
+
+    const handleOptionPress = (option) => {
+        // Handle the selected option here
+        setWalletOption( option);
+        toggleModal();
+    };
+
 
     const [convertedPoints, setConvertedPoints] = useState('');
     const [defaultPointsConvertValue, setDefaultPointsConvertValue] = useState('');
@@ -50,6 +62,9 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance, nearBalance}: props) =>
     const lightTextColor = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
 
+
+    const {data: ccdWallet} = useQuery(['getCCDWallet'], getCCDWallet)
+//console.log(ccdWallet)
     // https://pro-api.coinmarketcap.com/v2/tools/price-conversion?CMC_PRO_API_KEY=c8d06b53-dfbe-4de8-9e0d-62fdb128cf8a&amount=300&symbol=Near
 
     const {
@@ -74,8 +89,8 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance, nearBalance}: props) =>
             const {points} = values;
             const body = JSON.stringify({
                 amount: points,
-                "network": "near",
-                "token": "near"
+                "network": data?.data.find((wallet: { token: string; }) => wallet.token == walletOption).network,
+                "token": walletOption
             })
 
             redeemNow(body)
@@ -87,24 +102,44 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance, nearBalance}: props) =>
    // let defaultPointsConvertValue = '0'
   //  let pointsVal = '0'
     useEffect(() => {
+
         if (data && data?.success) {
-           setPointsVal(`${data?.data[1]?.value} ${data?.data[1]?.token}`)
+           // console.log(data?.data.find((wallet: { token: string; }) => wallet.token == walletOption).value)
+
+           setPointsVal(`${data?.data.find((wallet: { token: string; }) => wallet.token == walletOption).value} ${data?.data.find(wallet => wallet.token == walletOption)?.token}`)
             //defaultPointsConvertValue =
 
-            setDefaultPointsConvertValue(`${data?.data[1]?.value * +points}`)
+            setDefaultPointsConvertValue(`${data?.data.find((wallet: { token: string; }) => wallet.token == walletOption)?.value * +points}`)
         } else {
             setDefaultPointsConvertValue('0')
             setPointsVal('0')
         }
-    }, [data,points]);
+    }, [data,points,walletOption]);
 
-
+//console.log(data)
     const maxAmount = () => {
         setPoints(pointBalance)
         setFieldValue('points', pointBalance)
     }
     return (
         <View style={styles.sheetContainer}>
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={isModalVisible}
+                onRequestClose={toggleModal}
+            >
+                <TouchableOpacity style={styles.modalOverlay} onPress={toggleModal}>
+                    <View style={styles.modalContent}>
+                        <TouchableOpacity onPress={() => handleOptionPress('CCD')}>
+                            <Text style={styles.option}>Concordion</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => handleOptionPress('GATE')}>
+                            <Text style={styles.option}>Gate</Text>
+                        </TouchableOpacity>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
             <AdvancedTextInput
 
                 placeholder="0.00"
@@ -131,15 +166,16 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance, nearBalance}: props) =>
                                         color={theme == 'light' ? "rgba(0, 0, 0, 0.8)" : "rgba(227,227,227,0.8)"}/>
             </View>
             <AdvancedTextInput
+                walletOption={walletOption}
                 mainWallet
                 editable={false}
-
+actionSelectWallet={toggleModal}
                 placeholder="0.00"
                 label={"Amount"}
                 defaultValue={defaultPointsConvertValue}
                 keyboardType={"number-pad"}
 
-                balanceText={`${nearBalance} CCD`}
+                balanceText={`${walletOption == 'Gate' ? ccdWallet?.data?.gateBalance : ccdWallet?.data?.ccdBalance} ${walletOption}`}
                 onChangeText={(e) => {
                     handleChange('walletAmount')(e);
                 }}
@@ -148,7 +184,7 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance, nearBalance}: props) =>
 
                 }}
 
-            />
+           />
 
             <View style={styles.conversionRate}>
                 <Text style={[styles.label, {
@@ -228,7 +264,30 @@ const styles = StyleSheet.create({
     label: {
         fontFamily: Fonts.quicksandMedium,
         fontSize: fontPixel(14)
-    }
+    },
+
+
+
+    modalOverlay: {
+        flex: 1,
+        paddingHorizontal:pixelSizeHorizontal(20),
+        backgroundColor: 'rgba(0, 0, 0, 0.1)',
+        justifyContent: 'flex-end',
+        alignItems: 'flex-end',
+    },
+    modalContent: {
+        marginBottom:30,
+  width:'100%',
+        height:120,
+        backgroundColor: '#fff',
+        padding: 20,
+        borderRadius: 10,
+    },
+    option: {
+        fontFamily:Fonts.quicksandMedium,
+        fontSize: fontPixel(16),
+        paddingVertical: 10,
+    },
 })
 
 export default RedeemForm;

@@ -154,16 +154,6 @@ const Wallet = ({navigation}: RootTabScreenProps<'Learn'>) => {
         navigation.navigate('Notifications')
     }
 
-    useEffect(() => {
-        if(!isLoading ) {
-            if (!data?.success) {
-                bottomSheetRef?.current?.expand()
-            }
-
-        }
-    }, [tabIndex,data])
-
-
 
 
 
@@ -252,6 +242,7 @@ const visitMarketPlace =async () =>{
 
 
     useRefreshOnFocus(refetch)
+    useRefreshOnFocus(fetchBadge)
 
 
     return (

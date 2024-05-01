@@ -16,7 +16,7 @@ import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPix
 import {Fonts} from "../../constants/Fonts";
 import Colors from "../../constants/Colors";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
-import {useInfiniteQuery, useQueryClient,useMutation} from "@tanstack/react-query";
+import {useInfiniteQuery, useQueryClient, useMutation} from "@tanstack/react-query";
 import {createAIAdventure, userNotifications} from "../../action/action";
 import {RootStackScreenProps} from "../../../types";
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
@@ -39,19 +39,17 @@ import {BASE_URL, ACCESS_TOKEN, DEV_BASE_URL} from "@env";
 //const access_token = 'JGFyZ29uMmlkJHY9MTkkbT00MDk2LHQ9MyxwPTEkWnJjNEVDR05JTEYzU3B2WUJLZVBZdyRtdnNacUl6VVg3SG1UV2gvdjhQZXZGUXJOa1hWYUFHRkVKV3dCd0NobDBV'
 //const BASE_URL_LIVE = __DEV__ ? DEV_BASE_URL : BASE_URL
 const BASE_URL_LIVE = DEV_BASE_URL
-import EventSource, { EventSourceListener } from "react-native-sse";
+import EventSource, {EventSourceListener} from "react-native-sse";
 import SwipeAnimatedToast from "../../components/toasty";
-import {addNotificationItem} from "../../app/slices/dataSlice";
+import {addNotificationItem, setAdventure} from "../../app/slices/dataSlice";
 //import "react-native-url-polyfill/auto"; // Use URL polyfill in React Native
 
 
-
-
-const CustomProgressBar = ({ progress, width, height }) => {
+const CustomProgressBar = ({progress, width, height}) => {
     const animatedProgress = useSharedValue(0);
 
     React.useEffect(() => {
-        animatedProgress.value = withTiming(progress, { duration: 1000 });
+        animatedProgress.value = withTiming(progress, {duration: 1000});
     }, [progress]);
 
     const animatedStyle = useAnimatedStyle(() => ({
@@ -59,12 +57,11 @@ const CustomProgressBar = ({ progress, width, height }) => {
     }));
 
     return (
-        <View style={[styles.barContainer, {  height }]}>
-            <Animated.View style={[styles.progressBar, animatedStyle]} />
+        <View style={[styles.barContainer, {height}]}>
+            <Animated.View style={[styles.progressBar, animatedStyle]}/>
         </View>
     );
 };
-
 
 
 const formSchema = yup.object().shape({
@@ -95,7 +92,6 @@ const CreateAIAdventure = ({navigation}: RootStackScreenProps<'CreateAIAdventure
     const [focusContract, setFocusContract] = useState(false)
 
 
-
     const position = useSharedValue(0);
 
     const translateY = useSharedValue(0);
@@ -106,36 +102,27 @@ const CreateAIAdventure = ({navigation}: RootStackScreenProps<'CreateAIAdventure
             -1,
             true
         );
-    },[])
+    }, [])
     useEffect(() => {
         position.value = withRepeat(
-            withSpring(1, { damping: 2, stiffness: 80 }),
+            withSpring(1, {damping: 2, stiffness: 80}),
             -1,
             true
         );
     }, []);
 
     const animatedStyle = useAnimatedStyle(() => ({
-        transform: [{ translateY: translateY.value }],
+        transform: [{translateY: translateY.value}],
     }));
 
 
     useEffect(() => {
-        (async ()=>{
+        (async () => {
             let Token = await SecureStore.getItemAsync('Gateway-Token');
-          //  console.log(Token)
+            //  console.log(Token)
         })()
 
     }, []);
-
-
-
-
-
-
-
-
-
 
 
     useEffect(() => {
@@ -145,7 +132,6 @@ const CreateAIAdventure = ({navigation}: RootStackScreenProps<'CreateAIAdventure
 
         return () => clearInterval(interval);
     }, []);
-
 
 
     const openNotifications = () => {
@@ -171,12 +157,22 @@ const CreateAIAdventure = ({navigation}: RootStackScreenProps<'CreateAIAdventure
         })
 
 
+    const {mutate, isLoading, data,} = useMutation(['createAIAdventure'], createAIAdventure, {
+        onSuccess: (data) => {
+            if (data.success) {
 
-    const {mutate,isLoading,data,} = useMutation(['createAIAdventure'],createAIAdventure,{
-        onSuccess:(data)=>{
+                dispatch(setAdventure({adventure: data.data}))
+                navigation.navigate('AdventureHome')
 
-            console.log("createAIAdventure")
-            console.log(data)
+
+            } else {
+
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body: data.message,
+                }))
+            }
 
 
         }
@@ -202,8 +198,7 @@ const CreateAIAdventure = ({navigation}: RootStackScreenProps<'CreateAIAdventure
         },
         onSubmit: (values) => {
             const {contract} = values;
-         const body = JSON.stringify({courseTitle: contract, disableEventEmit:true})
-
+            const body = JSON.stringify({courseTitle: contract, disableEventEmit: true})
 
 
             mutate({body})
@@ -211,149 +206,145 @@ const CreateAIAdventure = ({navigation}: RootStackScreenProps<'CreateAIAdventure
     });
 
 
-
-
-    const createAdventure = ()=>{
+    const createAdventure = () => {
 
     }
 
 
-
     return (
         <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
+
             <SwipeAnimatedToast/>
-<IF condition={isLoading}>
+            <IF condition={isLoading}>
 
-    <Animated.View   entering={FadeInDown}
-                     exiting={FadeOutDown} style={styles.progressContainer}>
-
-
-    <ImageBackground source={require('../../assets/images/animated-bg.png')} resizeMode={'cover'} style={styles.backgroundImage}>
+                <Animated.View entering={FadeInDown}
+                               exiting={FadeOutDown} style={styles.progressContainer}>
 
 
+                    <ImageBackground source={require('../../assets/images/animated-bg.png')} resizeMode={'cover'}
+                                     style={styles.backgroundImage}>
 
 
-        <View style={styles.container}>
+                        <View style={styles.container}>
 
-            <View style={styles.avatar}>
-                <Image source={require('../../assets/images/avatar.png')} style={styles.avatarImage}/>
-            </View>
+                            <View style={styles.avatar}>
+                                <Image source={require('../../assets/images/avatar.png')} style={styles.avatarImage}/>
+                            </View>
 
-            <Text style={styles.noticeText}>
-                A moment while we create
-                your adventure
-            </Text>
+                            <Text style={styles.noticeText}>
+                                A moment while we create
+                                your adventure
+                            </Text>
 
-            <Text style={styles.subNoticeText}>
-                Creating your first lesson...
-            </Text>
+                            <Text style={styles.subNoticeText}>
+                                Creating your lesson...
+                            </Text>
 
-            <CustomProgressBar progress={progress} width={200} height={16} />
-        </View>
-
-        <Animated.View style={[styles.floatingRock,animatedStyle]}>
-            <Image source={require('../../assets/images/floating_rock.png')} style={styles.floatingRockImage}/>
-        </Animated.View>
-
-
-
-
-
-
-    </ImageBackground>
-    </Animated.View>
-</IF>
-
-
-<IF condition={!data?.success && !isLoading}>
-
-
-            <KeyboardAwareScrollView style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {backgroundColor}]} scrollEnabled showsVerticalScrollIndicator={false}>
-
-                <View style={styles.topBar}>
-
-                    <View style={styles.leftButton}>
-                        <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.8}
-                                          style={styles.backButton}>
-
-                            <AntDesign name="arrowleft" size={30} color="black"/>
-                        </TouchableOpacity>
-                        <View style={styles.pointWrap}>
-                            <Ionicons name="gift" size={16} color="#22BB33"/>
-                            <Text style={styles.pointsText}>20000</Text>
+                            <CustomProgressBar progress={progress} width={200} height={16}/>
                         </View>
+
+                        <Animated.View style={[styles.floatingRock, animatedStyle]}>
+                            <Image source={require('../../assets/images/floating_rock.png')}
+                                   style={styles.floatingRockImage}/>
+                        </Animated.View>
+
+
+                    </ImageBackground>
+                </Animated.View>
+            </IF>
+
+
+            <IF condition={!isLoading}>
+
+
+                <KeyboardAwareScrollView style={{width: '100%',}}
+                                         contentContainerStyle={[styles.scrollView, {backgroundColor}]} scrollEnabled
+                                         showsVerticalScrollIndicator={false}>
+
+                    <View style={styles.topBar}>
+
+                        <View style={styles.leftButton}>
+                            <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.8}
+                                              style={styles.backButton}>
+
+                                <AntDesign name="arrowleft" size={30} color="black"/>
+                            </TouchableOpacity>
+                            <View style={styles.pointWrap}>
+                                <Ionicons name="gift" size={16} color="#22BB33"/>
+                                <Text style={styles.pointsText}>20000</Text>
+                            </View>
+                        </View>
+
+                        <View style={styles.rightButton}>
+
+                            <ImageBackground style={styles.streaKIcon} resizeMode={'contain'}
+                                             source={require('../../assets/images/streakicon.png')}>
+                                <Text style={styles.streakText}> 200</Text>
+                            </ImageBackground>
+
+                            <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}
+                                              style={styles.roundTopBtn}>
+                                {
+                                    notifications?.pages[0]?.data?.result.length > 0 &&
+                                    <View style={styles.dot}/>
+                                }
+                                <Octicons name="bell-fill" size={22} color={"#000"}/>
+                            </TouchableOpacity>
+
+                        </View>
+
                     </View>
 
-                    <View style={styles.rightButton}>
 
-                        <ImageBackground style={styles.streaKIcon} resizeMode={'contain'}
-                                         source={require('../../assets/images/streakicon.png')}>
-                            <Text style={styles.streakText}> 200</Text>
-                        </ImageBackground>
-
-                        <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}
-                                          style={styles.roundTopBtn}>
-                            {
-                                notifications?.pages[0]?.data?.result.length > 0 &&
-                                <View style={styles.dot}/>
-                            }
-                            <Octicons name="bell-fill" size={22} color={"#000"}/>
-                        </TouchableOpacity>
-
-                    </View>
-
-                </View>
-
-
-                <View style={styles.bodyCreate}>
-                    <Image source={require('../../assets/images/gateway-adaptive.png')} style={styles.gatewayIcon}/>
-                    <Text style={styles.bodyText}>
-                        Let <Text style={{color: Colors.primaryColor}}>Learning</Text> help you
-                        become the best version of <Text style={{color: Colors.primaryColor}}>yourself</Text>.
-                    </Text>
-
-                    <TextInput
-
-                        placeholder="What are smart contracts?"
-                        keyboardType={"default"}
-                        touched={touched.contract}
-                        error={touched.contract && errors.contract}
-                        onFocus={() => setFocusContract(true)}
-                        onChangeText={(e) => {
-                            handleChange('contract')(e);
-
-                        }}
-                        onBlur={(e) => {
-                            handleBlur('contract')(e);
-                            setFocusContract(false);
-                        }}
-
-                        focus={focusContract}
-                        value={values.contract}
-                        label=""/>
-
-
-                    <RectButton disabled={!isValid || isLoading} style={{
-
-                        width: widthPixel(250)
-                    }} onPress={() => handleSubmit()}>
-
-
-                        {isLoading ? <ActivityIndicator size={"small"} color={"#fff"}/>
-                            :
-                        <Text style={styles.buttonText}>
-                            Create new adventure
-
+                    <View style={styles.bodyCreate}>
+                        <Image source={require('../../assets/images/gateway-adaptive.png')} style={styles.gatewayIcon}/>
+                        <Text style={styles.bodyText}>
+                            Let <Text style={{color: Colors.primaryColor}}>Learning</Text> help you
+                            become the best version of <Text style={{color: Colors.primaryColor}}>yourself</Text>.
                         </Text>
-                        }
-                    </RectButton>
 
-                </View>
+                        <TextInput
+
+                            placeholder="What are smart contracts?"
+                            keyboardType={"default"}
+                            touched={touched.contract}
+                            error={touched.contract && errors.contract}
+                            onFocus={() => setFocusContract(true)}
+                            onChangeText={(e) => {
+                                handleChange('contract')(e);
+
+                            }}
+                            onBlur={(e) => {
+                                handleBlur('contract')(e);
+                                setFocusContract(false);
+                            }}
+
+                            focus={focusContract}
+                            value={values.contract}
+                            label=""/>
 
 
-            </KeyboardAwareScrollView>
+                        <RectButton disabled={!isValid || isLoading} style={{
 
-</IF>
+                            width: widthPixel(250)
+                        }} onPress={() => handleSubmit()}>
+
+
+                            {isLoading ? <ActivityIndicator size={"small"} color={"#fff"}/>
+                                :
+                                <Text style={styles.buttonText}>
+                                    Create new adventure
+
+                                </Text>
+                            }
+                        </RectButton>
+
+                    </View>
+
+
+                </KeyboardAwareScrollView>
+
+            </IF>
 
 
         </SafeAreaView>
@@ -482,83 +473,78 @@ const styles = StyleSheet.create({
     },
 
 
-
-
-
-
-
     /*SECOND SCREEN*/
 
 
     barContainer: {
 
-        width:'100%',
+        width: '100%',
         backgroundColor: '#f0f0f0',
         borderRadius: 20,
         overflow: 'hidden',
     },
-    floatingRock:{
-        width:'100%',
-        height:200,
-        alignItems:"center",
-        justifyContent:'center',
+    floatingRock: {
+        width: '100%',
+        height: 200,
+        alignItems: "center",
+        justifyContent: 'center',
     },
 
-    floatingRockImage:{
-        width:'100%',
-        height:'100%',
-        alignItems:"center",
-        justifyContent:'center',
-        resizeMode:'contain'
+    floatingRockImage: {
+        width: '100%',
+        height: '100%',
+        alignItems: "center",
+        justifyContent: 'center',
+        resizeMode: 'contain'
     },
-    backgroundImage:{
+    backgroundImage: {
         width: '100%',
         flex: 1,
         alignItems: 'center',
     },
-    progressContainer:{
+    progressContainer: {
         width: '100%',
         flex: 1,
-backgroundColor:"#000"
+        backgroundColor: "#000"
     },
-    container:{
-        width:'90%',
-        alignItems:"center",
-        height:heightPixel(400),
-        justifyContent:'space-evenly'
+    container: {
+        width: '90%',
+        alignItems: "center",
+        height: heightPixel(400),
+        justifyContent: 'space-evenly'
     },
-    avatar:{
-        width:88,
-        height:88,
-        borderRadius:100,
-        alignItems:"center",
-        justifyContent:'center'
-    }, avatarImage:{
-        width:'100%',
-        height:'100%',
-        borderRadius:100,
-        alignItems:"center",
-        justifyContent:'center',
-        resizeMode:'cover'
+    avatar: {
+        width: 88,
+        height: 88,
+        borderRadius: 100,
+        alignItems: "center",
+        justifyContent: 'center'
+    }, avatarImage: {
+        width: '100%',
+        height: '100%',
+        borderRadius: 100,
+        alignItems: "center",
+        justifyContent: 'center',
+        resizeMode: 'cover'
     },
-    noticeText:{
-        fontSize:fontPixel(24),
-        lineHeight:30,
-        color:"#fff",
-        textAlign:'center',
-        fontFamily:Fonts.quicksandSemiBold,
-        marginVertical:pixelSizeVertical(10)
+    noticeText: {
+        fontSize: fontPixel(24),
+        lineHeight: 30,
+        color: "#fff",
+        textAlign: 'center',
+        fontFamily: Fonts.quicksandSemiBold,
+        marginVertical: pixelSizeVertical(10)
     },
-    subNoticeText:{
-        fontSize:fontPixel(14),
-        color:"#fff",
-        textAlign:'center',
-        fontFamily:Fonts.quicksandMedium
+    subNoticeText: {
+        fontSize: fontPixel(14),
+        color: "#fff",
+        textAlign: 'center',
+        fontFamily: Fonts.quicksandMedium
     },
     progressBar: {
-        backgroundColor:"#BF1314",
+        backgroundColor: "#BF1314",
         height: '100%',
-        borderRadius:20,
+        borderRadius: 20,
     },
 
 })

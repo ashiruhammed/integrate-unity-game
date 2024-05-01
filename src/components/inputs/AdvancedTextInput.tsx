@@ -11,7 +11,7 @@ import {useAppSelector} from "../../app/hooks";
 
 interface Props extends TextInputProps {
     mainWallet?:boolean
-    balanceText:string,
+    balanceText?:string,
     inputBg?: string,
     placeholder: string;
     error?: string;
@@ -24,7 +24,7 @@ interface Props extends TextInputProps {
     leftIcon?: boolean | React.ReactNode;
     icon?: boolean | React.ReactNode;
     focus?: boolean;
-
+    walletOption:string,
     value: string;
     actionSelectWallet?: () => void;
     actionMax?: () => void;
@@ -34,6 +34,7 @@ interface Props extends TextInputProps {
 
 
 const AdvancedTextInput: FC<Props> = ({
+                                          walletOption,
                                           actionSelectWallet,
                                           mainWallet,
                                           balanceText,
@@ -107,7 +108,7 @@ const AdvancedTextInput: FC<Props> = ({
                                 <Text style={[styles.label,{
                                     color:textColor,
                                 }]}>
-                                    Gate  <Entypo name="chevron-down" size={14} color={textColor} />
+                                    {walletOption}  <Entypo name="chevron-down" size={14} color={textColor} />
                                 </Text>
 
                             </TouchableOpacity>

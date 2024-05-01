@@ -22,6 +22,7 @@ import {useInfiniteQuery, useQueryClient} from "@tanstack/react-query";
 import {getAiAdventure, getAllAdventure} from "../../action/action";
 import {useRefreshOnFocus} from "../../helpers";
 import {setAdventure} from "../../app/slices/dataSlice";
+import {isLoading} from "expo-font";
 
 
 interface propsAi {
@@ -132,8 +133,7 @@ const AIAdventures = () => {
 
     const dispatch = useAppDispatch()
     const queryClient = useQueryClient();
-    const user = useAppSelector(state => state.user)
-    const {userData, responseState, responseType, responseMessage} = user
+
     const dataSlice = useAppSelector(state => state.data)
     const {theme} = dataSlice
 
@@ -155,7 +155,7 @@ const AIAdventures = () => {
     const selectAdventure = (adventure:{}) => {
         dispatch(setAdventure({adventure}))
         navigation.navigate('AdventureHome')
-        console.log("hello")
+
     }
 
     const renderItemAi = useCallback(({item}) => (
@@ -171,12 +171,9 @@ const AIAdventures = () => {
         fetchNextPage,
         isFetchingNextPage,
         refetch,
-
         isRefetching
     } = useInfiniteQuery([`getAiAdventure`], ({pageParam = 1}) => getAiAdventure.ai_adventures(pageParam),
         {
-
-
             getNextPageParam: lastPage => {
                 if (lastPage.next !== null) {
                     return lastPage.next;
@@ -187,7 +184,10 @@ const AIAdventures = () => {
             getPreviousPageParam: (firstPage, allPages) => firstPage.prevCursor,
         })
 
+
     // console.log(allAdventure?.pages[0])
+
+
     const loadMore = () => {
         if (hasNextPage) {
             fetchNextPage();
@@ -212,7 +212,8 @@ const AIAdventures = () => {
                 estimatedItemSize={200}
                 // refreshing={isLoading}
                 //  ListHeaderComponent={renderHeader}
-
+onRefresh={refetch}
+                refreshing={loadingAdventures}
                 scrollEnabled
                 showsVerticalScrollIndicator={false}
                 data={adventures?.pages[0]?.data?.result}

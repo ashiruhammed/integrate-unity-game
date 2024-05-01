@@ -21,7 +21,7 @@ import {AntDesign} from "@expo/vector-icons";
 import TextInput from "../../components/inputs/TextInput";
 import {useFormik} from "formik";
 import {RectButton} from "../../components/RectButton";
-import Animated, {Easing, FadeInDown, FadeOutDown, Layout} from "react-native-reanimated";
+
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {setAuthenticated, setResponse, unSetResponse, updateUserInfo} from "../../app/slices/userSlice";
@@ -34,7 +34,6 @@ import * as Google from "expo-auth-session/providers/google";
 import * as AppleAuthentication from 'expo-apple-authentication';
 import GoogleIcon from "../../components/GoogleIcon";
 import HorizontalLine from "../../components/HorizontalLine";
-import {LoginButton, AccessToken, AuthenticationToken} from 'react-native-fbsdk-next';
 import Recaptcha, {RecaptchaHandles} from 'react-native-recaptcha-that-works';
 import {addNotificationItem} from "../../app/slices/dataSlice";
 import SwipeAnimatedToast from "../../components/toasty";
