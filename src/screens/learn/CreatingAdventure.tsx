@@ -36,7 +36,7 @@ const CreatingAdventure = ({navigation}:RootStackScreenProps<'CreatingAdventure'
 
     const [progress, setProgress] = React.useState(0);
 
-    React.useEffect(() => {
+   useEffect(() => {
         const interval = setInterval(() => {
             setProgress((prevProgress) => (prevProgress >= 1 ? 0 : prevProgress + 0.1));
         }, 1000);

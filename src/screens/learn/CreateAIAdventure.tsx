@@ -40,6 +40,8 @@ import {BASE_URL, ACCESS_TOKEN, DEV_BASE_URL} from "@env";
 //const BASE_URL_LIVE = __DEV__ ? DEV_BASE_URL : BASE_URL
 const BASE_URL_LIVE = DEV_BASE_URL
 import EventSource, { EventSourceListener } from "react-native-sse";
+import SwipeAnimatedToast from "../../components/toasty";
+import {addNotificationItem} from "../../app/slices/dataSlice";
 //import "react-native-url-polyfill/auto"; // Use URL polyfill in React Native
 
 
@@ -67,7 +69,7 @@ const CustomProgressBar = ({ progress, width, height }) => {
 
 const formSchema = yup.object().shape({
 
-    contract: yup.string().required('Title is required'),
+    contract: yup.string().required('Course Title is required'),
 
 });
 
@@ -231,6 +233,45 @@ console.log(value)
 
 
 
+    const fetchEvents = async (courseTitle:string) => {
+        let Token = await SecureStore.getItemAsync('Gateway-Token');
+        try {
+            const response = await fetch('https://gateway-backend.onrender.com/magic/create', {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                    "x-client-type": "web",
+                    "x-access-token": ACCESS_TOKEN,
+                    Authorization: `Bearer ${Token}`,
+                },
+                body: JSON.stringify({ courseTitle })
+            });
+console.log(response.body)
+            const reader = response.body && response.body.getReader();
+            if (!reader) {
+                console.error('Error fetching events: Response body is undefined');
+                return;
+            }
+
+            let decoder = new TextDecoder();
+            let result = '';
+console.log(reader)
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                result += decoder.decode(value, { stream: true });
+                const lines = result.split('\n');
+                if (lines.length > 1) {
+                    const newEvents = lines.slice(0, -1).map(line => JSON.parse(line));
+                    setEvents(prevEvents => [...prevEvents, ...newEvents]);
+                    result = lines.slice(-1)[0];
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching events:', error);
+        }
+    };
 
 
     const createAiAd = async (courseTitle:string) =>{
@@ -252,9 +293,9 @@ console.log(value)
             },
         });
 
-console.log(es)
+//console.log(es)
         es.addEventListener("open", (event) => {
-            console.log("Open SSE connection.");
+            console.log("Open SSE connection.",event);
         });
         es.addEventListener("message", (event) => {
             console.log("New message event:", event.data);
@@ -262,9 +303,25 @@ console.log(es)
 
         es.addEventListener("error", (event) => {
             if (event.type === "error") {
-                console.error("Connection error:", event.message);
+               // console.error("Connection error:", event.message);
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body: `Connection error: ${event.message}`,
+                }))
+
             } else if (event.type === "exception") {
-                console.error("Error:", event.message, event.error);
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'success',
+                    body: `Connection error: ${event.message}`,
+                }))
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'success',
+                    body: `Connection error: ${event.error}`,
+                }))
+                //console.error("Error:", event.message, event.error);
             }
         });
 
@@ -312,17 +369,6 @@ console.log(es)
 
 
 
-    const {mutate,isLoading,data,} = useMutation(['createAIAdventure'],createAIAdventure,{
-        onSuccess:(data)=>{
-
-            console.log("createAIAdventure")
-            console.log(data)
-
-
-        }
-
-    })
-
     const {
         resetForm,
         handleChange, handleSubmit, handleBlur,
@@ -361,9 +407,10 @@ console.log(es)
 
     return (
         <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
-<IF condition={data?.success}>
+            <SwipeAnimatedToast/>
 
-    <Animated.View   entering={FadeInDown}
+
+    {/*<Animated.View   entering={FadeInDown}
                      exiting={FadeOutDown} style={styles.progressContainer}>
 
 
@@ -400,11 +447,10 @@ console.log(es)
 
 
     </ImageBackground>
-    </Animated.View>
-</IF>
+    </Animated.View>*/}
 
 
-<IF condition={!data?.success}>
+
 
 
             <KeyboardAwareScrollView style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {backgroundColor}]} scrollEnabled showsVerticalScrollIndicator={false}>
@@ -453,7 +499,7 @@ console.log(es)
 
                     <TextInput
 
-                        placeholder="What are smart contracts?"
+                        placeholder="e.g What are smart contracts?"
                         keyboardType={"default"}
                         touched={touched.contract}
                         error={touched.contract && errors.contract}
@@ -492,7 +538,7 @@ console.log(es)
 
             </KeyboardAwareScrollView>
 
-</IF>
+
 
 
         </SafeAreaView>

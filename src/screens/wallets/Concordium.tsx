@@ -26,7 +26,15 @@ import {
 import {RootStackScreenProps} from "../../../types";
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
 import {Fonts} from "../../constants/Fonts";
-import Animated, {FadeInDown, FadeOutDown} from 'react-native-reanimated';
+import Animated, {
+    Easing,
+    FadeInDown,
+    FadeOutDown,
+    Layout,
+    useAnimatedStyle,
+    useSharedValue,
+    withTiming
+} from 'react-native-reanimated';
 import BottomSheet, {
     BottomSheetBackdrop,
     BottomSheetModal,
@@ -113,7 +121,7 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
     const snapPoints = useMemo(() => ["1", "45%"], []);
 
     const [copied, setCopied] = useState(false)
-    const copyToClipboard = async (copyText:string) => {
+    const copyToClipboard = async (copyText: string) => {
         await Clipboard.setStringAsync(copyText);
         setCopied(true)
     };
@@ -161,8 +169,7 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
     })
 
 
-
-    const {mutate:withdrawNow, isLoading:loadingWithdraw} = useMutation(['withdrawFromWallet'], withdrawFromWallet,
+    const {mutate: withdrawNow, isLoading: loadingWithdraw} = useMutation(['withdrawFromWallet'], withdrawFromWallet,
 
         {
 
@@ -171,13 +178,13 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
                 if (data.success) {
                     refetch()
                     handleClosePressWithdraw()
-                  //  getTransactions()
+                    //  getTransactions()
 
 
                     dispatch(addNotificationItem({
                         id: Math.random(),
                         type: 'success',
-                        body:  data.message,
+                        body: data.message,
                     }))
 
                 } else {
@@ -186,7 +193,7 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
                     dispatch(addNotificationItem({
                         id: Math.random(),
                         type: 'error',
-                        body:  data.message,
+                        body: data.message,
                     }))
                     /*  navigation.navigate('EmailConfirm', {
                           email:contentEmail
@@ -201,7 +208,7 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
                 dispatch(addNotificationItem({
                     id: Math.random(),
                     type: 'error',
-                    body:  err.message,
+                    body: err.message,
                 }))
             },
             onSettled: () => {
@@ -209,8 +216,6 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
             }
 
         })
-
-
 
 
     //   console.log(ccdWallet)
@@ -225,6 +230,34 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
         ),
         []
     );
+
+
+    let count = 1;
+    const width = useSharedValue(1);
+    const animatedStyle = useAnimatedStyle(() => {
+        return {
+            width: withTiming(width.value, {
+                duration: 10
+            }),
+        };
+    });
+
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            if (!isLoading || count > 200) {
+                clearInterval(intervalId);
+
+            } else {
+
+                width.value = count++
+
+            }
+        }, 100);
+
+        return () => {
+            clearInterval(intervalId);
+        }
+    }, [count, isLoading]);
 
 
     const {
@@ -255,15 +288,25 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
                 "token": "ccd"
             })
 
-            withdrawNow(body)
-
+            if (ccdWallet?.data?.ccdBalance < 1) {
+                dispatch(addNotificationItem({
+                    id: Math.random(),
+                    type: 'error',
+                    body: "Your wallet balance is too low!",
+                }))
+            } else {
+                withdrawNow(body)
+            }
         }
     });
 
-   const {data:transactions,isLoading:loadingTransactions} = useQuery(['walletTransactions'],walletTransactions)
+    const {data: transactions, isLoading: loadingTransactions} = useQuery(['walletTransactions'], walletTransactions)
 
-    const {isLoading: loadingUser,data:userDashboard, refetch:fetchDashboard} = useQuery(['getUserDashboard'], getUserDashboard, {})
-
+    const {
+        isLoading: loadingUser,
+        data: userDashboard,
+        refetch: fetchDashboard
+    } = useQuery(['getUserDashboard'], getUserDashboard, {})
 
 
     const startNow = () => {
@@ -278,11 +321,18 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
         setPoints(ccdWallet?.data?.ccdBalance.toString())
         setFieldValue('points', ccdWallet?.data?.ccdBalance.toString())
     }
-    useRefreshOnFocus(refetch)
 
-    const openTransactions= () => {
+
+    const openTransactions = () => {
         navigation.navigate('ConcordiumTransactions')
     }
+
+    useEffect(() => {
+        refetch()
+    }, []);
+
+    useRefreshOnFocus(refetch)
+console.log(ccdWallet)
 //console.log( JSON.stringify(transactions.data, null, 2))
     return (
 
@@ -338,12 +388,28 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
 
                 </View>
 
+                {
+                    ccdWallet && ccdWallet?.message == 'Balance not fetched' &&
+                    <View style={styles.loading}>
+
+                        <Animated.View key={count}
+                                       entering={FadeInDown.springify()} exiting={FadeOutDown}
+                                       style={styles.loadingView}>
+                            <Text style={styles.Uploading}>
+                                Loading wallet balance please wait...
+                            </Text>
+                            <Animated.View style={[styles.loadingViewBorder, animatedStyle]}/>
+                        </Animated.View>
+                        {/* <ActivityIndicator size='small' color={Colors.primary}/>*/}
+                    </View>
+                }
+
                 {isLoadingWallet &&
                     <ActivityIndicator color={Colors.primaryColor} size='small'/>}
 
-            {!isLoadingWallet &&
-                    <IF condition={Object.keys(ccdWallet?.data).length > 0}>
+                {!isLoadingWallet &&  ccdWallet?.message !== 'Balance not fetched' && ccdWallet && ccdWallet?.data !== null &&
 
+                    <>
 
                         <View style={styles.dashboardBox}>
                             <Text style={styles.cardText}>
@@ -369,14 +435,14 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
                                     Value: {ccdWallet?.data?.ccdValue}
                                 </Text>
 
-                             {/*   <Text style={styles.cardText}>
+                                {/*   <Text style={styles.cardText}>
                                     +4.0%
                                 </Text>*/}
                             </View>
                         </View>
 
 
-                          {/*   <Pressable onPress={handleOpen} style={styles.copyWrap}>
+                        {/*   <Pressable onPress={handleOpen} style={styles.copyWrap}>
                     <Text style={[styles.copyText, {
                         color: Colors.primaryColor,
                         fontFamily: Fonts.quicksandMedium
@@ -392,20 +458,20 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
                 </Pressable>*/}
 
 
-
                         <View style={styles.copyWrap}>
-                            <Text style={[styles.copyText,{
+                            <Text style={[styles.copyText, {
                                 color: "#333333",
                                 fontFamily: Fonts.quicksandMedium
                             }]}>
-                                {truncateString(ccdWallet?.data?.address,30)}
+                                {ccdWallet?.data?.address ? truncateString(ccdWallet?.data?.address, 30) : ''}
                             </Text>
 
-                            <TouchableOpacity onPress={()=>copyToClipboard(ccdWallet?.data?.address)} activeOpacity={0.8} style={styles.copyBtn}>
-                                <Ionicons name="copy-outline" size={16} color={Colors.primaryColor} />
+                            <TouchableOpacity onPress={() => copyToClipboard(ccdWallet?.data?.address)}
+                                              activeOpacity={0.8} style={styles.copyBtn}>
+                                <Ionicons name="copy-outline" size={16} color={Colors.primaryColor}/>
                                 {copied ? <Text style={styles.copyText}>
                                     Copied
-                                </Text>: <Text style={styles.copyText}>Copy</Text>}
+                                </Text> : <Text style={styles.copyText}>Copy</Text>}
                             </TouchableOpacity>
                         </View>
 
@@ -442,12 +508,20 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
 
 
                             {!loadingTransactions && transactions &&
-                                transactions.data.filter((transact) => transact.token === 'CCD').map((({token,hash,type,createdAt,amount})=>(
-                                    <Animated.View key={hash} entering={FadeInDown.delay(200).randomDelay()} exiting={FadeOutDown} style={styles.breakDownCard}>
+                                transactions.data.filter((transact) => transact.token === 'CCD').map((({
+                                                                                                           token,
+                                                                                                           hash,
+                                                                                                           type,
+                                                                                                           createdAt,
+                                                                                                           amount
+                                                                                                       }) => (
+                                    <Animated.View key={hash} entering={FadeInDown.delay(200).randomDelay()}
+                                                   exiting={FadeOutDown} style={styles.breakDownCard}>
                                         <View style={[styles.boxSign, {
                                             backgroundColor: Colors.errorTint
                                         }]}>
-                                            <AntDesign name="arrowdown" size={20} style={{transform: [{rotate: "40deg"}]}}
+                                            <AntDesign name="arrowdown" size={20}
+                                                       style={{transform: [{rotate: "40deg"}]}}
                                                        color={Colors.errorRed}/>
                                         </View>
 
@@ -480,38 +554,57 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
 
                         </View>
 
-                    </IF>
 
+                    </>
                 }
 
 
-      {!isLoadingWallet &&
-                    <IF condition={Object.keys(ccdWallet?.data).length < 1 }>
-
-                        <View style={styles.walletContentContainer}>
+                {!isLoadingWallet && ccdWallet?.message !== 'Balance not fetched' && ccdWallet?.data == null &&
 
 
-                            <Text style={styles.walletTitle}>
-                                Welcome to your Wallet
-                            </Text>
-                            <Text style={styles.walletSheetContentText}>
-                                Complete quick KYC to unlock wallet fully. Earn up to $5 afterward. Your wallet can
-                                receive
-                                Gateway Points, Tokens & NFTs as you explore. Necessary to prevent fraud.
-                            </Text>
+                    <View style={styles.walletContentContainer}>
 
+
+                        <Text style={styles.walletTitle}>
+                            Welcome to your Wallet
+                        </Text>
+                        <Text style={styles.walletSheetContentText}>
+                            Complete quick KYC to unlock wallet fully. Earn up to $5 afterward. Your wallet can
+                            receive
+                            Gateway Points, Tokens & NFTs as you explore. Necessary to prevent fraud.
+                        </Text>
+                        {
+                            !isLoading &&
                             <Pressable onPress={startNow} disabled={isLoading} style={styles.claimBtn}>
-                                {
-                                    isLoading ? <ActivityIndicator color={"#fff"} size={'small'}/>
-                                        :
-                                        <Text style={styles.claimBtnText}>
-                                            Create wallet
-                                        </Text>
-                                }
+
+                                <Text style={styles.claimBtnText}>
+                                    Create wallet
+                                </Text>
+
                             </Pressable>
-                        </View>
-                    </IF>
+                        }
+
+
+                        {
+                            isLoading &&
+                            <View style={styles.loading}>
+
+                                <Animated.View key={count} layout={Layout.easing(Easing.bounce).delay(150)}
+                                               entering={FadeInDown.springify()} exiting={FadeOutDown}
+                                               style={styles.loadingView}>
+                                    <Text style={styles.Uploading}>
+                                        Creating identity please wait...
+                                    </Text>
+                                    <Animated.View style={[styles.loadingViewBorder, animatedStyle]}/>
+                                </Animated.View>
+                                {/* <ActivityIndicator size='small' color={Colors.primary}/>*/}
+                            </View>
+                        }
+
+                    </View>
+
                 }
+
 
             </ScrollView>
 
@@ -607,7 +700,7 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
                         keyboardType={"number-pad"}
                         touched={touched.points}
                         error={touched.points && errors.points}
-                        balanceText={`${ccdWallet?.data?.data?.ccdBalance} Points`}
+                        balanceText={`${ccdWallet?.data?.ccdBalance} Points`}
                         onChangeText={(e) => {
                             handleChange('points')(e);
                             setPoints(e)
@@ -644,8 +737,8 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
                     {
                         loadingWithdraw ? <ActivityIndicator size="small" color={"#fff"}/> :
 
-                            <Text style={[styles.buttonText,{
-                                color:"#fff"
+                            <Text style={[styles.buttonText, {
+                                color: "#fff"
                             }]}>
                                 Withdraw
 
@@ -829,7 +922,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row'
     },
     copyBtn: {
-        width: 45,
+        width: 55,
         alignItems: 'center',
         justifyContent: 'flex-end',
         flexDirection: 'row'
@@ -1024,6 +1117,44 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         alignItems: 'center',
 
+    },
+    loading: {
+
+
+        width: '100%',
+
+
+        zIndex: 1,
+        top: 0,
+        bottom: 0,
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+
+
+    },
+    loadingView: {
+        width: '90%',
+        height: 40,
+        // paddingHorizontal:pixelSizeHorizontal(10),
+        borderRadius: 3,
+        backgroundColor: '#fff',
+        alignContent: 'center',
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+
+    },
+    Uploading: {
+        marginBottom: 10,
+        alignSelf: 'center',
+        color: Colors.light.text,
+        fontSize: pixelSizeHorizontal(14),
+        fontFamily: Fonts.quickSandBold
+    },
+    loadingViewBorder: {
+
+        borderColor: "#BF1314",
+        borderWidth: 3,
+        borderRadius: 5,
     },
 
 })

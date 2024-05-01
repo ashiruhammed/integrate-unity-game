@@ -26,6 +26,7 @@ import CircularProgress from "../../components/ProgressBar";
 import {FlashList} from "@shopify/flash-list";
 import {IF} from "../../helpers/ConditionJsx";
 import AIAdventures from "../learn/AIAdvenrures";
+import {useRefreshOnFocus} from "../../helpers";
 
 
 
@@ -198,7 +199,7 @@ const Learn = ({navigation}: RootTabScreenProps<'Learn'>) => {
 
 
 
-
+useRefreshOnFocus(refetch)
 
     return (
         <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>

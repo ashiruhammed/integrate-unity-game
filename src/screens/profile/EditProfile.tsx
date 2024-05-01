@@ -474,6 +474,8 @@ Lock phone number if it exits
 
 */}
                         <PhoneInputText
+                            editable={false}
+                            style={{backgroundColor:"#ccc"}}
                             error={errors.phoneNumber}
                             defaultValue={userData?.phone}
                             label="Phone number"

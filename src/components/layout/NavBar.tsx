@@ -79,7 +79,7 @@ const NavBar = ({title,noBell,clearBtn,clearAction}:props) => {
                                       style={styles.roundTopBtn}>
 
                         {
-                            notifications?.pages[0].data.result.length > 0 &&
+                            notifications?.pages[0]?.data?.result.length > 0 &&
                             <View style={[styles.dot,{
                             borderColor: theme =='light' ?"#fff":Colors.dark.background,
                         }]}/>

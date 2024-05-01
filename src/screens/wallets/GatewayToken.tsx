@@ -297,7 +297,7 @@ const GatewayToken = ({navigation}: RootStackScreenProps<'GatewayToken'>) => {
                                 Gateway Token
                             </Text>
                             <Text style={styles.cardTitle}>
-                                {ccdWallet?.data?.gateBalance}
+                                {!ccdWallet?.data?.gateBalance  ? '0' : ccdWallet?.data?.gateBalance}
                             </Text>
                         </View>
 
@@ -305,7 +305,7 @@ const GatewayToken = ({navigation}: RootStackScreenProps<'GatewayToken'>) => {
                             height: 15,
                         }]}>
                             <Text style={styles.cardText}>
-                                Value: {ccdWallet?.data?.gateValue}
+                                Value: {!ccdWallet?.data?.gateValue ? '0' : ccdWallet?.data?.gateValue}
                             </Text>
 
                             {/* <Text style={styles.cardText}>
@@ -450,7 +450,7 @@ const GatewayToken = ({navigation}: RootStackScreenProps<'GatewayToken'>) => {
                         keyboardType={"number-pad"}
                         touched={touched.points}
                         error={touched.points && errors.points}
-                        balanceText={`${ccdWallet?.data?.gateBalance} Points`}
+                        balanceText={`${!ccdWallet?.data?.gateBalance ? '0' : ccdWallet?.data?.gateBalance} Points`}
                         onChangeText={(e) => {
                             handleChange('points')(e);
                             setPoints(e)

@@ -36,7 +36,7 @@ const BadgeItem = ({
 
     return (
         <Animated.View key={item?.id} entering={FadeInDown} exiting={FadeOutDown}
-                       layout={Layout.easing(Easing.bounce).delay(20)} style={[styles.badgeItem, {
+                        style={[styles.badgeItem, {
             backgroundColor,
             borderBottomColor: theme == 'light' ? Colors.borderColor : '#313131',
         }]}>

@@ -26,7 +26,7 @@ import {
     Icon,
 } from 'react-native-elements'
 import {fontPixel, heightPixel, pixelSizeHorizontal, widthPixel} from "../../helpers/normalize";
-import {AntDesign, Entypo} from "@expo/vector-icons";
+import {AntDesign, Entypo, Ionicons} from "@expo/vector-icons";
 import Colors from "../../constants/Colors";
 import {Fonts} from "../../constants/Fonts";
 import Animated, {FadeInDown, FadeOutDown} from 'react-native-reanimated';
@@ -193,7 +193,7 @@ setCountry(item.name)
                         <Text style={[
                             {color: theme == 'light' ? validationLabelColor : validationLabelDarkColor},
                             styles.label]}>
-                            {label}
+                            {label} {/*<Ionicons name="lock-closed" size={14} color="#ccc" />*/}
                         </Text>
                         {
                             rightText && <Text onPress={rightAction} style={[

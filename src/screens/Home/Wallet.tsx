@@ -9,7 +9,7 @@ import {
     Platform,
     Dimensions,
     Pressable,
-    Image, ActivityIndicator
+    Image, ActivityIndicator, Linking
 } from 'react-native';
 import {Ionicons, Octicons} from "@expo/vector-icons";
 import {SafeAreaView} from "react-native-safe-area-context";
@@ -41,6 +41,7 @@ import Animated, {Easing, FadeInDown, FadeInUp, FadeOutDown, Layout} from "react
 import MedalIcon from "../../assets/images/svg/MedalIcon";
 import HorizontalLine from "../../components/HorizontalLine";
 import StarIcon from "../../assets/images/svg/StarIcon";
+import * as SecureStore from "expo-secure-store";
 
 
 interface props {
@@ -148,6 +149,9 @@ const Wallet = ({navigation}: RootTabScreenProps<'Learn'>) => {
         }
     }, [tabIndex,data])
 
+
+
+
     const startCCDWallet = () => {
         handleClose()
         navigation.navigate('Concordium')
@@ -197,7 +201,10 @@ const Wallet = ({navigation}: RootTabScreenProps<'Learn'>) => {
 
 
 
-
+const visitMarketPlace =async () =>{
+    let Token = await SecureStore.getItemAsync('Gateway-Token');
+        Linking.openURL(`https://marketplace.gatewayapp.co/?token=${Token}`)
+}
 
     const {
         isLoading:loadingBadge,
@@ -230,7 +237,7 @@ const Wallet = ({navigation}: RootTabScreenProps<'Learn'>) => {
 
 
     useRefreshOnFocus(refetch)
-//console.log(ccdWallet)
+
 
     return (
         <>
@@ -296,13 +303,38 @@ const Wallet = ({navigation}: RootTabScreenProps<'Learn'>) => {
                     {
                         !loadingWallets && ccdWallet &&
 
-                    <MyCard
-                        gateBalance={Object.keys(ccdWallet?.data).length > 0 ? ccdWallet?.data?.gateBalance : '0'}
-                        gateValue={Object.keys(ccdWallet?.data).length > 0 ? ccdWallet?.data?.gateValue : '0'}
-                        ccdBalance={Object.keys(ccdWallet?.data).length > 0 ? ccdWallet?.data?.ccdBalance : '0'}
-                            ccdValue={Object.keys(ccdWallet?.data).length > 0 ? ccdWallet?.data?.ccdValue : '0'}
-                            totalPoint={points?.data?.totalPoint}/>
-                    }
+
+
+                            <IF condition={!ccdWallet?.data}>
+
+                                <MyCard
+                                    gateBalance={'0'}
+                                    gateValue={'0'}
+                                    ccdBalance={'0'}
+                                    ccdValue={'0'}
+                                    totalPoint={points?.data?.totalPoint}/>
+                            </IF>
+
+
+                }
+
+
+ {
+                        !loadingWallets && ccdWallet &&
+
+
+
+     ccdWallet?.data !== null &&
+
+     <MyCard
+         gateBalance={Object.keys(ccdWallet?.data).length > 0 ? ccdWallet?.data?.gateBalance : '0'}
+         gateValue={Object.keys(ccdWallet?.data).length > 0 ? ccdWallet?.data?.gateValue : '0'}
+         ccdBalance={Object.keys(ccdWallet?.data).length > 0 ? ccdWallet?.data?.ccdBalance : '0'}
+         ccdValue={Object.keys(ccdWallet?.data).length > 0 ? ccdWallet?.data?.ccdValue : '0'}
+         totalPoint={points?.data?.totalPoint}/>
+
+ }
+
                 </IF>
 
                 <IF condition={tabIndex == 1}>
@@ -334,7 +366,7 @@ const Wallet = ({navigation}: RootTabScreenProps<'Learn'>) => {
 
                         <View style={styles.badgesContainer}>
                             {
-                                !loadingBadge && badges?.pages[0].data.slice(0,6).map((badge: { id: string; imageUrl: any; amount: string  })=>(
+                                !loadingBadge && badges?.pages[0]?.data.slice(0,6).map((badge: { id: string; imageUrl: any; amount: string  })=>(
 
 
                             <Animated.View
@@ -426,9 +458,12 @@ const Wallet = ({navigation}: RootTabScreenProps<'Learn'>) => {
                         <Image source={require('../../assets/images/marketplace.png')} style={styles.imageMarketplace}/>
 
 
-                        <Text style={styles.linkText}>
-                            Go to <Text style={{color: Colors.primaryColor}}>Marketplace</Text>
-                        </Text>
+                        <Pressable onPress={visitMarketPlace}>
+                            <Text style={styles.linkText}>
+                                Go to <Text style={{color: Colors.primaryColor}}>Marketplace</Text>
+                            </Text>
+                        </Pressable>
+
                     </View>
                 </IF>
 

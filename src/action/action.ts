@@ -554,7 +554,7 @@ export const userNotifications = {
 
     notifications: async ({pageParam = 1}: { pageParam?: number }) => {
         let Token = await SecureStore.getItemAsync('Gateway-Token');
-        //console.log(Token)
+       // console.log(Token)
         let timeoutId: NodeJS.Timeout
         const myHeaders = {
             'Content-Type': 'application/json',

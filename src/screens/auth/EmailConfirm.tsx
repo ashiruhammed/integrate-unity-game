@@ -88,11 +88,11 @@ const EmailConfirm = ({route, navigation}: AuthStackScreenProps<'EmailConfirm'>)
 
             if (data.success) {
 
-                dispatch(addNotificationItem({
+            /*    dispatch(addNotificationItem({
                     id: Math.random(),
                     type: 'success',
                     body: data.message,
-                }))
+                }))*/
                  SecureStore.setItemAsync('Gateway-Token', data.data.token).then(() => {
                     fetchUser()
                 })
