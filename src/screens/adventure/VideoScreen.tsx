@@ -929,7 +929,7 @@ marginBottom:30,
         alignItems: 'flex-start',
     },
     cardTopLeft: {
-        marginTop: 10,
+        marginVertical: 10,
         flexDirection: 'row',
         alignItems: 'flex-start',
 

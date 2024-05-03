@@ -1243,6 +1243,11 @@
   resolved "https://registry.yarnpkg.com/@emotion/memoize/-/memoize-0.7.4.tgz#19bf0f5af19149111c40d98bb0cf82119f5d9eeb"
   integrity sha512-Ja/Vfqe3HpuzRsG1oBtWTHk2PGZ7GR+2Vz5iYGelAw8dx32K0y7PjVuxK6z1nMpZOqAFsRUPCkK1YjJ56qJlgw==
 
+"@erickcrus/react-native-recaptcha@^0.1.10":
+  version "0.1.10"
+  resolved "https://registry.yarnpkg.com/@erickcrus/react-native-recaptcha/-/react-native-recaptcha-0.1.10.tgz#b15fe91cac27392e1c8b8e30292cad582a51a97f"
+  integrity sha512-ZzuEvYsQuZkG3Vkie3vQBpYYUj3KQQ/9nyM6AyqEQEsUfRiwU6EEROzS9quHqfcjz0/K/fyKjaVvo5gdZWEY7w==
+
 "@expo/bunyan@^4.0.0":
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/@expo/bunyan/-/bunyan-4.0.0.tgz#be0c1de943c7987a9fbd309ea0b1acd605890c7b"

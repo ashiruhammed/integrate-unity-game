@@ -35,11 +35,9 @@ import * as AppleAuthentication from 'expo-apple-authentication';
 import GoogleIcon from "../../components/GoogleIcon";
 import HorizontalLine from "../../components/HorizontalLine";
 import Recaptcha, {RecaptchaHandles} from 'react-native-recaptcha-that-works';
+import RecaptchaNew from '@erickcrus/react-native-recaptcha';
 import {addNotificationItem} from "../../app/slices/dataSlice";
 import SwipeAnimatedToast from "../../components/toasty";
-
-
-
 
 
 WebBrowser.maybeCompleteAuthSession();
@@ -71,12 +69,21 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
     const [contentEmail, setContentEmail] = useState<string>('');
     const [togglePass, setTogglePass] = useState(true)
 
-    const [captchaToken, setCaptchaToken] = useState('1');
+    const [captchaToken, setCaptchaToken] = useState('');
 
     const [focusPassword, setFocusPassword] = useState<boolean>(false);
     const [contentPassword, setContentPassword] = useState<string>('');
 
     const [token, setToken] = useState('');
+
+
+    const recaptchaMain = useRef();
+
+    const send = () => {
+        //console.log('send!');
+        recaptchaMain?.current.open();
+    }
+
 
     const $recaptcha = useRef<RecaptchaHandles>(null);
 
@@ -85,7 +92,8 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
     }, []);
 
     const handleClosePress = useCallback(() => {
-        $recaptcha.current?.close();
+        recaptchaMain?.current.close();
+      //  $recaptcha.current?.close();
     }, []);
 
     const size = 'normal';
@@ -93,6 +101,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
 
     const onVerify = token => {
         setCaptchaToken(token)
+        setToken(token)
         console.log('success!', token);
     }
 
@@ -169,13 +178,14 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
 
             } else {
                 setToken('')
+                setCaptchaToken('')
                 await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
 
 
                 dispatch(addNotificationItem({
                     id: Math.random(),
                     type: 'error',
-                    body:  data.message,
+                    body: data.message,
                 }))
 
             }
@@ -187,7 +197,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
             dispatch(addNotificationItem({
                 id: Math.random(),
                 type: 'error',
-                body:  err.message,
+                body: err.message,
             }))
 
         },
@@ -212,14 +222,14 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
 
             } else {
                 setToken('')
+                setCaptchaToken('')
                 await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
-
 
 
                 dispatch(addNotificationItem({
                     id: Math.random(),
                     type: 'error',
-                    body:  data.message,
+                    body: data.message,
                 }))
             }
         },
@@ -227,11 +237,10 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
         onError: (err) => {
 
 
-
             dispatch(addNotificationItem({
                 id: Math.random(),
                 type: 'error',
-                body:  err.message,
+                body: err.message,
             }))
         },
         onSettled: () => {
@@ -254,6 +263,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
 
 
             } else {
+                setCaptchaToken('')
                 setToken('')
                 await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
 
@@ -261,7 +271,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                 dispatch(addNotificationItem({
                     id: Math.random(),
                     type: 'error',
-                    body:  data.message,
+                    body: data.message,
                 }))
             }
             /*  navigation.navigate('EmailConfirm', {
@@ -294,6 +304,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
             if (data.success) {
 
                 setToken('')
+                setCaptchaToken('')
                 SecureStore.setItemAsync('Gateway-Token', data.data.token).then(() => {
                     fetchUser()
                 })
@@ -305,7 +316,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                 dispatch(addNotificationItem({
                     id: Math.random(),
                     type: 'error',
-                    body:  data.message,
+                    body: data.message,
                 }))
                 if (data.message == 'Your email is not verified, kindly verify your email to continue.') {
                     navigation.navigate('EmailConfirm', {
@@ -314,12 +325,13 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                 } else {
 
                     setToken('')
+                    setCaptchaToken('')
                     await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error)
 
                     dispatch(addNotificationItem({
                         id: Math.random(),
                         type: 'error',
-                        body:  data.message,
+                        body: data.message,
                     }))
                 }
                 /*  navigation.navigate('EmailConfirm', {
@@ -334,9 +346,8 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
             dispatch(addNotificationItem({
                 id: Math.random(),
                 type: 'error',
-                body:  err.message,
+                body: err.message,
             }))
-
 
 
         },
@@ -367,16 +378,20 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
         onSubmit: (values) => {
             const {email, password} = values;
             const body = JSON.stringify({email: email.toLowerCase(), captchaToken, password})
-            //mutate(body)
+            //mutate(body
+
+          //  recaptchaMain.current.open()
             $recaptcha.current.open()
         }
     });
 
     useEffect(() => {
+
+
         if (token !== '') {
             const body = JSON.stringify({
                 email: values.email.toLowerCase(),
-                captchaToken: token,
+                captchaToken: captchaToken,
                 password: values.password
             })
             mutate(body)
@@ -388,8 +403,6 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
     const goBack = () => {
         navigation.goBack()
     }
-
-
 
 
     return (
@@ -404,13 +417,52 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
 
             />*/}
             <SafeAreaView style={styles.safeArea}>
-   <SwipeAnimatedToast/>
+                <SwipeAnimatedToast/>
+
+
+                {/*<RecaptchaNew
+                    ref={recaptchaMain}
+                    hideBadge={false}
+                    hideLoader={false}
+                    enterprise={false}
+                    headerComponent={
+                        <Button title="Close modal" onPress={handleClosePress}/>
+                    }
+                    footerComponent={<Text style={{
+                        fontFamily: Fonts.quickSandBold,
+                        fontSize: fontPixel(14),
+                        textAlign: 'center',
+                        color: Colors.primaryColor,
+                        position: 'absolute'
+                    }}>Fetching captcha, please wait</Text>}
+                    siteKey="6Les7rgjAAAAACAihGpA2LD4k-jx7Wjtl68Y8whF"
+                    baseUrl="https://api.gatewayapp.co"
+
+                    onVerify={onVerify}
+                    lang="eng"
+                    onExpire={onExpire}
+                    theme="light"
+                    size="invisible"
+
+                />*/}
+
+
                 <Recaptcha
                     ref={$recaptcha}
                     lang="eng"
-                   /* headerComponent={
+                    footerComponent={<Text style={{
+                        fontFamily: Fonts.quickSandBold,
+                        fontSize: fontPixel(14),
+                        textAlign: 'center',
+                        color: Colors.primaryColor,
+                        position: 'absolute'
+                    }}>Fetching captcha, please wait</Text>}
+                    headerComponent={
                         <Button title="Close modal" onPress={handleClosePress}/>
-                    }*/
+                    }
+                    /* headerComponent={
+                         <Button title="Close modal" onPress={handleClosePress}/>
+                     }*/
                     /*footerComponent={<Text>Footer here</Text>}*/
                     siteKey="6Les7rgjAAAAACAihGpA2LD4k-jx7Wjtl68Y8whF"
                     baseUrl="https://api.gatewayapp.co"
@@ -476,7 +528,6 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                     </View>
 
 
-
                     <View style={styles.authContainer}>
                         {/* <View style={styles.topBar}>
                         <TouchableOpacity onPress={goBack} style={styles.backBtn}>
@@ -497,9 +548,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                         </View>
 
 
-
-
-                     {/*   <TouchableOpacity style={[styles.buttonSignUp, {
+                        {/*   <TouchableOpacity style={[styles.buttonSignUp, {
                             marginBottom: 10
                         }]}>
 
@@ -625,7 +674,6 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                         </View>
 
 
-
                         {
                             Platform.OS == 'ios' &&
 
@@ -677,7 +725,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                                 fontFamily: Fonts.quickSandBold,
                                 fontSize: fontPixel(16),
                                 color: Colors.light.text,
-                                marginLeft:8,
+                                marginLeft: 8,
                             }]}>
                                 Continue with Google
                             </Text>
@@ -846,16 +894,16 @@ const styles = StyleSheet.create({
         zIndex: 1,
         backgroundColor: 'rgba(0,0,0,0.1)'
     },
-    marginAndText:{
-        justifyContent:'space-around',
-        marginVertical:pixelSizeVertical(30),
+    marginAndText: {
+        justifyContent: 'space-around',
+        marginVertical: pixelSizeVertical(30),
         width: '100%',
         flexDirection: 'row',
         alignItems: 'center',
     },
-    maginText:{
+    maginText: {
         fontSize: fontPixel(14),
-        color:Colors.light.text,
+        color: Colors.light.text,
         fontFamily: Fonts.quicksandRegular
     }
 })

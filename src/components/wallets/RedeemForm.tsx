@@ -132,7 +132,7 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance, nearBalance}: props) =>
                 <TouchableOpacity style={styles.modalOverlay} onPress={toggleModal}>
                     <View style={styles.modalContent}>
                         <TouchableOpacity onPress={() => handleOptionPress('CCD')}>
-                            <Text style={styles.option}>Concordion</Text>
+                            <Text style={styles.option}>Concordium</Text>
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() => handleOptionPress('GATE')}>
                             <Text style={styles.option}>Gate</Text>

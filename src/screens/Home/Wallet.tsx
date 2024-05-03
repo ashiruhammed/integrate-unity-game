@@ -118,11 +118,11 @@ const Wallet = ({navigation}: RootTabScreenProps<'Learn'>) => {
 
     useEffect(() => {
         if(!loadingWallets) {
-            if (!ccdWallet?.data) {
+            if (ccdWallet?.data == null) {
                 bottomSheetRef?.current?.present()
             }
         }
-    }, [ccdWallet,loadingWallets]);
+    }, [ccdWallet]);
     // variables
     const snapPoints = useMemo(() => ["1%", "45%"], []);
 
@@ -372,7 +372,7 @@ const visitMarketPlace =async () =>{
 
                         <View style={styles.badgesContainer}>
                             {
-                                !loadingBadge && badges?.pages[0]?.data.slice(0,6).map((badge: { id: string; imageUrl: any; amount: string  })=>(
+                                !loadingBadge && badges && badges?.pages[0]?.data.slice(0,6).map((badge: { id: string; imageUrl: any; amount: string  })=>(
 
 
                             <Animated.View

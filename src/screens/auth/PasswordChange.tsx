@@ -24,7 +24,10 @@ import {addNotificationItem} from "../../app/slices/dataSlice";
 
 const height = Dimensions.get('window').height
 const formSchema = yup.object().shape({
-
+    password: yup.string().required('Password is required').matches(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#.-:;()_?\$%\^&\*])(?=.{8,})/,
+        "Check Password"
+    ),
     authCode: yup.string().required('Pin is required').min(6, 'Must not be less than 4'),
 })
 

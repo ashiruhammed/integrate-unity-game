@@ -6,15 +6,6 @@
 import {BottomTabScreenProps} from '@react-navigation/bottom-tabs';
 import {CompositeScreenProps, NavigatorScreenParams} from '@react-navigation/native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import Games from "./src/screens/Home/Games";
-import CreateAIAdventure from "./src/screens/learn/CreateAIAdventure";
-import CreatingAdventure from "./src/screens/learn/CreatingAdventure";
-import DiscoverProducts from "./src/screens/discover/DiscoverProducts";
-import ProductView from "./src/screens/discover/ProductView";
-import FundamentalData from "./src/screens/discover/create/FundamentalData";
-import VisualRepresentation from "./src/screens/discover/create/VisualRepresentation";
-import ViewPoints from "./src/screens/wallets/ViewPoints";
-import ConcordiumTransactions from "./src/screens/wallets/ConcordiumTransactions";
 
 
 interface OwnerProps {

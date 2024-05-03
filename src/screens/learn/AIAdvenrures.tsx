@@ -55,11 +55,11 @@ interface propsAi {
 
     },
     theme: string,
-   // action: (visible: boolean) => void,
-    setAdventure: (adventure: {  }) => void
+    // action: (visible: boolean) => void,
+    setAdventure: (adventure: {}) => void
 }
 
-const AdventureAICardItem = ({item, theme,setAdventure}: propsAi) => {
+const AdventureAICardItem = ({item, theme, setAdventure}: propsAi) => {
     const backgroundColor = theme == 'light' ? "#FFFFFF" : "#141414"
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
     const lightText = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
@@ -68,9 +68,7 @@ const AdventureAICardItem = ({item, theme,setAdventure}: propsAi) => {
         <Pressable onPress={() => {
             setAdventure(item)
 
-        }} style={[styles.learnCard, !item.startedAdventure && {
-
-        }]}>
+        }} style={[styles.learnCard, !item.startedAdventure && {}]}>
             <CircularProgress active={item.startedAdventure}
 
                               locked={false} size={44} progress={85} strokeWidth={4}/>
@@ -113,16 +111,28 @@ const AdventureAICardItem = ({item, theme,setAdventure}: propsAi) => {
 
                 </View>
 
+                {item?.startedAdventure?
+
                 <TouchableOpacity onPress={() => {
                     setAdventure(item)
 
                 }} style={styles.startBtn}>
                     <Text style={styles.startBtnText}>
 
-                        {item?.startedAdventure ? 'Continue' : 'Start Adventure'}
+                        {item?.status == 'COMPLETED'  ? 'Completed' : 'Continue'}
                     </Text>
                 </TouchableOpacity>
+                    :
+                    <TouchableOpacity onPress={() => {
+                        setAdventure(item)
 
+                    }} style={styles.startBtn}>
+                        <Text style={styles.startBtnText}>
+
+                             Start Adventure
+                        </Text>
+                    </TouchableOpacity>
+                }
 
             </Pressable>
 
@@ -152,7 +162,7 @@ const AIAdventures = () => {
         navigation.navigate('CreateAIAdventure')
     }
 
-    const selectAdventure = (adventure:{}) => {
+    const selectAdventure = (adventure: {}) => {
         dispatch(setAdventure({adventure}))
         navigation.navigate('AdventureHome')
 
@@ -160,7 +170,7 @@ const AIAdventures = () => {
 
     const renderItemAi = useCallback(({item}) => (
 
-        <AdventureAICardItem setAdventure={selectAdventure}  item={item} theme={theme}/>
+        <AdventureAICardItem setAdventure={selectAdventure} item={item} theme={theme}/>
     ), [theme])
 
 
@@ -197,7 +207,7 @@ const AIAdventures = () => {
     useRefreshOnFocus(refetch)
     return (
         <>
-            {loadingAdventures && <ActivityIndicator size={"small"} color={Colors.primaryColor}/>}
+
 
 
             <TouchableOpacity onPress={create} activeOpacity={0.8} style={styles.createBtn}>
@@ -207,32 +217,36 @@ const AIAdventures = () => {
                 </Text>
             </TouchableOpacity>
 
+
+
+            {loadingAdventures && <ActivityIndicator size={"small"} color={Colors.primaryColor}/>}
+
             {!loadingAdventures &&
-            <FlashList
-                estimatedItemSize={200}
-                // refreshing={isLoading}
-                //  ListHeaderComponent={renderHeader}
-onRefresh={refetch}
-                refreshing={loadingAdventures}
-                scrollEnabled
-                showsVerticalScrollIndicator={false}
-                data={adventures?.pages[0]?.data?.result}
-                renderItem={renderItemAi}
-                keyExtractor={keyExtractor}
-                onEndReachedThreshold={0.3}
-                onEndReached={loadMore}
-                ListFooterComponent={isFetchingNextPage ?
-                    <ActivityIndicator size="small" color={Colors.primaryColor}/> : null}
-                /*  refreshControl={
-                      <RefreshControl
-                          tintColor={Colors.primaryColor}
-                          refreshing={refreshing}
-                          onRefresh={refresh}
-                      />
-                  }*/
+                <FlashList
+                    estimatedItemSize={200}
+                    // refreshing={isLoading}
+                    //  ListHeaderComponent={renderHeader}
+                    onRefresh={refetch}
+                    refreshing={loadingAdventures}
+                    scrollEnabled
+                    showsVerticalScrollIndicator={false}
+                    data={adventures?.pages[0]?.data?.result}
+                    renderItem={renderItemAi}
+                    keyExtractor={keyExtractor}
+                    onEndReachedThreshold={0.3}
+                    onEndReached={loadMore}
+                    ListFooterComponent={isFetchingNextPage ?
+                        <ActivityIndicator size="small" color={Colors.primaryColor}/> : null}
+                    /*  refreshControl={
+                          <RefreshControl
+                              tintColor={Colors.primaryColor}
+                              refreshing={refreshing}
+                              onRefresh={refresh}
+                          />
+                      }*/
 
 
-            />
+                />
             }
         </>
     );
