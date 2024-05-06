@@ -331,8 +331,8 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
         refetch()
     }, []);
 
-    useRefreshOnFocus(refetch)
-console.log(ccdWallet)
+   // useRefreshOnFocus(refetch)
+//console.log(ccdWallet)
 //console.log( JSON.stringify(transactions.data, null, 2))
     return (
 
@@ -507,8 +507,8 @@ console.log(ccdWallet)
                         <View style={styles.transactions}>
 
 
-                            {!loadingTransactions && transactions &&
-                                transactions.data.filter((transact) => transact.token === 'CCD').map((({
+                            {!loadingTransactions && transactions &&  transactions?.data &&
+                                transactions?.data.filter((transact: { token: string; }) => transact.token === 'CCD').map((({
                                                                                                            token,
                                                                                                            hash,
                                                                                                            type,
@@ -559,7 +559,7 @@ console.log(ccdWallet)
                 }
 
 
-                {!isLoadingWallet && ccdWallet?.message !== 'Balance not fetched' && ccdWallet?.data == null &&
+                {!isLoadingWallet && ccdWallet?.message !== 'Balance not fetched' || ccdWallet?.data == null &&
 
 
                     <View style={styles.walletContentContainer}>

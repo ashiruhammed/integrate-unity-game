@@ -784,7 +784,7 @@ export const uploadToCloudinary = async ({body, resource_type}: { body: any, res
 export const updateCompleteProfile = async (body: {}) => {
 
     let Token = await SecureStore.getItemAsync('Gateway-Token');
-
+console.log(body)
     const myHeaders = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${Token}`,
@@ -802,7 +802,7 @@ export const updateCompleteProfile = async (body: {}) => {
 
 
     return Promise.race([
-        fetch(`${BASE_URL_LIVE}/user/complete`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/user/complte`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)

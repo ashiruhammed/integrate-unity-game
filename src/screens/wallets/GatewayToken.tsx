@@ -37,7 +37,7 @@ import {
 import {useFormik} from "formik";
 import * as yup from "yup";
 import dayjs from "dayjs";
-import {truncateString} from "../../helpers";
+import {truncateString, useRefreshOnFocus} from "../../helpers";
 import * as Clipboard from "expo-clipboard";
 
 
@@ -199,7 +199,7 @@ const GatewayToken = ({navigation}: RootStackScreenProps<'GatewayToken'>) => {
     });
 
 
-    const {data: transactions, isLoading: loadingTransactions} = useQuery(['walletTransactions'], walletTransactions)
+    const {data: transactions, isLoading: loadingTransactions,refetch:fetchTransaction} = useQuery(['GatewalletTransactions'], walletTransactions)
 
     const {data: ccdWallet, isLoading: isLoadingWallet, refetch} = useQuery(['getCCDwallet'], getCCDWallet)
 
@@ -235,6 +235,8 @@ const GatewayToken = ({navigation}: RootStackScreenProps<'GatewayToken'>) => {
         setPoints(ccdWallet?.data?.gateBalance.toString())
         setFieldValue('points', ccdWallet?.data?.gateBalance)
     }
+
+    useRefreshOnFocus(fetchTransaction)
 
 
     return (
@@ -373,8 +375,8 @@ const GatewayToken = ({navigation}: RootStackScreenProps<'GatewayToken'>) => {
 
                     <View style={styles.transactions}>
 
-                        {!loadingTransactions && transactions &&
-                            transactions.data.filter(transaction => transaction.token === 'GATE').map((({token,hash,type,createdAt,amount})=>(
+                        {!loadingTransactions && transactions && transactions?.data &&
+                            transactions?.data.filter((transaction: { token: string; }) => transaction.token === 'GATE').map((({token,hash,type,createdAt,amount})=>(
                         <Animated.View key={hash} entering={FadeInDown.delay(200)
                             .randomDelay()
                         } exiting={FadeOutDown} style={styles.breakDownCard}>

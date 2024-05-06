@@ -103,7 +103,7 @@ const AdvancedTextInput: FC<Props> = ({
                     {
                         mainWallet ?
 
-                            <TouchableOpacity onPress={actionSelectWallet} style={styles.passBtn}>
+                            <TouchableOpacity disabled={balanceText == ''} onPress={actionSelectWallet} style={styles.passBtn}>
 
                                 <Text style={[styles.label,{
                                     color:textColor,
@@ -131,7 +131,7 @@ const AdvancedTextInput: FC<Props> = ({
                     <Text style={[styles.bottomText,{
                         color:textColor,
                     }]}>
-                        Balance: <Text style={{color:lightTextColor}}>{balanceText}</Text>
+                        Balance: <Text style={{color:lightTextColor}}>{balanceText ? balanceText : '0'} {walletOption}</Text>
                     </Text>
                     {  !mainWallet &&
                     <Text style={[styles.maxText]} onPress={actionMax}>

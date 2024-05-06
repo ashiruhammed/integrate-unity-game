@@ -28,11 +28,11 @@ interface props {
     isLoading: boolean,
     redeemNow: (body: {}) => void,
     pointBalance: string,
-    nearBalance: string,
+
 }
 
 
-const RedeemForm = ({isLoading, redeemNow, pointBalance, nearBalance}: props) => {
+const RedeemForm = ({isLoading, redeemNow, pointBalance}: props) => {
 
 
     const {isLoading: loadingRates, data} = useQuery(['getUserPointsExchangeRate'], getUserPointsExchangeRate)
@@ -40,14 +40,14 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance, nearBalance}: props) =>
     const [points, setPoints] = useState('');
 
     const [isModalVisible, setModalVisible] = useState(false);
-    const [walletOption, setWalletOption] = useState('GATE')
+    const [walletOption, setWalletOption] = useState('CCD')
     const toggleModal = () => {
         setModalVisible(!isModalVisible);
     };
 
     const handleOptionPress = (option) => {
         // Handle the selected option here
-        setWalletOption( option);
+        setWalletOption(option);
         toggleModal();
     };
 
@@ -99,24 +99,30 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance, nearBalance}: props) =>
         }
     });
 
-   // let defaultPointsConvertValue = '0'
-  //  let pointsVal = '0'
-    useEffect(() => {
+    // let defaultPointsConvertValue = '0'
+    //  let pointsVal = '0'
+ useEffect(() => {
 
-        if (data && data?.success) {
-           // console.log(data?.data.find((wallet: { token: string; }) => wallet.token == walletOption).value)
+        if (data && data?.data) {
+            // console.log(data?.data.find((wallet: { token: string; }) => wallet.token == walletOption).value)
 
-           setPointsVal(`${data?.data.find((wallet: { token: string; }) => wallet.token == walletOption).value} ${data?.data.find(wallet => wallet.token == walletOption)?.token}`)
+            setPointsVal(`${data?.data.find((wallet: {
+                token: string;
+            }) => wallet.token == walletOption).value} ${data?.data.find(wallet => wallet.token == walletOption)?.token}`)
             //defaultPointsConvertValue =
 
-            setDefaultPointsConvertValue(`${data?.data.find((wallet: { token: string; }) => wallet.token == walletOption)?.value * +points}`)
+            setDefaultPointsConvertValue(`${data?.data.find((wallet: {
+                token: string;
+            }) => wallet.token == walletOption)?.value * +points}`)
         } else {
             setDefaultPointsConvertValue('0')
             setPointsVal('0')
         }
-    }, [data,points,walletOption]);
+    }, [data, points, walletOption]);
 
-//console.log(data)
+
+
+
     const maxAmount = () => {
         setPoints(pointBalance)
         setFieldValue('points', pointBalance)
@@ -134,7 +140,7 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance, nearBalance}: props) =>
                         <TouchableOpacity onPress={() => handleOptionPress('CCD')}>
                             <Text style={styles.option}>Concordium</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => handleOptionPress('GATE')}>
+                        <TouchableOpacity onPress={() => handleOptionPress('gate')}>
                             <Text style={styles.option}>Gate</Text>
                         </TouchableOpacity>
                     </View>
@@ -169,13 +175,14 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance, nearBalance}: props) =>
                 walletOption={walletOption}
                 mainWallet
                 editable={false}
-actionSelectWallet={toggleModal}
+                actionSelectWallet={toggleModal}
                 placeholder="0.00"
                 label={"Amount"}
+
                 defaultValue={defaultPointsConvertValue}
                 keyboardType={"number-pad"}
 
-                balanceText={`${walletOption == 'Gate' ? ccdWallet?.data?.gateBalance : ccdWallet?.data?.ccdBalance} ${walletOption}`}
+                balanceText={`${walletOption == 'GATE' ? ccdWallet?.data?.gateBalance : ccdWallet?.data?.ccdBalance}`}
                 onChangeText={(e) => {
                     handleChange('walletAmount')(e);
                 }}
@@ -184,7 +191,7 @@ actionSelectWallet={toggleModal}
 
                 }}
 
-           />
+            />
 
             <View style={styles.conversionRate}>
                 <Text style={[styles.label, {
@@ -267,24 +274,23 @@ const styles = StyleSheet.create({
     },
 
 
-
     modalOverlay: {
         flex: 1,
-        paddingHorizontal:pixelSizeHorizontal(20),
+        paddingHorizontal: pixelSizeHorizontal(20),
         backgroundColor: 'rgba(0, 0, 0, 0.1)',
         justifyContent: 'flex-end',
         alignItems: 'flex-end',
     },
     modalContent: {
-        marginBottom:30,
-  width:'100%',
-        height:120,
+        marginBottom: 30,
+        width: '100%',
+        height: 120,
         backgroundColor: '#fff',
         padding: 20,
         borderRadius: 10,
     },
     option: {
-        fontFamily:Fonts.quicksandMedium,
+        fontFamily: Fonts.quicksandMedium,
         fontSize: fontPixel(16),
         paddingVertical: 10,
     },

@@ -47,7 +47,7 @@ import {addNotificationItem} from "../../app/slices/dataSlice";
 const formSchema = yup.object().shape({
     fullName: yup.string().min(2, 'Name is Too short').required('Name is required').trim('No white spaces'),
     userName: yup.string().min(2, 'User name is Too short').required('User Name is required').trim('No white spaces'),
-    phoneNumber: yup.string().min(10, 'Please enter a valid phone number').required('Phone number is required'),
+  //  phoneNumber: yup.string().min(10, 'Please enter a valid phone number').required('Phone number is required'),
     email: yup.string().email("Please enter a valid email address").required('Email is required'),
 
 });
@@ -104,11 +104,13 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
 
     const [focusFullName, setFocusFullName] = useState(false);
     const [contentFullName, setContentFullName] = useState(userData?.fullName ? '' : userData?.fullName);
+    const [focusUserName, setFocusUserName] = useState(false);
+    const [contentUserName, setContentUserName] = useState(userData?.username ? '' : userData?.username);
 
     const [focusEmail, setFocusEmail] = useState(false);
     const [contentEmail, setContentEmail] = useState(data?.data?.email);
 
-    console.log(userData)
+
 
     const {mutate, isLoading} = useMutation(['complete-profile'], updateCompleteProfile,
 
@@ -305,18 +307,18 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
         validationSchema: formSchema,
         initialValues: {
 
-            fullName: userData?.fullName,
-            phoneNumber: userData?.phone,
+            fullName: contentFullName,
+            //phoneNumber: userData?.phone,
             email: userData?.email,
-            userName: userData?.username,
+            userName: contentUserName,
 
         },
         onSubmit: (values) => {
-            const {phoneNumber, userName, fullName} = values;
+            const { userName, fullName} = values;
 
             const body = JSON.stringify({
                 username: userName,
-                phoneNumber,
+                fullName,
                 interests: []
 
             })
@@ -476,7 +478,7 @@ Lock phone number if it exits
                         <PhoneInputText
                             editable={false}
                             style={{backgroundColor:"#ccc"}}
-                            error={errors.phoneNumber}
+
                             defaultValue={userData?.phone}
                             label="Phone number"
                             onChangeText={(text,code) => {
@@ -485,7 +487,7 @@ Lock phone number if it exits
 
                             }}
 
-                            value={values.phoneNumber}
+
                             errorMessage=''
                             placeholder="Phone number"/>
                         <TextInput

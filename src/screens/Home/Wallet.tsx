@@ -241,6 +241,8 @@ const visitMarketPlace =async () =>{
 
 
 
+
+
     useRefreshOnFocus(refetch)
     useRefreshOnFocus(fetchBadge)
 
@@ -306,7 +308,7 @@ const visitMarketPlace =async () =>{
                     {
                         loadingWallets && <ActivityIndicator size={'small'} color={Colors.primaryColor}/>
                     }
-                    {
+                   {/* {
                         !loadingWallets && ccdWallet &&
 
 
@@ -322,7 +324,7 @@ const visitMarketPlace =async () =>{
                             </IF>
 
 
-                }
+                }*/}
 
 
  {
@@ -330,13 +332,13 @@ const visitMarketPlace =async () =>{
 
 
 
-     ccdWallet?.data !== null &&
+
 
      <MyCard
-         gateBalance={Object.keys(ccdWallet?.data).length > 0 ? ccdWallet?.data?.gateBalance : '0'}
-         gateValue={Object.keys(ccdWallet?.data).length > 0 ? ccdWallet?.data?.gateValue : '0'}
-         ccdBalance={Object.keys(ccdWallet?.data).length > 0 ? ccdWallet?.data?.ccdBalance : '0'}
-         ccdValue={Object.keys(ccdWallet?.data).length > 0 ? ccdWallet?.data?.ccdValue : '0'}
+         gateBalance={ccdWallet?.data  ? ccdWallet?.data?.gateBalance : '0'}
+         gateValue={ccdWallet?.data ? ccdWallet?.data?.gateValue : '0'}
+         ccdBalance={ccdWallet?.data ? ccdWallet?.data?.ccdBalance : '0'}
+         ccdValue={ccdWallet?.data ? ccdWallet?.data?.ccdValue : '0'}
          totalPoint={points?.data?.totalPoint}/>
 
  }
@@ -371,8 +373,12 @@ const visitMarketPlace =async () =>{
                         </View>
 
                         <View style={styles.badgesContainer}>
+                    {
+                                !loadingBadge && badges && badges?.pages[0]?.data &&
+                      <IF condition={badges?.pages[0]?.data.length > 0}>
+
                             {
-                                !loadingBadge && badges && badges?.pages[0]?.data.slice(0,6).map((badge: { id: string; imageUrl: any; amount: string  })=>(
+                                badges?.pages[0]?.data.slice(0,6).map((badge: { id: string; imageUrl: any; amount: string  })=>(
 
 
                             <Animated.View
@@ -394,8 +400,13 @@ const visitMarketPlace =async () =>{
                                     </Text>
                                 </View>
                             </Animated.View>
+
+
                                 ))
                             }
+                        </IF>
+                    }
+
                         </View>
                         <HorizontalLine/>
 

@@ -400,7 +400,7 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
                             onRefresh={refetch}
                             scrollEnabled
                             showsVerticalScrollIndicator={false}
-                            data={data?.pages[0].data.result}
+                            data={data?.pages[0]?.data?.result}
                             renderItem={renderItem}
                             onEndReached={loadMore}
                             keyExtractor={keyExtractor}
@@ -486,8 +486,8 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
                     </TouchableOpacity>}
                 </View>
 
-                <RedeemForm nearBalance={nearBalance?.balance} isLoading={redeeming} redeemNow={redeemPointsNow}
-                            pointBalance={points?.data?.totalPoint}/>
+                <RedeemForm  isLoading={redeeming} redeemNow={redeemPointsNow}
+                            pointBalance={points?.data?.totalPoint ? points?.data?.totalPoint : '0'}/>
             </BottomSheet>
         </>
 
