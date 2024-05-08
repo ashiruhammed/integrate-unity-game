@@ -182,7 +182,7 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance}: props) => {
                 defaultValue={defaultPointsConvertValue}
                 keyboardType={"number-pad"}
 
-                balanceText={`${walletOption == 'GATE' ? ccdWallet?.data?.gateBalance : ccdWallet?.data?.ccdBalance}`}
+                balanceText={`${walletOption == 'gate' ? ccdWallet?.data?.gateBalance : ccdWallet?.data?.ccdBalance}`}
                 onChangeText={(e) => {
                     handleChange('walletAmount')(e);
                 }}

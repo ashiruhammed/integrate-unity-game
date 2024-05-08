@@ -258,7 +258,7 @@ const MoreInformation = ({navigation}: RootStackScreenProps<'MoreInformation'>) 
                         <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}
                                           style={styles.roundTopBtn}>
                             {
-                                notifications?.pages[0]?.data?.result.length > 0 &&
+                                notifications?.pages[0]?.data?.result.some((obj: { isRead: boolean; }) => !obj.isRead)  &&
                                 <View style={styles.dot}/>
                             }
                             <Octicons name="bell-fill" size={22} color={"#000"}/>

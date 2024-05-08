@@ -313,11 +313,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
             } else {
 
 
-                dispatch(addNotificationItem({
-                    id: Math.random(),
-                    type: 'error',
-                    body: data.message,
-                }))
+
                 if (data.message == 'Your email is not verified, kindly verify your email to continue.') {
                     navigation.navigate('EmailConfirm', {
                         email: contentEmail

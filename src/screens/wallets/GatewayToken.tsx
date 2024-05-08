@@ -269,7 +269,7 @@ const GatewayToken = ({navigation}: RootStackScreenProps<'GatewayToken'>) => {
                             <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}
                                               style={styles.roundTopBtn}>
                                 {
-                                    notifications?.pages[0]?.data?.result.length > 0 &&
+                                    notifications?.pages[0]?.data?.result.some((obj: { isRead: boolean; }) => !obj.isRead)  &&
                                     <View style={styles.dot}/>
                                 }
                                 <Octicons name="bell-fill" size={22} color={"#000"}/>
@@ -346,11 +346,11 @@ const GatewayToken = ({navigation}: RootStackScreenProps<'GatewayToken'>) => {
                     }
                     <View style={styles.buttonWrap}>
 
-                        <Pressable onPress={handleOpenWithdraw} style={[styles.dahButton, {
-                            backgroundColor: "#FDDCDC"
+                        <Pressable disabled={!ccdWallet?.data} onPress={handleOpenWithdraw} style={[styles.dahButton, {
+                            backgroundColor:ccdWallet?.data ? "#FDDCDC" : "#ccc"
                         }]}>
                             <Text style={[styles.buttonText, {
-                                color: "#E01414"
+                                color:ccdWallet?.data ? "#E01414" : '#fff'
                             }]}>
                                 Withdraw
                             </Text>

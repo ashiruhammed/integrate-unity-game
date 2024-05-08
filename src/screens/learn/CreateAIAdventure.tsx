@@ -7,8 +7,7 @@ import {
     ImageBackground,
     TouchableOpacity,
     Platform,
-    RefreshControl,
-    ScrollView, Image, ActivityIndicator
+     Image, ActivityIndicator
 } from 'react-native';
 import {AntDesign, Ionicons, Octicons} from "@expo/vector-icons";
 import {SafeAreaView} from "react-native-safe-area-context";
@@ -34,12 +33,12 @@ import Animated, {
 } from "react-native-reanimated";
 import {IF} from "../../helpers/ConditionJsx";
 import * as SecureStore from "expo-secure-store";
-import {setResponse} from "../../app/slices/userSlice";
+
 import {BASE_URL, ACCESS_TOKEN, DEV_BASE_URL} from "@env";
 //const access_token = 'JGFyZ29uMmlkJHY9MTkkbT00MDk2LHQ9MyxwPTEkWnJjNEVDR05JTEYzU3B2WUJLZVBZdyRtdnNacUl6VVg3SG1UV2gvdjhQZXZGUXJOa1hWYUFHRkVKV3dCd0NobDBV'
 //const BASE_URL_LIVE = __DEV__ ? DEV_BASE_URL : BASE_URL
 const BASE_URL_LIVE = DEV_BASE_URL
-import EventSource, {EventSourceListener} from "react-native-sse";
+
 import SwipeAnimatedToast from "../../components/toasty";
 import {addNotificationItem, setAdventure} from "../../app/slices/dataSlice";
 //import "react-native-url-polyfill/auto"; // Use URL polyfill in React Native

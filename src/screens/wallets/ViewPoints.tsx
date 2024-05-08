@@ -17,6 +17,7 @@ import {useAppDispatch, useAppSelector} from "../../app/hooks";
 import {useInfiniteQuery, useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import Colors from "../../constants/Colors";
 import {
+    getCCDWallet,
     getPointsHistory,
     getPublicCommunities, getUserDashboard,
     getUserPoints,
@@ -36,6 +37,7 @@ import {
 import SwipeAnimatedToast from "../../components/toasty";
 import {addNotificationItem} from "../../app/slices/dataSlice";
 import dayjs from "dayjs";
+import {useRefreshOnFocus} from "../../helpers";
 
 
 interface props {
@@ -146,6 +148,8 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
         data: points,
         refetch: fetchPoints
     } = useQuery(['getUserPoints'], getUserPoints, {})
+
+    const {data: ccdWallet, isLoading: isLoadingWallet, refetch:refetchWallet} = useQuery(['getCCDwallet'], getCCDWallet)
 
     const {
         isLoading: loadingUser,
@@ -270,7 +274,7 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
 
             <View style={styles.buttonWrap}>
 
-                <Pressable style={[styles.dahButton, {
+              {/*  <Pressable style={[styles.dahButton, {
                     backgroundColor: "#FDDCDC"
                 }]}>
                     <Text style={[styles.buttonText, {
@@ -278,14 +282,14 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
                     }]}>
                         Buy Points
                     </Text>
-                </Pressable>
+                </Pressable>*/}
 
 
-                <Pressable onPress={openRedeem} style={[styles.dahButton, {
-                    backgroundColor: "#D90429"
+                <Pressable disabled={!ccdWallet?.data } onPress={openRedeem} style={[styles.dahButton, {
+                    backgroundColor:ccdWallet?.data ?  "#D90429" : '#eee'
                 }]}>
                     <Text style={[styles.buttonText, {
-                        color: "#fff"
+                        color: ccdWallet?.data ? "#fff" : '#ccc'
                     }]}>
                         Redeem Points
                     </Text>
@@ -341,15 +345,9 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
     );
 
 
-    const {
-        isLoading: loadingWallets,
-        data: wallet,
-        isSuccess,
-        refetch: fetchWallet
-    } = useQuery(['getUserWallets'], getUserWallets, {})
-
-    const nearBalance = wallet?.data?.find((wallet: { network: string; }) => wallet.network == 'near')
 //console.log(wallet?.data)
+
+    useRefreshOnFocus(refetchWallet)
     return (
         <>
 
@@ -381,7 +379,7 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
                             <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}
                                               style={styles.roundTopBtn}>
                                 {
-                                    notifications?.pages[0]?.data?.result.length > 0 &&
+                                    notifications?.pages[0]?.data?.result.some((obj: { isRead: boolean; }) => !obj.isRead)  &&
                                     <View style={styles.dot}/>
                                 }
                                 <Octicons name="bell-fill" size={22} color={"#000"}/>
