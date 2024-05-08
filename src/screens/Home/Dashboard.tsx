@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 
 import {
     Text,
@@ -28,6 +28,7 @@ import {updateUserDashboard} from "../../app/slices/userSlice";
 import LearnSVG from "../../assets/images/svg/LearnSVG";
 import ProductIcon from "../../assets/images/svg/ProductIcon";
 import StreakIcon from "../../assets/images/svg/StreakIcon";
+import messaging from "@react-native-firebase/messaging";
 
 
 const users = [
@@ -212,6 +213,28 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
 
     })
 
+
+    useEffect(() => {
+        messaging().onNotificationOpenedApp(remoteMessage => {
+
+            /* console.log(
+                 'Notification caused app to open from background state:',
+                 remoteMessage,
+             );*/
+
+            if (!!remoteMessage?.data && remoteMessage?.data?.Wallet) {
+                // console.log(`SIGNAL_DATA -> ${remoteMessage}`)
+                setTimeout(() => {
+                    navigation.navigate("Dashboard",
+                        {
+                            screen: 'Wallet',
+                        }
+                    )
+                }, 1200);
+            }
+        });
+
+    }, [])
 
 
     const Achievements = [
