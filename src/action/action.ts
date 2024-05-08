@@ -511,6 +511,39 @@ export const getUser = async () => {
 
     ])
 }
+export const updateUser = async (body) => {
+
+    let Token = await SecureStore.getItemAsync('Gateway-Token');
+
+    const myHeaders = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${Token}`,
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
+    }
+    let timeoutId: NodeJS.Timeout
+
+
+    const requestOptions = {
+        method: 'PUT',
+        headers: myHeaders,
+        body
+    };
+
+
+    return Promise.race([
+        fetch(`${BASE_URL_LIVE}/user`, requestOptions)
+            .then(response => response.json()),
+        new Promise((resolve, reject) => {
+            timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+
+            //  clearTimeout(timeoutId)
+        }).then(() => {
+            clearTimeout(timeoutId)
+        })
+
+    ])
+}
 
 
 export const updateUserImage = async (imageUrl: any) => {
@@ -549,12 +582,32 @@ export const updateUserImage = async (imageUrl: any) => {
     ])
 }
 
+export const readNotifications = async (id:string) =>{
+    let Token = await SecureStore.getItemAsync('Gateway-Token');
+    const myHeaders = {
+
+        'Authorization': `Bearer ${Token}`,
+        'x-access-token': ACCESS_TOKEN,
+        'x-client-type': 'web',
+    }
+
+    const requestOptions = {
+        method: "PUT",
+        headers: myHeaders,
+
+    };
+
+    return fetch(`${BASE_URL_LIVE}/notification/read/${id}`, requestOptions)
+        .then((response) => response.json())
+
+}
+
 
 export const userNotifications = {
 
     notifications: async ({pageParam = 1}: { pageParam?: number }) => {
         let Token = await SecureStore.getItemAsync('Gateway-Token');
-       //console.log(Token)
+      // console.log(Token)
         let timeoutId: NodeJS.Timeout
         const myHeaders = {
             'Content-Type': 'application/json',
@@ -784,7 +837,7 @@ export const uploadToCloudinary = async ({body, resource_type}: { body: any, res
 export const updateCompleteProfile = async (body: {}) => {
 
     let Token = await SecureStore.getItemAsync('Gateway-Token');
-console.log(body)
+
     const myHeaders = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${Token}`,
@@ -802,7 +855,7 @@ console.log(body)
 
 
     return Promise.race([
-        fetch(`${BASE_URL_LIVE}/user/complte`, requestOptions)
+        fetch(`${BASE_URL_LIVE}/user/complete`, requestOptions)
             .then(response => response.json()),
         new Promise((resolve, reject) => {
             timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
@@ -3297,18 +3350,11 @@ export const aiAdventures = async () => {
     };
 
 
-    return Promise.race([
-        fetch(`${BASE_URL_LIVE}/adventure/ai`, requestOptions)
-            .then(response => response.json()),
-        new Promise((resolve, reject) => {
-            timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
+    return fetch(`${BASE_URL_LIVE}/adventure/ai`, requestOptions)
+            .then(response => response.json())
 
-            //  clearTimeout(timeoutId)
-        }).then(() => {
-            clearTimeout(timeoutId)
-        })
 
-    ])
+
 }
 export const createAIAdventure = async ({body}: { body: any }) => {
 

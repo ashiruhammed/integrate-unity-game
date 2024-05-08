@@ -16,8 +16,8 @@ import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPix
 import {Fonts} from "../../constants/Fonts";
 import Colors from "../../constants/Colors";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
-import {useInfiniteQuery, useQueryClient, useMutation} from "@tanstack/react-query";
-import {createAIAdventure, userNotifications} from "../../action/action";
+import {useInfiniteQuery, useQueryClient, useMutation, useQuery} from "@tanstack/react-query";
+import {createAIAdventure, getUserDashboard, userNotifications} from "../../action/action";
 import {RootStackScreenProps} from "../../../types";
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 import * as yup from "yup";
@@ -96,6 +96,8 @@ const CreateAIAdventure = ({navigation}: RootStackScreenProps<'CreateAIAdventure
 
     const translateY = useSharedValue(0);
 
+    const {isLoading: loadingUser,data:userDashboard, refetch:fetchDashboard} = useQuery(['getUserDashboard'], getUserDashboard, {})
+
     useEffect(() => {
         translateY.value = withRepeat(
             withSpring(50, {damping: 2, stiffness: 80}),
@@ -125,13 +127,7 @@ const CreateAIAdventure = ({navigation}: RootStackScreenProps<'CreateAIAdventure
     }, []);
 
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setProgress((prevProgress) => (prevProgress >= 1 ? 0 : prevProgress + 0.1));
-        }, 1000);
 
-        return () => clearInterval(interval);
-    }, []);
 
 
     const openNotifications = () => {
@@ -178,6 +174,37 @@ const CreateAIAdventure = ({navigation}: RootStackScreenProps<'CreateAIAdventure
         }
 
     })
+
+
+
+    let count = 1;
+    const width = useSharedValue(1);
+    const animatedProgressStyle = useAnimatedStyle(() => {
+        return {
+            width: withTiming(width.value, {
+                duration: 10
+            }),
+        };
+    });
+
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            if (!isLoading || count > 200) {
+                clearInterval(intervalId);
+
+            } else {
+
+                width.value = count++
+
+            }
+        }, 100);
+
+        return () => {
+            clearInterval(intervalId);
+        }
+    }, [count, isLoading]);
+
+
 
     const {
         resetForm,
@@ -239,8 +266,11 @@ const CreateAIAdventure = ({navigation}: RootStackScreenProps<'CreateAIAdventure
                             <Text style={styles.subNoticeText}>
                                 Creating your lesson...
                             </Text>
+                            <Animated.View key={count}
+                                           entering={FadeInDown.springify()} exiting={FadeOutDown} style={styles.barContainer}>
+                            <Animated.View style={[styles.loadingViewBorder, animatedProgressStyle ]}/>
+                            </Animated.View>
 
-                            <CustomProgressBar progress={progress} width={200} height={16}/>
                         </View>
 
                         <Animated.View style={[styles.floatingRock, animatedStyle]}>
@@ -271,7 +301,7 @@ const CreateAIAdventure = ({navigation}: RootStackScreenProps<'CreateAIAdventure
                             </TouchableOpacity>
                             <View style={styles.pointWrap}>
                                 <Ionicons name="gift" size={16} color="#22BB33"/>
-                                <Text style={styles.pointsText}>20000</Text>
+                                <Text style={styles.pointsText}>{userDashboard?.data?.totalPoint}</Text>
                             </View>
                         </View>
 
@@ -279,13 +309,13 @@ const CreateAIAdventure = ({navigation}: RootStackScreenProps<'CreateAIAdventure
 
                             <ImageBackground style={styles.streaKIcon} resizeMode={'contain'}
                                              source={require('../../assets/images/streakicon.png')}>
-                                <Text style={styles.streakText}> 200</Text>
+                                <Text style={styles.streakText}> {userDashboard?.data?.currentDayStreak}</Text>
                             </ImageBackground>
 
                             <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}
                                               style={styles.roundTopBtn}>
                                 {
-                                    notifications?.pages[0]?.data?.result.length > 0 &&
+                                    notifications?.pages[0]?.data?.result.some((obj: { isRead: boolean; }) => !obj.isRead)  &&
                                     <View style={styles.dot}/>
                                 }
                                 <Octicons name="bell-fill" size={22} color={"#000"}/>
@@ -480,7 +510,7 @@ const styles = StyleSheet.create({
 
         width: '100%',
         backgroundColor: '#f0f0f0',
-        borderRadius: 20,
+        borderRadius: 15,
         overflow: 'hidden',
     },
     floatingRock: {
@@ -546,7 +576,21 @@ const styles = StyleSheet.create({
         height: '100%',
         borderRadius: 20,
     },
+    loadingViewBorder: {
+        borderColor: "#BF1314",
+        borderWidth: 5,
+        borderRadius: 10,
+    },
+    loadingView: {
+        width: '80%',
+        height: 40,
+        // paddingHorizontal:pixelSizeHorizontal(10),
+        borderRadius: 3,
+        backgroundColor: '#fff',
+        alignContent: 'center',
+        justifyContent: 'flex-end',
 
+    },
 })
 
 export default CreateAIAdventure;

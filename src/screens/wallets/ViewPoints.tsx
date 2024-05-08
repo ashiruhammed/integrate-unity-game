@@ -35,15 +35,27 @@ import {
 
 import SwipeAnimatedToast from "../../components/toasty";
 import {addNotificationItem} from "../../app/slices/dataSlice";
+import dayjs from "dayjs";
 
 
 interface props {
-    item: {}
+    item: {
+        "amount": "3000",
+        "createdAt": "2024-05-07T10:48:52.077Z",
+        "deletedAt": null,
+        "id": "5d7a3304-85c6-401a-8fdd-949cbafc9292",
+        "isDeleted": false,
+        "reason": "Point issued.",
+        "transactionId": null,
+        "user": { "avatar": "", "fullName": "Orji", "id": "c3208ae7-0849-4a86-b6e9-5d54dacd046d", "username": "ace" },
+        "userId": "c3208ae7-0849-4a86-b6e9-5d54dacd046d"
+    }
 }
 
 const HistoryCard = ({item}: props) => {
+
     return (
-        <Animated.View entering={FadeInDown.delay(200).randomDelay()} exiting={FadeOutDown}
+        <Animated.View key={item.id} entering={FadeInDown.delay(200).randomDelay()} exiting={FadeOutDown}
                        style={styles.breakDownCard}>
             <View style={[styles.boxSign, {
                 backgroundColor: Colors.successTint
@@ -56,10 +68,10 @@ const HistoryCard = ({item}: props) => {
 
                 <View style={styles.boxTransactionBodyLeft}>
                     <Text style={styles.transactionTitle}>
-                        Points Bought
+                        {item.reason}
                     </Text>
                     <Text style={styles.transactionDate}>
-                        Jan 6, 2024
+                        {dayjs(item.createdAt).format('MMM, DD YYYY')}
                     </Text>
                 </View>
 
@@ -68,7 +80,7 @@ const HistoryCard = ({item}: props) => {
                     justifyContent: 'flex-start'
                 }]}>
                     <Text style={styles.transactionTitle}>
-                        -500 GP
+                        -{item.amount} GP
                     </Text>
 
                 </View>
@@ -129,11 +141,17 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
 
         })
 
-    const {isLoading: loadingPoints, data: points, refetch: fetchPoints} = useQuery(['getUserPoints'], getUserPoints, {
+    const {
+        isLoading: loadingPoints,
+        data: points,
+        refetch: fetchPoints
+    } = useQuery(['getUserPoints'], getUserPoints, {})
 
-    })
-
-    const {isLoading: loadingUser,data:userDashboard, refetch:fetchDashboard} = useQuery(['getUserDashboard'], getUserDashboard, {})
+    const {
+        isLoading: loadingUser,
+        data: userDashboard,
+        refetch: fetchDashboard
+    } = useQuery(['getUserDashboard'], getUserDashboard, {})
 
 
     const {
@@ -175,7 +193,7 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
                     dispatch(addNotificationItem({
                         id: Math.random(),
                         type: 'success',
-                        body:  data.message,
+                        body: data.message,
                     }))
 
                 } else {
@@ -184,7 +202,7 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
                     dispatch(addNotificationItem({
                         id: Math.random(),
                         type: 'error',
-                        body:  data.message,
+                        body: data.message,
                     }))
                     /*  navigation.navigate('EmailConfirm', {
                           email:contentEmail
@@ -199,7 +217,7 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
                 dispatch(addNotificationItem({
                     id: Math.random(),
                     type: 'error',
-                    body:  err.message,
+                    body: err.message,
                 }))
 
             },
@@ -208,8 +226,6 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
             }
 
         })
-
-
 
 
     const loadMore = () => {
@@ -327,12 +343,10 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
 
     const {
         isLoading: loadingWallets,
-        data:wallet,
+        data: wallet,
         isSuccess,
-        refetch:fetchWallet
-    } = useQuery(['getUserWallets'], getUserWallets, {
-
-    })
+        refetch: fetchWallet
+    } = useQuery(['getUserWallets'], getUserWallets, {})
 
     const nearBalance = wallet?.data?.find((wallet: { network: string; }) => wallet.network == 'near')
 //console.log(wallet?.data)
@@ -486,7 +500,7 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
                     </TouchableOpacity>}
                 </View>
 
-                <RedeemForm  isLoading={redeeming} redeemNow={redeemPointsNow}
+                <RedeemForm isLoading={redeeming} redeemNow={redeemPointsNow}
                             pointBalance={points?.data?.totalPoint ? points?.data?.totalPoint : '0'}/>
             </BottomSheet>
         </>

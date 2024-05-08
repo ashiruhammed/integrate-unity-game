@@ -332,7 +332,7 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
     }, []);
 
    // useRefreshOnFocus(refetch)
-//console.log(ccdWallet)
+console.log(ccdWallet)
 //console.log( JSON.stringify(transactions.data, null, 2))
     return (
 
@@ -407,7 +407,7 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
                 {isLoadingWallet &&
                     <ActivityIndicator color={Colors.primaryColor} size='small'/>}
 
-                {!isLoadingWallet &&  ccdWallet?.message !== 'Balance not fetched' && ccdWallet && ccdWallet?.data !== null &&
+                {!isLoadingWallet &&  ccdWallet?.success  && ccdWallet && ccdWallet?.data !== null &&
 
                     <>
 
@@ -559,7 +559,10 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
                 }
 
 
-                {!isLoadingWallet && ccdWallet?.message !== 'Balance not fetched' || ccdWallet?.data == null &&
+                {!isLoadingWallet &&  ccdWallet?.data == null &&
+
+                    <IF condition={ccdWallet.message !== 'Balance not fetched'}>
+
 
 
                     <View style={styles.walletContentContainer}>
@@ -602,7 +605,7 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
                         }
 
                     </View>
-
+                    </IF>
                 }
 
 

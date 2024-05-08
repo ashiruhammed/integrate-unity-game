@@ -325,7 +325,7 @@ const GatewayToken = ({navigation}: RootStackScreenProps<'GatewayToken'>) => {
                     </View>
 
                     {
-                        !isLoadingWallet && ccdWallet?.data !== null &&
+                        !isLoadingWallet && ccdWallet?.data !== null && ccdWallet?.success &&
 
                     <View style={styles.copyWrap}>
                         <Text style={[styles.copyText, {

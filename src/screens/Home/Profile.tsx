@@ -216,7 +216,7 @@ const Profile = ({navigation}: RootTabScreenProps<'Profile'>) => {
                     <Text style={[styles.fullName, {
                         color: textColor
                     }]}>
-                        {userData.fullName ? <Text onPress={() => openScreen('EditProfile')} style={{
+                        {!userData.fullName ? <Text onPress={() => openScreen('EditProfile')} style={{
                             textDecorationLine:'underline',
                             fontSize:12,
                         }}>Update profile</Text> : userData?.fullName}

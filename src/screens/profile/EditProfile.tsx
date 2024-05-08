@@ -29,7 +29,14 @@ import TextInput from "../../components/inputs/TextInput";
 import {RectButton} from "../../components/RectButton";
 import PhoneInputText from "../../components/inputs/PhoneInputText";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
-import {getUser, loginUser, updateCompleteProfile, updateUserImage, uploadToCloudinary} from "../../action/action";
+import {
+    getUser,
+    loginUser,
+    updateCompleteProfile,
+    updateUser,
+    updateUserImage,
+    uploadToCloudinary
+} from "../../action/action";
 import * as SecureStore from "expo-secure-store";
 import {setAuthenticated, setResponse, unSetResponse, updateUserInfo} from "../../app/slices/userSlice";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
@@ -48,7 +55,7 @@ const formSchema = yup.object().shape({
     fullName: yup.string().min(2, 'Name is Too short').required('Name is required').trim('No white spaces'),
     userName: yup.string().min(2, 'User name is Too short').required('User Name is required').trim('No white spaces'),
   //  phoneNumber: yup.string().min(10, 'Please enter a valid phone number').required('Phone number is required'),
-    email: yup.string().email("Please enter a valid email address").required('Email is required'),
+   // email: yup.string().email("Please enter a valid email address").required('Email is required'),
 
 });
 
@@ -102,17 +109,18 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
     })
 
 
+
     const [focusFullName, setFocusFullName] = useState(false);
-    const [contentFullName, setContentFullName] = useState(userData?.fullName ? '' : userData?.fullName);
+    const [contentFullName, setContentFullName] = useState(!data?.data?.fullName ? '' : data?.data?.fullName);
     const [focusUserName, setFocusUserName] = useState(false);
-    const [contentUserName, setContentUserName] = useState(userData?.username ? '' : userData?.username);
+    const [contentUserName, setContentUserName] = useState(!data?.data?.username ? '' : data?.data?.username);
 
     const [focusEmail, setFocusEmail] = useState(false);
     const [contentEmail, setContentEmail] = useState(data?.data?.email);
 
 
 
-    const {mutate, isLoading} = useMutation(['complete-profile'], updateCompleteProfile,
+    const {mutate, isLoading} = useMutation(['update-user-profile'], updateUser,
 
         {
 
@@ -153,7 +161,7 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
                 }))
             },
             onSettled: () => {
-                queryClient.invalidateQueries(['complete-profile']);
+                queryClient.invalidateQueries(['update-user-profile']);
             }
 
         })
@@ -309,7 +317,7 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
 
             fullName: contentFullName,
             //phoneNumber: userData?.phone,
-            email: userData?.email,
+            email: data?.data?.email,
             userName: contentUserName,
 
         },
@@ -466,7 +474,7 @@ const EditProfile = ({navigation}: RootStackScreenProps<'EditProfile'>) => {
 
                             }}
 
-                            defaultValue={userData?.username}
+                            defaultValue={contentUserName}
                             value={values.userName}
                             label="Username"/>
 

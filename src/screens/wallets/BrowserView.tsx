@@ -43,10 +43,10 @@ const BrowserView = ({navigation,route}: RootStackScreenProps<'BrowserView'>)=>{
     const [loading, setLoading] = useState(false)
     const handleNavigationStateChange = (navState: { url: any; }) => {
         const { url } = navState;
-//console.log({"My URL":url})
+console.log({"My URL":url})
 
         // Check if the URL matches your redirect URL
-        if (url.startsWith('http://localhost:3001')) {
+        if (url.startsWith('https://staging.gatewayapp.co')) {
             setRedirectUrl(url);
         }
     };
