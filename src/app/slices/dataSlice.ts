@@ -52,7 +52,7 @@ export interface DataState {
             "isCountryLimited": boolean,
             "supportedCountries": CountryProps[],
             "productLogo": string,
-            "launchDate": string,
+            "launchDate": Date,
             "categories": String[],
             "productSteps": ProductStepsProps[]
             "socialMedia":SocialMediaProps[];
@@ -97,7 +97,7 @@ const initialState: DataState = {
         isCountryLimited: true,
         supportedCountries: [],
         productLogo: "",
-       launchDate: "",
+       launchDate: new Date(),
         categories: [],
         productSteps: [],
         socialMedia: []

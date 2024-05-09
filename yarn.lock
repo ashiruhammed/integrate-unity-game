@@ -2301,13 +2301,6 @@
     prompts "^2.4.2"
     semver "^7.5.2"
 
-"@react-native-community/datetimepicker@7.6.1":
-  version "7.6.1"
-  resolved "https://registry.yarnpkg.com/@react-native-community/datetimepicker/-/datetimepicker-7.6.1.tgz#98bdee01e3df490526ee1125e438c2030becac1f"
-  integrity sha512-g66Q2Kd9Uw3eRL7kkrTsGhi+eXxNoPDRFYH6z78sZQuYjPkUQgJDDMUYgBmaBsQx/fKMtemPrCj1ulGmyi0OSw==
-  dependencies:
-    invariant "^2.2.4"
-
 "@react-native-community/slider@4.4.2":
   version "4.4.2"
   resolved "https://registry.yarnpkg.com/@react-native-community/slider/-/slider-4.4.2.tgz#1fea0eb3ae31841fe87bd6c4fc67569066e9cf4b"
@@ -7939,6 +7932,11 @@ react-native-config@^1.5.0:
   resolved "https://registry.yarnpkg.com/react-native-config/-/react-native-config-1.5.1.tgz#73c94f511493e9b7ff9350cdf351d203a1b05acc"
   integrity sha512-g1xNgt1tV95FCX+iWz6YJonxXkQX0GdD3fB8xQtR1GUBEqweB9zMROW77gi2TygmYmUkBI7LU4pES+zcTyK4HA==
 
+react-native-date-picker@^5.0.2:
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/react-native-date-picker/-/react-native-date-picker-5.0.2.tgz#7a9cc42c086fe1ebfe39d2f431f523d924239ae6"
+  integrity sha512-ZibwqA+6W+uOLzeblsKnMQT2zZpnOw/tKFotgyrLZuTPTcwMvnnlzi5QhSjB203PhyFEElbcFrIuHJQpb/Zahw==
+
 react-native-dotenv@^3.4.7:
   version "3.4.11"
   resolved "https://registry.yarnpkg.com/react-native-dotenv/-/react-native-dotenv-3.4.11.tgz#2e6c4eabd55d5f1bf109b3dd9141dadf9c55cdd4"
@@ -8015,13 +8013,6 @@ react-native-media-console@^2.0.6:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/react-native-media-console/-/react-native-media-console-2.2.0.tgz#a6cf94ca6945d1fbeb1ae6f8cc3422d9fad13f22"
   integrity sha512-TsClEFUz9OZ3d2wU4w0wYY9RA2ULCi3VFyKW4ho9by9WHGMokSwCViDMVE6+PuE6Fi4a+IgwgtcJ0euqI2aYAg==
-
-react-native-modal-datetime-picker@^17.1.0:
-  version "17.1.0"
-  resolved "https://registry.yarnpkg.com/react-native-modal-datetime-picker/-/react-native-modal-datetime-picker-17.1.0.tgz#74291bf92b830be285752f437841f52885c90e0b"
-  integrity sha512-jfTwfaCLtBffYbQ+pOGFLM+J5HmUh3vb9rT0JrrQPjxzecdc8pNYreB1c96+mVuq8bDCvaCdIeuEsslTqLJL0Q==
-  dependencies:
-    prop-types "^15.7.2"
 
 react-native-ratings@8.0.4:
   version "8.0.4"

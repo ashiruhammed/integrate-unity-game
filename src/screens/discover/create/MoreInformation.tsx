@@ -28,9 +28,8 @@ import {
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../../helpers/normalize";
 import {Fonts} from "../../../constants/Fonts";
 import OpenBoxIcon from "../../../assets/images/svg/OpenBoxIcon";
+import DatePicker from 'react-native-date-picker'
 
-
-import DateTimePickerModal from "react-native-modal-datetime-picker";
 import {
     addNotificationItem,
     clearProductInfo,
@@ -66,9 +65,8 @@ const MoreInformation = ({navigation}: RootStackScreenProps<'MoreInformation'>) 
     const tintText = theme == 'light' ? "#AEAEAE" : Colors.dark.tintTextColor
     const borderColor = theme == 'light' ? "#DEE5ED" : "#ccc"
 
-    const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
 
-    const [contentLauchDate, setContentLauchDate] = useState<string>('2023-07-08T12:04:09.124Z');
+
 
 
     // ref
@@ -78,8 +76,18 @@ const MoreInformation = ({navigation}: RootStackScreenProps<'MoreInformation'>) 
 
 
     })
+    const [date, setDate] = useState(new Date())
+    const [open, setOpen] = useState(false)
 
 
+    const confirmDateFunc =  (myLaunchDate: Date) =>{
+        setOpen(false)
+        setDate(myLaunchDate)
+        const serializableDate = myLaunchDate.toISOString();
+        dispatch(updateProduct({launchDate: serializableDate}))
+
+
+    }
     const handleClose = () => {
         bottomSheetRef?.current?.close();
     };
@@ -87,19 +95,8 @@ const MoreInformation = ({navigation}: RootStackScreenProps<'MoreInformation'>) 
     const snapPoints = useMemo(() => ["1", "45%"], []);
 
 
-    const hideDatePicker = () => {
-        setDatePickerVisibility(false);
-    };
-    const showDatePicker = () => {
-        setDatePickerVisibility(true);
-    };
-    const handleConfirm = (date: Date) => {
-        //   setContentLauchDate(dayjs(date).format('YYYY-DD-MM'))
-        setContentLauchDate(date)
-        dispatch(updateProduct({launchDate: contentLauchDate}))
-        // setFieldValue('endDate', dayjs(date).format('YYYY-MM-DD'))
-        hideDatePicker();
-    };
+
+
     const openNotifications = () => {
         navigation.navigate('Notifications')
     }
@@ -309,7 +306,7 @@ const MoreInformation = ({navigation}: RootStackScreenProps<'MoreInformation'>) 
 
 
 
-                    <TouchableOpacity onPress={showDatePicker} activeOpacity={0.8} style={styles.createBtn}>
+                    <TouchableOpacity onPress={() => setOpen(true)} activeOpacity={0.8} style={styles.createBtn}>
                         <AntDesign name="pluscircle" size={14} color={Colors.primaryColor}/>
                         <Text style={styles.createBtnText}>
                             Schedule a Launch Date
@@ -317,7 +314,7 @@ const MoreInformation = ({navigation}: RootStackScreenProps<'MoreInformation'>) 
                     </TouchableOpacity>
 
                         <Text style={styles.contentLauchDate}>
-                            {dayjs(contentLauchDate).format('ddd, DD MMM YYYY')}
+                            {dayjs(date).format('ddd, DD MMM YYYY')}
                         </Text>
                     </View>
 
@@ -393,24 +390,21 @@ const MoreInformation = ({navigation}: RootStackScreenProps<'MoreInformation'>) 
                     }
                 </Pressable>
 
-                <DateTimePickerModal
-                    style={{
-                        backgroundColor: "#fff",
-                    }}
-                    pickerContainerStyleIOS={{
-                        backgroundColor: "#fff"
-                    }}
 
-                    isDarkModeEnabled={false}
-                    cancelTextIOS={"Close"}
-                    display={Platform.OS === 'ios' ? "inline" : 'spinner'}
-                    themeVariant={theme}
-                    isVisible={isDatePickerVisible}
-                    mode="date"
-                    onConfirm={(t) => handleConfirm(t)}
-                    onCancel={hideDatePicker}
-                />
             </KeyboardAwareScrollView>
+
+            <DatePicker
+                modal
+                theme={theme}
+                open={open}
+                date={date}
+                cancelText={"Close"}
+                mode={'date'}
+                onConfirm={(date)=>confirmDateFunc(date)}
+                onCancel={() => {
+                    setOpen(false)
+                }}
+            />
         </SafeAreaView>
 
             <BottomSheetModalProvider>
