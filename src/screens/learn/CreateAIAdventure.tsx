@@ -34,33 +34,14 @@ import Animated, {
 import {IF} from "../../helpers/ConditionJsx";
 import * as SecureStore from "expo-secure-store";
 
-import {BASE_URL, ACCESS_TOKEN, DEV_BASE_URL} from "@env";
-//const access_token = 'JGFyZ29uMmlkJHY9MTkkbT00MDk2LHQ9MyxwPTEkWnJjNEVDR05JTEYzU3B2WUJLZVBZdyRtdnNacUl6VVg3SG1UV2gvdjhQZXZGUXJOa1hWYUFHRkVKV3dCd0NobDBV'
-//const BASE_URL_LIVE = __DEV__ ? DEV_BASE_URL : BASE_URL
-const BASE_URL_LIVE = DEV_BASE_URL
+
+
 
 import SwipeAnimatedToast from "../../components/toasty";
 import {addNotificationItem, setAdventure} from "../../app/slices/dataSlice";
 //import "react-native-url-polyfill/auto"; // Use URL polyfill in React Native
 
 
-const CustomProgressBar = ({progress, width, height}) => {
-    const animatedProgress = useSharedValue(0);
-
-    React.useEffect(() => {
-        animatedProgress.value = withTiming(progress, {duration: 1000});
-    }, [progress]);
-
-    const animatedStyle = useAnimatedStyle(() => ({
-        width: `${animatedProgress.value * 100}%`,
-    }));
-
-    return (
-        <View style={[styles.barContainer, {height}]}>
-            <Animated.View style={[styles.progressBar, animatedStyle]}/>
-        </View>
-    );
-};
 
 
 const formSchema = yup.object().shape({

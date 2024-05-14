@@ -45,7 +45,7 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance}: props) => {
         setModalVisible(!isModalVisible);
     };
 
-    const handleOptionPress = (option) => {
+    const handleOptionPress = (option: React.SetStateAction<string>) => {
         // Handle the selected option here
         setWalletOption(option);
         toggleModal();
@@ -64,7 +64,7 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance}: props) => {
 
 
     const {data: ccdWallet} = useQuery(['getCCDWallet'], getCCDWallet)
-//console.log(ccdWallet)
+console.log(ccdWallet)
     // https://pro-api.coinmarketcap.com/v2/tools/price-conversion?CMC_PRO_API_KEY=c8d06b53-dfbe-4de8-9e0d-62fdb128cf8a&amount=300&symbol=Near
 
     const {
@@ -103,14 +103,15 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance}: props) => {
     //  let pointsVal = '0'
  useEffect(() => {
 
+
         if (data && data?.data) {
             // console.log(data?.data.find((wallet: { token: string; }) => wallet.token == walletOption).value)
-
-            setPointsVal(`${data?.data.find((wallet: {
-                token: string;
-            }) => wallet.token == walletOption).value} ${data?.data.find(wallet => wallet.token == walletOption)?.token}`)
-            //defaultPointsConvertValue =
-
+            if(ccdWallet?.data !== null) {
+                setPointsVal(`${data?.data.find((wallet: {
+                    token: string;
+                }) => wallet.token == walletOption).value} ${data?.data.find(wallet => wallet.token == walletOption)?.token}`)
+                //defaultPointsConvertValue =
+            }
             setDefaultPointsConvertValue(`${data?.data.find((wallet: {
                 token: string;
             }) => wallet.token == walletOption)?.value * +points}`)
@@ -118,6 +119,7 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance}: props) => {
             setDefaultPointsConvertValue('0')
             setPointsVal('0')
         }
+
     }, [data, points, walletOption]);
 
 

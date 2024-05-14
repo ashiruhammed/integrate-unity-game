@@ -12,8 +12,8 @@ import Colors from "../../constants/Colors";
 import Animated, {useAnimatedStyle, useSharedValue, withRepeat, withSpring, withTiming} from "react-native-reanimated";
 import {fontPixel, heightPixel, pixelSizeVertical} from "../../helpers/normalize";
 import {Fonts} from "../../constants/Fonts";
-//const BASE_URL_LIVE = __DEV__ ? DEV_BASE_URL : BASE_URL
-const BASE_URL_LIVE = DEV_BASE_URL
+const BASE_URL_LIVE = __DEV__ ? DEV_BASE_URL : BASE_URL
+//const BASE_URL_LIVE = DEV_BASE_URL
 
 
 
@@ -43,10 +43,10 @@ const BrowserView = ({navigation,route}: RootStackScreenProps<'BrowserView'>)=>{
     const [loading, setLoading] = useState(false)
     const handleNavigationStateChange = (navState: { url: any; }) => {
         const { url } = navState;
-console.log({"My URL":url})
+
 
         // Check if the URL matches your redirect URL
-        if (url.startsWith('https://staging.gatewayapp.co')) {
+        if (url.startsWith('https://gatewayapp.co')) {
             setRedirectUrl(url);
         }
     };

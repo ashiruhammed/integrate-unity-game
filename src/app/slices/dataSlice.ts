@@ -97,7 +97,7 @@ const initialState: DataState = {
         isCountryLimited: true,
         supportedCountries: [],
         productLogo: "",
-       launchDate: new Date(),
+       launchDate:'',
         categories: [],
         productSteps: [],
         socialMedia: []

@@ -68,7 +68,9 @@ const HistoryCard = ({item}: props) => {
 
             <View style={styles.boxTransactionBody}>
 
-                <View style={styles.boxTransactionBodyLeft}>
+                <View style={[styles.boxTransactionBodyLeft,{
+
+                }]}>
                     <Text style={styles.transactionTitle}>
                         {item.reason}
                     </Text>
@@ -79,6 +81,8 @@ const HistoryCard = ({item}: props) => {
 
                 <View style={[styles.boxTransactionBodyLeft, {
                     alignItems: 'flex-end',
+                    width: '35%',
+
                     justifyContent: 'flex-start'
                 }]}>
                     <Text style={styles.transactionTitle}>
@@ -422,39 +426,7 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
                         />
 
 
-                        {/*           <Animated.View entering={FadeInDown.delay(200).randomDelay()} exiting={FadeOutDown} style={styles.breakDownCard}>
-                            <View style={[styles.boxSign, {
-                                backgroundColor: Colors.errorTint
-                            }]}>
-                                <AntDesign name="arrowdown" size={20} style={{transform: [{rotate: "40deg"}]}}
-                                           color={Colors.errorRed}/>
-                            </View>
 
-                            <View style={styles.boxTransactionBody}>
-
-                                <View style={styles.boxTransactionBodyLeft}>
-                                    <Text style={styles.transactionTitle}>
-                                        Withdrawal
-                                    </Text>
-                                    <Text style={styles.transactionDate}>
-                                        Jan 6, 2024
-                                    </Text>
-                                </View>
-
-                                <View style={[styles.boxTransactionBodyLeft, {
-                                    alignItems: 'flex-end',
-                                    justifyContent: 'flex-start'
-                                }]}>
-                                    <Text style={styles.transactionTitle}>
-                                        -500 GP
-                                    </Text>
-
-                                </View>
-                            </View>
-
-
-                        </Animated.View>
-*/}
                     </View>
                 </View>
 
@@ -730,7 +702,7 @@ const styles = StyleSheet.create({
     },
     boxTransactionBodyLeft: {
 
-        width: '45%',
+        width: '55%',
         height: '70%',
         alignItems: 'flex-start',
         justifyContent: 'space-evenly',

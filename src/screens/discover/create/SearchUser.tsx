@@ -39,16 +39,13 @@ interface props {
         "avatar":string
     },
     selectedItem: any[],
-    addUser: (details: {
-        "id": string,
 
-        "name": string,
-
-    }) => void
     selectUser: (symbol: {}) => void,
 }
 
-const UserItem = ({item,addUser,selectUser,selectedItem}: props) => {
+const UserItem = ({item,selectUser,selectedItem}: props) => {
+
+
     return (
         <Animated.View key={item.id} entering={FadeInDown} exiting={FadeOutDown}>
             <Pressable
@@ -81,19 +78,22 @@ const UserItem = ({item,addUser,selectUser,selectedItem}: props) => {
 
 
             </View>
-            <TouchableOpacity activeOpacity={0.6} style={styles.listBody}>
+            <TouchableOpacity onPress={() => {
+                selectUser(item)
+
+            }} activeOpacity={0.6} style={styles.listBody}>
                 <Text style={styles.bodyTitle}>
 
                     {item.username}
                 </Text>
-                <View style={styles.listBottom}>
 
 
-                    <Octicons name="dot-fill" size={14} color="#D1D5DB"/>
+
+
                     <Text style={styles.bodySubText}>
                         {item.fullName}
                     </Text>
-                </View>
+
 
             </TouchableOpacity>
             <View style={styles.listBodyRight}>
@@ -122,7 +122,7 @@ const SearchUser = ({navigation}: RootStackScreenProps<'SearchUser'>) => {
 
     const dataSlice = useAppSelector(state => state.data)
     const user = useAppSelector(state => state.user)
-    const {theme, productDetails} = dataSlice
+    const {theme, productDetails, } = dataSlice
 
     const queryClient = useQueryClient();
 
@@ -141,6 +141,11 @@ const SearchUser = ({navigation}: RootStackScreenProps<'SearchUser'>) => {
     const [selectedUser, setSelectedUser] = useState<UserProps[]>([]);
 
 
+  /*  useEffect(() => {
+        dispatch(updateProduct({
+            contributors:[]
+        }))
+    }, []);*/
     const updateSelectUser = useCallback((payload: {
         "id": string,
         "name": string,
@@ -388,7 +393,7 @@ const styles = StyleSheet.create({
         textTransform:'capitalize'
     },
     bodySubText: {
-        marginHorizontal: pixelSizeHorizontal(5),
+
         fontSize: fontPixel(12),
         fontFamily: Fonts.quickSandBold,
         color: "#9CA3AF"

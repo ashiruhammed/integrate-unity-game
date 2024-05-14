@@ -105,9 +105,12 @@ const dispatch = useDispatch()
         );
     } else {*/
         return (
-            <AppleStyleSwipeableRow onPress={()=>handlePress(item.id)}>
+            <AppleStyleSwipeableRow  onPress={()=>handlePress(item.id)}>
                 <Animated.View key={item.id}
-                               entering={FadeInDown.springify()} exiting={FadeOutDown} style={styles.notificationCard}>
+                               entering={FadeInDown.springify()} exiting={FadeOutDown} style={[styles.notificationCard,!item.isRead &&{
+                                backgroundColor:"#f9f9f9"
+
+                }]}>
 
                     <View style={styles.roundImage}>
                         <FastImage
@@ -261,9 +264,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: pixelSizeHorizontal(20)
     },
     notificationCard: {
+paddingVertical:10,
+        paddingHorizontal:10,
+        borderRadius:5,
         width: '100%',
-        marginVertical:pixelSizeVertical(10),
-        height: heightPixel(80),
+       marginVertical:pixelSizeVertical(10),
+        height: heightPixel(100),
         flexDirection: 'row',
         justifyContent: 'flex-start',
         alignItems: 'flex-start',
@@ -285,7 +291,7 @@ const styles = StyleSheet.create({
         resizeMode: 'cover',
     },
     notificationBody: {
-        width: '80%',
+        width: '85%',
         marginLeft: 10,
         alignItems: 'flex-start',
         justifyContent: 'center',

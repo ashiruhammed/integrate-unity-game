@@ -354,7 +354,7 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
     ), [])
 
     const {isLoading: loadingUser,data:userDashboard, isRefetching, refetch:fetchDashboard} = useQuery(['getUserDashboard'], getUserDashboard, {
-
+        contributors
 
     })
     // ref
@@ -412,7 +412,7 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
 
     useRefreshOnFocus(refetch)
     useRefreshOnFocus(fetchComments)
-
+//console.log(data?.data.contributors)
 //console.log(comments?.data?.result[0])
     return (
 
@@ -684,6 +684,9 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
                         </TouchableOpacity>
                     </View>
 
+                    {
+                        !isLoading &&
+                        data &&   data?.data?.contributors.length > 0 &&
 
                     <View style={styles.ourTeam}>
                         <View style={{marginBottom: 5}}>
@@ -710,7 +713,7 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
                         />
 
                     </View>
-
+                    }
 
                     <Pressable onPress={()=>navigation.navigate('MakeComment',{
                         id:item.id
@@ -789,7 +792,7 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
                                     </Pressable>
 
 
-                                    <Pressable onPress={()=>handlePress()} style={styles.bottomBtn}>
+                                    <Pressable  style={styles.bottomBtn}>
 
                                         <Text style={styles.bottomBtnText}>
                                             Share

@@ -261,6 +261,14 @@ const DiscoverProducts = ({navigation}: RootStackScreenProps<'DiscoverProducts'>
 
         })
 
+    const viewProduct = (item:{}) => {
+        navigation.navigate('ProductView',{
+            item
+        })
+
+    }
+
+
     const keyExtractor = useCallback((item: { id: any; }) => item.id, [],)
     const renderItem = useCallback(({item}) => (
         <ProductCardItem viewProduct={viewProduct} item={item}/>
@@ -272,12 +280,7 @@ const DiscoverProducts = ({navigation}: RootStackScreenProps<'DiscoverProducts'>
     const create = () => {
         navigation.navigate('ProductInformation')
     }
-    const viewProduct = (item:{}) => {
-        navigation.navigate('ProductView',{
-            item
-        })
 
-    }
     const {isLoading: loadingUser,data:userDashboard, isRefetching, refetch:fetchDashboard} = useQuery(['getUserDashboard'], getUserDashboard, {
 
 
@@ -448,12 +451,13 @@ const DiscoverProducts = ({navigation}: RootStackScreenProps<'DiscoverProducts'>
                                 </Text>
                             </View>
 
-
-                            <Pressable style={styles.viewBtn}>
+                            { !isLoading && trending && trending?.data?.productHuntProjects.length > 0 &&
+                            <Pressable onPress={()=>viewProduct(trending?.data?.productHuntProjects[0])} style={styles.viewBtn}>
                                 <Text style={styles.viewBtnText}>
                                     View Product
                                 </Text>
                             </Pressable>
+                            }
                         </View>
 
 

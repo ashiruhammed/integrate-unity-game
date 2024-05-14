@@ -188,13 +188,13 @@ const MoreInformation = ({navigation}: RootStackScreenProps<'MoreInformation'>) 
 
 
 
-       // console.log(productDetails)
+
 
         mutate({body})
 
     }
 
-
+    console.log(productDetails.contributors)
 
 
 
