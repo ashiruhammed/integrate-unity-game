@@ -8,7 +8,7 @@ import {
     RefreshControl,
     ScrollView,
     TouchableOpacity,
-    ImageBackground, Pressable, Image, FlatList
+    ImageBackground, Pressable, Image, FlatList, ActivityIndicator
 } from 'react-native';
 import {SafeAreaView} from "react-native-safe-area-context";
 import Colors from "../../constants/Colors";
@@ -16,7 +16,7 @@ import {RootTabScreenProps} from "../../../types";
 import {useAppDispatch, useAppSelector} from "../../app/hooks";
 import {useInfiniteQuery, useQuery, useQueryClient} from "@tanstack/react-query";
 import {useRefreshOnFocus, wait} from "../../helpers";
-import {Ionicons, Octicons} from "@expo/vector-icons";
+import {FontAwesome, FontAwesome5, Ionicons, Octicons} from "@expo/vector-icons";
 import {fontPixel, heightPixel, pixelSizeHorizontal, pixelSizeVertical, widthPixel} from "../../helpers/normalize";
 import {getUserDashboard, userNotifications} from "../../action/action";
 import {Fonts} from "../../constants/Fonts";
@@ -69,14 +69,14 @@ const users = [
 
 const Games = [{
     gameImage: "https://images.pexels.com/photos/2708981/pexels-photo-2708981.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    id:'1',
-    name:"It takes two",
-    category:"Multiplayer"
-},{
+    id: '1',
+    name: "It takes two",
+    category: "Multiplayer"
+}, {
     gameImage: "https://images.pexels.com/photos/6080928/pexels-photo-6080928.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    id:'2',
-    name:"Fortnite",
-    category:"Single-player"
+    id: '2',
+    name: "Fortnite",
+    category: "Single-player"
 }]
 
 
@@ -86,23 +86,37 @@ interface AchievementsProps {
         subText: string,
         bg: string,
         color: string,
-icon:React.JSX.Element
+        icon: React.JSX.Element
 
     }
 
 }
 
 interface gameProps {
-    item:{
-        gameImage:string,
-        name:string,
-        category:string
+    item: {
+        gameImage: string,
+        name: string,
+        category: string
     }
 }
 
 interface props {
     item: {
-        image: string
+        "balance": string,
+        "createdAt": string,
+        "deletedAt": null,
+        "id": string,
+        "isDeleted": boolean,
+        "lastPoint": string,
+        "totalAccruedPoint": string,
+        "updatedAt": string,
+        "user": {
+            "avatar": string,
+            "fullName": string,
+            "id": string,
+            "username": string
+        },
+        "userId": string
     }
 }
 
@@ -110,8 +124,24 @@ const FriendItem = ({item}: props) => {
 
     return (
         <Pressable style={styles.friendsOnlineCard}>
-            <View style={styles.dotOnline}/>
-            <Image source={{uri: item.image}} style={styles.friendsOnlineCardImage}/>
+
+            {/*      <View style={styles.dotOnline}/>*/}
+            <View style={styles.friendsOnlineCardImageWrap}>
+
+
+                <Image
+                    source={{uri: item.user.avatar ? item.user.avatar : 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'}}
+                    style={styles.friendsOnlineCardImage}/>
+            </View>
+            <Text style={styles.userFullName}>
+                {item.user.fullName}
+            </Text>
+
+            <View style={styles.pointsWrap}>
+                {/* <FontAwesome5 name="coins" size={12} color="#ddd" />*/}
+                <Text style={styles.userPointsText}>Points: {item.totalAccruedPoint}</Text>
+            </View>
+
         </Pressable>
     )
 }
@@ -120,7 +150,7 @@ const GameItem = ({item}: gameProps) => {
     return (
         <Pressable style={styles.gameCard}>
             <ImageBackground resizeMode={'cover'} resizeMethod={'scale'} style={styles.gameCardImage}
-                             source={{uri:item.gameImage}}>
+                             source={{uri: item.gameImage}}>
 
                 <View style={styles.gameCardBottom}>
                     <BlurView intensity={40} tint="light" style={[styles.blurContainer, {
@@ -134,7 +164,7 @@ const GameItem = ({item}: gameProps) => {
                             </Text>
 
                             <Text style={styles.bottomSubTxt}>
-                                <Octicons name="people" size={12} color="#CCCCCC"/>    {item.category}
+                                <Octicons name="people" size={12} color="#CCCCCC"/> {item.category}
                             </Text>
                         </View>
 
@@ -171,7 +201,7 @@ const AchievementsItem = ({item}: AchievementsProps) => {
                 </Text>
             </View>
 
-            <View style={[styles.iconWrap,{
+            <View style={[styles.iconWrap, {
                 backgroundColor: item.color
             }]}>
 
@@ -208,11 +238,14 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
         navigation.navigate('Notifications')
     }
 
-    const {isLoading: loadingUser,data:userDashboard, isRefetching, refetch} = useQuery(['getUserDashboard'], getUserDashboard, {
+    const {
+        isLoading: loadingUser,
+        data: userDashboard,
+        isRefetching,
+        refetch
+    } = useQuery(['getUserDashboard'], getUserDashboard, {})
 
-
-    })
-
+    //  console.log(userDashboard.data.topUsers)
 
     useEffect(() => {
         messaging().onNotificationOpenedApp(remoteMessage => {
@@ -239,28 +272,28 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
 
     const Achievements = [
         {
-            icon:<GameIconLarge/>,
+            icon: <GameIconLarge/>,
             title: 'Games',
             subText: `${!userDashboard?.data?.gamesPlayed ? '0' : userDashboard?.data?.gamesPlayed} Played`,
             id: '1',
             bg: '#FFE8EC',
             color: Colors.primaryColor
         }, {
-        icon:<LearnSVG/>,
+            icon: <LearnSVG/>,
             title: 'Learn',
-            subText: `${!userDashboard?.data?.completedAdventures ? '0': userDashboard?.data?.completedAdventures} Courses Completed`,
+            subText: `${!userDashboard?.data?.completedAdventures ? '0' : userDashboard?.data?.completedAdventures} Courses Completed`,
             id: '2',
             bg: "#ECFFEE",
             color: '#22BB33'
         }, {
-            icon:<ProductIcon/>,
+            icon: <ProductIcon/>,
             title: 'Products',
             subText: `${!userDashboard?.data?.totalDiscoveryProduct ? '0' : userDashboard?.data?.totalDiscoveryProduct} Products`,
             id: '3',
             bg: '#FFF1EB',
             color: '#FFAA88'
         }, {
-            icon:<StreakIcon/>,
+            icon: <StreakIcon/>,
             title: 'Highest Streak',
             subText: `${!userDashboard?.data?.currentDayStreak ? '0' : userDashboard?.data?.currentDayStreak} Daily Streaks`,
             id: '4',
@@ -268,7 +301,6 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
             color: '#325AE8'
         },
     ]
-
 
 
     const {
@@ -294,7 +326,8 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
     const renderItem = useCallback(
         ({item}) => <FriendItem item={item}/>,
         [],
-    );  const renderItemGame = useCallback(
+    );
+    const renderItemGame = useCallback(
         ({item}) => <GameItem item={item}/>,
         [],
     );
@@ -305,7 +338,7 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
 
 //console.log(userDashboard)
 
-useRefreshOnFocus(refetch)
+    useRefreshOnFocus(refetch)
 
     return (
         <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
@@ -332,7 +365,9 @@ useRefreshOnFocus(refetch)
                         <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}
                                           style={styles.roundTopBtn}>
                             {
-                                notifications?.pages[0]?.data?.result.some((obj: { isRead: boolean; }) => !obj.isRead)  &&
+                                notifications?.pages[0]?.data?.result.some((obj: {
+                                    isRead: boolean;
+                                }) => !obj.isRead) &&
                                 <View style={styles.dot}/>
                             }
                             <Octicons name="bell-fill" size={22} color={"#000"}/>
@@ -356,7 +391,7 @@ useRefreshOnFocus(refetch)
                     <View style={styles.dailyStreak}>
                         <ImageBackground style={styles.streaKIcon} resizeMode={'contain'}
                                          source={require('../../assets/images/streakicon.png')}>
-
+                            <Text style={styles.streakText}> {userDashboard?.data?.currentDayStreak}</Text>
                         </ImageBackground>
                         <Text style={[styles.dailyStreakText, {
                             color: textColor
@@ -380,24 +415,31 @@ useRefreshOnFocus(refetch)
                         <Text style={[styles.friendsOnlineTitle, {
                             color: textColor
                         }]}>
-                            Friends Online
+                            Top Earners ({userDashboard?.data?.topUsers.length})
                         </Text>
                     </View>
 
+                    {
+                        loadingUser && <ActivityIndicator size={"small"} color={Colors.primaryColor}/>
+                    }
 
-                    <FlatList
+                    {
+                        !loadingUser && userDashboard && userDashboard?.data?.topUsers.length > 0 &&
 
-                        data={users}
-                        keyExtractor={keyExtractor}
-                        horizontal
-                        pagingEnabled
-                        scrollEnabled
-                        snapToAlignment="center"
-                        scrollEventThrottle={16}
-                        decelerationRate={"fast"}
-                        showsHorizontalScrollIndicator={false}
-                        renderItem={renderItem}
-                    />
+                        <FlatList
+
+                            data={userDashboard?.data?.topUsers}
+                            keyExtractor={keyExtractor}
+                            horizontal
+                            pagingEnabled
+                            scrollEnabled
+                            snapToAlignment="center"
+                            scrollEventThrottle={16}
+                            decelerationRate={"fast"}
+                            showsHorizontalScrollIndicator={false}
+                            renderItem={renderItem}
+                        />
+                    }
 
                 </View>
 
@@ -443,7 +485,6 @@ useRefreshOnFocus(refetch)
                             See all
                         </Text>
                     </View>
-
 
 
                     <FlatList
@@ -575,10 +616,20 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-start',
         height: '70%'
     },
+    streakText: {
+        marginTop: 10,
+        fontSize: fontPixel(14),
+        color: "#fff",
+        fontFamily: Fonts.quicksandMedium
+    },
     streaKIcon: {
         width: 40,
         resizeMode: 'center',
-        height: '100%'
+        height: '100%',
+
+
+        alignItems: "center",
+        justifyContent: "center"
     },
     dailyStreakText: {
         marginLeft: 10,
@@ -592,8 +643,7 @@ const styles = StyleSheet.create({
     },
     friendsOnline: {
         width: '90%',
-        height: 80,
-
+        height: 120,
         justifyContent: 'space-between',
         alignItems: 'flex-start',
         marginTop: pixelSizeVertical(30),
@@ -605,11 +655,31 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.quickSandBold,
     },
     friendsOnlineCard: {
-        width: 45,
+        width: 60,
         alignItems: 'center',
         justifyContent: 'center',
         marginHorizontal: 10,
-        height: 45,
+        height: 70,
+        borderRadius: 100,
+    },
+    userFullName: {
+        textAlign: 'center',
+        color: Colors.light.text,
+        fontSize: fontPixel(10),
+        fontFamily: Fonts.quicksandMedium,
+    },
+    userPointsText: {
+        textAlign: 'center',
+        color: Colors.light.tintTextColor,
+        fontSize: fontPixel(10),
+        fontFamily: Fonts.quicksandMedium,
+    },
+    friendsOnlineCardImageWrap: {
+        width: 35,
+        alignItems: 'center',
+        justifyContent: 'center',
+
+        height: 35,
         borderRadius: 100,
     },
     friendsOnlineCardImage: {
@@ -700,7 +770,7 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.quicksandMedium,
     },
     gameCard: {
-        marginRight:15,
+        marginRight: 15,
         width: widthPixel(250),
         height: heightPixel(270),
         borderRadius: 10,

@@ -16,7 +16,7 @@ import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {useAppSelector} from "../../app/hooks";
 import Colors from "../../constants/Colors";
-import {useInfiniteQuery, useQuery, useQueryClient,useMutation} from "@tanstack/react-query";
+import {useInfiniteQuery, useQuery, useQueryClient, useMutation} from "@tanstack/react-query";
 import {
     getProductComment,
     getSingleProduct,
@@ -54,10 +54,10 @@ import Animated, {
     withTiming
 } from "react-native-reanimated";
 import {truncateString, useRefreshOnFocus} from "../../helpers";
+import SwipeAnimatedToast from "../../components/toasty";
 
 
-
-const openLink = async (url:string) =>{
+const openLink = async (url: string) => {
     Linking.openURL(url)
 }
 
@@ -102,18 +102,21 @@ const TeamData = [
     },
 ]
 
+
 interface teamProps {
     item: {
-        teamName: string
-        image: string
-
+        "avatar": "https://res.cloudinary.com/dj0rcdagd/image/upload/v1672770058/xlichzhfbqprcqehqqrz.jpg",
+        "fullName": "Emmanuel Nduka",
+        "id": "30a2a634-3405-4880-881f-5bdb74b3d8e4",
+        "username": "gatewayMasterAccount"
     }
+
 }
 
 interface props {
     item: {
-        imageUrl:string,
-        id:string
+        imageUrl: string,
+        id: string
     }
 }
 
@@ -124,70 +127,6 @@ const formSchema = yup.object().shape({
 
 
 });
-
-
-const SimilarProductCardItem = ({item}: props) => {
-    const dataSlice = useAppSelector(state => state.data)
-    const {theme} = dataSlice
-    const backgroundColor = theme == 'light' ? "#FFFFFF" : "#141414"
-    const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
-    const darkTextColor = theme == 'light' ? Colors.light.darkText : Colors.dark.text
-    const lightText = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
-    const tintText = theme == 'light' ? "#AEAEAE" : Colors.dark.tintTextColor
-    return (
-        <View style={styles.similarProductsCard}>
-            <View style={styles.topCard}>
-                <View style={styles.topCardLeft}>
-
-
-                    <View style={styles.simProductsCardImageWrap}>
-                        <Image
-                            source={{uri: 'https://images.unsplash.com/photo-1611488006018-95b79a137ff5?q=80&w=2953&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'}}
-                            style={styles.productsCardImage}
-                        />
-                    </View>
-
-                    <Text style={[styles.simProductsCardTitle, {
-                        color: darkTextColor
-                    }]}>
-                        Ether Vault
-                    </Text>
-                </View>
-
-                <View style={styles.pointCardWrap}>
-                    <FontAwesome name="thumbs-up" size={19} color={"#E01414"}/>
-                    <Text style={[styles.pointCardText, {
-                        color: '#E01414'
-                    }]}>
-                        1600
-                    </Text>
-                </View>
-
-
-            </View>
-
-
-            <Text style={[styles.bodyText, {
-                color: tintText,
-                alignSelf: 'flex-start'
-            }]}>
-                A secure and easy-to-use wallet for managing your Ethereum and ERC-20...
-            </Text>
-
-            <View style={styles.productsCardBottom}>
-                <View style={styles.tinyAvatar}>
-                    <Image
-                        source={{uri: 'https://pub-static.fotor.com/assets/projects/pages/bc0734b486094ec0b1dec9aa4148de39/fotor-45a3795d0c5b46bcadc381a82e81fae0.jpg'}}
-                        style={styles.tinyAvatarImg}
-                    />
-                </View>
-                <Text style={styles.productsCardBottomText}>
-                    Declan Rice
-                </Text>
-            </View>
-        </View>
-    )
-}
 
 
 const ProductCardItem = ({item}: props) => {
@@ -206,7 +145,6 @@ const ProductCardItem = ({item}: props) => {
             />
 
 
-
         </View>
     )
 }
@@ -218,11 +156,11 @@ const TeamItem = ({item}: teamProps) => {
         <Pressable style={styles.teamItem}>
             <View style={styles.friendsOnlineCard}>
 
-                <Image source={{uri: item.image}} style={styles.friendsOnlineCardImage}/>
+                <Image source={{uri: item.avatar}} style={styles.friendsOnlineCardImage}/>
             </View>
 
             <Text style={styles.teamName}>
-                {item.teamName}
+                {item.fullName}
             </Text>
 
         </Pressable>
@@ -230,7 +168,7 @@ const TeamItem = ({item}: teamProps) => {
     )
 }
 
-const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) => {
+const ProductView = ({navigation, route}: RootStackScreenProps<'ProductView'>) => {
 
     const {item} = route.params
     const queryClient = useQueryClient();
@@ -249,7 +187,6 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
     };
 
 
-
     const rotation = useSharedValue(0);
 
 
@@ -259,15 +196,19 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
 
     const animatedStyle = useAnimatedStyle(() => {
         return {
-            transform: [{ rotateZ: `${rotation.value}deg` }]
+            transform: [{rotateZ: `${rotation.value}deg`}]
         };
     });
 
-    const {data,isLoading,refetch} = useQuery(['getSingleProduct',item.slug],()=>getSingleProduct(item.slug))
-    const {data:comments,isLoading:loadingComments,refetch:fetchComments} = useQuery(['ProductComments',item.id],()=>getProductComment(item.id))
+    const {data, isLoading, refetch} = useQuery(['getSingleProduct', item.slug], () => getSingleProduct(item.slug))
+    const {
+        data: comments,
+        isLoading: loadingComments,
+        refetch: fetchComments
+    } = useQuery(['ProductComments', item.id], () => getProductComment(item.id))
 
-    const {mutate,isLoading:upvoting} = useMutation(['upVoteProduct'],upVoteProduct,{
-        onSuccess:(data)=>{
+    const {mutate, isLoading: upvoting} = useMutation(['upVoteProduct'], upVoteProduct, {
+        onSuccess: (data) => {
             refetch()
 
         },
@@ -280,14 +221,13 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
 
     const handlePressLike = () => {
         mutate(item.id)
-        progress.value = withTiming(0, { duration: 500 });
-        progressMore.value = withTiming(0, { duration: 500 });
+        progress.value = withTiming(0, {duration: 500});
+        progressMore.value = withTiming(0, {duration: 500});
         rotation.value = withSequence(
-            withTiming(-10, { duration: 50 }),
-            withRepeat(withTiming(10, { duration: 100 }), 6, true),
-            withTiming(0, { duration: 50 })
+            withTiming(-10, {duration: 50}),
+            withRepeat(withTiming(10, {duration: 100}), 6, true),
+            withTiming(0, {duration: 50})
         )
-
 
 
     };
@@ -326,7 +266,6 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
         })
 
 
-
     useEffect(() => {
         const countries = require('../../constants/countries.json')
         const cons = countries['countries']
@@ -349,19 +288,18 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
         <TeamItem item={item}/>
     ), [])
 
-    const renderSimilarProductItem = useCallback(({item}) => (
-        <SimilarProductCardItem item={item}/>
-    ), [])
 
-    const {isLoading: loadingUser,data:userDashboard, isRefetching, refetch:fetchDashboard} = useQuery(['getUserDashboard'], getUserDashboard, {
-        contributors
-
-    })
+    const {
+        isLoading: loadingUser,
+        data: userDashboard,
+        isRefetching,
+        refetch: fetchDashboard
+    } = useQuery(['getUserDashboard'], getUserDashboard,)
     // ref
     const bottomSheetModalRef = useRef<BottomSheetModal>(null);
 
     // variables
-    const snapPoints = useMemo(() => ["25%", "75%","85%"], []);
+    const snapPoints = useMemo(() => ["25%", "75%", "85%"], []);
 
     // callbacks
     const handlePresentModalPress = useCallback(() => {
@@ -418,7 +356,7 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
 
         <>
             <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
-
+<SwipeAnimatedToast/>
                 <KeyboardAwareScrollView
 
                     style={{width: '100%',}} contentContainerStyle={[styles.scrollView, {
@@ -447,7 +385,9 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
                             <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}
                                               style={styles.roundTopBtn}>
                                 {
-                                    notifications?.pages[0]?.data?.result.some((obj: { isRead: boolean; }) => !obj.isRead)  &&
+                                    notifications?.pages[0]?.data?.result.some((obj: {
+                                        isRead: boolean;
+                                    }) => !obj.isRead) &&
                                     <View style={styles.dot}/>
                                 }
                                 <Octicons name="bell-fill" size={22} color={"#000"}/>
@@ -506,17 +446,22 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
 
                     </View>
                     <View style={styles.socialPlug}>
-                        <Pressable onPress={()=>openLink(item.socialMedia.find(item => item.name === 'instagram')?.url)} style={styles.shareBtn}>
+                        <Pressable
+                            onPress={() => openLink(item.socialMedia.find(item => item.name === 'instagram')?.url)}
+                            style={styles.shareBtn}>
 
-                            <Entypo name="instagram-with-circle" size={22} color="#BFBFBF" />
+                            <Entypo name="instagram-with-circle" size={22} color="#BFBFBF"/>
                         </Pressable>
 
 
-                        <Pressable onPress={()=>openLink(item.socialMedia.find(item => item.name === 'twitter')?.url)} style={styles.shareBtn}>
+                        <Pressable onPress={() => openLink(item.socialMedia.find(item => item.name === 'twitter')?.url)}
+                                   style={styles.shareBtn}>
                             <Fontisto name="twitter" size={20} color="#BFBFBF"/>
                         </Pressable>
 
-                        <Pressable onPress={()=>openLink(item.socialMedia.find(item => item.name === 'facebook')?.url)} style={styles.shareBtn}>
+                        <Pressable
+                            onPress={() => openLink(item.socialMedia.find(item => item.name === 'facebook')?.url)}
+                            style={styles.shareBtn}>
 
                             <FontAwesome name="facebook" size={20} color="#BFBFBF"/>
                         </Pressable>
@@ -524,7 +469,7 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
 
 
                     <View style={styles.actionBtnWrap}>
-                        <TouchableOpacity onPress={()=>openLink(item.websiteUrl)} style={[styles.actionBtn, {
+                        <TouchableOpacity onPress={() => openLink(item.websiteUrl)} style={[styles.actionBtn, {
                             backgroundColor: Colors.primaryColor
                         }]}>
                             <Fontisto name="world-o" size={14} color="#fff"/>
@@ -536,16 +481,20 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
                         </TouchableOpacity>
 
 
-                        <TouchableOpacity activeOpacity={0.7} onPress={handlePressLike}  style={[styles.actionBtn, {
-                            backgroundColor: data?.data?.upvotes.find(vote => vote.userId === userData.id) ? Colors.primaryColor : "#F2F2F2"
-                        }]}>
-                            <Animated.View style={[animatedStyle,{
-                                flexDirection:'row',
+                        <TouchableOpacity disabled={upvoting} activeOpacity={0.7} onPress={handlePressLike}
+                                          style={[styles.actionBtn, {
+                                              backgroundColor: data?.data?.upvotes.find((vote: {
+                                                  userId: string;
+                                              }) => vote.userId === userData.id) ? Colors.primaryColor : "#F2F2F2"
+                                          }]}>
+                            <Animated.View style={[animatedStyle, {
+                                flexDirection: 'row',
                                 alignItems: 'center',
                                 justifyContent: 'space-evenly',
-                             width:'100%'
+                                width: '100%'
                             }]}>
-                                <FontAwesome name="thumbs-up" size={14} color={data?.data?.upvotes.find(vote => vote.userId === userData.id) ? "#fff" :Colors.primaryColor}/>
+                                <FontAwesome name="thumbs-up" size={14}
+                                             color={data?.data?.upvotes.find(vote => vote.userId === userData.id) ? "#fff" : Colors.primaryColor}/>
                                 <Text style={[styles.buttonText, {
                                     color: data?.data?.upvotes.find(vote => vote.userId === userData.id) ? "#fff" : Colors.primaryColor
                                 }]}>
@@ -564,22 +513,22 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
                         }
                         {
                             !isLoading &&
-                           data && data?.data?.productSteps.length > 0 &&
+                            data && data?.data?.productSteps.length > 0 &&
 
 
-                        <FlatList
+                            <FlatList
 
-                            data={data?.data?.productSteps}
-                            keyExtractor={keyExtractor}
-                            horizontal
-                            pagingEnabled
-                            scrollEnabled
-                            snapToAlignment="center"
-                            scrollEventThrottle={16}
-                            decelerationRate={"fast"}
-                            showsHorizontalScrollIndicator={false}
-                            renderItem={renderItem}
-                        />
+                                data={data?.data?.productSteps}
+                                keyExtractor={keyExtractor}
+                                horizontal
+                                pagingEnabled
+                                scrollEnabled
+                                snapToAlignment="center"
+                                scrollEventThrottle={16}
+                                decelerationRate={"fast"}
+                                showsHorizontalScrollIndicator={false}
+                                renderItem={renderItem}
+                            />
                         }
                     </View>
 
@@ -595,7 +544,8 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
                             </Text>
 
                             <TouchableOpacity activeOpacity={0.7} onPress={copyToClipboard} style={styles.copyBtn}>
-                                {copied ? <Text style={styles.copyBtnText}>Copied</Text> : <Text style={styles.copyBtnText}>Copy</Text>}
+                                {copied ? <Text style={styles.copyBtnText}>Copied</Text> :
+                                    <Text style={styles.copyBtnText}>Copy</Text>}
                             </TouchableOpacity>
                         </TouchableOpacity>
 
@@ -611,13 +561,13 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
                             </Text>
 
 
-                            <View  style={styles.tagItemContainer}>
-                                {item?.categories.map((cat:{id:string,name:string})=>(
-                                <View key={cat.id} style={styles.tagItem}>
-                                    <Text style={styles.tagItemText}>
-                                        {cat.name}
-                                    </Text>
-                                </View>
+                            <View style={styles.tagItemContainer}>
+                                {item?.categories.map((cat: { id: string, name: string }) => (
+                                    <View key={cat.id} style={styles.tagItem}>
+                                        <Text style={styles.tagItemText}>
+                                            {cat.name}
+                                        </Text>
+                                    </View>
                                 ))}
 
 
@@ -630,31 +580,31 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
                                 Supported Countries
                             </Text>
                             {item.supportedCountries.length > 0 &&
-                            <View style={styles.tagItemContainer}>
-                                {
-                                    filteredCountries.map((country) =>(
-                                        <View key={item.phone} style={styles.tagItem}>
-                                            <Text>
-                                                {country.emoji}
-                                            </Text>
-                                      {/*      <Image
+                                <View style={styles.tagItemContainer}>
+                                    {
+                                        filteredCountries.map((country) => (
+                                            <View key={item.phone} style={styles.tagItem}>
+                                                <Text>
+                                                    {country.emoji}
+                                                </Text>
+                                                {/*      <Image
                                                 source={{uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Flag_of_Egypt.svg/800px-Flag_of_Egypt.svg.png'}}
                                                 style={styles.flagIcon}/>*/}
-                                            <Text style={styles.tagItemText}>
-                                                {country.name}
-                                            </Text>
-                                        </View>
+                                                <Text style={styles.tagItemText}>
+                                                    {country.name}
+                                                </Text>
+                                            </View>
 
-                                    ))
+                                        ))
 
-                                }
+                                    }
 
-                                <TouchableOpacity activeOpacity={0.8} style={[styles.tagItem, {
-                                    backgroundColor: '#F2F2F2'
-                                }]}>
-                                    <Text style={styles.seeMoreText}> See all</Text>
-                                </TouchableOpacity>
-                            </View>
+                                    <TouchableOpacity activeOpacity={0.8} style={[styles.tagItem, {
+                                        backgroundColor: '#F2F2F2'
+                                    }]}>
+                                        <Text style={styles.seeMoreText}> See all</Text>
+                                    </TouchableOpacity>
+                                </View>
                             }
                         </View>
 
@@ -686,57 +636,58 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
 
                     {
                         !isLoading &&
-                        data &&   data?.data?.contributors.length > 0 &&
+                        data && data?.data?.contributors.length > 0 &&
 
-                    <View style={styles.ourTeam}>
-                        <View style={{marginBottom: 5}}>
-                            <Text style={[styles.friendsOnlineTitle, {
-                                color: textColor
-                            }]}>
-                                Our Wonderful Team
-                            </Text>
+                        <View style={styles.ourTeam}>
+                            <View style={{marginBottom: 5}}>
+                                <Text style={[styles.friendsOnlineTitle, {
+                                    color: textColor
+                                }]}>
+                                    Our Wonderful Team
+                                </Text>
+                            </View>
+
+
+                            <FlatList
+
+                                data={data?.data?.contributors}
+                                keyExtractor={keyExtractor}
+                                horizontal
+                                pagingEnabled
+                                scrollEnabled
+                                snapToAlignment="center"
+                                scrollEventThrottle={16}
+                                decelerationRate={"fast"}
+                                showsHorizontalScrollIndicator={false}
+                                renderItem={renderTeamItem}
+                            />
+
                         </View>
-
-
-                        <FlatList
-
-                            data={TeamData}
-                            keyExtractor={keyExtractor}
-                            horizontal
-                            pagingEnabled
-                            scrollEnabled
-                            snapToAlignment="center"
-                            scrollEventThrottle={16}
-                            decelerationRate={"fast"}
-                            showsHorizontalScrollIndicator={false}
-                            renderItem={renderTeamItem}
-                        />
-
-                    </View>
                     }
 
-                    <Pressable onPress={()=>navigation.navigate('MakeComment',{
-                        id:item.id
+                    <Pressable onPress={() => navigation.navigate('MakeComment', {
+                        id: item.id
                     })} style={styles.wrapCommentBox}>
 
                         <View style={styles.userAvatar}>
-                            <Image source={{uri: !userData.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : userData.avatar}}
-                                   style={styles.userAvatarImage}/>
+                            <Image
+                                source={{uri: !userData.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : userData.avatar}}
+                                style={styles.userAvatarImage}/>
                         </View>
                         <View style={styles.commentBox}>
                             <Text>
                                 Leave a comment...
                             </Text>
 
-                            <TouchableOpacity onPress={()=>navigation.navigate('MakeComment',{
-                                id:item.id
+                            <TouchableOpacity onPress={() => navigation.navigate('MakeComment', {
+                                id: item.id
                             })} style={styles.passBtn}>
 
-                                <Ionicons name="paper-plane-outline" size={18} color="#333333" />
+                                <Ionicons name="paper-plane-outline" size={18} color="#333333"/>
 
                             </TouchableOpacity>
                         </View>
-                       {/* <CommentInput  editable={false} placeholder={'Leave a comment...'} value={commentText}/>
+                        {/* <CommentInput  editable={false} placeholder={'Leave a comment...'} value={commentText}/>
 */}
 
                     </Pressable>
@@ -745,12 +696,13 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
                     {
                         !loadingComments && comments && comments?.data?.result.length > 0 &&
 
-                        comments?.data?.result.map((comment)=>(
+                        comments?.data?.result.map((comment) => (
                             <View key={comment.id} style={styles.commentCard}>
                                 <View style={styles.commentCardTop}>
                                     <View style={styles.commentUserAvatar}>
-                                        <Image source={{uri: !comment.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : comment.avatar}}
-                                               style={styles.userAvatarImage}/>
+                                        <Image
+                                            source={{uri: !comment.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : comment.avatar}}
+                                            style={styles.userAvatarImage}/>
                                     </View>
 
                                     <View style={styles.commentBody}>
@@ -792,7 +744,7 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
                                     </Pressable>
 
 
-                                    <Pressable  style={styles.bottomBtn}>
+                                    <Pressable style={styles.bottomBtn}>
 
                                         <Text style={styles.bottomBtnText}>
                                             Share
@@ -804,8 +756,6 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
                             </View>
                         ))
                     }
-
-
 
 
                     <View style={styles.statsVault}>
@@ -822,7 +772,7 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
 
                             <View style={styles.vaultBoxImageWrap}>
                                 <Image
-                                    source={{uri:item.productLogo}}
+                                    source={{uri: item.productLogo}}
                                     style={styles.productsCardImage}
                                 />
                             </View>
@@ -832,11 +782,11 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
                                     {item.name}
                                 </Text>
                                 <Text style={styles.vaultTextBody}>
-                                {truncateString(item.description,25)}
+                                    {truncateString(item.description, 25)}
                                 </Text>
 
 
-                             {/*   <Text style={styles.vaultTextBody}>
+                                {/*   <Text style={styles.vaultTextBody}>
                                     A secure and easy-to-use wallet for managing your Ethereum and ERC-20...
                                 </Text>*/}
                             </View>
@@ -846,13 +796,15 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
 
 
                     <View style={styles.buttonContainer}>
-                        <TouchableOpacity activeOpacity={0.7} onPress={()=>openLink(item.appleStoreUrl)} style={styles.appStoreButton}>
+                        <TouchableOpacity activeOpacity={0.7} onPress={() => openLink(item.appleStoreUrl)}
+                                          style={styles.appStoreButton}>
                             <Image
                                 source={{uri: 'https://miro.medium.com/v2/resize:fit:1400/1*V9-OPWpauGEi-JMp05RC_A.png'}}
                                 style={styles.logo}/>
 
                         </TouchableOpacity>
-                        <TouchableOpacity activeOpacity={0.8} onPress={()=>openLink(item.googlePlayStoreUrl)} style={styles.googlePlayButton}>
+                        <TouchableOpacity activeOpacity={0.8} onPress={() => openLink(item.googlePlayStoreUrl)}
+                                          style={styles.googlePlayButton}>
                             <Image
                                 source={{uri: 'https://contentgrid.thdstatic.com/hdus/en_US/DTCCOMNEW/fetch/NexGen/ContentPage/androidbadgesbox2.png'}}
                                 style={styles.logo}/>
@@ -882,7 +834,7 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
                         </View>
 
 
-                     {/*   <View style={styles.otherDetailsBox}>
+                        {/*   <View style={styles.otherDetailsBox}>
                             <Text style={styles.otherDetailsBoxTitle}>
                                 Product of the week
                             </Text>
@@ -915,7 +867,7 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
                         </Text>
                     </View>*/}
 
-                 {/*   <View style={[styles.productsContainer, {}]}>
+                    {/*   <View style={[styles.productsContainer, {}]}>
 
 
                         <FlatList
@@ -934,12 +886,7 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
                     </View>*/}
 
 
-
-
                 </KeyboardAwareScrollView>
-
-
-
 
 
             </SafeAreaView>
@@ -1001,21 +948,19 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
 
                                 <Text style={styles.sheetText}>
                                     This is a verification process to know if you really own <Text style={{
-                                        fontFamily:Fonts.quickSandBold,
-                                    color:'#000'
+                                    fontFamily: Fonts.quickSandBold,
+                                    color: '#000'
                                 }}>{item.name}</Text>
                                 </Text>
 
 
-
-
                             </View>
-                            <Text style={[styles.sheetText,{
+                            <Text style={[styles.sheetText, {
                                 marginBottom: 30,
                             }]}>
                                 Please enter an email address that matches the product domain <Text style={{
-                                fontFamily:Fonts.quickSandBold,
-                                color:'#000'
+                                fontFamily: Fonts.quickSandBold,
+                                color: '#000'
                             }}>({item.websiteUrl}).</Text>
                             </Text>
                             <TextInput
@@ -1037,7 +982,7 @@ const ProductView = ({navigation,route}: RootStackScreenProps<'ProductView'>) =>
                                 value={values.email}
                                 label="Email"/>
 
-                            <Pressable disabled={!isValid} onPress={()=>handleSubmit()} style={styles.claimBtn}>
+                            <Pressable disabled={!isValid} onPress={() => handleSubmit()} style={styles.claimBtn}>
                                 <Text style={styles.claimBtnText}>
                                     Make Request
                                 </Text>
@@ -1344,11 +1289,11 @@ const styles = StyleSheet.create({
         shadowRadius: 7.22,
         elevation: 3,
     },
-    imageUrl:{
+    imageUrl: {
         width: widthPixel(320),
         height: heightPixel(220),
-        resizeMode:'cover',
-        borderRadius:10,
+        resizeMode: 'cover',
+        borderRadius: 10,
     },
     tagsBoxWrap: {
 
@@ -1499,19 +1444,19 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         flexDirection: 'row'
     },
-    commentBox:{
-        width:'80%',
-        borderRadius:  10,
+    commentBox: {
+        width: '80%',
+        borderRadius: 10,
         borderColor: "#CCCCCC",
         backgroundColor: 'transparent',
-        height:  heightPixel(55),
-        alignItems:'center',
-        justifyContent:'space-between',
-       paddingHorizontal:20,
+        height: heightPixel(55),
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 20,
         borderWidth: 1,
         flexDirection: 'row',
     },
-    commentBoxText:{
+    commentBoxText: {
         color: '#131313',
         fontSize: fontPixel(14),
         fontFamily: Fonts.quicksandSemiBold,

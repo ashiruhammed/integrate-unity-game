@@ -387,7 +387,7 @@ useRefreshOnFocus(refetch)
                         <FastImage
                             style={styles.adventureCard}
                             source={{
-                                uri: adventure?.imageUrl,
+                                uri: adventure?.imageUrl.replace(/^http:\/\//i, 'https://'),
                                 cache: FastImage.cacheControl.web,
                                 priority: FastImage.priority.normal,
                             }}

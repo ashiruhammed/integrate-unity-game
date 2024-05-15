@@ -194,11 +194,10 @@ const Profile = ({navigation}: RootTabScreenProps<'Profile'>) => {
                         <View style={styles.profileImage}>
 
 
-
-                                    <FastImage
+                              <FastImage
                                         style={styles.Image}
                                         source={{
-                                            uri: !user.userData?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : user.userData?.avatar,
+                                            uri: !user.userData?.avatar.replace(/^http:\/\//i, 'https://') ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : user?.userData?.avatar.replace(/^http:\/\//i, 'https://'),
 
                                             cache: FastImage.cacheControl.web,
                                             priority: FastImage.priority.normal,

@@ -27,6 +27,8 @@ import {FlashList} from "@shopify/flash-list";
 import {IF} from "../../helpers/ConditionJsx";
 import AIAdventures from "../learn/AIAdvenrures";
 import {useRefreshOnFocus} from "../../helpers";
+import {setAdventure} from "../../app/slices/dataSlice";
+import FastImage from "react-native-fast-image";
 
 
 
@@ -39,47 +41,62 @@ interface props {
         startedAdventure:boolean,
 
 },
+    setAdventure: (adventure: {}) => void
     theme:string
 }
 
-const LearnCardItem = ({item,theme}:props) =>{
+const LearnCardItem = ({item,theme,setAdventure}:props) =>{
     const backgroundColor = theme == 'light' ? "#FFFFFF" : "#141414"
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
     const lightText = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
 
+
     return(
-        <View style={[styles.learnCard,!item.startedAdventure &&{
-            opacity:0.7
-        }]}>
-            <CircularProgress active={item.startedAdventure} locked={true} size={44} progress={85} strokeWidth={4}/>
+        <Pressable onPress={() => {
+            setAdventure(item)
 
-            <Pressable style={styles.learnMainCard}>
+        }} style={[styles.learnCard, !item.startedAdventure && {}]}>
+            <CircularProgress active={item.startedAdventure}
+
+                              locked={false} size={44} progress={85} strokeWidth={4}/>
+
+            <Pressable onPress={() => {
+                setAdventure(item)
+
+            }} style={styles.learnMainCard}>
                 <View style={styles.learnMainCardCover}>
-
-
-                    <Image
-                        source={{uri: item.imageUrl}}
+                    <FastImage
                         style={styles.learnMainCardCoverImg}
+                        source={{
+                            uri: !item.imageUrl ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : item.imageUrl.replace(/^http:\/\//i, 'https://'),
+
+                            cache: FastImage.cacheControl.web,
+                            priority: FastImage.priority.normal,
+                        }}
+                        resizeMode={FastImage.resizeMode.cover}
                     />
+
+
+
                 </View>
 
                 <View style={styles.learnCardBody}>
-                    <Text style={[styles.missionText,{
-                        color:lightText
+                    <Text style={[styles.missionText, {
+                        color: lightText
                     }]}>
                         {item?._count?.modules} missions
                     </Text>
 
-                    <Text style={[styles.titleText,{
-                        color:textColor
+                    <Text style={[styles.titleText, {
+                        color: textColor
                     }]}>
                         {item.name}
                     </Text>
 
                     <View style={styles.rewardPoint}>
-                        <Ionicons name="gift" size={14} color={Colors.success} />
-                        <Text style={[styles.rewardPointText,{
-                            color:lightText
+                        <Ionicons name="gift" size={14} color={Colors.success}/>
+                        <Text style={[styles.rewardPointText, {
+                            color: lightText
                         }]}>
                             {item.rewardPoint} Reward Points
                         </Text>
@@ -88,17 +105,36 @@ const LearnCardItem = ({item,theme}:props) =>{
 
                 </View>
 
-                <TouchableOpacity style={styles.startBtn}>
-                    <Text style={styles.startBtnText}>
+                {item?.startedAdventure?
 
-                        {item?.startedAdventure ? 'Continue' :  'Start Adventure' }
-                    </Text>
-                </TouchableOpacity>
+                    <TouchableOpacity onPress={() => {
+                        setAdventure(item)
 
+                    }} style={styles.startBtn}>
+                        <Text style={styles.startBtnText}>
+
+                            {item?.status == 'COMPLETED'  ? 'Completed' : 'Continue'}
+                        </Text>
+                    </TouchableOpacity>
+                    :
+                    <TouchableOpacity onPress={() => {
+                        setAdventure(item)
+
+                    }} style={styles.startBtn}>
+                        <Text style={styles.startBtnText}>
+
+                            Start Adventure
+                        </Text>
+                    </TouchableOpacity>
+                }
 
             </Pressable>
 
-        </View>
+        </Pressable>
+
+
+
+
     )
 }
 
@@ -188,11 +224,15 @@ const Learn = ({navigation}: RootTabScreenProps<'Learn'>) => {
         })
 
     const keyExtractor = useCallback((item: { id: string }) => item.id, [],);
+    const selectAdventure = (adventure: {}) => {
+        dispatch(setAdventure({adventure}))
+        navigation.navigate('AdventureHome')
 
+    }
 
     const renderItem = useCallback(({item}) => (
 
-        <LearnCardItem  item={item} theme={theme}/>
+        <LearnCardItem setAdventure={selectAdventure}  item={item} theme={theme}/>
     ), [theme])
 
 
@@ -258,7 +298,7 @@ useRefreshOnFocus(refetch)
             <IF condition={tabIndex === 0}>
                 <View style={styles.flatList}>
                     {loadingAdventures && <ActivityIndicator size={"small"} color={Colors.primaryColor}/>}
-                    {loadingAdventures &&
+                    {!loadingAdventures && allAdventure?.pages[0].data.result.length > 0 &&
                     <FlashList
                         estimatedItemSize={200}
                         // refreshing={isLoading}
@@ -266,7 +306,7 @@ useRefreshOnFocus(refetch)
 
                         scrollEnabled
                         showsVerticalScrollIndicator={false}
-                        data={allAdventure?.pages[0]?.data.result}
+                        data={allAdventure?.pages[0].data.result}
                         renderItem={renderItem}
                         keyExtractor={keyExtractor}
                         onEndReachedThreshold={0.3}
