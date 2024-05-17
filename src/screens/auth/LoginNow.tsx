@@ -102,7 +102,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
     const onVerify = token => {
         setCaptchaToken(token)
         setToken(token)
-        console.log('success!', token);
+        //console.log('success!', token);
     }
 
     const onExpire = () => {
@@ -387,9 +387,10 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
         if (token !== '') {
             const body = JSON.stringify({
                 email: values.email.toLowerCase(),
-                captchaToken: captchaToken,
+                captchaToken: token,
                 password: values.password
             })
+
             mutate(body)
         }
     }, [token])
@@ -472,6 +473,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                      }}*/
                     //  onExpire={() => Alert.alert('onExpire event')}
                     onVerify={(token) => {
+                      //  console.log({token})
                         // Alert.alert('onVerify event');
                         setToken(token);
                     }}

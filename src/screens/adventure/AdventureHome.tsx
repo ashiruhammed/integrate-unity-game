@@ -145,7 +145,7 @@ const MissionCard = ({
     return (
 
         <Animated.View key={index} entering={FadeInLeft} exiting={FadeOutLeft}
-                       layout={Layout.easing(Easing.bounce).delay(20)} style={styles.missionCard}>
+                       style={styles.missionCard}>
             <>
                 <View style={styles.missionCardHead}>
 

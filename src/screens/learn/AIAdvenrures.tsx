@@ -259,11 +259,11 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-evenly',
         alignItems: 'flex-start',
-        height: heightPixel(300),
+        height: heightPixel(315),
     },
     learnMainCard: {
         width: widthPixel(285),
-        height: heightPixel(300),
+        height: heightPixel(315),
         backgroundColor: "#fff",
         shadowColor: "#212121",
         alignItems: 'center',

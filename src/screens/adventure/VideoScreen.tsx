@@ -287,12 +287,12 @@ const VideoScreen = ({navigation, route}: RootStackScreenProps<'VideoScreen'>) =
             adventureId: adventure?.id
         })
     }
-
+/*
     useEffect(() => {
         navigation.addListener('beforeRemove', () => {
-            video.current?.setNativeProps({paused: true});
+            video?.current?.setNativeProps({paused: true});
         });
-    }, []);
+    }, []);*/
 
 
     const nextSheet = () => {
@@ -313,6 +313,7 @@ const VideoScreen = ({navigation, route}: RootStackScreenProps<'VideoScreen'>) =
         []
     );
 
+    //console.log(lesson?.data?.video?.url)
 
     return (
 
@@ -481,7 +482,7 @@ const VideoScreen = ({navigation, route}: RootStackScreenProps<'VideoScreen'>) =
                     <View style={[styles.videoContainer, {
                         flex: 1,
                     }]}>
-                        <VideoPlayer
+                       <VideoPlayer
                             rate={1}
                             isFullscreen
                             toggleResizeModeOnFullscreen
@@ -494,9 +495,14 @@ const VideoScreen = ({navigation, route}: RootStackScreenProps<'VideoScreen'>) =
                             playInBackground={false}
                             containerStyle={styles.video}
                             videoRef={video}
-                            source={{uri: lesson?.data?.video?.url}}
+                            source={{uri: lesson?.data?.video?.url.replace(/^http:\/\//i, 'https://')}}
                             navigator={navigation}
                             showDuration
+                            onError={(e)=>{
+                                console.log(
+                                    e
+                                )
+                            }}
                             muted={false}
                             seekColor={Colors.primaryColor}
                         />

@@ -1,7 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
 import {BASE_URL, ACCESS_TOKEN, DEV_BASE_URL} from "@env";
 //const access_token = 'JGFyZ29uMmlkJHY9MTkkbT00MDk2LHQ9MyxwPTEkWnJjNEVDR05JTEYzU3B2WUJLZVBZdyRtdnNacUl6VVg3SG1UV2gvdjhQZXZGUXJOa1hWYUFHRkVKV3dCd0NobDBV'
-const BASE_URL_LIVE = !__DEV__ ? DEV_BASE_URL : BASE_URL
+const BASE_URL_LIVE = __DEV__ ? DEV_BASE_URL : BASE_URL
 //const BASE_URL_LIVE = DEV_BASE_URL
 
 interface signupProps {

@@ -1160,10 +1160,14 @@ PODS:
     - React-Core
   - react-native-version-check (3.4.7):
     - React-Core
-  - react-native-video (5.2.1):
+  - react-native-video (6.0.0):
+    - glog
+    - RCT-Folly (= 2022.05.16.00)
     - React-Core
-    - react-native-video/Video (= 5.2.1)
-  - react-native-video/Video (5.2.1):
+    - react-native-video/Video (= 6.0.0)
+  - react-native-video/Video (6.0.0):
+    - glog
+    - RCT-Folly (= 2022.05.16.00)
     - React-Core
   - react-native-webview (13.6.4):
     - glog
@@ -1823,7 +1827,7 @@ SPEC CHECKSUMS:
   react-native-safe-area-context: 0ee144a6170530ccc37a0fd9388e28d06f516a89
   react-native-slider: 33b8d190b59d4f67a541061bb91775d53d617d9d
   react-native-version-check: 6cd36aad4e30b8e3216747e3b4ddeb09e0647af8
-  react-native-video: c26780b224543c62d5e1b2a7244a5cd1b50e8253
+  react-native-video: 0c2ca9ef7008151d30be92244355d2a3d93462b4
   react-native-webview: ff06d1fe175ff827882ec88b696a7efcafa7e98d
   React-nativeconfig: b4d4e9901d4cabb57be63053fd2aa6086eb3c85f
   React-NativeModulesApple: cd26e56d56350e123da0c1e3e4c76cb58a05e1ee

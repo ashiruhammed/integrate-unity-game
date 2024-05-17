@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         width: '95%',
         backgroundColor: Colors.primaryColor,
-        height: heightPixel(180),
+        height: heightPixel(190),
         marginVertical: pixelSizeVertical(12),
         alignSelf: 'center',
     },

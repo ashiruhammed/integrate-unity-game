@@ -64,7 +64,7 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance}: props) => {
 
 
     const {data: ccdWallet} = useQuery(['getCCDWallet'], getCCDWallet)
-console.log(ccdWallet)
+
     // https://pro-api.coinmarketcap.com/v2/tools/price-conversion?CMC_PRO_API_KEY=c8d06b53-dfbe-4de8-9e0d-62fdb128cf8a&amount=300&symbol=Near
 
     const {

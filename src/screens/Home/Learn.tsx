@@ -298,7 +298,7 @@ useRefreshOnFocus(refetch)
             <IF condition={tabIndex === 0}>
                 <View style={styles.flatList}>
                     {loadingAdventures && <ActivityIndicator size={"small"} color={Colors.primaryColor}/>}
-                    {!loadingAdventures && allAdventure?.pages[0].data.result.length > 0 &&
+                    {!loadingAdventures && allAdventure?.pages[0]?.data?.result.length > 0 &&
                     <FlashList
                         estimatedItemSize={200}
                         // refreshing={isLoading}
@@ -306,7 +306,7 @@ useRefreshOnFocus(refetch)
 
                         scrollEnabled
                         showsVerticalScrollIndicator={false}
-                        data={allAdventure?.pages[0].data.result}
+                        data={allAdventure?.pages[0]?.data?.result}
                         renderItem={renderItem}
                         keyExtractor={keyExtractor}
                         onEndReachedThreshold={0.3}
@@ -457,11 +457,11 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-evenly',
         alignItems: 'flex-start',
-        height: heightPixel(300),
+        height: heightPixel(315),
     },
     learnMainCard: {
         width: widthPixel(285),
-        height: heightPixel(300),
+        height: heightPixel(315),
         backgroundColor: "#fff",
         shadowColor: "#212121",
         alignItems: 'center',
