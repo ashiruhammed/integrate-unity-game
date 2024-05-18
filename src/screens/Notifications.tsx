@@ -78,7 +78,7 @@ const dispatch = useDispatch()
 
 
         readNotifications(id).then(res =>{
-            console.log(res)
+           // console.log(res)
             if(res.success){
                 dispatch(addNotificationItem({
                     id: Math.random(),

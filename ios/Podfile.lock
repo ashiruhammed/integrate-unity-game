@@ -1,7 +1,4 @@
 PODS:
-  - AppsFlyerFramework (6.13.1):
-    - AppsFlyerFramework/Main (= 6.13.1)
-  - AppsFlyerFramework/Main (6.13.1)
   - boost (1.83.0)
   - BVLinearGradient (2.8.3):
     - React-Core
@@ -25,12 +22,8 @@ PODS:
     - ExpoModulesCore
   - EXNotifications (0.27.7):
     - ExpoModulesCore
-  - Expo (50.0.17):
+  - Expo (50.0.18):
     - ExpoModulesCore
-  - ExpoAdapterFBSDKNext (11.3.0):
-    - ExpoModulesCore
-    - FBSDKCoreKit
-    - React-Core
   - ExpoAppleAuthentication (6.3.0):
     - ExpoModulesCore
   - ExpoBlur (12.9.2):
@@ -86,8 +79,6 @@ PODS:
     - React-Core
     - sqlite3 (~> 3.42.0)
   - EXUpdatesInterface (0.15.3)
-  - FBAEMKit (15.0.0):
-    - FBSDKCoreKit_Basics (= 15.0.0)
   - FBLazyVector (0.73.6)
   - FBReactNativeSpec (0.73.6):
     - RCT-Folly (= 2022.05.16.00)
@@ -96,18 +87,6 @@ PODS:
     - React-Core (= 0.73.6)
     - React-jsi (= 0.73.6)
     - ReactCommon/turbomodule/core (= 0.73.6)
-  - FBSDKCoreKit (15.0.0):
-    - FBAEMKit (= 15.0.0)
-    - FBSDKCoreKit_Basics (= 15.0.0)
-  - FBSDKCoreKit_Basics (15.0.0)
-  - FBSDKGamingServicesKit (15.0.0):
-    - FBSDKCoreKit (= 15.0.0)
-    - FBSDKCoreKit_Basics (= 15.0.0)
-    - FBSDKShareKit (= 15.0.0)
-  - FBSDKLoginKit (15.0.0):
-    - FBSDKCoreKit (= 15.0.0)
-  - FBSDKShareKit (15.0.0):
-    - FBSDKCoreKit (= 15.0.0)
   - Firebase (10.7.0):
     - Firebase/Core (= 10.7.0)
   - Firebase/Analytics (10.7.0):
@@ -1130,29 +1109,11 @@ PODS:
   - React-Mapbuffer (0.73.6):
     - glog
     - React-debug
-  - react-native-appsflyer (6.13.1):
-    - AppsFlyerFramework (= 6.13.1)
-    - React
   - react-native-config (1.5.1):
     - react-native-config/App (= 1.5.1)
   - react-native-config/App (1.5.1):
     - React-Core
   - react-native-date-picker (5.0.2):
-    - React-Core
-  - react-native-fbsdk-next (11.3.0):
-    - React-Core
-    - react-native-fbsdk-next/Core (= 11.3.0)
-    - react-native-fbsdk-next/Login (= 11.3.0)
-    - react-native-fbsdk-next/Share (= 11.3.0)
-  - react-native-fbsdk-next/Core (11.3.0):
-    - FBSDKCoreKit (~> 15.0.0)
-    - React-Core
-  - react-native-fbsdk-next/Login (11.3.0):
-    - FBSDKLoginKit (~> 15.0.0)
-    - React-Core
-  - react-native-fbsdk-next/Share (11.3.0):
-    - FBSDKGamingServicesKit (~> 15.0.0)
-    - FBSDKShareKit (~> 15.0.0)
     - React-Core
   - react-native-safe-area-context (4.8.2):
     - React-Core
@@ -1403,7 +1364,6 @@ DEPENDENCIES:
   - EXManifests (from `../node_modules/expo-manifests/ios`)
   - EXNotifications (from `../node_modules/expo-notifications/ios`)
   - Expo (from `../node_modules/expo`)
-  - ExpoAdapterFBSDKNext (from `../node_modules/react-native-fbsdk-next/ios`)
   - ExpoAppleAuthentication (from `../node_modules/expo-apple-authentication/ios`)
   - ExpoBlur (from `../node_modules/expo-blur/ios`)
   - ExpoClipboard (from `../node_modules/expo-clipboard/ios`)
@@ -1457,10 +1417,8 @@ DEPENDENCIES:
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector-modern`)
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
-  - react-native-appsflyer (from `../node_modules/react-native-appsflyer`)
   - react-native-config (from `../node_modules/react-native-config`)
   - react-native-date-picker (from `../node_modules/react-native-date-picker`)
-  - react-native-fbsdk-next (from `../node_modules/react-native-fbsdk-next`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - "react-native-slider (from `../node_modules/@react-native-community/slider`)"
   - react-native-version-check (from `../node_modules/react-native-version-check`)
@@ -1501,13 +1459,6 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
-    - AppsFlyerFramework
-    - FBAEMKit
-    - FBSDKCoreKit
-    - FBSDKCoreKit_Basics
-    - FBSDKGamingServicesKit
-    - FBSDKLoginKit
-    - FBSDKShareKit
     - Firebase
     - FirebaseAnalytics
     - FirebaseCore
@@ -1557,8 +1508,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-notifications/ios"
   Expo:
     :path: "../node_modules/expo"
-  ExpoAdapterFBSDKNext:
-    :path: "../node_modules/react-native-fbsdk-next/ios"
   ExpoAppleAuthentication:
     :path: "../node_modules/expo-apple-authentication/ios"
   ExpoBlur:
@@ -1652,14 +1601,10 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/logger"
   React-Mapbuffer:
     :path: "../node_modules/react-native/ReactCommon"
-  react-native-appsflyer:
-    :path: "../node_modules/react-native-appsflyer"
   react-native-config:
     :path: "../node_modules/react-native-config"
   react-native-date-picker:
     :path: "../node_modules/react-native-date-picker"
-  react-native-fbsdk-next:
-    :path: "../node_modules/react-native-fbsdk-next"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
   react-native-slider:
@@ -1736,7 +1681,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
-  AppsFlyerFramework: 971521cf5b890c2afeab2f2c91734547b8b169ca
   boost: d3f49c53809116a5d38da093a8aa78bf551aed09
   BVLinearGradient: 880f91a7854faff2df62518f0281afb1c60d49a3
   DoubleConversion: fea03f2699887d960129cc54bba7e52542b6f953
@@ -1749,8 +1693,7 @@ SPEC CHECKSUMS:
   EXJSONUtils: 5c42959e87be238b045ef37cc5268b16a6c0ad4a
   EXManifests: 5e8c29f36c716af768a4ea47ec05e1b89ab93091
   EXNotifications: 1c117bf042bd05a5b1a1ffd06f4c36ff9921ed2b
-  Expo: 2cdb5916749a1509cf88114f1f510bd458630eb4
-  ExpoAdapterFBSDKNext: 620f4a7b1ca3fe9769d6ea14cd0963851fe94d5f
+  Expo: 09bd48f31bb7f1a3c97fd5a6cb28feae89cb4e40
   ExpoAppleAuthentication: 4fc9972356977f009911f2f3a5f56319c2a5b11b
   ExpoBlur: e832d874bd94afc0645daddbd3162ec1ce172080
   ExpoClipboard: b597982124f067ff9f5b89093eb3d97898d5d877
@@ -1771,14 +1714,8 @@ SPEC CHECKSUMS:
   EXStructuredHeaders: 5b0f47259db047dc1fdfa84752e292c2bfa68ecd
   EXUpdates: 17e26679a93e626b0ae3ebbff966cd7021413a0a
   EXUpdatesInterface: 3e444e2093e25b7ca0999a7d8c16e8392dee70c3
-  FBAEMKit: d8312d8451ead46282adc7f3565ffc4965e3a4a7
   FBLazyVector: f64d1e2ea739b4d8f7e4740cde18089cd97fe864
   FBReactNativeSpec: 9f2b8b243131565335437dba74923a8d3015e780
-  FBSDKCoreKit: 81879058dd06208c0820fc713d054ca54903e8ba
-  FBSDKCoreKit_Basics: eebc9bb69a0e5d133b92dca53a20716227faa454
-  FBSDKGamingServicesKit: e0766514d64d26a9f846e793c0a44bc4a236723b
-  FBSDKLoginKit: 11995469cd7da16fd4d5245e8d2ec61060479270
-  FBSDKShareKit: 9501792c3024580809f811a8a549868699d9bd32
   Firebase: 0219acf760880eeec8ce479895bd7767466d9f81
   FirebaseAnalytics: f8133442ee6f8512e28ff19e62ce15398bfaeace
   FirebaseCore: e317665b9d744727a97e623edbbed009320afdd7
@@ -1820,10 +1757,8 @@ SPEC CHECKSUMS:
   React-jsinspector: 85583ef014ce53d731a98c66a0e24496f7a83066
   React-logger: 3eb80a977f0d9669468ef641a5e1fabbc50a09ec
   React-Mapbuffer: 84ea43c6c6232049135b1550b8c60b2faac19fab
-  react-native-appsflyer: 2cc1f96348065fc23e976fc7a27e371789fb349e
   react-native-config: 86038147314e2e6d10ea9972022aa171e6b1d4d8
   react-native-date-picker: 90687f1dbd374ff0265dca99d949998364c22fa9
-  react-native-fbsdk-next: 16e652b5f1236492631185c58ec2ae15b029119d
   react-native-safe-area-context: 0ee144a6170530ccc37a0fd9388e28d06f516a89
   react-native-slider: 33b8d190b59d4f67a541061bb91775d53d617d9d
   react-native-version-check: 6cd36aad4e30b8e3216747e3b4ddeb09e0647af8

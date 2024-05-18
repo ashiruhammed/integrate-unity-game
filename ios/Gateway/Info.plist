@@ -21,7 +21,7 @@
 <key>CFBundlePackageType</key>
 <string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
 <key>CFBundleShortVersionString</key>
-<string>3.0.2</string>
+<string>3.0.6</string>
 <key>CFBundleSignature</key>
 <string>????</string>
 <key>CFBundleURLTypes</key>
@@ -47,7 +47,7 @@
 	</dict>
 </array>
 <key>CFBundleVersion</key>
-<string>62</string>
+<string>66</string>
 <key>FacebookAdvertiserIDCollectionEnabled</key>
 <false/>
 <key>FacebookAppID</key>
@@ -78,14 +78,8 @@
 </dict>
 <key>NSCameraUsageDescription</key>
 <string>This app uses the camera to let user put a photo in his profile page.</string>
-<key>NSLocationWhenInUseUsageDescription</key>
-<string>Allow user to receive remote notification</string>
-<key>NSMicrophoneUsageDescription</key>
-<string>Allow Brace to access your microphone</string>
 <key>NSPhotoLibraryUsageDescription</key>
 <string>This app needs to access the camera library so they can upload their profile image.</string>
-<key>NSUserTrackingUsageDescription</key>
-<string>This identifier will be used to deliver personalized ads to you.</string>
 <key>SKAdNetworkItems</key>
 <array>
 	<dict>

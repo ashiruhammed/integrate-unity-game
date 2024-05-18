@@ -22,7 +22,7 @@ import {persistor, store} from "./src/app/store";
 import {PersistGate} from "redux-persist/integration/react";
 import {PortalProvider} from "@gorhom/portal";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import messaging from '@react-native-firebase/messaging';
+
 import {Platform} from "react-native";
 
 import * as Notifications from 'expo-notifications';
@@ -33,8 +33,8 @@ import {
     requestUserPermission,
     notificationListener,
 } from './notification';
-import { Settings } from 'react-native-fbsdk-next'
-import appsFlyer from 'react-native-appsflyer';
+
+
 import {BASE_URL,AppID,DEV_BASE_URL,ACCESS_TOKEN} from "@env";
 import {logoutUser} from "./src/app/slices/userSlice";
 import {fontPixel, heightPixel} from "./src/helpers/normalize";
@@ -43,28 +43,12 @@ import {Fonts} from "./src/constants/Fonts";
 import ErrorBoundary from "react-native-error-boundary";
 import {GestureHandlerRootView} from "react-native-gesture-handler";
 import VersionCheck from 'react-native-version-check';
-Settings.initializeSDK();
-Settings.setAppID(AppID);
+
 enableScreens()
 
 const BASE_URL_LIVE = DEV_BASE_URL
 
-appsFlyer.initSdk(
-    {
-        devKey: 'ZQCnz6xc7VeXUpnbXj4cG5',
-        isDebug: false,
-        appId: 'id1669256052',
-        onInstallConversionDataListener:false, //Optional
-        onDeepLinkListener: true, //Optional
-        timeToWaitForATTUserAuthorization: 10 //for iOS 14.5
-    },
-    (result) => {
-      //  console.log(result);
-    },
-    (error) => {
-       // console.error(error);
-    }
-);
+
 
 
 
@@ -215,6 +199,7 @@ export default function App() {
         const fetchToken = async () => {
             const token = await getFcmToken();
             const BearerToken = await SecureStore.getItemAsync('Gateway-Token');
+           // console.log(token)
             if (token) {
                 setGeneratedToken(token);
                let timeoutId: NodeJS.Timeout
