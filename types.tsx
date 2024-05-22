@@ -60,6 +60,9 @@ export type RootStackParamList = {
     FundamentalData: undefined;
     ViewPoints: undefined;
     Concordium: undefined;
+    ConfirmIdentity: {
+        url:string
+    };
     GatewayToken: undefined;
     MoreInformation: undefined;
     VisualRepresentation: undefined;

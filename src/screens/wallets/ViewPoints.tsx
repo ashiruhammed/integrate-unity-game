@@ -7,9 +7,8 @@ import {
     ImageBackground,
     TouchableOpacity,
     Platform,
-    ScrollView,
     Pressable,
-    Keyboard, FlatList, Animated as MyAnimated, ActivityIndicator
+    Keyboard, FlatList, ActivityIndicator
 } from 'react-native';
 import {AntDesign, Entypo, Ionicons, Octicons} from "@expo/vector-icons";
 import {SafeAreaView} from "react-native-safe-area-context";
@@ -42,15 +41,15 @@ import {useRefreshOnFocus} from "../../helpers";
 
 interface props {
     item: {
-        "amount": "3000",
-        "createdAt": "2024-05-07T10:48:52.077Z",
+        "amount": string,
+        "createdAt": string,
         "deletedAt": null,
-        "id": "5d7a3304-85c6-401a-8fdd-949cbafc9292",
+        "id":string,
         "isDeleted": false,
-        "reason": "Point issued.",
+        "reason":string,
         "transactionId": null,
-        "user": { "avatar": "", "fullName": "Orji", "id": "c3208ae7-0849-4a86-b6e9-5d54dacd046d", "username": "ace" },
-        "userId": "c3208ae7-0849-4a86-b6e9-5d54dacd046d"
+        "user": { "avatar": string, "fullName": string, "id": string, "username": string },
+        "userId":string
     }
 }
 
@@ -86,7 +85,7 @@ const HistoryCard = ({item}: props) => {
                     justifyContent: 'flex-start'
                 }]}>
                     <Text style={styles.transactionTitle}>
-                        -{item.amount} GP
+                        +{item.amount} GP
                     </Text>
 
                 </View>
@@ -269,9 +268,9 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
                         Value: 200
                     </Text>
 
-                    <Text style={styles.cardText}>
+                  {/*  <Text style={styles.cardText}>
                         +4.0%
-                    </Text>
+                    </Text>*/}
                 </View>
             </View>
 
@@ -310,9 +309,9 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
                     Transactions
                 </Text>
 
-                <Text>
+               {/* <Text>
                     See all
-                </Text>
+                </Text>*/}
             </View>
         </>
     ), [])
@@ -357,12 +356,7 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
 
             <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
                 <SwipeAnimatedToast/>
-                <View
 
-                    style={[styles.scrollView, {
-                        backgroundColor
-                    }]}
-                >
                     <View style={styles.topBar}>
 
                         <View style={styles.leftButton}>
@@ -428,7 +422,7 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
 
 
                     </View>
-                </View>
+
 
             </SafeAreaView>
 
@@ -667,6 +661,7 @@ const styles = StyleSheet.create({
         fontSize: fontPixel(16),
     },
     transactions: {
+flex:1,
         width: '90%',
         alignItems: 'center'
     },
@@ -702,7 +697,7 @@ const styles = StyleSheet.create({
     },
     boxTransactionBodyLeft: {
 
-        width: '55%',
+        width: '65%',
         height: '70%',
         alignItems: 'flex-start',
         justifyContent: 'space-evenly',

@@ -149,6 +149,8 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
         })
 
 
+
+
     const {data: ccdWallet, isLoading: isLoadingWallet, refetch} = useQuery(['getCCDwallet'], getCCDWallet)
 
     //  console.log(ccdWallet)
@@ -311,6 +313,7 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
 
     const startNow = () => {
         mutate()
+
         /*navigation.navigate('BrowserView',{
             url:'https://id-verifier.testnet.concordium.com/api/verify/v1/096cb60717e702e0643598330c5f47da2b2b5c3674985e55f0b816351938348e/909b612d6573c6f931ccd7940517ed3bf8192dd312e7000b6b0da61514413e1b03cca48e7c58d65cd644882b4bb245bdb9ff3d74a2ce7d266a553925bd027a0f'
         })*/
@@ -327,12 +330,18 @@ const Concordium = ({navigation}: RootStackScreenProps<'Concordium'>) => {
         navigation.navigate('ConcordiumTransactions')
     }
 
+    const goBackNow = ()=>{
+        navigation.navigate('Dashboard',{
+            screen:'Wallet'
+        })
+    }
+
     useEffect(() => {
         refetch()
     }, []);
 
    // useRefreshOnFocus(refetch)
-console.log(ccdWallet)
+//console.log(ccdWallet)
 //console.log( JSON.stringify(transactions.data, null, 2))
     return (
 
@@ -374,7 +383,7 @@ console.log(ccdWallet)
 
                 </View>
                 <View style={styles.navButtonWrap}>
-                    <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.8}
+                    <TouchableOpacity onPress={goBackNow} activeOpacity={0.8}
                                       style={styles.navButton}>
 
                         <AntDesign name="arrowleft" size={24} color="black"/>
@@ -592,7 +601,7 @@ console.log(ccdWallet)
                             isLoading &&
                             <View style={styles.loading}>
 
-                                <Animated.View key={count} layout={Layout.easing(Easing.bounce).delay(150)}
+                                <Animated.View key={count}
                                                entering={FadeInDown.springify()} exiting={FadeOutDown}
                                                style={styles.loadingView}>
                                     <Text style={styles.Uploading}>

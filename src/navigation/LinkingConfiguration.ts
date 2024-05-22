@@ -5,34 +5,24 @@
  */
 
 import { LinkingOptions } from '@react-navigation/native';
-import * as Linking from 'expo-linking';
+
 
 import { RootStackParamList } from '../../types';
 
 const linking: LinkingOptions<RootStackParamList> = {
-  prefixes: [Linking.createURL('/')],
+  prefixes: ["gateway://"],
   config: {
     screens: {
       Dashboard: {
         screens: {
-          Home:{
-
-          },
-          Adventures:{
-
-          },
-          Community:{
-
-          },
-          MarketPlace:{
-
-          },
-          Profile:{
-
-          }
+          Home:'Home',
+          Learn:'Learn',
+          Wallet:'Wallet',
+         Profile:'Profile'
         },
       },
-      Wallet: {},
+      MyWallet: 'MyWallet',
+      Concordium:'Concordium/:token',
       auth:{
 
       },

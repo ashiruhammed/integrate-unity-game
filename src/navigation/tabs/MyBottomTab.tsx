@@ -94,7 +94,7 @@ export default () => {
                 }}
             />
 
-            <Tabs.Screen
+           {/* <Tabs.Screen
                 name="Games"
                 component={Games}
                 options={{
@@ -112,7 +112,7 @@ export default () => {
 
                     ),
                 }}
-            />
+            />*/}
 
             <Tabs.Screen
 
@@ -183,7 +183,7 @@ export default () => {
                                             opacity:focused ? 1 : 0.3
                                         }]}
                                         source={{
-                                            uri: !user.userData?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' :  user.userData?.avatar,
+                                            uri: !user.userData?.avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' :  user.userData?.avatar.replace(/^http:\/\//i, 'https://'),
 
                                             cache: FastImage.cacheControl.web,
                                             priority: FastImage.priority.normal,

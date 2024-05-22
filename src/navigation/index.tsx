@@ -4,20 +4,18 @@
  *
  */
 import {FontAwesome, FontAwesome5, Ionicons, Octicons} from '@expo/vector-icons';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+
 import {NavigationContainer, DefaultTheme, DarkTheme} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import * as React from 'react';
-import {ColorSchemeName, Image, Pressable, View, StyleSheet} from 'react-native';
+import {ColorSchemeName, Image, View, StyleSheet} from 'react-native';
 
 import Colors from '../constants/Colors';
-import useColorScheme from '../hooks/useColorScheme';
 import ModalScreen from '../screens/ModalScreen';
 import NotFoundScreen from '../screens/NotFoundScreen';
 
-import {CommunityStackParamList, RootStackParamList, RootTabParamList, RootTabScreenProps} from '../../types';
-import LinkingConfiguration from './LinkingConfiguration';
-import OnBoardingScreen from "../screens/onboarding/OnBoarding";
+import {CommunityStackParamList, RootStackParamList} from '../../types';
+
 import {AuthNavigator} from "./AuthNavigation";
 import MyBottomTab from "./tabs/MyBottomTab";
 import EditProfile from "../screens/profile/EditProfile";
@@ -81,6 +79,8 @@ import BrowserView from "../screens/wallets/BrowserView";
 import SearchUser from "../screens/discover/create/SearchUser";
 import ConcordiumTransactions from "../screens/wallets/ConcordiumTransactions";
 import GateTokenTransactions from "../screens/wallets/GateTokenTransactions";
+import ConfirmIdentity from "../screens/wallets/ConfirmIdentity";
+import LinkingConfiguration from "./LinkingConfiguration";
 
 const styles = StyleSheet.create({
     displayPhoto: {
@@ -358,6 +358,7 @@ function RootNavigator() {
                         <Stack.Screen name="LeaveReview" component={LeaveReview}/>
                         <Stack.Screen name="CommunityInfo" component={CommunityInfo}/>*/}
                         <Stack.Screen name="AllCommunities" component={AllCommunities}/>
+                        <Stack.Screen name="ConfirmIdentity" component={ConfirmIdentity}/>
                         <Stack.Screen name="AdventureHome" component={AdventureHome}/>
                         <Stack.Screen name="VideoScreen" component={VideoScreen}/>
                         <Stack.Screen name="QuizScreen" component={QuizScreen}/>

@@ -659,13 +659,14 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         marginHorizontal: 10,
-        height: 70,
+        height: 80,
         borderRadius: 100,
     },
     userFullName: {
+        marginTop:5,
         textAlign: 'center',
         color: Colors.light.text,
-        fontSize: fontPixel(10),
+        fontSize: fontPixel(12),
         fontFamily: Fonts.quicksandMedium,
     },
     userPointsText: {
