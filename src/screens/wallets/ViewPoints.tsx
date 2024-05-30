@@ -169,7 +169,7 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
         isFetchingNextPage,
         refetch,
 
-        isRefetching
+
     } = useInfiniteQuery([`points-history`], ({pageParam = 1}) => getPointsHistory.history(pageParam),
         {
             networkMode: 'online',
@@ -241,6 +241,8 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
         }
     };
 
+
+
     const renderItemHeader = useCallback(() => (
         <>
 
@@ -288,7 +290,7 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
                 </Pressable>*/}
 
 
-                <Pressable disabled={!ccdWallet?.data } onPress={openRedeem} style={[styles.dahButton, {
+                <Pressable disabled={!ccdWallet?.data} onPress={openRedeem} style={[styles.dahButton, {
                     backgroundColor:ccdWallet?.data ?  "#D90429" : '#eee'
                 }]}>
                     <Text style={[styles.buttonText, {
@@ -314,7 +316,7 @@ const ViewPoints = ({navigation}: RootStackScreenProps<'ViewPoints'>) => {
                 </Text>*/}
             </View>
         </>
-    ), [])
+    ), [ccdWallet])
 
     const renderItem = useCallback(({item}) => (
         <HistoryCard item={item}/>

@@ -472,7 +472,7 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
                 </View>
 
 
-                <View style={styles.games}>
+               {/* <View style={styles.games}>
                     <View style={styles.titleWrap}>
                         <Text style={[styles.friendsOnlineTitle, {
                             color: textColor
@@ -503,7 +503,7 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
 
 
                 </View>
-
+*/}
 
             </ScrollView>
         </SafeAreaView>
@@ -643,7 +643,7 @@ const styles = StyleSheet.create({
     },
     friendsOnline: {
         width: '90%',
-        height: 120,
+        minHeight: heightPixel(120),
         justifyContent: 'space-between',
         alignItems: 'flex-start',
         marginTop: pixelSizeVertical(30),
@@ -659,7 +659,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         marginHorizontal: 10,
-        height: 80,
+        minHeight: 80,
         borderRadius: 100,
     },
     userFullName: {
@@ -702,7 +702,7 @@ const styles = StyleSheet.create({
     },
     achievements: {
         width: '90%',
-        height: 200,
+        minHeight: 200,
 
         flexWrap: 'wrap',
 

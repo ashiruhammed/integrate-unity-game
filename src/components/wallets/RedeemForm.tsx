@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 
-import {Text, View, StyleSheet, ActivityIndicator, TouchableOpacity, Modal} from 'react-native';
+import {Text, View, StyleSheet, ActivityIndicator, TouchableOpacity, Modal, Platform} from 'react-native';
 import {useFormik} from "formik";
 import * as yup from "yup";
 import AdvancedTextInput from "../inputs/AdvancedTextInput";
@@ -89,7 +89,7 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance}: props) => {
             const {points} = values;
             const body = JSON.stringify({
                 amount: points,
-                "network": data?.data.find((wallet: { token: string; }) => wallet.token == walletOption).network,
+                "network": data?.data.find((wallet: { token: string; }) => wallet.token == walletOption.toLowerCase()).network,
                 "token": walletOption
             })
 
@@ -109,12 +109,12 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance}: props) => {
             if(ccdWallet?.data !== null) {
                 setPointsVal(`${data?.data.find((wallet: {
                     token: string;
-                }) => wallet.token == walletOption).value} ${data?.data.find(wallet => wallet.token == walletOption)?.token}`)
+                }) => wallet.token == walletOption.toLowerCase()).value} ${data?.data.find((wallet: { token: string; }) => wallet.token == walletOption.toLowerCase())?.token}`)
                 //defaultPointsConvertValue =
             }
             setDefaultPointsConvertValue(`${data?.data.find((wallet: {
                 token: string;
-            }) => wallet.token == walletOption)?.value * +points}`)
+            }) => wallet.token == walletOption.toLowerCase())?.value * +points}`)
         } else {
             setDefaultPointsConvertValue('0')
             setPointsVal('0')
@@ -169,7 +169,9 @@ const RedeemForm = ({isLoading, redeemNow, pointBalance}: props) => {
                 value={values.points}
             />
 
-            <View style={styles.exchangeView}>
+            <View style={[styles.exchangeView,{
+                top:Platform.OS == 'android' ? 45 : 60,
+            }]}>
                 <MaterialCommunityIcons name="swap-vertical-circle" size={45}
                                         color={theme == 'light' ? "rgba(0, 0, 0, 0.8)" : "rgba(227,227,227,0.8)"}/>
             </View>
@@ -244,7 +246,7 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.quickSandBold
     },
     exchangeView: {
-        top: 60,
+
         zIndex: 1,
         position: 'absolute',
         borderRadius: 40,

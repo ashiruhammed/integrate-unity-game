@@ -21,6 +21,7 @@ import GmailStyleSwipeableRow from "../components/GmailStyleSwipeableRow";
 import SwipeAnimatedToast from "../components/toasty";
 import {addNotificationItem} from "../app/slices/dataSlice";
 import {useDispatch} from "react-redux";
+import EmptyState from "../components/EmptyState";
 
 
 interface props {
@@ -36,15 +37,12 @@ interface props {
         "updatedAt": string,
         "deletedAt": null
     },
-    avatar:string
+    avatar: string
 }
 
 
 var relativeTime = require('dayjs/plugin/relativeTime')
 dayjs.extend(relativeTime)
-
-
-
 
 
 //  To toggle LTR/RTL change to `true`
@@ -56,7 +54,7 @@ type DataRow = {
     message: string;
 };
 
-const Row = ({ item }: { item: DataRow }) => (
+const Row = ({item}: { item: DataRow }) => (
     // eslint-disable-next-line no-alert
     <RectButton style={styles.rectButton} onPress={() => window.alert(item.from)}>
         <Text style={styles.fromText}>{item.from}</Text>
@@ -67,26 +65,26 @@ const Row = ({ item }: { item: DataRow }) => (
     </RectButton>
 );
 
-const SwipeableRow = ({item, theme,avatar}: props) => {
+const SwipeableRow = ({item, theme, avatar}: props) => {
 
-const dispatch = useDispatch()
+    const dispatch = useDispatch()
     const lightTextColor = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tint
 
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
 
-    const handlePress = (id:string) => {
+    const handlePress = (id: string) => {
 
 
-        readNotifications(id).then(res =>{
-           // console.log(res)
-            if(res.success){
+        readNotifications(id).then(res => {
+            // console.log(res)
+            if (res.success) {
                 dispatch(addNotificationItem({
                     id: Math.random(),
                     type: 'success',
                     body: res.message,
                 }))
 
-            }else{
+            } else {
                 dispatch(addNotificationItem({
                     id: Math.random(),
                     type: 'error',
@@ -97,52 +95,53 @@ const dispatch = useDispatch()
         })
         // Add your onPress functionality here
     };
- /*   if (index % 2 === 0) {
-        return (
-            <AppleStyleSwipeableRow>
-                <Row item={item} />
-            </AppleStyleSwipeableRow>
-        );
-    } else {*/
-        return (
-            <AppleStyleSwipeableRow  onPress={()=>handlePress(item.id)}>
-                <Animated.View key={item.id}
-                               entering={FadeInDown.springify()} exiting={FadeOutDown} style={[styles.notificationCard,!item.isRead &&{
-                                backgroundColor:"#f9f9f9"
+    /*   if (index % 2 === 0) {
+           return (
+               <AppleStyleSwipeableRow>
+                   <Row item={item} />
+               </AppleStyleSwipeableRow>
+           );
+       } else {*/
+    return (
+        <AppleStyleSwipeableRow onPress={() => handlePress(item.id)}>
+            <Animated.View key={item.id}
+                           entering={FadeInDown.springify()} exiting={FadeOutDown}
+                           style={[styles.notificationCard, !item.isRead && {
+                               backgroundColor: "#f9f9f9"
 
-                }]}>
+                           }]}>
 
-                    <View style={styles.roundImage}>
-                        <FastImage
-                            style={styles.userAvatar}
-                            source={{
-                                uri: !avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : avatar,
-                                cache: FastImage.cacheControl.web,
-                                priority: FastImage.priority.normal,
-                            }}
-                            resizeMode={FastImage.resizeMode.cover}
-                        />
+                <View style={styles.roundImage}>
+                    <FastImage
+                        style={styles.userAvatar}
+                        source={{
+                            uri: !avatar ? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png' : avatar,
+                            cache: FastImage.cacheControl.web,
+                            priority: FastImage.priority.normal,
+                        }}
+                        resizeMode={FastImage.resizeMode.cover}
+                    />
 
-                    </View>
+                </View>
 
-                    <View style={styles.notificationBody}>
-                        <Text style={[styles.notificationBodyText,{
-                            color: textColor
-                        }]}>
-                            <Text style={{
-                                color: textColor,
-                                fontFamily: Fonts.quicksandSemiBold,
-                            }}>{item.title}</Text> {item.description}
-                        </Text>
-                        <Text style={[styles.time,{
-                            color: lightTextColor
-                        }]}>
-                            { dayjs(item.createdAt).fromNow() }
-                        </Text>
-                    </View>
-                </Animated.View>
-            </AppleStyleSwipeableRow>
-        );
+                <View style={styles.notificationBody}>
+                    <Text style={[styles.notificationBodyText, {
+                        color: textColor
+                    }]}>
+                        <Text style={{
+                            color: textColor,
+                            fontFamily: Fonts.quicksandSemiBold,
+                        }}>{item.title}</Text> {item.description}
+                    </Text>
+                    <Text style={[styles.time, {
+                        color: lightTextColor
+                    }]}>
+                        {dayjs(item.createdAt).fromNow()}
+                    </Text>
+                </View>
+            </Animated.View>
+        </AppleStyleSwipeableRow>
+    );
 
 };
 
@@ -156,11 +155,9 @@ const Notifications = () => {
     const user = useAppSelector(state => state.user)
     const {userData} = user
 
-const close = () => {
+    const close = () => {
 
-}
-
-
+    }
 
 
     const {
@@ -193,8 +190,8 @@ const close = () => {
         }
     };
     const renderItem = useCallback(
-        ({item,index}) => (
-            <SwipeableRow item={item} index={index} theme={theme} />
+        ({item, index}) => (
+            <SwipeableRow item={item} index={index} theme={theme}/>
         ),
         [theme],
     );
@@ -202,7 +199,7 @@ const close = () => {
 
     const keyExtractor = useCallback((item: { id: any; }) => item.id, [],);
 
-useRefreshOnFocus(refetch)
+    useRefreshOnFocus(refetch)
     return (
         <SafeAreaView style={[styles.safeArea, {
             backgroundColor
@@ -216,6 +213,13 @@ useRefreshOnFocus(refetch)
                     backgroundColor
                 }]}
             >
+
+
+                {!isLoading && notifications && notifications?.pages[0]?.data?.result?.length < 1 &&
+                    <EmptyState message={"You have no new notification 🔕"}/>
+                }
+
+
                 {
                     isLoading &&
                     <View style={styles.loading}>
@@ -228,19 +232,19 @@ useRefreshOnFocus(refetch)
                     !isLoading && notifications && notifications?.pages[0]?.data?.result?.length > 0 &&
 
                     <FlashList
-                    estimatedItemSize={200}
-                    refreshing={isLoading}
-                    onRefresh={refetch}
-                    scrollEnabled
-                    showsVerticalScrollIndicator={false}
-                    data={notifications?.pages[0].data.result}
-                    renderItem={renderItem}
-                    onEndReached={loadMore}
-                    keyExtractor={keyExtractor}
-                    onEndReachedThreshold={0.3}
-                    ListFooterComponent={isFetchingNextPage ?
-                        <ActivityIndicator size="small" color={Colors.primaryColor}/> : null}
-                />
+                        estimatedItemSize={200}
+                        refreshing={isLoading}
+                        onRefresh={refetch}
+                        scrollEnabled
+                        showsVerticalScrollIndicator={false}
+                        data={notifications?.pages[0].data.result}
+                        renderItem={renderItem}
+                        onEndReached={loadMore}
+                        keyExtractor={keyExtractor}
+                        onEndReachedThreshold={0.3}
+                        ListFooterComponent={isFetchingNextPage ?
+                            <ActivityIndicator size="small" color={Colors.primaryColor}/> : null}
+                    />
                 }
 
             </View>
@@ -264,11 +268,11 @@ const styles = StyleSheet.create({
         paddingHorizontal: pixelSizeHorizontal(20)
     },
     notificationCard: {
-paddingVertical:10,
-        paddingHorizontal:10,
-        borderRadius:5,
+        paddingVertical: 10,
+        paddingHorizontal: 10,
+        borderRadius: 5,
         width: '100%',
-       marginVertical:pixelSizeVertical(10),
+        marginVertical: pixelSizeVertical(10),
         height: heightPixel(100),
         flexDirection: 'row',
         justifyContent: 'flex-start',
@@ -299,7 +303,7 @@ paddingVertical:10,
     },
     notificationBodyText: {
 
-        lineHeight:heightPixel(22),
+        lineHeight: heightPixel(22),
         fontFamily: Fonts.quicksandRegular,
         color: Colors.light.text,
         fontSize: fontPixel(14)
@@ -318,8 +322,7 @@ paddingVertical:10,
     },
 
 
-
-/*SWIPE*/
+    /*SWIPE*/
 
 
     rectButton: {

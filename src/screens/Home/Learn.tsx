@@ -29,29 +29,28 @@ import AIAdventures from "../learn/AIAdvenrures";
 import {useRefreshOnFocus} from "../../helpers";
 import {setAdventure} from "../../app/slices/dataSlice";
 import FastImage from "react-native-fast-image";
-
-
+import EmptyState from "../../components/EmptyState";
 
 
 interface props {
-    item:{
-        imageUrl:string,
-        name:string,
-        rewardPoint:number,
-        startedAdventure:boolean,
+    item: {
+        imageUrl: string,
+        name: string,
+        rewardPoint: number,
+        startedAdventure: boolean,
 
-},
+    },
     setAdventure: (adventure: {}) => void
-    theme:string
+    theme: string
 }
 
-const LearnCardItem = ({item,theme,setAdventure}:props) =>{
+const LearnCardItem = ({item, theme, setAdventure}: props) => {
     const backgroundColor = theme == 'light' ? "#FFFFFF" : "#141414"
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
     const lightText = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
 
 
-    return(
+    return (
         <Pressable onPress={() => {
             setAdventure(item)
 
@@ -75,7 +74,6 @@ const LearnCardItem = ({item,theme,setAdventure}:props) =>{
                         }}
                         resizeMode={FastImage.resizeMode.cover}
                     />
-
 
 
                 </View>
@@ -105,7 +103,7 @@ const LearnCardItem = ({item,theme,setAdventure}:props) =>{
 
                 </View>
 
-                {item?.startedAdventure?
+                {item?.startedAdventure ?
 
                     <TouchableOpacity onPress={() => {
                         setAdventure(item)
@@ -113,7 +111,7 @@ const LearnCardItem = ({item,theme,setAdventure}:props) =>{
                     }} style={styles.startBtn}>
                         <Text style={styles.startBtnText}>
 
-                            {item?.status == 'COMPLETED'  ? 'Completed' : 'Continue'}
+                            {item?.status == 'COMPLETED' ? 'Completed' : 'Continue'}
                         </Text>
                     </TouchableOpacity>
                     :
@@ -133,11 +131,8 @@ const LearnCardItem = ({item,theme,setAdventure}:props) =>{
         </Pressable>
 
 
-
-
     )
 }
-
 
 
 const Learn = ({navigation}: RootTabScreenProps<'Learn'>) => {
@@ -163,16 +158,17 @@ const Learn = ({navigation}: RootTabScreenProps<'Learn'>) => {
     const lightText = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
 
 
-    const {data,isLoading} = useQuery(['aiAdventures'], aiAdventures)
-    const {isLoading: loadingUser,data:userDashboard, refetch:fetchDashboard} = useQuery(['getUserDashboard'], getUserDashboard, {
-
-
-    })
+    const {data, isLoading} = useQuery(['aiAdventures'], aiAdventures)
+    const {
+        isLoading: loadingUser,
+        data: userDashboard,
+        refetch: fetchDashboard
+    } = useQuery(['getUserDashboard'], getUserDashboard, {})
 
 
     const {
-        isLoading:loadingAdventures,
-        data:allAdventure,
+        isLoading: loadingAdventures,
+        data: allAdventure,
         hasNextPage,
         fetchNextPage,
         isFetchingNextPage,
@@ -194,7 +190,7 @@ const Learn = ({navigation}: RootTabScreenProps<'Learn'>) => {
             getPreviousPageParam: (firstPage, allPages) => firstPage.prevCursor,
         })
 
-  // console.log(allAdventure?.pages[0])
+    // console.log(allAdventure?.pages[0])
     const loadMore = () => {
         if (hasNextPage) {
             fetchNextPage();
@@ -232,14 +228,11 @@ const Learn = ({navigation}: RootTabScreenProps<'Learn'>) => {
 
     const renderItem = useCallback(({item}) => (
 
-        <LearnCardItem setAdventure={selectAdventure}  item={item} theme={theme}/>
+        <LearnCardItem setAdventure={selectAdventure} item={item} theme={theme}/>
     ), [theme])
 
 
-
-
-
-useRefreshOnFocus(refetch)
+    useRefreshOnFocus(refetch)
 
     return (
         <SafeAreaView style={[styles.safeArea, {backgroundColor}]}>
@@ -263,7 +256,7 @@ useRefreshOnFocus(refetch)
                     <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}
                                       style={styles.roundTopBtn}>
                         {
-                            notifications?.pages[0]?.data?.result.some((obj: { isRead: boolean; }) => !obj.isRead)  &&
+                            notifications?.pages[0]?.data?.result.some((obj: { isRead: boolean; }) => !obj.isRead) &&
                             <View style={styles.dot}/>
                         }
                         <Octicons name="bell-fill" size={22} color={"#000"}/>
@@ -274,8 +267,8 @@ useRefreshOnFocus(refetch)
             </View>
 
             <View style={styles.pageTitleWrap}>
-                <Text style={[styles.pageTitle,{
-                    color:textColor
+                <Text style={[styles.pageTitle, {
+                    color: textColor
                 }]}>
                     Learn
                 </Text>
@@ -297,31 +290,36 @@ useRefreshOnFocus(refetch)
 
             <IF condition={tabIndex === 0}>
                 <View style={styles.flatList}>
+
+                    {!loadingAdventures && allAdventure?.pages[0]?.data?.result.length < 1 &&
+                        <EmptyState message={"No adventures available yet"}/>
+                    }
+
                     {loadingAdventures && <ActivityIndicator size={"small"} color={Colors.primaryColor}/>}
                     {!loadingAdventures && allAdventure?.pages[0]?.data?.result.length > 0 &&
-                    <FlashList
-                        estimatedItemSize={200}
-                        // refreshing={isLoading}
-                        //  ListHeaderComponent={renderHeader}
+                        <FlashList
+                            estimatedItemSize={200}
+                            // refreshing={isLoading}
+                            //  ListHeaderComponent={renderHeader}
 
-                        scrollEnabled
-                        showsVerticalScrollIndicator={false}
-                        data={allAdventure?.pages[0]?.data?.result}
-                        renderItem={renderItem}
-                        keyExtractor={keyExtractor}
-                        onEndReachedThreshold={0.3}
-                        ListFooterComponent={isFetchingNextPage ?
-                            <ActivityIndicator size="small" color={Colors.primaryColor}/> : null}
-                        /*refreshControl={
-                            <RefreshControl
-                                tintColor={Colors.primary}
-                                refreshing={refreshing}
-                                onRefresh={refresh}
-                            />
-                        }*/
+                            scrollEnabled
+                            showsVerticalScrollIndicator={false}
+                            data={allAdventure?.pages[0]?.data?.result}
+                            renderItem={renderItem}
+                            keyExtractor={keyExtractor}
+                            onEndReachedThreshold={0.3}
+                            ListFooterComponent={isFetchingNextPage ?
+                                <ActivityIndicator size="small" color={Colors.primaryColor}/> : null}
+                            /*refreshControl={
+                                <RefreshControl
+                                    tintColor={Colors.primary}
+                                    refreshing={refreshing}
+                                    onRefresh={refresh}
+                                />
+                            }*/
 
 
-                    />
+                        />
                     }
                 </View>
             </IF>
@@ -329,11 +327,10 @@ useRefreshOnFocus(refetch)
             <IF condition={tabIndex === 1}>
                 <View style={styles.flatList}>
 
-                   <AIAdventures/>
+                    <AIAdventures/>
 
                 </View>
             </IF>
-
 
 
         </SafeAreaView>
@@ -349,13 +346,13 @@ const styles = StyleSheet.create({
         backgroundColor: "#FEF1F1",
         paddingBottom: Platform.OS === 'ios' ? -40 : 0
     },
-    pageTitleWrap:{
+    pageTitleWrap: {
         width: '90%',
-    marginVertical:pixelSizeVertical(10),
+        marginVertical: pixelSizeVertical(10),
         flexDirection: 'row',
         justifyContent: 'flex-start',
     },
-    pageTitle:{
+    pageTitle: {
         fontSize: fontPixel(24),
         fontFamily: Fonts.quickSandBold
     },
@@ -489,44 +486,44 @@ const styles = StyleSheet.create({
         height: '100%',
         width: '100%'
     },
-    learnCardBody:{
-        height:90,
-        width:'95%',
-        alignItems:'flex-start',
-        justifyContent:'space-evenly'
+    learnCardBody: {
+        height: 90,
+        width: '95%',
+        alignItems: 'flex-start',
+        justifyContent: 'space-evenly'
     },
-    missionText:{
+    missionText: {
         fontSize: fontPixel(12),
         fontFamily: Fonts.quicksandMedium
     },
-    titleText:{
+    titleText: {
         fontSize: fontPixel(14),
         fontFamily: Fonts.quickSandBold
     },
-    rewardPoint:{
-        flexDirection:'row',
-        alignItems:'center',
-        justifyContent:'flex-start',
+    rewardPoint: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
 
     },
-    rewardPointText:{
-        marginLeft:5,
+    rewardPointText: {
+        marginLeft: 5,
         fontSize: fontPixel(12),
         fontFamily: Fonts.quicksandMedium
     },
-    startBtn:{
-        height:37,
+    startBtn: {
+        height: 37,
 
-        width:140,
-        borderRadius:20,
-        backgroundColor:Colors.primaryColor,
-        alignItems:'center',
-marginTop:20,
-        justifyContent:'center',
+        width: 140,
+        borderRadius: 20,
+        backgroundColor: Colors.primaryColor,
+        alignItems: 'center',
+        marginTop: 20,
+        justifyContent: 'center',
     },
-    startBtnText:{
+    startBtnText: {
         fontSize: fontPixel(14),
-        color:"#fff",
+        color: "#fff",
         fontFamily: Fonts.quicksandSemiBold
     },
     flatList: {
@@ -536,20 +533,19 @@ marginTop:20,
 
 
     },
-    createBtn:{
-        flexDirection:'row',
-        alignItems:'center',
-        justifyContent:'flex-start',
-        marginLeft:30,
-height:35,
+    createBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        marginLeft: 30,
+        height: 35,
     },
-    createBtnText:{
-        marginLeft:5,
-        color:Colors.primaryColor,
+    createBtnText: {
+        marginLeft: 5,
+        color: Colors.primaryColor,
         fontFamily: Fonts.quicksandSemiBold,
         fontSize: fontPixel(14),
     }
-
 
 
 })

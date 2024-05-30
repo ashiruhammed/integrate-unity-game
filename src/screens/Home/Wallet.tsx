@@ -47,6 +47,7 @@ import MedalIcon from "../../assets/images/svg/MedalIcon";
 import HorizontalLine from "../../components/HorizontalLine";
 import StarIcon from "../../assets/images/svg/StarIcon";
 import * as SecureStore from "expo-secure-store";
+import EmptyState from "../../components/EmptyState";
 
 
 interface props {
@@ -308,23 +309,6 @@ const visitMarketPlace =async () =>{
                     {
                         loadingWallets && <ActivityIndicator size={'small'} color={Colors.primaryColor}/>
                     }
-                   {/* {
-                        !loadingWallets && ccdWallet &&
-
-
-
-                            <IF condition={!ccdWallet?.data}>
-
-                                <MyCard
-                                    gateBalance={'0'}
-                                    gateValue={'0'}
-                                    ccdBalance={'0'}
-                                    ccdValue={'0'}
-                                    totalPoint={points?.data?.totalPoint}/>
-                            </IF>
-
-
-                }*/}
 
 
  {
@@ -373,6 +357,13 @@ const visitMarketPlace =async () =>{
                         </View>
 
                         <View style={styles.badgesContainer}>
+
+                            {!loadingBadge && badges && badges?.pages[0]?.data.length < 1 &&
+                                <EmptyState message={"You haven't earned any badge 🙃"}/>
+                            }
+
+
+
                     {
                                 !loadingBadge && badges && badges?.pages[0]?.data &&
                       <IF condition={badges?.pages[0]?.data.length > 0}>
@@ -436,7 +427,9 @@ const visitMarketPlace =async () =>{
 
                         <View style={styles.badgesContainer}>
 
-
+                            {!loadingNFTs && allUserNFTs && allUserNFTs?.pages[0]?.data?.result.length < 1 &&
+                                <EmptyState message={"You haven't earned any NFTs 🙃"}/>
+                            }
                             {!loadingNFTs && allUserNFTs && allUserNFTs?.pages[0]?.data?.result.slice(0,6).map((item)=>(
                                 <Animated.View key={item.metadata.media_hash} entering={FadeInDown} exiting={FadeOutDown}
                                                style={[styles.badgeItem,{

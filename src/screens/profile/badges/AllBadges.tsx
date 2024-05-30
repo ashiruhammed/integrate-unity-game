@@ -13,6 +13,7 @@ import {getAllAdventure, getAllBadges, getBadges} from "../../../action/action";
 import {FlashList} from "@shopify/flash-list";
 import {isWhatPercentOf, useRefreshOnFocus} from "../../../helpers";
 import badges from "../Badges";
+import EmptyState from "../../../components/EmptyState";
 
 
 interface badgeProps {
@@ -143,6 +144,14 @@ const AllBadges = () => {
                     backgroundColor
                 }]}
             >
+
+
+                {!isLoading && data && data?.pages[0]?.data?.length < 1 &&
+                    <EmptyState message={"You haven't earned any badge 🙃"}/>
+                }
+
+
+
                 {isLoading && <ActivityIndicator size="small" color={Colors.primaryColor}/>}
 
                 {

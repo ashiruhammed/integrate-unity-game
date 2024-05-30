@@ -23,6 +23,7 @@ import {getAiAdventure, getAllAdventure} from "../../action/action";
 import {useRefreshOnFocus} from "../../helpers";
 import {setAdventure} from "../../app/slices/dataSlice";
 import {isLoading} from "expo-font";
+import EmptyState from "../../components/EmptyState";
 
 
 interface propsAi {
@@ -111,17 +112,17 @@ const AdventureAICardItem = ({item, theme, setAdventure}: propsAi) => {
 
                 </View>
 
-                {item?.startedAdventure?
+                {item?.startedAdventure ?
 
-                <TouchableOpacity onPress={() => {
-                    setAdventure(item)
+                    <TouchableOpacity onPress={() => {
+                        setAdventure(item)
 
-                }} style={styles.startBtn}>
-                    <Text style={styles.startBtnText}>
+                    }} style={styles.startBtn}>
+                        <Text style={styles.startBtnText}>
 
-                        {item?.status == 'COMPLETED'  ? 'Completed' : 'Continue'}
-                    </Text>
-                </TouchableOpacity>
+                            {item?.status == 'COMPLETED' ? 'Completed' : 'Continue'}
+                        </Text>
+                    </TouchableOpacity>
                     :
                     <TouchableOpacity onPress={() => {
                         setAdventure(item)
@@ -129,7 +130,7 @@ const AdventureAICardItem = ({item, theme, setAdventure}: propsAi) => {
                     }} style={styles.startBtn}>
                         <Text style={styles.startBtnText}>
 
-                             Start Adventure
+                            Start Adventure
                         </Text>
                     </TouchableOpacity>
                 }
@@ -209,7 +210,6 @@ const AIAdventures = () => {
         <>
 
 
-
             <TouchableOpacity onPress={create} activeOpacity={0.8} style={styles.createBtn}>
                 <AntDesign name="pluscircle" size={14} color={Colors.primaryColor}/>
                 <Text style={styles.createBtnText}>
@@ -217,6 +217,9 @@ const AIAdventures = () => {
                 </Text>
             </TouchableOpacity>
 
+            {!loadingAdventures && adventures?.pages[0]?.data?.result.length < 1 &&
+                <EmptyState message={"No AI adventures, create one with the button above"}/>
+            }
 
 
             {loadingAdventures && <ActivityIndicator size={"small"} color={Colors.primaryColor}/>}

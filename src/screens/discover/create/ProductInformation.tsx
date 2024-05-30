@@ -34,8 +34,8 @@ const ProductInformation = ({navigation}: RootStackScreenProps<'ProductInformati
 
 
     const dataSlice = useAppSelector(state => state.data)
-    const {theme,productDetails} = dataSlice
-const dispatch = useAppDispatch()
+    const {theme, productDetails} = dataSlice
+    const dispatch = useAppDispatch()
 
     const backgroundColor = theme == 'light' ? "#FFFFFF" : "#141414"
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
@@ -50,13 +50,15 @@ const dispatch = useAppDispatch()
     const [focusProductName, setFocusProductName] = useState(false)
     const [focusProductUrl, setFocusProductUrl] = useState(false)
 
-    const [checkOption, setCheckOption] = useState<'Yes'|'No'>('No')
+    const [checkOption, setCheckOption] = useState<'Yes' | 'No'>('No')
 
 
-    const {isLoading: loadingUser,data:userDashboard, isRefetching, refetch:fetchDashboard} = useQuery(['getUserDashboard'], getUserDashboard, {
-
-
-    })
+    const {
+        isLoading: loadingUser,
+        data: userDashboard,
+        isRefetching,
+        refetch: fetchDashboard
+    } = useQuery(['getUserDashboard'], getUserDashboard, {})
 
 
     const openNotifications = () => {
@@ -101,13 +103,14 @@ const dispatch = useAppDispatch()
 
         },
         onSubmit: (values) => {
-            const {productName,productURL} = values;
+            const {productName, productURL} = values;
             //     const body = JSON.stringify({email: email.toLowerCase()})
-dispatch(updateProduct({
-    name:productName,websiteUrl:productURL,
-    ownerWorkedOnProject:checkOption == "Yes" ? true : false }))
-navigation.navigate('FundamentalData')
-console.log(productDetails)
+            dispatch(updateProduct({
+                name: productName, websiteUrl: productURL,
+                ownerWorkedOnProject: checkOption == "Yes" ? true : false
+            }))
+            navigation.navigate('FundamentalData')
+
         }
     });
 
@@ -142,7 +145,9 @@ console.log(productDetails)
                         <TouchableOpacity onPress={openNotifications} activeOpacity={0.6}
                                           style={styles.roundTopBtn}>
                             {
-                                notifications?.pages[0]?.data?.result.some((obj: { isRead: boolean; }) => !obj.isRead)  &&
+                                notifications?.pages[0]?.data?.result.some((obj: {
+                                    isRead: boolean;
+                                }) => !obj.isRead) &&
                                 <View style={styles.dot}/>
                             }
                             <Octicons name="bell-fill" size={22} color={"#000"}/>
@@ -187,7 +192,7 @@ console.log(productDetails)
                     </View>
 
                     <View style={styles.stepsBoxRight}>
-                        <Pressable onPress={()=>handleSubmit()} style={styles.nextStep}>
+                        <Pressable onPress={() => handleSubmit()} style={styles.nextStep}>
                             <Text style={styles.nextStepText}>
                                 Next Step
                             </Text>
@@ -196,7 +201,6 @@ console.log(productDetails)
                     </View>
 
                 </View>
-
 
 
                 <View style={styles.productBanner}>
@@ -214,52 +218,48 @@ console.log(productDetails)
                 <View style={styles.authContainer}>
 
 
+                    <TextInput
 
-                <TextInput
-
-                    placeholder="Gatewayapp"
-                    keyboardType={"default"}
-                    touched={touched.productName}
-                    error={touched.productName && errors.productName}
-                    onFocus={() => setFocusProductName(true)}
-                    onChangeText={(e) => {
-                        handleChange('productName')(e);
-setProductName(e)
-                    }}
-                    onBlur={(e) => {
-                        handleBlur('productName')(e);
-                        setFocusProductName(false);
-                    }}
-defaultValue={productName}
-                    focus={focusProductName}
-                    value={values.productName}
-                    label="Product Name"/>
-
-
+                        placeholder="Gatewayapp"
+                        keyboardType={"default"}
+                        touched={touched.productName}
+                        error={touched.productName && errors.productName}
+                        onFocus={() => setFocusProductName(true)}
+                        onChangeText={(e) => {
+                            handleChange('productName')(e);
+                            setProductName(e)
+                        }}
+                        onBlur={(e) => {
+                            handleBlur('productName')(e);
+                            setFocusProductName(false);
+                        }}
+                        defaultValue={productName}
+                        focus={focusProductName}
+                        value={values.productName}
+                        label="Product Name"/>
 
 
                     <TextInput
 
-                    placeholder="https://gatewayapp.co"
-                    keyboardType={"url"}
-                    touched={touched.productURL}
-                    error={touched.productURL && errors.productURL}
-                    onFocus={() => setFocusProductUrl(true)}
-                    onChangeText={(e) => {
-                        handleChange('productURL')(e);
-                        setProductURL(e)
-                    }}
-                    onBlur={(e) => {
-                        handleBlur('productURL')(e);
-                        setFocusProductUrl(false);
-                    }}
-defaultValue={productURL}
-                    focus={focusProductUrl}
-                    value={values.productURL}
-                    label="Product URL"/>
+                        placeholder="https://gatewayapp.co"
+                        keyboardType={"url"}
+                        touched={touched.productURL}
+                        error={touched.productURL && errors.productURL}
+                        onFocus={() => setFocusProductUrl(true)}
+                        onChangeText={(e) => {
+                            handleChange('productURL')(e);
+                            setProductURL(e)
+                        }}
+                        onBlur={(e) => {
+                            handleBlur('productURL')(e);
+                            setFocusProductUrl(false);
+                        }}
+                        defaultValue={productURL}
+                        focus={focusProductUrl}
+                        value={values.productURL}
+                        label="Product URL"/>
 
                     <HorizontalLine margin/>
-
 
 
                 </View>
@@ -271,18 +271,20 @@ defaultValue={productURL}
 
                     <View style={styles.checkItem}>
 
-                        <Pressable onPress={()=>setCheckOption('Yes')} style={[styles.checkBox, checkOption == 'Yes' &&{
-                            borderColor:"#000"
-                        }]}>
+                        <Pressable onPress={() => setCheckOption('Yes')}
+                                   style={[styles.checkBox, checkOption == 'Yes' && {
+                                       borderColor: "#000"
+                                   }]}>
                             <CheckYesIcon/>
                             <Text style={styles.checkBoxText}>
                                 Yes
                             </Text>
                         </Pressable>
 
-                        <Pressable onPress={()=>setCheckOption('No')} style={[styles.checkBox, checkOption == 'No' &&{
-                            borderColor:"#000"
-                        }]}>
+                        <Pressable onPress={() => setCheckOption('No')}
+                                   style={[styles.checkBox, checkOption == 'No' && {
+                                       borderColor: "#000"
+                                   }]}>
                             <CheckNoIcon/>
                             <Text style={styles.checkBoxText}>
                                 No
@@ -292,11 +294,10 @@ defaultValue={productURL}
                     </View>
 
 
-
                 </View>
 
-                <Pressable disabled={!isValid} onPress={()=>handleSubmit()} style={[styles.claimBtn,{
-                    backgroundColor:!isValid ? Colors.disabled : Colors.primaryColor,
+                <Pressable disabled={!isValid} onPress={() => handleSubmit()} style={[styles.claimBtn, {
+                    backgroundColor: !isValid ? Colors.disabled : Colors.primaryColor,
                 }]}>
 
                     <Text style={styles.claimBtnText}>
@@ -505,66 +506,66 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.quicksandSemiBold,
         color: Colors.primaryColor
     },
-    productBanner:{
-        height:heightPixel(120),
-        alignItems:'flex-start',
-        justifyContent:'center',
-        width:'90%',
+    productBanner: {
+        height: heightPixel(120),
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+        width: '90%',
     },
 
-    productPageTitle:{
+    productPageTitle: {
         fontSize: fontPixel(24),
         fontFamily: Fonts.quickSandBold,
-color:"#000"
+        color: "#000"
     },
-    productPageText:{
-        lineHeight:22,
-        marginTop:10,
+    productPageText: {
+        lineHeight: 22,
+        marginTop: 10,
         fontSize: fontPixel(14),
         fontFamily: Fonts.quicksandMedium,
-color:"#686868"
+        color: "#686868"
     },
 
     authContainer: {
 
         justifyContent: 'center',
         width: '90%',
-marginTop:40,
+        marginTop: 40,
     },
-    checkBoxContainer:{
-        height:heightPixel(120),
-        alignItems:'flex-start',
-        justifyContent:'center',
-        width:'80%',
+    checkBoxContainer: {
+        height: heightPixel(120),
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+        width: '80%',
 
     },
-    checkTitle:{
+    checkTitle: {
         fontSize: fontPixel(14),
         fontFamily: Fonts.quicksandMedium,
-        color:"#333333"
+        color: "#333333"
     },
-    checkItem:{
-        marginTop:10,
-        height:heightPixel(80),
-        alignItems:'center',
-        justifyContent:'space-between',
-        width:'100%',
-        flexDirection:'row',
+    checkItem: {
+        marginTop: 10,
+        height: heightPixel(80),
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        width: '100%',
+        flexDirection: 'row',
 
     },
-    checkBox:{
-        height:heightPixel(72),
-        alignItems:'center',
-        justifyContent:'center',
-        width:145,
-        borderRadius:6,
-        borderColor:"#ccc",
-        borderWidth:1,
+    checkBox: {
+        height: heightPixel(72),
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 145,
+        borderRadius: 6,
+        borderColor: "#ccc",
+        borderWidth: 1,
     },
-    checkBoxText:{
+    checkBoxText: {
         fontSize: fontPixel(10),
         fontFamily: Fonts.quicksandMedium,
-        color:"#181818"
+        color: "#181818"
     },
     claimBtn: {
         height: 45,

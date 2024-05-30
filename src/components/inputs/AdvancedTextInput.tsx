@@ -199,13 +199,15 @@ const styles = StyleSheet.create({
     topInputWrap: {
         justifyContent: 'space-between',
         width: '100%',
-        height: 50,
+        height: 40,
+        alignItems:'center',
         flexDirection: 'row',
         paddingHorizontal: pixelSizeHorizontal(15),
     },
     bottomInputWrap: {
         paddingHorizontal: pixelSizeHorizontal(15),
         justifyContent: 'space-between',
+        alignItems:'center',
         width: '100%',
         height: 30,
         flexDirection: 'row',
@@ -216,7 +218,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         width: '100%',
-        marginBottom: 10,
+        marginBottom: 5,
         borderWidth: 1,
 
 

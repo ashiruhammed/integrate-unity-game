@@ -46,7 +46,7 @@ import * as Clipboard from 'expo-clipboard';
 import FastImage from "react-native-fast-image";
 import Animated, {
     Easing,
-    Extrapolate, Extrapolation,
+ Extrapolation,
     interpolate, interpolateColor,
     useAnimatedStyle, useDerivedValue,
     useSharedValue, withDelay,
@@ -62,45 +62,16 @@ const openLink = async (url: string) => {
 }
 
 
-const Products = [
-    {
-        image: "Ether Vault",
-        id: '1'
-    },
-    {
-        image: "Tron Vault",
-        id: '2'
-    }
-]
+
+const BtnColors = {
+    primaryColor: '#3498db',
+    errorColor: '#e74c3c',
+    defaultBgColor: '#F2F2F2',
+};
 
 
-const TeamData = [
-    {
-        teamName: "Declan Rice",
-        image: "https://img.freepik.com/free-photo/3d-rendering-zoom-call-avatar_23-2149556787.jpg?size=626&ext=jpg&ga=GA1.1.1546980028.1702339200&semt=ais",
-        id: '1',
-    }, {
-        teamName: "Kelly Rolls",
-        image: 'https://img.freepik.com/premium-photo/3d-rendering-zoom-call-avatar_23-2149556775.jpg',
-        id: '2',
-    }, {
-        teamName: "Zobolo Chucks",
-        image: 'https://img.freepik.com/premium-photo/3d-rendering-zoom-call-avatar_23-2149556774.jpg',
-        id: '3',
-    }, {
-        teamName: "Bruno Fernandes",
-        id: '4',
-        image: 'https://img.freepik.com/fotos-premium/3d-darstellung-des-zoom-call-avatars_23-2149556773.jpg?size=626&ext=jpg'
-    }, {
-        teamName: "Anita Beca",
-        id: '5',
-        image: 'https://img.freepik.com/free-photo/3d-rendering-zoom-call-avatar_23-2149556779.jpg'
-    }, {
-        teamName: "Andre Onana",
-        image: 'https://img.freepik.com/free-photo/3d-rendering-zoom-call-avatar_23-2149556784.jpg',
-        id: '6',
-    },
-]
+
+
 
 
 interface teamProps {
@@ -194,11 +165,7 @@ const ProductView = ({navigation, route}: RootStackScreenProps<'ProductView'>) =
     const progressMore = useSharedValue(0);
 
 
-    const animatedStyle = useAnimatedStyle(() => {
-        return {
-            transform: [{rotateZ: `${rotation.value}deg`}]
-        };
-    });
+
 
     const {data, isLoading, refetch} = useQuery(['getSingleProduct', item.slug], () => getSingleProduct(item.slug))
     const {
@@ -218,7 +185,27 @@ const ProductView = ({navigation, route}: RootStackScreenProps<'ProductView'>) =
 
     })
 
+    const bgColor = useSharedValue(BtnColors.defaultBgColor);
+    const isUpvoted = data?.data?.upvotes.find((vote: { userId: string }) => vote.userId === userData.id);
 
+    useEffect(() => {
+        if (upvoting) {
+            bgColor.value = withTiming(Colors.primaryColor, { duration: 500 });
+        } else {
+            if (isUpvoted) {
+                bgColor.value = Colors.primaryColor;
+            } else {
+                bgColor.value = withTiming(BtnColors.defaultBgColor, { duration: 500 });
+            }
+        }
+    }, [upvoting, isUpvoted]);
+
+    const animatedStyle = useAnimatedStyle(() => {
+        return {
+            backgroundColor: bgColor.value,
+            transform: [{rotateZ: `${rotation.value}deg`}]
+        };
+    });
     const handlePressLike = () => {
         mutate(item.id)
         progress.value = withTiming(0, {duration: 500});
@@ -481,7 +468,7 @@ const ProductView = ({navigation, route}: RootStackScreenProps<'ProductView'>) =
                         </TouchableOpacity>
 
 
-                        <TouchableOpacity disabled={upvoting} activeOpacity={0.7} onPress={handlePressLike}
+                  <TouchableOpacity disabled={upvoting} activeOpacity={0.7} onPress={handlePressLike}
                                           style={[styles.actionBtn, {
                                               backgroundColor: data?.data?.upvotes.find((vote: {
                                                   userId: string;
@@ -489,16 +476,18 @@ const ProductView = ({navigation, route}: RootStackScreenProps<'ProductView'>) =
                                           }]}>
                             <Animated.View style={[animatedStyle, {
                                 flexDirection: 'row',
+                                height:'100%',
+                                borderRadius:30,
                                 alignItems: 'center',
                                 justifyContent: 'space-evenly',
                                 width: '100%'
                             }]}>
                                 <FontAwesome name="thumbs-up" size={14}
-                                             color={data?.data?.upvotes.find(vote => vote.userId === userData.id) ? "#fff" : Colors.primaryColor}/>
+                                             color={data?.data?.upvotes.find((vote: { userId: string; }) => vote.userId === userData.id) ? "#fff" : Colors.primaryColor}/>
                                 <Text style={[styles.buttonText, {
                                     color: data?.data?.upvotes.find(vote => vote.userId === userData.id) ? "#fff" : Colors.primaryColor
                                 }]}>
-                                    Thumbs up
+                                    Thumbs up {data?.data?.upvotes.length}
                                 </Text>
                             </Animated.View>
 
@@ -1212,7 +1201,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-evenly',
         flexDirection: 'row',
-        paddingHorizontal: 10,
+
 
         marginHorizontal: pixelSizeHorizontal(20)
     },

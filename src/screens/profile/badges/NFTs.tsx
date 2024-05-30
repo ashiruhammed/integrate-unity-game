@@ -14,6 +14,7 @@ import {useInfiniteQuery} from "@tanstack/react-query";
 import {userNFTs} from "../../../action/action";
 import { FlashList } from '@shopify/flash-list';
 import { useRefreshOnFocus } from '../../../helpers';
+import EmptyState from "../../../components/EmptyState";
 
 
 
@@ -28,7 +29,7 @@ interface badgeProps {
         worthInPoints: string,
         "metadata":  {
     "copies": null,
-        "description": "Blue badge NFT",
+        "description": string,
         "expires_at": null,
         "extra": null,
         "issued_at": null,
@@ -37,7 +38,7 @@ interface badgeProps {
         "reference": null,
         "reference_hash": null,
         "starts_at": null,
-        "title": "Blue badge - 63",
+        "title": string,
         "updated_at": null,
 },
 
@@ -159,7 +160,12 @@ const NFTs = () => {
                     backgroundColor
                 }]}
             >
-                {isLoading && <ActivityIndicator size="small" color={Colors.primaryColor}/>}
+
+      {!isLoading && data && data?.pages[0]?.data?.length < 1 &&
+          <EmptyState message={"You haven't earned any NFTs 🙃"}/>
+      }
+
+      {isLoading && <ActivityIndicator size="small" color={Colors.primaryColor}/>}
 
                 {
                     !isLoading && data &&

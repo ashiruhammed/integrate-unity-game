@@ -108,13 +108,19 @@ interface props {
 }
 
 const ProductCardItem = ({item,viewProduct}: props) => {
+   // console.log(item.upvotes)
     const dataSlice = useAppSelector(state => state.data)
+    const userSlice = useAppSelector(state => state.user)
     const {theme} = dataSlice
+    const {userData} = userSlice
     const backgroundColor = theme == 'light' ? "#FFFFFF" : "#141414"
     const textColor = theme == 'light' ? Colors.light.text : Colors.dark.text
     const darkTextColor = theme == 'light' ? Colors.light.darkText : Colors.dark.text
     const lightText = theme == 'light' ? Colors.light.tintTextColor : Colors.dark.tintTextColor
     const tintText = theme == 'light' ? "#AEAEAE" : Colors.dark.tintTextColor
+
+    const isUpvoted = item.upvotes.find((vote: { userId: string }) => vote.userId == userData.id);
+
     return (
         <Pressable onPress={()=>viewProduct(item)} style={styles.productsCard}>
             <View style={styles.topCard}>
@@ -136,9 +142,9 @@ const ProductCardItem = ({item,viewProduct}: props) => {
                 </View>
 
                 <View style={styles.pointCardWrap}>
-                    <FontAwesome name="thumbs-up" size={19} color={"#E01414"}/>
+                    <FontAwesome name="thumbs-up" size={19} color={isUpvoted ? "#E01414" : "#444"}/>
                     <Text style={[styles.pointCardText, {
-                        color: '#E01414'
+                        color: isUpvoted ? '#E01414' : "#444"
                     }]}>
                         {item._count.upvotes}
                     </Text>
@@ -421,7 +427,7 @@ const DiscoverProducts = ({navigation}: RootStackScreenProps<'DiscoverProducts'>
 
                                 <View style={styles.productRowItem}>
                                     <Text style={styles.productRowItemText}>
-                                        NFTworld
+                                        {trending?.data?.productHuntProjects[0].name}
                                     </Text>
                                 </View>
 
@@ -429,26 +435,17 @@ const DiscoverProducts = ({navigation}: RootStackScreenProps<'DiscoverProducts'>
                                     {justifyContent: 'flex-end'}]}>
                                     <FontAwesome name="thumbs-up" size={12} color="white"/>
                                     <Text style={styles.productRowItemText}>
-                                        3000 Thumbs up
+                                        {trending?.data?.productHuntProjects[0].upvotes.length} Thumbs up
                                     </Text>
                                 </View>
                             </View>
 
                             <View style={styles.textBody}>
-                                <Text style={styles.leftProductDashDescription}>
-                                    Generating of
-                                </Text>
-                                <GradientText style={styles.leftProductDashDescription}>NFT images
-                                </GradientText>
-                                <Text style={styles.leftProductDashDescription}> MADE
-                                </Text>
+
                                 <GradientText style={styles.leftProductDashDescription}>
-                                    easy
-                                    with AI
+                                    {trending?.data?.productHuntProjects[0].tagline}
                                 </GradientText>
-                                <Text style={styles.leftProductDashDescription}>
-                                    🔥
-                                </Text>
+
                             </View>
 
                             { !isLoading && trending && trending?.data?.productHuntProjects.length > 0 &&
