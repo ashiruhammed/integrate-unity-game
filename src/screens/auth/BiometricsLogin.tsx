@@ -386,13 +386,15 @@ const BiometricsLogin = ({navigation}: AuthStackScreenProps<'BiometricsLogin'>) 
         validationSchema: formSchema,
         initialValues: {
 
-            email: '',
+
             password: '',
         },
         onSubmit: (values) => {
-            const {email, password} = values;
-            const body = JSON.stringify({email: email.toLowerCase(), captchaToken, password})
+            const { password} = values;
+
             //mutate(body
+
+            console.log(values)
 
             //  recaptchaMain.current.open()
             $recaptcha.current.open()
@@ -404,13 +406,24 @@ const BiometricsLogin = ({navigation}: AuthStackScreenProps<'BiometricsLogin'>) 
         const userObject = JSON.parse(jsonUser ? jsonUser : '{}')
 
         if (token !== '') {
-            const body = JSON.stringify({
-                email: userObject.email.toLowerCase(),
-                captchaToken: token,
-                password: userObject.password
-            })
+            if(contentPassword == ''){
+                const body = JSON.stringify({
+                    email: userObject.email.toLowerCase(),
+                    captchaToken: token,
+                    password: userObject.password
+                })
+                mutate(body)
+            }else{
+                const body = JSON.stringify({
+                    email: userObject.email.toLowerCase(),
+                    captchaToken: token,
+                    password: contentPassword
+                })
+                mutate(body)
+            }
 
-            mutate(body)
+
+
         }
     }, [token])
     const forgotPassword = () => {
@@ -547,7 +560,7 @@ const BiometricsLogin = ({navigation}: AuthStackScreenProps<'BiometricsLogin'>) 
                         </View>
 
 
-                        <RectButton disabled={isLoading || !isValid || googleAuthenticating} style={{
+                        <RectButton disabled={isLoading || !isValid} style={{
 
                             width: widthPixel(200)
                         }} onPress={() => handleSubmit()}>
