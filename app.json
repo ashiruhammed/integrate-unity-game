@@ -28,7 +28,13 @@
       "**/*"
     ],
     "plugins": [
-      "expo-apple-authentication"
+
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Allow GateWay to use device Biometrics."
+        }
+      ]
     ],
     "ios": {
       "supportsTablet": true,
@@ -41,6 +47,7 @@
       "infoPlist": {
         "remote-notification": "Allow user to receive remote notification",
         "UIViewControllerBasedStatusBarAppearance": "No",
+        "NSFaceIDUsageDescription": "This app uses face id to authenticate user",
         "NSCameraUsageDescription": "This app uses the camera to let user put a photo in his profile page.",
         "NSPhotoLibraryUsageDescription": "This app needs to access the camera library so they can upload their profile image.",
         "SKAdNetworkItems": [
@@ -62,6 +69,8 @@
         "RECEIVE_BOOT_COMPLETED",
         "CAMERA",
         "INTERNET",
+        "USE_BIOMETRIC",
+        "USE_FINGERPRINT",
         "ACCESS_MEDIA_LOCATION",
         "WRITE_EXTERNAL_STORAGE",
         "READ_EXTERNAL_STORAGE",

@@ -233,6 +233,7 @@ export type AuthStackParamList = {
     };
 
     LoginNow: undefined;
+    BiometricsLogin: undefined;
     ForgotPassword: undefined;
 
 

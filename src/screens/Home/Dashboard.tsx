@@ -29,42 +29,8 @@ import LearnSVG from "../../assets/images/svg/LearnSVG";
 import ProductIcon from "../../assets/images/svg/ProductIcon";
 import StreakIcon from "../../assets/images/svg/StreakIcon";
 import messaging from "@react-native-firebase/messaging";
+import {storage} from "../../helpers/storage";
 
-
-const users = [
-    {
-        id: '1',
-        image: 'https://images.pexels.com/photos/773371/pexels-photo-773371.jpeg?auto=compress&cs=tinysrgb&w=800'
-    },
-    {
-        id: '2',
-        image: "https://images.pexels.com/photos/3394335/pexels-photo-3394335.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-    },
-    {
-        id: '3',
-        image: "https://images.pexels.com/photos/428333/pexels-photo-428333.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-    },
-    {
-        id: '4',
-        image: "https://images.pexels.com/photos/3626313/pexels-photo-3626313.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-    },
-    {
-        id: '5',
-        image: "https://images.pexels.com/photos/1832959/pexels-photo-1832959.jpeg?auto=compress&cs=tinysrgb&w=800"
-    },
-    {
-        id: '6',
-        image: "https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-    },
-    {
-        id: '7',
-        image: "https://images.pexels.com/photos/3674249/pexels-photo-3674249.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-    },
-    {
-        id: '8',
-        image: "https://images.pexels.com/photos/11805711/pexels-photo-11805711.jpeg?auto=compress&cs=tinysrgb&w=800&lazy=load"
-    },
-];
 
 
 const Games = [{
@@ -238,6 +204,16 @@ const Dashboard = ({navigation}: RootTabScreenProps<'Home'>) => {
         navigation.navigate('Notifications')
     }
 
+    useEffect(() => {
+        storage.set('testname', 'ACE')
+        console.log(storage.getString('testname'))
+
+    }, []);
+    const jsonUser = storage.getString('userData') // { 'password': 'Marc', 'email': 21 }
+    const fullName = storage.getString('fullName')
+    const userObject = JSON.parse(jsonUser ? jsonUser : '{}')
+    console.log(userObject)
+    console.log({fullName})
     const {
         isLoading: loadingUser,
         data: userDashboard,

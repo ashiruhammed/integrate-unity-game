@@ -9,7 +9,7 @@ import {
     Image,
     ActivityIndicator,
     Platform,
-    Button, Alert
+    Button, Alert, Pressable
 } from 'react-native';
 import {AuthStackScreenProps} from "../../../types";
 import {SafeAreaView} from "react-native-safe-area-context";
@@ -30,22 +30,21 @@ import {getUser, loginUser, userAppleOAuth, userFBOAuth, userGoogleAuth} from ".
 import Toast from "../../components/Toast";
 import * as Haptics from 'expo-haptics';
 import * as WebBrowser from 'expo-web-browser';
-import * as Google from "expo-auth-session/providers/google";
-import * as AppleAuthentication from 'expo-apple-authentication';
-import GoogleIcon from "../../components/GoogleIcon";
-import HorizontalLine from "../../components/HorizontalLine";
+
 import Recaptcha, {RecaptchaHandles} from 'react-native-recaptcha-that-works';
 import RecaptchaNew from '@erickcrus/react-native-recaptcha';
 import {addNotificationItem} from "../../app/slices/dataSlice";
 import SwipeAnimatedToast from "../../components/toasty";
-
-import { storage } from '../../helpers/storage';
+import FingerPrint from "../../assets/svgs/FingerPrint";
+import FaceID from "../../assets/svgs/FaceID";
+import * as LocalAuthentication from 'expo-local-authentication'
+import {storage} from "../../helpers/storage";
 
 WebBrowser.maybeCompleteAuthSession();
 
 const formSchema = yup.object().shape({
 
-    email: yup.string().email("Please enter a valid email address").required('Email is required'),
+
     password: yup.string().required('Password is required'),
 
 });
@@ -54,7 +53,7 @@ const formSchema = yup.object().shape({
 const height = Dimensions.get('window').height
 
 
-const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
+const BiometricsLogin = ({navigation}: AuthStackScreenProps<'BiometricsLogin'>) => {
 
     const recaptcha = useRef();
     const dispatch = useAppDispatch()
@@ -76,6 +75,9 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
     const [contentPassword, setContentPassword] = useState<string>('');
 
     const [token, setToken] = useState('');
+    // wherever the useState is located
+    const [isBiometricSupported, setIsBiometricSupported] = useState(false);
+    const [isBioMetric, setIsBioMetric] = useState(true);
 
 
     const recaptchaMain = useRef();
@@ -94,7 +96,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
 
     const handleClosePress = useCallback(() => {
         recaptchaMain?.current.close();
-      //  $recaptcha.current?.close();
+        //  $recaptcha.current?.close();
     }, []);
 
     const size = 'normal';
@@ -110,51 +112,25 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
         console.warn('expired!');
     }
 
-    const [_, googleResponse, googleAuth] = Google.useAuthRequest({
 
-        expoClientId:
-            "450276546603-kv794hqhb9orlqla7fv5fk64fljbhhnq.apps.googleusercontent.com",
-        iosClientId:
-            "450276546603-nbqqhqaa8jjb1b5hlvp0bprsripoupke.apps.googleusercontent.com",
-        androidClientId:
-            "450276546603-fe4l1d0uq37bvjra4pdpfph9nvursbua.apps.googleusercontent.com",
-        webClientId: "GOOGLE_GUID.apps.googleusercontent.com",
-        selectAccount: true,
-    });
-
-
+// Check if hardware supports biometrics
     useEffect(() => {
-
-
-        if (googleResponse?.type === "success") {
-
-
-            const {access_token, id_token, code} = googleResponse.params;
-            //console.log(code)
-
-            // console.log(id_token)
-            // setAccessToken(access_token)
-            const body = JSON.stringify({
-                "grantType": "access_token",
-                "tokens": {access_token}
-                //  "referralCode": "gate"
-            })
-
-            googleAuthLogin(body)
-
-        }
-    }, [googleResponse]);
+        (async () => {
+            const compatible = await LocalAuthentication.hasHardwareAsync();
+            setIsBiometricSupported(compatible);
+        })();
+    }, []);
 
 
     const signupNow = () => {
-        navigation.navigate('RegisterScreen')
+        navigation.navigate('LoginNow')
     }
 
 
     const {isLoading: loadingUser, mutate: fetchUser} = useMutation(['user-data'], getUser, {
         onSuccess: (data) => {
             if (data.success) {
-                storage.set("fullName", data.data.fullName);
+
                 dispatch(updateUserInfo(data.data))
                 dispatch(setAuthenticated({
                     isAuthenticated: true
@@ -170,6 +146,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
         onSuccess: async (data) => {
 
             if (data.success) {
+
 
                 SecureStore.setItemAsync('Gateway-Token', data.data.token).then(() => {
                     fetchUser()
@@ -302,23 +279,15 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
         onSuccess: async (data) => {
 
             if (data.success) {
-                const userData = {
-                    isBiometrics: 'true',
-                    email: contentEmail,
-                    password:contentPassword
-                }
-              //  console.log(userData)
-           storage.set("userData", JSON.stringify(userData));
 
                 setToken('')
                 setCaptchaToken('')
-        SecureStore.setItemAsync('Gateway-Token', data.data.token).then(() => {
+                SecureStore.setItemAsync('Gateway-Token', data.data.token).then(() => {
                     fetchUser()
                 })
 
 
             } else {
-
 
 
                 if (data.message == 'Your email is not verified, kindly verify your email to continue.') {
@@ -361,6 +330,48 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
     })
 
 
+    const onFaceId = async () => {
+        try {
+            // Checking if device is compatible
+            const isCompatible = await LocalAuthentication.hasHardwareAsync();
+
+            if (!isCompatible) {
+                throw new Error('Your device isn\'t compatible.')
+            }
+
+            // Checking if device has biometrics records
+            const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+
+            if (!isEnrolled) {
+                throw new Error('No Faces / Fingers found.')
+            }
+
+            // Authenticate user
+
+
+            const auth = await LocalAuthentication.authenticateAsync();
+            if (auth.success) {
+                // Deserialize the JSON string into an object
+                const jsonUser = storage.getString('userData') // { 'password': 'Marc', 'email': 21 }
+                const userObject = JSON.parse(jsonUser ? jsonUser : '{}')
+
+                      //  mutate(userData)
+                        $recaptcha.current.open()
+
+            } else {
+                Alert.alert(
+                    'Biometric record not found',
+                    'Please verify your identity with your password')
+            }
+
+
+        } catch (error) {
+            Alert.alert('An error as occured', error?.message);
+        }
+    };
+
+
+
     const {
         resetForm,
         handleChange, handleSubmit, handleBlur,
@@ -383,19 +394,20 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
             const body = JSON.stringify({email: email.toLowerCase(), captchaToken, password})
             //mutate(body
 
-          //  recaptchaMain.current.open()
+            //  recaptchaMain.current.open()
             $recaptcha.current.open()
         }
     });
 
     useEffect(() => {
-
+        const jsonUser = storage.getString('userData') // { 'password': 'Marc', 'email': 21 }
+        const userObject = JSON.parse(jsonUser ? jsonUser : '{}')
 
         if (token !== '') {
             const body = JSON.stringify({
-                email: values.email.toLowerCase(),
+                email: userObject.email.toLowerCase(),
                 captchaToken: token,
-                password: values.password
+                password: userObject.password
             })
 
             mutate(body)
@@ -423,34 +435,6 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
             <SafeAreaView style={styles.safeArea}>
                 <SwipeAnimatedToast/>
 
-
-                {/*<RecaptchaNew
-                    ref={recaptchaMain}
-                    hideBadge={false}
-                    hideLoader={false}
-                    enterprise={false}
-                    headerComponent={
-                        <Button title="Close modal" onPress={handleClosePress}/>
-                    }
-                    footerComponent={<Text style={{
-                        fontFamily: Fonts.quickSandBold,
-                        fontSize: fontPixel(14),
-                        textAlign: 'center',
-                        color: Colors.primaryColor,
-                        position: 'absolute'
-                    }}>Fetching captcha, please wait</Text>}
-                    siteKey="6Les7rgjAAAAACAihGpA2LD4k-jx7Wjtl68Y8whF"
-                    baseUrl="https://api.gatewayapp.co"
-
-                    onVerify={onVerify}
-                    lang="eng"
-                    onExpire={onExpire}
-                    theme="light"
-                    size="invisible"
-
-                />*/}
-
-
                 <Recaptcha
                     ref={$recaptcha}
                     lang="eng"
@@ -461,9 +445,9 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                         color: Colors.primaryColor,
                         position: 'absolute'
                     }}>Fetching captcha, please wait</Text>}
-                    headerComponent={
+                   /* headerComponent={
                         <Button title="Close modal" onPress={handleClosePress}/>
-                    }
+                    }*/
                     /* headerComponent={
                          <Button title="Close modal" onPress={handleClosePress}/>
                      }*/
@@ -480,7 +464,7 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                      }}*/
                     //  onExpire={() => Alert.alert('onExpire event')}
                     onVerify={(token) => {
-                      //  console.log({token})
+                        //  console.log({token})
                         // Alert.alert('onVerify event');
                         setToken(token);
                     }}
@@ -488,22 +472,6 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                     enterprise={false}
 
                 />
-
-                {
-                    googleAuthenticating &&
-                    <ActivityIndicator size="large" color={Colors.primaryColor}
-                                       style={[StyleSheet.absoluteFill, styles.loader]}/>
-                }
-                {
-                    appleAuthenticating &&
-                    <ActivityIndicator size="large" color={Colors.primaryColor}
-                                       style={[StyleSheet.absoluteFill, styles.loader]}/>
-                }
-                {
-                    fbAuthenticating &&
-                    <ActivityIndicator size="large" color={Colors.primaryColor}
-                                       style={[StyleSheet.absoluteFill, styles.loader]}/>
-                }
                 {
                     loadingUser &&
                     <ActivityIndicator size="large" color={Colors.primaryColor}
@@ -536,141 +504,11 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                     <View style={styles.authContainer}>
 
 
-
-                        {/* <View style={styles.topBar}>
-                        <TouchableOpacity onPress={goBack} style={styles.backBtn}>
-
-
-                            <AntDesign name="arrowleft" size={24} color="#848484"/>
-                            <Text style={styles.backTxt}>
-                                Back
-                            </Text>
-                        </TouchableOpacity>
-                    </View>*/}
-
-
                         <View style={styles.titleContainer}>
                             <Text style={styles.titleText}>
-                                Sign in
+                                Welcome Back, David!
                             </Text>
                         </View>
-                        {
-                            Platform.OS == 'ios' &&
-
-                            <AppleAuthentication.AppleAuthenticationButton
-
-                                buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
-                                buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
-                                cornerRadius={5}
-
-                                style={styles.buttonSignUp}
-                                onPress={async () => {
-                                    try {
-                                        const credential = await AppleAuthentication.signInAsync({
-                                            requestedScopes: [
-                                                AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-                                                AppleAuthentication.AppleAuthenticationScope.EMAIL,
-                                            ],
-                                        });
-
-                                        const body = JSON.stringify({
-                                            access_token: credential.identityToken,
-                                            full_name: `${credential.fullName?.familyName} ${credential.fullName?.givenName}`,
-                                            source: "mobile",
-                                            "referralCode": "",
-                                        })
-                                        appleOAuth(body)
-
-                                        // signed in
-                                    } catch (e) {
-                                        if (e.code === 'ERR_CANCELED') {
-                                            // handle that the user canceled the sign-in flow
-                                        } else {
-                                            // handle other errors
-                                        }
-                                    }
-                                }}
-                            />
-                        }
-
-                        <TouchableOpacity onPress={async () => await googleAuth()} activeOpacity={0.6}
-                                          style={[styles.buttonSignUp, {
-                                              borderWidth: 1,
-                                              borderColor: Colors.borderColor,
-                                              marginVertical: pixelSizeVertical(10),
-                                          }]}>
-
-                            <GoogleIcon/>
-                            <Text style={[{
-                                fontFamily: Fonts.quickSandBold,
-                                fontSize: fontPixel(16),
-                                color: Colors.light.text,
-                                marginLeft: 8,
-                            }]}>
-                                Sign in with Google
-                            </Text>
-                        </TouchableOpacity>
-
-                          <View style={styles.marginAndText}>
-                        <HorizontalLine width={'30%'}/>
-                        <Text style={styles.maginText}>
-                            Or sign in with
-                        </Text>
-                        <HorizontalLine width={'30%'}/>
-                    </View>
-
-                        {/*   <TouchableOpacity style={[styles.buttonSignUp, {
-                            marginBottom: 10
-                        }]}>
-
-                            <LoginButton
-
-                                style={styles.fbButtonSignUp}
-
-                                onLoginFinished={
-                                    (error, result) => {
-                                        if (error) {
-                                            console.log("login has error: " + result.error);
-                                        } else if (result.isCancelled) {
-                                            console.log("login is cancelled.");
-                                        } else {
-
-                                            AccessToken.getCurrentAccessToken().then(
-                                                (data) => {
-                                                    // console.log(data.accessToken.toString())
-                                                    const body = JSON.stringify({
-                                                        access_token: data.accessToken.toString(),
-                                                    })
-                                                    FBOAuth(body)
-                                                }
-                                            )
-                                        }
-                                    }
-                                }
-
-                                onLogoutFinished={() => console.log("logout.")}/>
-                        </TouchableOpacity>*/}
-
-
-                        <TextInput
-
-                            placeholder="Email address"
-                            keyboardType={"email-address"}
-                            touched={touched.email}
-                            error={touched.email && errors.email}
-                            onFocus={() => setFocusEmail(true)}
-                            onChangeText={(e) => {
-                                handleChange('email')(e);
-                                setContentEmail(e);
-                            }}
-                            onBlur={(e) => {
-                                handleBlur('email')(e);
-                                setFocusEmail(false);
-                            }}
-                            defaultValue={contentEmail}
-                            focus={focusEmail}
-                            value={values.email}
-                            label="Email"/>
 
 
                         <TextInput
@@ -728,16 +566,24 @@ const LoginNow = ({navigation}: AuthStackScreenProps<'LoginNow'>) => {
                         <TouchableOpacity style={styles.signUpBtn}>
 
                             <Text onPress={signupNow} style={styles.alreadyHaveAcc}>
-                                No account yet? <Text style={{
+                                Not you? <Text style={{
                                 color: Colors.primaryColor
-                            }}>Get one here</Text>
+                            }}>Switch account</Text>
                             </Text>
 
                         </TouchableOpacity>
 
+                        {Platform.OS == 'android' ?
+                            <Pressable onPress={onFaceId}>
 
 
-
+                                <FingerPrint/>
+                            </Pressable>
+                            :
+                            <Pressable onPress={onFaceId}>
+                                <FaceID/>
+                            </Pressable>
+                        }
 
 
                     </View>
@@ -809,13 +655,14 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.quicksandRegular
     },
     titleContainer: {
+        marginTop: 50,
         width: '100%',
-        height: 90,
+        height: 120,
         alignItems: 'flex-start',
-        justifyContent: 'flex-start'
+        justifyContent: 'center'
     },
     titleText: {
-        width: '60%',
+
         fontSize: fontPixel(24),
         color: Colors.light.text,
         lineHeight: heightPixel(32),
@@ -847,7 +694,8 @@ const styles = StyleSheet.create({
     },
     signUpBtn: {
         height: heightPixel(40),
-        marginVertical: pixelSizeVertical(15),
+        marginBottom: 40,
+        marginTop: 15,
         alignItems: 'center',
         flexDirection: 'row',
         width: widthPixel(210),
@@ -869,7 +717,7 @@ const styles = StyleSheet.create({
     },
     terms: {
         width: '100%',
-        height: 100,
+        height: 50,
         alignItems: 'flex-start',
         justifyContent: 'flex-start',
         flexDirection: 'row'
@@ -918,4 +766,4 @@ const styles = StyleSheet.create({
     }
 })
 
-export default LoginNow;
+export default BiometricsLogin;
