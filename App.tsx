@@ -1,423 +1,270 @@
-import {StatusBar} from 'expo-status-bar';
-import React, {useEffect, useRef, useState} from "react";
-import {PermissionsAndroid, TouchableOpacity, View, Text, StyleSheet, Alert, Linking} from 'react-native'
-import 'react-native-gesture-handler';
-import {SafeAreaProvider} from 'react-native-safe-area-context';
-import * as SecureStore from 'expo-secure-store';
-import useCachedResources from './src/hooks/useCachedResources';
-import useColorScheme from './src/hooks/useColorScheme';
-import Navigation from './src/navigation';
-import {enableScreens} from "react-native-screens";
-import 'react-native-gesture-handler';
-import OnBoarding from "./src/screens/onboarding/OnBoarding";
-
-import {PersistQueryClientProvider} from "@tanstack/react-query-persist-client";
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import {
-    QueryClient,
-    QueryClientProvider, focusManager, MutationCache, useQuery
-} from '@tanstack/react-query'
-import {createSyncStoragePersister} from "@tanstack/query-sync-storage-persister";
-import {Provider} from "react-redux";
-import {persistor, store} from "./src/app/store";
-import {PersistGate} from "redux-persist/integration/react";
-import {PortalProvider} from "@gorhom/portal";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
-import {Platform} from "react-native";
-
-import * as Notifications from 'expo-notifications';
-import * as Device from 'expo-device';
+  FlatList,
+  ListRenderItem,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {
-    getFcmToken,
-    getFcmTokenFromLocalStorage,
-    requestUserPermission,
-    notificationListener,
-} from './notification';
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
+import UnityView from '@azesmway/react-native-unity';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
+enum RootRoutes {
+  HOME = 'Home',
+  UNITY = 'Unity',
+}
 
-import {BASE_URL,AppID,DEV_BASE_URL,ACCESS_TOKEN} from "@env";
-import {logoutUser} from "./src/app/slices/userSlice";
-import {fontPixel, heightPixel} from "./src/helpers/normalize";
-import {Colors} from "react-native/Libraries/NewAppScreen";
-import {Fonts} from "./src/constants/Fonts";
-import ErrorBoundary from "react-native-error-boundary";
-import {GestureHandlerRootView} from "react-native-gesture-handler";
-import VersionCheck from 'react-native-version-check';
+type RootStackParamList = {
+  [RootRoutes.HOME]: { score?: Score };
+  [RootRoutes.UNITY]: { messageToUnity: string }; // added messageToUnity
+};
 
-enableScreens()
+type RootStackScreenProps<RN extends keyof RootStackParamList = RootRoutes> =
+  NativeStackScreenProps<RootStackParamList, RN>;
 
-const BASE_URL_LIVE = DEV_BASE_URL
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
+// score data type
+type Score = {
+  date: string;
+  score: number;
+};
 
+const HomeScreen: React.FC<RootStackScreenProps<RootRoutes.HOME>> = ({
+  navigation,
+  route,
+}) => {
+  const [scores, setScores] = useState<Score[]>([]); // scores to display in list
 
+  const insets = useSafeAreaInsets();
 
+  //func to setup scores from async storage on app open (we have no scores)
+  const setupScores = async () => {
+    const scoresJSON = await AsyncStorage.getItem('scores');
 
-Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-        shouldShowAlert: true,
-        shouldPlaySound: false,
-        shouldSetBadge: false,
-    }),
-});
+    if (scoresJSON) {
+      setScores(JSON.parse(scoresJSON) as Score[]);
+    }
+  };
 
+  //setting up existed scores
+  useEffect(() => {
+    if (!scores.length) {
+      setupScores();
+    }
+  });
 
-const persister = createSyncStoragePersister({
-    storage: window.localStorage,
-});
+  const setNewScores = async (score: Score) => {
+    //creating new scores with new one, includes filter & sort to show only 10 best results
+    const newScores = [...scores, score]
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 10);
 
+    //setting new scores to async storage
+    await AsyncStorage.setItem('scores', JSON.stringify(newScores));
 
-const queryClient = new QueryClient({
-    defaultOptions: {
-        queries: {
-            networkMode: 'online',
-            cacheTime: 1000 * 60 * 60 * 24, // 24 hours
-            staleTime: 2000,
-            retry: 0,
-        },
-    },
-    // configure global cache callbacks to show toast notifications
-    mutationCache: new MutationCache({
-        onSuccess: (data) => {
-            //  toast.success(data.message);
-        },
-        onError: (error) => {
-            // toast.error(error.message);
-        },
-    }),
-});
+    //setting new scores to scores' state
+    setScores(newScores);
 
+    //clean navigation score param
+    navigation.setParams({ score: undefined });
+  };
 
+  useEffect(() => {
+    if (route.params?.score) {
+      setNewScores(route.params.score);
+    }
+  }, [route.params]);
 
-const CustomFallback = (props: { error: Error, resetError: Function }) => (
+  const goUnity = () => {
+    let messageToUnity = '0';
+    if (scores.length) {
+      messageToUnity = scores[0].score.toString();
+    }
+    navigation.navigate(RootRoutes.UNITY, { messageToUnity });
+  };
+
+  //List item to render
+  const renderScore: ListRenderItem<Score> = useCallback(({ item, index }) => {
+    return (
+      <View style={styles.score}>
+        <Text style={styles.scoreText}>{index + 1}.</Text>
+        <Text style={[styles.scoreText, styles.flex]}>{item.score}</Text>
+        <Text style={styles.scoreDate}>
+          {new Date(item.date).toLocaleString()}
+        </Text>
+      </View>
+    );
+  }, []);
+
+  return (
     <View
-              style={styles.errorBoundaryBackdrop}>
-
-        <View
-
-            style={styles.errorBoundaryContainer}>
-
-
-            <Text style={styles.errorTitle}>Opps! sorry something unexpected happened!</Text>
-
-            <Text style={styles.errorBody}>{props.error.toString()}</Text>
-
-            <View style={{
-                flexDirection: 'row',
-            }}>
-                <TouchableOpacity onPress={() => {
-                    props.resetError()
-                    queryClient.clear()
-                    store.dispatch(logoutUser())
-                }} style={styles.resetButton}>
-                    <Text style={styles.buttonText}>
-                        Restart app
-                    </Text>
-                </TouchableOpacity>
-            </View>
+      style={[styles.screen, { paddingBottom: Math.max(insets.bottom, 15) }]}>
+      <Text style={styles.welcomeText}>
+        Hello, from{' '}
+        <Text style={[styles.welcomeText, styles.purple]}>mr orji</Text> team
+      </Text>
+      {/** scoreboard */}
+      <Text style={styles.welcomeText}>Scores 🏆:</Text>
+      {!!scores.length && (
+        <View style={[styles.row, styles.scoreInfo]}>
+          <Text style={[styles.scoreText, styles.flex]}>Score</Text>
+          <Text style={styles.scoreText}>Date</Text>
         </View>
+      )}
+      <FlatList
+        data={scores}
+        renderItem={renderScore}
+        keyExtractor={(i) => i.date}
+        style={styles.list}
+        contentContainerStyle={styles.listContent}
+        ListEmptyComponent={<Text>You have no scoreboard yet</Text>}
+      />
+      <TouchableOpacity style={styles.button} onPress={goUnity}>
+        <Text style={styles.buttonText}>Go Unity</Text>
+      </TouchableOpacity>
     </View>
-)
+  );
+};
 
-export default function App() {
-    const isLoadingComplete = useCachedResources();
-    const colorScheme = useColorScheme();
+const UnityScreen: React.FC<RootStackScreenProps<RootRoutes.UNITY>> = ({
+  route,
+  navigation,
+}) => {
+  // Start
+  const unityRef = useRef<UnityView>(null);
 
-    const fcmToken = SecureStore.getItemAsync('fcmtoken');
-    const [generatedToken, setGeneratedToken] = useState();
-    const isDarkMode = useColorScheme() === 'dark';
- //  const navigation = useNavigation();
-    const [firstLaunch, setFirstLaunch] = useState(true);
-    const [loading, setLoading] = useState(true);
-    const [initialRoute, setInitialRoute] = useState('Home');
-    const [responseMessage, setResponseMessage] = useState('');
-    const [responseState, setResponseState] = useState(false);
+  const { messageToUnity } = route.params;
 
-    const [expoPushToken, setExpoPushToken] = useState('');
-    const [notification, setNotification] = useState(false);
+  const message = {
+    gameObject: 'LogicManager',
+    method: 'SetBestScore',
+    message: messageToUnity,
+  };
 
-   // const notificationListener = useRef();
-    const responseListener = useRef();
-
-
-
- /*   useEffect(  () => {
-        //console.log('storage', fcmToken, 'newly generated', generatedToken);
-
-
-    }, [fcmToken, generatedToken]);
-*/
-
-
-    useEffect(() => {
-        const checkAppVersion = async () => {
-            try {
-                const latestVersion = Platform.OS === 'ios'? await fetch(`https://itunes.apple.com/in/lookup?bundleId=com.gatewaymobile.app`)
-                        .then(r => r.json())
-                        .then((res) => { return res?.results[0]?.version })
-                    : await VersionCheck.getLatestVersion({
-                        provider: 'playStore',
-                        packageName: 'com.gatewaymobile.app',
-                        ignoreErrors: true,
-                    });
-            const urlGoogle = await VersionCheck.getPlayStoreUrl({ appID: 'com.gatewaymobile.app' })
-            const urlApple = await VersionCheck.getAppStoreUrl({ appID: 'com.gatewaymobile.app' })
-
-                const currentVersion = VersionCheck.getCurrentVersion();
-
-                if (latestVersion > currentVersion) {
-                    Alert.alert(
-                        'Update Required',
-                        'A new version of the app is available. Please update to continue using the app.',
-                        [
-                            {
-                                text: 'Update Now',
-                                onPress: () => {
-                                    Linking.openURL(
-                                        Platform.OS === 'ios'
-                                            ? urlApple
-                                            : urlGoogle
-                                    );
-                                },
-                            },
-                        ],
-                        { cancelable: false }
-                    );
-                } else {
-                    // App is up-to-date; proceed with the app
-                }
-            } catch (error) {
-                // Handle error while checking app version
-                console.error('Error checking app version:', error);
-            }
-        };
-
-        checkAppVersion();
-    }, []);
-
-
-    useEffect(() => {
-        const fetchToken = async () => {
-            const token = await getFcmToken();
-            const BearerToken = await SecureStore.getItemAsync('Gateway-Token');
-           // console.log(token)
-            if (token) {
-                setGeneratedToken(token);
-               let timeoutId: NodeJS.Timeout
-               const body = JSON.stringify({
-                   pushNotificationToken:token ,
-               })
-               const myHeaders = {
-                   'Content-Type': 'application/json',
-                   'x-access-token': ACCESS_TOKEN,
-                   'Authorization': `Bearer ${BearerToken}`
-               }
-               const requestOptions = {
-                   method: 'POST',
-                   headers: myHeaders,
-                   body: body,
-               };
-               const promise = Promise.race([
-                   fetch(`${BASE_URL_LIVE}/preferences/update`, requestOptions)
-                       .then(response => response.json()),
-                   new Promise((resolve, reject) => {
-                       //  clearTimeout(timeoutId)
-                       timeoutId = setTimeout(() => reject(new Error('Timeout')), 20000)
-                   }).then(() => {
-                       clearTimeout(timeoutId)
-                   })
-
-               ])
-
-
-            }
-        };
-
-        const fetchTokenByLocal = async () => {
-            await getFcmTokenFromLocalStorage();
-        };
-        void fetchToken();
-        void fetchTokenByLocal();
-        void requestUserPermission();
-        void notificationListener();
-    }, []);
-
-
-   /* useEffect(() => {
-        registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
-
-        notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
-            setNotification(notification);
-        });
-
-        responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-            console.log(response);
-        });
-
-        return () => {
-            Notifications.removeNotificationSubscription(notificationListener.current);
-            Notifications.removeNotificationSubscription(responseListener.current);
-        };
-    }, []);
-*/
-
-
-
-
-
-
-
-
-
-
-    useEffect(() => {
-        AsyncStorage.getItem("gateway_user_first_time")
-            .then((value) => {
-
-                if (value === null) {
-                    setFirstLaunch(true);
-                } else if (value == 'false') {
-
-                    setFirstLaunch(false);
-                }
-            })
-            .catch((err) => {
-                //   console.log("Error @brace_user_first_time: ", err);
-            });
-    }, []);
-    const skip = async () => {
-        await AsyncStorage.setItem('gateway_user_first_time', 'false');
-        setFirstLaunch(false)
-
+  useEffect(() => {
+    if (messageToUnity) {
+      unityRef.current?.postMessage(
+        message.gameObject,
+        message.method,
+        message.message
+      );
     }
+  }, [messageToUnity]);
 
-    if (!isLoadingComplete) {
-        return null;
-    } else {
-        return (
-            <ErrorBoundary FallbackComponent={CustomFallback}>
-
-
-            <SafeAreaProvider>
-                {
-                    firstLaunch ?
-
-                        <OnBoarding skip={skip}/>
-                        :
-
-                        <Provider store={store}>
-                            {/*@ts-ignore*/}
-                            <GestureHandlerRootView style={{flex: 1, }}>
-                            <PersistGate loading={null} persistor={persistor}>
-                                <PersistQueryClientProvider
-                                    client={queryClient}
-                                    persistOptions={{persister}}
-                                    onSuccess={() => {
-                                        // resume mutations after initial restore from localStorage was successful
-                                        queryClient.resumePausedMutations().then(() => {
-                                            queryClient.invalidateQueries();
-                                        });
-                                    }}
-                                >
-                                    <QueryClientProvider client={queryClient}>
-                                        <PortalProvider>
-
-
-                                            <Navigation colorScheme={colorScheme}/>
-                                        </PortalProvider>
-                                    </QueryClientProvider>
-                                </PersistQueryClientProvider>
-                            </PersistGate>
-                            </GestureHandlerRootView>
-                        </Provider>
-                }
-                <StatusBar/>
-            </SafeAreaProvider>
-
-
-            </ErrorBoundary>
-        );
+  const handleUnityMessage = (json: string) => {
+    //alert to show Unity message data
+    const score = JSON.parse(json) as Score;
+    if (score) {
+      // unityRef.current?.unloadUnity();
+      navigation.navigate(RootRoutes.HOME, { score });
+      unityRef.current?.unloadUnity();
     }
-}
+  };
 
+  //End
 
+  return (
+    <View style={styles.flex}>
+      <UnityView
+        ref={unityRef}
+        //@ts-expect-error UnityView needs a 'flex: 1' style to show full screen view
+        style={styles.flex}
+        onUnityMessage={(e) => handleUnityMessage(e.nativeEvent.message)} // and this line
+      />
+    </View>
+  );
+};
 
-async function registerForPushNotificationsAsync() {
-    let token;
-    if (Device.isDevice) {
-        const { status: existingStatus } = await Notifications.getPermissionsAsync();
-        let finalStatus = existingStatus;
-        if (existingStatus !== 'granted') {
-            const { status } = await Notifications.requestPermissionsAsync();
-            finalStatus = status;
-        }
-        if (finalStatus !== 'granted') {
-            alert('Failed to get push token for push notification!');
-            return;
-        }
-        token = (await Notifications.getExpoPushTokenAsync()).data;
-        console.log(token);
-    } else {
-        alert('Must use physical device for Push Notifications');
-    }
+const App = () => {
+  return (
+    <View style={styles.flex}>
+      <StatusBar backgroundColor={'#FFF'} barStyle='dark-content' />
 
-    if (Platform.OS === 'android') {
-        Notifications.setNotificationChannelAsync('default', {
-            name: 'default',
-            importance: Notifications.AndroidImportance.MAX,
-            vibrationPattern: [0, 250, 250, 250],
-            lightColor: '#FF231F7C',
-        });
-    }
-
-    return token;
-}
-
-
-
+      <SafeAreaProvider>
+        <NavigationContainer>
+          <Stack.Navigator
+            screenOptions={{
+              headerTintColor: 'purple',
+              headerTitleStyle: { color: 'black' },
+            }}>
+            <Stack.Screen name={RootRoutes.HOME} component={HomeScreen} />
+            <Stack.Screen name={RootRoutes.UNITY} component={UnityScreen} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </SafeAreaProvider>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
-    errorBoundaryContainer: {
-        backgroundColor: "#fff",
-        width: '95%',
-        borderRadius: 20,
-        marginBottom: 50,
-        minHeight: heightPixel(240),
-        alignItems: 'flex-start',
-        justifyContent: 'space-between',
-        padding: 20,
-    },
-    errorTitle: {
-        fontSize: fontPixel(16),
-        color: Colors.errorRed,
-        fontFamily: Fonts.quickSandBold
-    },
-    errorBody: {
-        lineHeight: 18,
-        fontSize: fontPixel(14),
-        color: "#333",
-        fontFamily: Fonts.quicksandMedium
-    },
-    errorBoundaryBackdrop: {
-        padding: 10,
-        position: 'absolute',
-        height: '100%',
-        alignItems: 'center',
-        justifyContent: 'flex-end',
-        width: '100%',
-        zIndex: 10,
-        backgroundColor: 'rgba(42,42,42,0.61)'
-    },
-    resetButton: {
-        width: '45%',
-        height: 50,
-        borderRadius: 10,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: Colors.primary
-    },
-    buttonText: {
-        fontSize: fontPixel(16),
-        color: "#fff",
-        fontFamily: Fonts.quickSandBold
-    }
-})
+  screen: {
+    flex: 1,
+    paddingHorizontal: 16,
+    gap: 30,
+    paddingTop: 25,
+  },
+  button: {
+    width: '100%',
+    backgroundColor: 'purple',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 50,
+    borderRadius: 16,
+    marginTop: 'auto',
+  },
+  purple: { color: 'purple' },
+  buttonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  welcomeText: {
+    fontSize: 24,
+    color: 'black',
+    fontWeight: '600',
+  },
+  flex: {
+    flex: 1,
+  },
+  row: { flexDirection: 'row' },
+  scoreInfo: { paddingHorizontal: 14 },
+
+  score: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingBottom: 6,
+    borderBottomWidth: 1,
+    borderColor: '#bcbcbc',
+  },
+  scoreText: {
+    fontSize: 18,
+    fontWeight: '500',
+    color: 'black',
+  },
+  scoreDate: {
+    color: '#262626',
+    fontSize: 16,
+    fontWeight: '400',
+  },
+  list: {
+    flex: 1,
+  },
+  listContent: {
+    flexGrow: 1,
+    paddingBottom: 20,
+    gap: 12,
+  },
+});
+
+export default App;

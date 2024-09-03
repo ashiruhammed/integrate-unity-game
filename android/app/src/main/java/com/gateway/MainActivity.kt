@@ -1,4 +1,4 @@
-package com.gatewaymobile.app
+package com.gateway
 
 import android.os.Build
 import android.os.Bundle

@@ -1,4 +1,4 @@
-package com.gatewaymobile.app
+package com.gateway
 
 import android.app.Application
 import android.content.res.Configuration
